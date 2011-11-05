@@ -1,0 +1,113 @@
+# -*- coding: UTF-8 -*-
+
+# Copyright (c) 2011 Jose Antonio Chavarría
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Author: Jose Antonio Chavarría <jachavar@gmail.com>
+
+__author__ = 'Jose Antonio Chavarría'
+__file__   = 'pms.py'
+__date__   = '2011-10-03'
+
+class Pms:
+    '''
+    PMS: Package Management System
+    Interface class
+    Abstract methods
+    '''
+
+    def __init__(self):
+        self._name = '' # Package Management System name
+        self._pm   = '' # Package Manager command
+        self._pms  = '' # Package Management System command
+        self._repo = '' # Repositories file
+        self._cmd  = '' # Command to execute
+
+    def __str__(self):
+        '''
+        string __str__(void)
+        '''
+
+        return self._name
+
+    def install(self, package):
+        '''
+        bool install(string package)
+        '''
+
+        raise NotImplementedError
+
+    def remove(self, package):
+        '''
+        bool remove(string package)
+        '''
+
+        raise NotImplementedError
+
+    def search(self, pattern):
+        '''
+        bool search(string pattern)
+        '''
+
+        raise NotImplementedError
+
+    def update_silent(self):
+        '''
+        (bool, string) update_silent(void)
+        '''
+
+        raise NotImplementedError
+
+    def install_silent(self, package_set):
+        '''
+        (bool, string) install_silent(list package_set)
+        '''
+
+        raise NotImplementedError
+
+    def remove_silent(self, package_set):
+        '''
+        (bool, string) remove_silent(list package_set)
+        '''
+
+        raise NotImplementedError
+
+    def is_installed(self, package):
+        '''
+        bool is_installed(string package)
+        '''
+
+        raise NotImplementedError
+
+    def clean_all(self):
+        '''
+        bool clean_all(void)
+        '''
+
+        raise NotImplementedError
+
+    def query_all(self):
+        '''
+        ordered list query_all(void)
+        '''
+
+        raise NotImplementedError
+
+    def create_repos(self, server, version, repositories):
+        '''
+        bool create_repos(string server, string version, list repositories)
+        '''
+
+        raise NotImplementedError

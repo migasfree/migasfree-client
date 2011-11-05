@@ -1,0 +1,21 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Encoding=UTF-8
+Name=Update System
+Name[es]=Actualización del sistema
+Comment=Update System from migasfree server
+Comment[es]=Actualización del sistema desde un servidor migasfree
+Icon=migasfree
+Exec=sudo /usr/bin/migasfree --update
+Terminal=false
+Type=Application
+Categories=Settings;System;PackageManager;
+StartupNotify=true
+X-GNOME-Autostart-Notify=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-after=panel
+X-KDE-Autostart-Notify=true
+X-KDE-Autostart-enabled=true
+X-KDE-Autostart-after=panel
+Hidden=false

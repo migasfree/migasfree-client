@@ -1,0 +1,25 @@
+Thanks for downloading migasfree client.
+
+To install it, make sure you have these programs installed:
+
+    * Python >= 2.6
+    * PyCurl >= 7.19
+    * lshw >= B.02.15
+
+Then run this command from the command prompt:
+
+    python setup.py install
+
+Check /etc/migasfree.conf configuration before run migasfree bin scripts.
+
+And enjoy!
+
+If you want execute 'migasfree --update' with some user, you can add this line in sudoers config:
+
+    ALL ALL=(root) NOPASSWD: /usr/bin/migasfree --update
+
+If you want execute 'migasfree --update' command at begin of graphic session, you can add a symbolic link in /etc/xdg/autostart/ path:
+
+    ln -s /usr/share/applications/migasfree-client.desktop /etc/xdg/autostart/migasfree-client.desktop
+
+If your migasfree server is configured over SSL, server certificate must be copied in client machine and destination path must be configured in /etc/migasfree.conf:SSL_Cert.

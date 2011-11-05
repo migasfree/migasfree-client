@@ -1,0 +1,9 @@
+# http://docs.python.org/distutils/sourcedist.html#the-manifest-in-template
+
+include AUTHORS INSTALL LICENSE README TODO MANIFEST.in migasfree-client.doap setup.cfg
+include bin/migasfree
+include conf/migasfree.conf
+recursive-include icons *.svg
+include launcher/migasfree-client.desktop
+recursive-include migasfree_client *.py
+include po/*
