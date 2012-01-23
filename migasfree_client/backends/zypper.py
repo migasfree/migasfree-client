@@ -19,7 +19,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'zypper.py'
-__date__   = '2011-10-17'
+__date__   = '2012-01-23'
 
 import logging
 
@@ -78,7 +78,7 @@ class Zypper(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive = False)
         if _ret != 0:
-            return (False, _error)
+            return (False, '%s\n%s' % (_output, _error))
 
         #self._cmd = '%s --quiet lu -a' % self._pms
         self._cmd = '%s lu -a' % self._pms
