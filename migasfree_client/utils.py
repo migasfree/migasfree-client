@@ -19,7 +19,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'utils.py'
-__date__   = '2011-10-16'
+__date__   = '2012-02-07'
 
 import subprocess
 import os
@@ -127,7 +127,12 @@ def get_graphic_user(pid):
     string get_graphic_user(int pid)
     '''
 
-    return commands.getoutput('ps hp %s -o %s' % (str(pid), '"%U"'))
+    _user = commands.getoutput('ps hp %s -o %s' % (str(pid), '"%U"'))
+    if _user.isdigit():
+        # ps command not always show username instead of uid (if len(username) > 8)
+        return get_user_info(_user)['name']
+
+    return _user
 
 def grep(string, list_strings):
     '''
@@ -199,19 +204,22 @@ def get_user_info(user):
     '''
 
     try:
-        info = pwd.getpwnam(user)
+        _info = pwd.getpwnam(user)
+    except KeyError:
+        try:
+            _info = pwd.getpwuid(int(user))
+        except:
+            return False
 
-        return {
-            'name'     : info[0],
-            'pwd'      : info[1], # if 'x', encrypted
-            'uid'      : info[2],
-            'gid'      : info[3],
-            'fullname' : info[4],
-            'home'     : info[5],
-            'shell'    : info[6]
-        }
-    except:
-        return False
+    return {
+        'name'     : info[0],
+        'pwd'      : info[1], # if 'x', encrypted
+        'uid'      : info[2],
+        'gid'      : info[3],
+        'fullname' : info[4],
+        'home'     : info[5],
+        'shell'    : info[6]
+    }
 
 def write_file(filename, content):
     '''
