@@ -19,7 +19,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'utils.py'
-__date__   = '2012-02-07'
+__date__   = '2012-02-08'
 
 import subprocess
 import os
@@ -129,7 +129,7 @@ def get_graphic_user(pid):
 
     _user = commands.getoutput('ps hp %s -o %s' % (str(pid), '"%U"'))
     if _user.isdigit():
-        # ps command not always show username instead of uid (if len(username) > 8)
+        # ps command not always show username (show uid if len(username) > 8)
         return get_user_info(_user)['name']
 
     return _user
@@ -212,13 +212,13 @@ def get_user_info(user):
             return False
 
     return {
-        'name'     : info[0],
-        'pwd'      : info[1], # if 'x', encrypted
-        'uid'      : info[2],
-        'gid'      : info[3],
-        'fullname' : info[4],
-        'home'     : info[5],
-        'shell'    : info[6]
+        'name'     : _info[0],
+        'pwd'      : _info[1], # if 'x', encrypted
+        'uid'      : _info[2],
+        'gid'      : _info[3],
+        'fullname' : _info[4],
+        'home'     : _info[5],
+        'shell'    : _info[6]
     }
 
 def write_file(filename, content):
