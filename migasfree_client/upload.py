@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 __author__  = 'Jose Antonio Chavarría'
 __file__    = 'upload.py'
-__date__    = '2011-10-25'
+__date__    = '2012-06-06'
 __version__ = '2.0'
 __license__ = 'GPLv3'
 __all__     = ('MigasFreeUpload', 'main')
@@ -30,7 +31,6 @@ import optparse
 import logging
 import getpass
 import errno
-import glob
 
 # package imports
 import settings
@@ -274,31 +274,35 @@ class MigasFreeUpload:
 
         self._check_sign_keys()
 
-        for _filename in glob.glob(os.path.join(self._directory, '*')):
-            if os.path.isfile(_filename):
-                logging.debug('Uploading server set: %s', _filename)
-                if self._debug:
-                    print 'Uploading file: %s' % os.path.abspath(_filename)
+        for _root, _subfolders, _files in os.walk(self._directory):
+            for _file in _files:
+                _filename = os.path.join(_root, _file)
 
-                _ret = self._url_request.run(
-                    'upload_server_set',
-                    data = {
-                        'version': self.packager_version,
-                        'store': self.packager_store,
-                        'packageset': self._server_directory
-                    },
-                    upload_file = os.path.abspath(_filename)
-                )
+                if os.path.isfile(_filename):
+                    logging.debug('Uploading server set: %s', _filename)
+                    if self._debug:
+                        print 'Uploading file: %s' % os.path.abspath(_filename)
 
-                logging.debug('Uploading set response: %s', _ret)
-                if self._debug:
-                    print 'Response: %s' % _ret
+                    _ret = self._url_request.run(
+                        'upload_server_set',
+                        data = {
+                            'version': self.packager_version,
+                            'store': self.packager_store,
+                            'packageset': self._server_directory,
+                            'path': os.path.dirname(_filename)
+                        },
+                        upload_file = os.path.abspath(_filename)
+                    )
 
-                if _ret['errmfs']['code'] != server_errors.ALL_OK:
-                    _error_info = server_errors.error_info(_ret['errmfs']['code'])
-                    print _error_info
-                    logging.error('Uploading set error: %s', _error_info)
-                    sys.exit(errno.EINPROGRESS)
+                    logging.debug('Uploading set response: %s', _ret)
+                    if self._debug:
+                        print 'Response: %s' % _ret
+
+                    if _ret['errmfs']['code'] != server_errors.ALL_OK:
+                        _error_info = server_errors.error_info(_ret['errmfs']['code'])
+                        print _error_info
+                        logging.error('Uploading set error: %s', _error_info)
+                        sys.exit(errno.EINPROGRESS)
 
         return self._create_repository()
 
