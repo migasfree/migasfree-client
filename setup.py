@@ -53,13 +53,13 @@ _requires = [
 ]
 if _dist[0] == 'Fedora':
     _requires.append('pycurl (>=7.19)') # python-pycurl
-    _requires.append('notify-python')
+    #_requires.append('notify-python')
 elif _dist[0] == 'openSUSE':
     _requires.append('curl (>=7.19)') # python-curl
-    _requires.append('python-notify')
+    #_requires.append('python-notify')
 elif _dist[0] == 'Ubuntu':
     _requires.append('pycurl (>=7.19)')
-    _requires.append('python-notify')
+    #_requires.append('python-notify')
 
 import glob
 import subprocess
