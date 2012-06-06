@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'utils.py'
-__date__   = '2012-02-08'
+__date__   = '2012-06-06'
 
 import subprocess
 import os
@@ -32,6 +33,8 @@ import pwd
 import platform
 import errno
 import re
+import fcntl
+import select
 
 # TODO http://docs.python.org/library/unittest.html
 
@@ -74,6 +77,22 @@ def execute(cmd, verbose = False, interactive = True):
             stdout = subprocess.PIPE
         )
 
+        _output_buffer = ''
+        if verbose:
+            fcntl.fcntl(
+                _process.stdout.fileno(),
+                fcntl.F_SETFL,
+                fcntl.fcntl(_process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
+            )
+
+            while _process.poll() == None:
+                readx = select.select([_process.stdout.fileno()], [], [])[0]
+                if readx:
+                    chunk = _process.stdout.read()
+                    if chunk and chunk != '\n':
+                        print chunk
+                    _output_buffer = '%s%s' % (_output_buffer, chunk)
+
         '''
         # simple progress indicator
         # does not work with some commands (lshw, getting repositories...)
@@ -87,7 +106,20 @@ def execute(cmd, verbose = False, interactive = True):
                     break
         '''
 
+        '''
+        while True:
+            _out = _process.stdout.read(1)
+            if _out == '' and _process.poll() != None:
+                break
+            if _out != '':
+                sys.stdout.write(_out)
+                sys.stdout.flush()
+        '''
+
     _output, _error = _process.communicate()
+
+    if not interactive and _output_buffer:
+        _output = _output_buffer
 
     return (_process.returncode, _output, _error)
 
