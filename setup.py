@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 __author__  = 'Jose Antonio Chavarría'
 __file__    = 'setup.py'
-__date__    = '2011-10-21'
+__date__    = '2012-06-06'
 __license__ = 'GPLv3'
 
 # http://guide.python-distribute.org/
@@ -53,10 +53,13 @@ _requires = [
 ]
 if _dist[0] == 'Fedora':
     _requires.append('pycurl (>=7.19)') # python-pycurl
+    _requires.append('notify-python')
 elif _dist[0] == 'openSUSE':
     _requires.append('curl (>=7.19)') # python-curl
+    _requires.append('python-notify')
 elif _dist[0] == 'Ubuntu':
     _requires.append('pycurl (>=7.19)')
+    _requires.append('python-notify')
 
 import glob
 import subprocess
@@ -119,7 +122,6 @@ setup(
     author       = 'Jose Antonio Chavarría',
     author_email = 'jachavar@gmail.com',
     url          = 'http://www.migasfree.org/',
-    #download_url = 'http://migasfree.org/releases/2.0/migasfree-client-2.0.tar.gz',
     platforms    = ['Linux'],
     packages     = ['migasfree_client', 'migasfree_client.backends'],
     package_dir  = {
