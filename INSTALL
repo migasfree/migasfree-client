@@ -4,6 +4,7 @@ To install it, make sure you have these programs installed:
 
     * Python >= 2.6
     * PyCurl >= 7.19
+    * python-notify (or notify-python)
     * lshw >= B.02.15
 
 Then run this command from the command prompt:
