@@ -379,13 +379,11 @@ class MigasFreeClient:
         # evaluate faults
         self._send_message(_('Executing faults...'))
         for _item in faultsdef:
-            _response['faults'][_item['name']] = \
-                self._eval_code(_item['language'], _item['code'])
-            _info = '%s: %s' % (
-                _item['name'],
-                _response['faults'][_item['name']]
-            )
-            if _response['faults'][_item['name']]:
+            _result = self._eval_code(_item['language'], _item['code'])
+            _info = '%s: %s' % (_item['name'], _result)
+            if _result:
+                # only send faults with output!!!
+                _response['faults'][_item['name']] = _result
                 _operation_failed(_info)
             else:
                 _operation_ok(_info)
