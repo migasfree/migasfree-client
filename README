@@ -3,7 +3,7 @@ migasfree client README
 =======================
 
 :Author: Jose Antonio Chavarría
-:Date: October 3, 2011
+:Date: June 6, 2012
 
 Introduction
 ============
@@ -16,7 +16,7 @@ First of all, thanks a lot for downloading this software. We hope that this soft
 Description
 ===========
 
-'migasfree' is a very simple, but effective, systems management system. Actually, it is used in ``Ayuntamiento de Zaragoza`` (Spain) by initial authors in the project **migration to open source software for desktops**. They use AZLinux distribution <http://zaragozaciudad.net/azlinux>, which is based on SUSE <http://www.novell.com/linux>.
+'migasfree' is a very simple, but effective, systems management system. Actually, it is used in ``Ayuntamiento de Zaragoza`` (Spain) by initial authors in the project **migration to open source software for desktops**. They use AZLinux distribution <http://zaragozaciudad.net/azlinux>, which is based on SUSE <http://www.novell.com/linux> and Ubuntu <http://www.ubuntu.com/>.
 
 You can learn about systems management systems at:
 
@@ -50,6 +50,7 @@ Requirements
         + a Linux distribution (Fedora, openSUSE, Ubuntu, ...)
         + Python >= 2.6
             - pycurl >= 7.19
+            - python-notify
         + lshw >= B.02.15
 
 
