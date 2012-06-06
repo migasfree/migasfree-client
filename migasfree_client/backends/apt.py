@@ -81,9 +81,13 @@ class Apt(Pms):
 
         self._cmd = '%s --assume-yes --force-yes --allow-unauthenticated dist-upgrade' % self._pms
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def install_silent(self, package_set):
         '''
@@ -105,9 +109,13 @@ class Apt(Pms):
             ' '.join(package_set)
         )
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def remove_silent(self, package_set):
         '''
@@ -127,9 +135,13 @@ class Apt(Pms):
         self._cmd = '%s --assume-yes remove %s' \
             % (self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose=True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def is_installed(self, package):
         '''
