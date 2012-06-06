@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'yum.py'
-__date__   = '2011-10-17'
+__date__   = '2012-06-06'
 
 import os
 import logging
@@ -82,9 +83,13 @@ class Yum(Pms):
 
         self._cmd = '%s --assumeyes update' % self._pms
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def install_silent(self, package_set):
         '''
@@ -103,9 +108,13 @@ class Yum(Pms):
 
         self._cmd = '%s --assumeyes install %s' % (self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def remove_silent(self, package_set):
         '''
@@ -122,11 +131,16 @@ class Yum(Pms):
         if not package_set:
             return (True, None)
 
-        self._cmd = '%s --assumeyes remove %s' % (self._pms, ' '.join(package_set))
+        self._cmd = '%s --assumeyes remove %s' \
+            % (self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def is_installed(self, package):
         '''
