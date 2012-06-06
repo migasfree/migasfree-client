@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 __author__  = 'Jose Antonio Chavarría'
 __file__    = 'client.py'
-__date__    = '2011-10-25'
+__date__    = '2012-06-06'
 __version__ = '2.0'
 __license__ = 'GPLv3'
 __all__     = ('MigasFreeClient', 'main')
@@ -34,6 +35,10 @@ import time
 import getpass
 import tempfile
 
+import pygtk
+pygtk.require('2.0')
+import pynotify
+
 try:
     import pycurl
 except ImportError:
@@ -41,9 +46,6 @@ except ImportError:
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
-
-# http://www.koders.com/python/fid4952E1E78662638143A177E2876228F122705147.aspx?s=gtk
-import trayicon
 
 # package imports
 import settings
@@ -81,6 +83,7 @@ def _search_pms():
     return None # if not found
 
 class MigasFreeClient:
+    APP_NAME   = 'Migasfree'
     CMD        = 'migasfree' # /usr/bin/migasfree
     LOCK_FILE  = '/tmp/%s.pid' % CMD
     ERROR_FILE = '/tmp/%s.err' % CMD
@@ -93,8 +96,8 @@ class MigasFreeClient:
     ICON           = '/usr/share/icons/hicolor/scalable/apps/migasfree.svg'
     ICON_COMPLETED = '/usr/share/icons/hicolor/scalable/actions/migasfree-ok.svg'
 
-    _graphic_user    = None
-    _tray_icon       = None
+    _graphic_user = None
+    _notify       = None
 
     # default values for .conf options
     migas_version  = 'OPENSUSE'
@@ -180,10 +183,8 @@ class MigasFreeClient:
             self._graphic_user = utils.get_graphic_user(_graphic_pid)
             _user_display = utils.get_user_display_graphic(_graphic_pid)
             logging.debug('Graphic display: %s', _user_display)
-            self._tray_icon = trayicon.TrayIcon(
-                env = {'DISPLAY': _user_display}
-            )
-            self._tray_icon.set_visible(False)
+            pynotify.init(self.APP_NAME)
+            self._notify = pynotify.Notification(self.APP_NAME)
         logging.debug('Graphic user: %s', self._graphic_user)
 
     def _pms_selection(self):
@@ -267,12 +268,19 @@ class MigasFreeClient:
         if msg:
             print
             printcolor.info(str(' ' + msg + ' ').center(76, '*'))
-            if self._tray_icon:
-                if not icon:
-                    icon = self.ICON
-                self._tray_icon.set_icon(icon)
-                self._tray_icon.set_tooltip(msg)
-                self._tray_icon.set_visible(True)
+
+            if not icon:
+                icon = self.ICON
+
+            if self._notify:
+                icon = 'file://%s' % icon
+
+                try:
+                    self._notify.update(self.APP_NAME, msg, icon)
+                    self._notify.set_timeout(pynotify.EXPIRES_DEFAULT)
+                    self._notify.show()
+                except:
+                    pass
 
         _ret = self._url_request.run(
             'upload_computer_message',
