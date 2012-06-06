@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'apt.py'
-__date__   = '2011-10-17'
+__date__   = '2012-06-06'
 
 import re
 import logging
@@ -37,7 +38,7 @@ class Apt(Pms):
 
         self._name = 'apt'              # Package Management System name
         self._pm   = '/usr/bin/dpkg'    # Package Manager command
-        self._pms  = '/usr/bin/apt-get' # Package Management System command
+        self._pms  = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get' # Package Management System command
         self._repo = '/etc/apt/sources.list.d/migasfree.list' # Repositories file
 
         self._pms_search = '/usr/bin/apt-cache'
@@ -78,7 +79,7 @@ class Apt(Pms):
         (bool, string) update_silent(void)
         '''
 
-        self._cmd = '%s --assume-yes --force-yes dist-upgrade' % self._pms
+        self._cmd = '%s --assume-yes --force-yes --allow-unauthenticated dist-upgrade' % self._pms
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive = False)
 
@@ -99,7 +100,7 @@ class Apt(Pms):
         if not package_set:
             return (True, None)
 
-        self._cmd = '%s --assume-yes --force-yes install %s' % (
+        self._cmd = '%s --assume-yes --force-yes --allow-unauthenticated install %s' % (
             self._pms,
             ' '.join(package_set)
         )
@@ -123,7 +124,8 @@ class Apt(Pms):
         if not package_set:
             return (True, None)
 
-        self._cmd = '%s --assume-yes remove %s' % (self._pms, ' '.join(package_set))
+        self._cmd = '%s --assume-yes remove %s' \
+            % (self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive = False)
 
@@ -135,7 +137,6 @@ class Apt(Pms):
         '''
 
         self._cmd = '%s --status %s | grep "Status: install ok installed"' % (self._pm, package.strip())
-        #self._cmd = '%s --show %s' % (self._pms_query, package.strip())
         logging.debug(self._cmd)
 
         return (execute(self._cmd, interactive = False)[0] == 0)
