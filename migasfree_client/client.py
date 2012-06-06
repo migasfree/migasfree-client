@@ -685,7 +685,7 @@ class MigasFreeClient:
             'password': '',
             'version' : self.migas_version
         }
-        print _('Autoregistring computer...')
+        print _('Autoregistering computer...')
 
         return self._save_sign_keys(_data)
 
