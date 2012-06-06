@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'network.py'
-__date__   = '2011-10-25'
+__date__   = '2012-06-06'
 
 # based in http://stackoverflow.com/questions/4912523/python-network-cidr-calculations
 
@@ -83,10 +84,11 @@ def get_ifname():
         _ip = ''
     if not _ip or (_ip.startswith("127.") and os.name != "nt"):
         _interfaces = [
-            "eth0", "eth1", "eth2",
-            "wlan0", "wlan1",
+            "eth0", "eth1", "eth2", "eth3", "eth4",
+            "eth5", "eth6", "eth7", "eth8", "eth9",
+            "wlan0", "wlan1", "wlan2", "wlan3", "wlan4",
             "wifi0",
-            "ath0", "ath1",
+            "ath0", "ath1", "ath2", "ath3", "ath4",
             "ppp0"
         ]
         for _ifname in _interfaces:
