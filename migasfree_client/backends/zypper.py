@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2012 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'zypper.py'
-__date__   = '2012-01-23'
+__date__   = '2012-06-06'
 
 import logging
 
@@ -83,9 +84,13 @@ class Zypper(Pms):
         #self._cmd = '%s --quiet lu -a' % self._pms
         self._cmd = '%s lu -a' % self._pms
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def install_silent(self, package_set):
         '''
@@ -105,9 +110,13 @@ class Zypper(Pms):
         self._cmd = '%s --non-interactive install --no-force-resolution %s' \
             % (self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def remove_silent(self, package_set):
         '''
@@ -127,9 +136,13 @@ class Zypper(Pms):
         self._cmd = '%s --non-interactive remove %s' \
             % (self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
 
-        return (_ret == 0, '%s\n%s' % (_output, _error))
+        return (_ret == 0, _error)
 
     def is_installed(self, package):
         '''
