@@ -20,7 +20,7 @@
 
 __author__  = 'Jose Antonio Chavarría'
 __file__    = 'upload.py'
-__date__    = '2012-06-06'
+__date__    = '2012-06-11'
 __version__ = '2.0'
 __license__ = 'GPLv3'
 __all__     = ('MigasFreeUpload', 'main')
@@ -289,7 +289,9 @@ class MigasFreeUpload:
                             'version': self.packager_version,
                             'store': self.packager_store,
                             'packageset': self._server_directory,
-                            'path': os.path.dirname(_filename)
+                            'path': os.path.dirname(
+                                os.path.join(_root, _file)[len(_directory) + 1:]
+                            )
                         },
                         upload_file = os.path.abspath(_filename)
                     )
