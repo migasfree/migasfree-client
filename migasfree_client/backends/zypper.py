@@ -20,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'zypper.py'
-__date__   = '2012-06-06'
+__date__   = '2012-06-13'
 
 import logging
 
@@ -77,11 +77,14 @@ class Zypper(Pms):
 
         self._cmd = '%s --non-interactive update --no-force-resolution "*"' % self._pms
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(
+            self._cmd,
+            interactive = False,
+            verbose = True
+        )
         if _ret != 0:
-            return (False, '%s\n%s' % (_output, _error))
+            return (False, _error)
 
-        #self._cmd = '%s --quiet lu -a' % self._pms
         self._cmd = '%s lu -a' % self._pms
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
