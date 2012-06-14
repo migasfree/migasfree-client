@@ -20,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__   = 'zypper.py'
-__date__   = '2012-06-13'
+__date__   = '2012-06-14'
 
 import logging
 
@@ -83,7 +83,7 @@ class Zypper(Pms):
             verbose = True
         )
         if _ret != 0:
-            return (False, _error)
+            return (False, '%s\n%s\n%s' % (str(_ret), _output, _error))
 
         self._cmd = '%s lu -a' % self._pms
         logging.debug(self._cmd)
@@ -93,7 +93,7 @@ class Zypper(Pms):
             verbose = True
         )
 
-        return (_ret == 0, _error)
+        return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
 
     def install_silent(self, package_set):
         '''
@@ -119,7 +119,7 @@ class Zypper(Pms):
             verbose = True
         )
 
-        return (_ret == 0, _error)
+        return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
 
     def remove_silent(self, package_set):
         '''
@@ -145,7 +145,7 @@ class Zypper(Pms):
             verbose = True
         )
 
-        return (_ret == 0, _error)
+        return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
 
     def is_installed(self, package):
         '''
