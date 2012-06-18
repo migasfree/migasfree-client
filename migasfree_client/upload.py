@@ -290,7 +290,7 @@ class MigasFreeUpload:
                             'store': self.packager_store,
                             'packageset': self._server_directory,
                             'path': os.path.dirname(
-                                os.path.join(_root, _file)[len(_directory) + 1:]
+                                os.path.join(_root, _file)[len(self._directory) + 1:]
                             )
                         },
                         upload_file = os.path.abspath(_filename)
