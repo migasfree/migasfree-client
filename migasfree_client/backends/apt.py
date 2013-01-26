@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,15 +19,17 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'apt.py'
-__date__   = '2012-06-06'
+__file__ = 'apt.py'
+__date__ = '2013-01-26'
 
 import re
 import logging
 
-from pms import Pms
+from .pms import Pms
 from migasfree_client.utils import execute
 
+
+@Pms.register('Apt')
 class Apt(Pms):
     '''
     PMS for apt based systems (Debian, Ubuntu, Mint, ...)
@@ -36,13 +38,13 @@ class Apt(Pms):
     def __init__(self):
         Pms.__init__(self)
 
-        self._name = 'apt'              # Package Management System name
-        self._pm   = '/usr/bin/dpkg'    # Package Manager command
-        self._pms  = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get' # Package Management System command
-        self._repo = '/etc/apt/sources.list.d/migasfree.list' # Repositories file
+        self._name = 'apt-get'      # Package Management System name
+        self._pm = '/usr/bin/dpkg'  # Package Manager command
+        self._pms = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get'  # Package Management System command
+        self._repo = '/etc/apt/sources.list.d/migasfree.list'  # Repositories file
 
         self._pms_search = '/usr/bin/apt-cache'
-        self._pms_query  = '/usr/bin/dpkg-query'
+        self._pms_query = '/usr/bin/dpkg-query'
 
     def install(self, package):
         '''
@@ -83,8 +85,8 @@ class Apt(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, _error)
@@ -111,8 +113,8 @@ class Apt(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, _error)
@@ -137,7 +139,7 @@ class Apt(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
+            interactive=False,
             verbose=True
         )
 
@@ -148,10 +150,13 @@ class Apt(Pms):
         bool is_installed(string package)
         '''
 
-        self._cmd = '%s --status %s | grep "Status: install ok installed"' % (self._pm, package.strip())
+        self._cmd = '%s --status %s | grep "Status: install ok installed"' % (
+            self._pm,
+            package.strip()
+        )
         logging.debug(self._cmd)
 
-        return (execute(self._cmd, interactive = False)[0] == 0)
+        return (execute(self._cmd, interactive=False)[0] == 0)
 
     def clean_all(self):
         '''
@@ -174,7 +179,7 @@ class Apt(Pms):
 
         _ret, _packages, _error = execute(
             '%s --list' % self._pm,
-            interactive = False
+            interactive=False
         )
         if not _packages:
             return []

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,15 +19,17 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'yum.py'
-__date__   = '2012-06-06'
+__file__ = 'yum.py'
+__date__ = '2013-01-26'
 
 import os
 import logging
 
-from pms import Pms
+from .pms import Pms
 from migasfree_client.utils import execute
 
+
+@Pms.register('Yum')
 class Yum(Pms):
     '''
     PMS for yum based systems (Fedora, Red Hat, CentOS, ...)
@@ -36,9 +38,9 @@ class Yum(Pms):
     def __init__(self):
         Pms.__init__(self)
 
-        self._name = 'yum'         # Package Management System name
-        self._pm  = '/bin/rpm'     # Package Manager command
-        self._pms = '/usr/bin/yum' # Package Management System command
+        self._name = 'yum'          # Package Management System name
+        self._pm = '/bin/rpm'       # Package Manager command
+        self._pms = '/usr/bin/yum'  # Package Management System command
 
         # Repositories file
         if os.path.isdir('/etc/yum.repos.d'):
@@ -85,8 +87,8 @@ class Yum(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, _error)
@@ -106,12 +108,15 @@ class Yum(Pms):
         if not package_set:
             return (True, None)
 
-        self._cmd = '%s --assumeyes install %s' % (self._pms, ' '.join(package_set))
+        self._cmd = '%s --assumeyes install %s' % (
+            self._pms,
+            ' '.join(package_set)
+        )
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, _error)
@@ -136,8 +141,8 @@ class Yum(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, _error)
@@ -150,7 +155,7 @@ class Yum(Pms):
         self._cmd = '%s -q %s' % (self._pm, package.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd, interactive = False)[0] == 0)
+        return (execute(self._cmd, interactive=False)[0] == 0)
 
     def clean_all(self):
         '''
@@ -173,7 +178,7 @@ class Yum(Pms):
 
         self._cmd = '%s -qa' % self._pm
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret != 0:
             return []
 

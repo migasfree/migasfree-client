@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,14 +19,16 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'zypper.py'
-__date__   = '2012-06-14'
+__file__ = 'zypper.py'
+__date__ = '2013-01-26'
 
 import logging
 
-from pms import Pms
+from .pms import Pms
 from migasfree_client.utils import execute
 
+
+@Pms.register('Zypper')
 class Zypper(Pms):
     '''
     PMS for zypper based systems (openSUSE, SLED, SLES, ...)
@@ -36,16 +38,19 @@ class Zypper(Pms):
         Pms.__init__(self)
 
         self._name = 'zypper'          # Package Management System name
-        self._pm   = '/bin/rpm'        # Package Manager command
-        self._pms  = '/usr/bin/zypper' # Package Management System command
-        self._repo = '/etc/zypp/repos.d/migasfree.repo' # Repositories file
+        self._pm = '/bin/rpm'          # Package Manager command
+        self._pms = '/usr/bin/zypper'  # Package Management System command
+        self._repo = '/etc/zypp/repos.d/migasfree.repo'  # Repositories file
 
     def install(self, package):
         '''
         bool install(string package)
         '''
 
-        self._cmd = '%s install --no-force-resolution %s' % (self._pms, package.strip())
+        self._cmd = '%s install --no-force-resolution %s' % (
+            self._pms,
+            package.strip()
+        )
         logging.debug(self._cmd)
 
         return (execute(self._cmd)[0] == 0)
@@ -79,8 +84,8 @@ class Zypper(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
         if _ret != 0:
             return (False, '%s\n%s\n%s' % (str(_ret), _output, _error))
@@ -89,8 +94,8 @@ class Zypper(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
@@ -115,8 +120,8 @@ class Zypper(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
@@ -141,8 +146,8 @@ class Zypper(Pms):
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
-            interactive = False,
-            verbose = True
+            interactive=False,
+            verbose=True
         )
 
         return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
@@ -155,7 +160,7 @@ class Zypper(Pms):
         self._cmd = '%s -q %s' % (self._pm, package.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd, interactive = False)[0] == 0)
+        return (execute(self._cmd, interactive=False)[0] == 0)
 
     def clean_all(self):
         '''
@@ -179,7 +184,7 @@ class Zypper(Pms):
 
         self._cmd = '%s -qa' % self._pm
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive = False)
+        _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret != 0:
             return []
 
