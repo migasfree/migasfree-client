@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,13 +39,17 @@ SSL info:
 '''
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'curl.py'
-__date__   = '2011-10-20'
+__file__ = 'curl.py'
+__date__ = '2013-01-26'
 
 import os
-import pycurl
+try:
+    import pycurl
+except ImportError:
+    raise SystemExit('migasfree client requires PycURL 7.19 or later.')
 
-class Storage:
+
+class Storage(object):
     def __init__(self):
         self.contents = ''
 
@@ -55,17 +59,18 @@ class Storage:
     def __str__(self):
         return self.contents
 
-class Curl:
+
+class Curl(object):
     DEBUG = 0
 
     def __init__(
         self,
-        url = '',
-        post = None,
-        proxy = '',
-        accept_lang = 'en-US',
-        cert = None,
-        timeout = 60
+        url='',
+        post=None,
+        proxy='',
+        accept_lang='en-US',
+        cert=None,
+        timeout=60
     ):
         self.url = url
         self.post = post
@@ -85,8 +90,8 @@ class Curl:
         self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
         self.curl.setopt(pycurl.HTTPGET, 1)
 
-        if self.url.startswith('https://'): # server over SSL
-            self.curl.setopt(pycurl.SSL_VERIFYPEER, False) # do not check the server's cert
+        if self.url.startswith('https://'):  # server over SSL
+            self.curl.setopt(pycurl.SSL_VERIFYPEER, False)  # do not check the server's cert
             self.curl.setopt(pycurl.SSL_VERIFYHOST, False)
 
             # Set certificate path and verifications
@@ -100,7 +105,7 @@ class Curl:
             self.curl.setopt(pycurl.DEBUGFUNCTION, self._test)
 
     def _test(self, debug_type, debug_msg):
-        print 'debug(%d): %s' % (debug_type, debug_msg)
+        print('debug(%d): %s' % (debug_type, debug_msg))
 
     def run(self):
         self.curl.setopt(pycurl.HTTPHEADER, [
