@@ -672,7 +672,8 @@ class MigasFreeClient(object):
         _operation_ok()
 
         # update computer hardware inventory
-        self._update_hardware_inventory()
+        if _request.get('hardware_capture') is True:  # new in server 3.0
+            self._update_hardware_inventory()
 
         # TODO remove and install devices
 
