@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,14 +19,17 @@
 # Author: Alberto Gacías <agacias@ono.com>
 
 __author__ = "Jose Antonio Chavarría"
-__file__   = "secure.py"
-__date__   = '2011-09-26'
+__file__ = "secure.py"
+__date__ = '2013-01-26'
+
+# TODO common code between server & client
 
 import os
 import json
 
 import utils
 import server_errors
+
 
 def sign(filename, private_key):
     '''
@@ -42,6 +45,7 @@ def sign(filename, private_key):
             filename
         )
     )
+
 
 def verify(filename, public_key):
     '''
@@ -64,27 +68,27 @@ def genKeysRSA(filename):
     os.system("openssl rsa -in %s.pri -pubout > %s.pub" % (filename, filename))
 '''
 
-def wrap(filename, data, key = None):
+
+def wrap(filename, data, key=None):
     '''
     void wrap(string filename, data, string key = None)
     Creates a JSON file with data
     If key, signs JSON file
     '''
 
-    _f = open(filename, 'wb')
-    json.dump(data, _f)
-    _f.close()
+    with open(filename, 'wb') as _fp:
+        json.dump(data, _fp)
 
-    #os.system('less %s; read' % filename) # DEBUG
+    #os.system('less %s; read' % filename)  # DEBUG
 
     if key:
         sign(filename, key)
-        _f = open(filename, 'ab')
-        _f.write(open('%s.sign' % filename, 'rb').read())
-        _f.close()
-        os.remove('%s.sign' % filename) # remove temp file (sign function)
+        with open(filename, 'ab') as _fp:
+            _fp.write(open('%s.sign' % filename, 'rb').read())
+        os.remove('%s.sign' % filename)  # remove temp file (sign function)
 
-def unwrap(filename, key = None):
+
+def unwrap(filename, key=None):
     '''
     dict unwrap(string filename, string key = None)
     filename is a JSON file (signed or not)
@@ -93,23 +97,27 @@ def unwrap(filename, key = None):
     '''
 
     if key:
-        _content = open(filename, 'rb').read()
-        _n = len(_content)
-        utils.write_file('%s.sign' % filename, _content[_n - 256:_n])
-        utils.write_file(filename, _content[0:_n - 256])
+        with open(filename, 'rb').read() as _content:
+            _n = len(_content)
+            utils.write_file('%s.sign' % filename, _content[_n - 256:_n])
+            utils.write_file(filename, _content[0:_n - 256])
 
     try:
         _data = json.loads(open(filename, 'rb').read())
     except ValueError:
-        print filename
-        return {} # no response in JSON format
+        print(filename)
+        return {}  # no response in JSON format
 
     if not key:
         return _data
 
     if not verify(filename, key):
-        #return {} # Sign not OK
-        return {'errmfs': {'code': server_errors.SIGN_NOT_OK, 'info': ''}} # Sign not OK
+        return {
+            'errmfs': {
+                'code': server_errors.SIGN_NOT_OK,
+                'info': ''
+            }
+        }  # Sign not OK
 
-    os.remove('%s.sign' % filename) # remove temp file (verify function)
+    os.remove('%s.sign' % filename)  # remove temp file (verify function)
     return _data
