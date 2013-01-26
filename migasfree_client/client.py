@@ -21,7 +21,7 @@
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'client.py'
 __date__ = '2013-01-26'
-__version__ = '2.0'
+__version__ = '3.0'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeClient', 'main')
 
