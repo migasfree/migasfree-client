@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,22 +18,39 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'pms.py'
-__date__   = '2011-10-03'
+__file__ = 'pms.py'
+__date__ = '2013-01-26'
 
-class Pms:
+
+class Pms(object):
     '''
     PMS: Package Management System
     Interface class
     Abstract methods
     '''
 
+    # http://stackoverflow.com/questions/3786762/dynamic-base-class-and-factories
+    _entity_ = None
+    _entities_ = {}
+
+    @classmethod
+    def factory(cls, entity):
+        return cls._entities_[entity]
+
+    @classmethod
+    def register(cls, entity):
+        def decorator(subclass):
+            cls._entities_[entity] = subclass
+            subclass._entity_ = entity
+            return subclass
+        return decorator
+
     def __init__(self):
-        self._name = '' # Package Management System name
-        self._pm   = '' # Package Manager command
-        self._pms  = '' # Package Management System command
-        self._repo = '' # Repositories file
-        self._cmd  = '' # Command to execute
+        self._name = ''  # Package Management System name
+        self._pm = ''    # Package Manager command
+        self._pms = ''   # Package Management System command
+        self._repo = ''  # Repositories file
+        self._cmd = ''   # Command to execute
 
     def __str__(self):
         '''
