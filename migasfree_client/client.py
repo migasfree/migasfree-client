@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__  = 'Jose Antonio Chavarría'
-__file__    = 'client.py'
-__date__    = '2012-06-06'
+__author__ = 'Jose Antonio Chavarría'
+__file__ = 'client.py'
+__date__ = '2013-01-26'
 __version__ = '2.0'
 __license__ = 'GPLv3'
-__all__     = ('MigasFreeClient', 'main')
+__all__ = ('MigasFreeClient', 'main')
 
 import os
 import sys
@@ -35,19 +35,29 @@ import time
 import getpass
 import tempfile
 
+import gettext
+_ = gettext.gettext
+
 import pygtk
 pygtk.require('2.0')
 import pynotify
 
-try:
-    import pycurl
-except ImportError:
-    raise SystemExit('migasfree client requires PycURL 7.19 or later.')
+#sys.path.append(os.path.dirname(__file__))  # DEBUG
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
 
 # package imports
+"""
+from . import (
+    settings,
+    utils,
+    server_errors,
+    printcolor,
+    url_request,
+    network
+)
+"""
 import settings
 import utils
 import server_errors
@@ -55,54 +65,61 @@ import printcolor
 import url_request
 import network
 
-def _operation_ok(info = ''):
+from backends import Pms
+
+
+def _operation_ok(info=''):
     _msg = str(' ' + _('Ok')).rjust(38, '*')
     if info:
         _msg = str(info)
 
     printcolor.ok(_msg)
 
-def _operation_failed(info = ''):
+
+def _operation_failed(info=''):
     printcolor.fail(str(' ' + _('Failed')).rjust(38, '*'))
     if info:
         printcolor.fail(info)
 
+
 def _search_pms():
     _pms_list = {
-        'zypper' : {'module' : 'zypper', 'class' : 'Zypper'},
-        'yum'    : {'module' : 'yum', 'class' : 'Yum'},
-        'apt-get': {'module' : 'apt', 'class' : 'Apt'}
+        'zypper': 'Zypper',
+        'yum': 'Yum',
+        'apt-get': 'Apt'
     }
 
     for _item in _pms_list:
         _cmd = 'which %s' % _item
-        _ret, _output, _error = utils.execute(_cmd, interactive = False)
+        _ret, _output, _error = utils.execute(_cmd, interactive=False)
         if _ret == 0:
             return _pms_list[_item]
 
-    return None # if not found
+    return None  # if not found
 
-class MigasFreeClient:
-    APP_NAME   = 'Migasfree'
-    CMD        = 'migasfree' # /usr/bin/migasfree
-    LOCK_FILE  = '/tmp/%s.pid' % CMD
+
+class MigasFreeClient(object):
+    APP_NAME = 'Migasfree'
+    CMD = 'migasfree'  # /usr/bin/migasfree
+    LOCK_FILE = '/tmp/%s.pid' % CMD
     ERROR_FILE = '/tmp/%s.err' % CMD
 
     SOFTWARE_FILE = '/var/log/installed_software.txt'
 
-    PUBLIC_KEY  = 'migasfree-server.pub'
+    PUBLIC_KEY = 'migasfree-server.pub'
     PRIVATE_KEY = 'migasfree-client.pri'
 
-    ICON           = '/usr/share/icons/hicolor/scalable/apps/migasfree.svg'
-    ICON_COMPLETED = '/usr/share/icons/hicolor/scalable/actions/migasfree-ok.svg'
+    ICON_PATH = '/usr/share/icons/hicolor/scalable/apps'
+    ICON = 'migasfree.svg'
+    ICON_COMPLETED = 'migasfree-ok.svg'
 
     _graphic_user = None
-    _notify       = None
+    _notify = None
 
     # default values for .conf options
-    migas_version  = 'OPENSUSE'
-    migas_server   = 'migasfree.org'
-    migas_proxy    = None
+    migas_version = 'UBUNTU'
+    migas_server = 'migasfree.org'
+    migas_proxy = None
     migas_ssl_cert = None
 
     pms = None
@@ -128,15 +145,15 @@ class MigasFreeClient:
         else:
             _url_base = '%s://%s' % ('http', _url_base)
         self._url_request = url_request.UrlRequest(
-            debug = self._debug,
-            url_base = _url_base,
-            proxy = self.migas_proxy,
-            info_keys = {
+            debug=self._debug,
+            url_base=_url_base,
+            proxy=self.migas_proxy,
+            info_keys={
                 'path': settings.KEYS_PATH,
                 'private': self.PRIVATE_KEY,
                 'public': self.PUBLIC_KEY
             },
-            cert = self.migas_ssl_cert
+            cert=self.migas_ssl_cert
         )
 
         self._pms_selection()
@@ -146,15 +163,15 @@ class MigasFreeClient:
         _log_level = logging.INFO
 
         if type(_config) is dict:
-            if _config.has_key('version'):
+            if 'version' in _config:
                 self.migas_version = _config['version']
-            if _config.has_key('server'):
+            if 'server' in _config:
                 self.migas_server = _config['server']
-            if _config.has_key('proxy'):
+            if 'proxy' in _config:
                 self.migas_proxy = _config['proxy']
-            if _config.has_key('ssl_cert'):
+            if 'ssl_cert' in _config:
                     self.migas_ssl_cert = _config['ssl_cert']
-            if _config.has_key('debug'):
+            if 'debug' in _config:
                 if _config['debug'] == 'True' \
                 or _config['debug'] == '1' \
                 or _config['debug'] == 'On':
@@ -163,11 +180,11 @@ class MigasFreeClient:
 
         # http://www.lightbird.net/py-by-example/logging.html
         logging.basicConfig(
-            format   = '%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
-            level    = _log_level,
-            filename = settings.LOG_FILE
+            format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
+            level=_log_level,
+            filename=settings.LOG_FILE
         )
-        logging.info('*'*20)
+        logging.info('*' * 20)
         logging.info('%s in execution', self.CMD)
         logging.debug('Config: %s', _config)
 
@@ -178,7 +195,7 @@ class MigasFreeClient:
 
         if not _graphic_pid:
             self._graphic_user = os.environ['USER']
-            print _('No detected graphic process')
+            print(_('No detected graphic process'))
         else:
             self._graphic_user = utils.get_graphic_user(_graphic_pid)
             _user_display = utils.get_user_display_graphic(_graphic_pid)
@@ -194,24 +211,19 @@ class MigasFreeClient:
             logging.critical('Any PMS was not found. Cannot continue.')
             sys.exit(errno.EINPROGRESS)
 
-        # TODO factory pattern
-        exec('import migasfree_client.backends.%s' % _pms_info['module'])
-        self.pms = eval('migasfree_client.backends.%s.%s' % (
-            _pms_info['module'],
-            _pms_info['class']
-        ))()
+        self.pms = Pms.factory(_pms_info)()
 
     def _show_running_options(self):
-        print
-        print _('Running options:')
-        print '\t%s: %s' % (_('Version'), self.migas_version)
-        print '\t%s: %s' % (_('Server'), self.migas_server)
-        print '\t%s: %s' % (_('Proxy'), self.migas_proxy)
-        print '\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert)
-        print '\t%s: %s' % (_('Debug'), self._debug)
-        print '\t%s: %s' % (_('Graphic user'), self._graphic_user)
-        print '\t%s: %s' % (_('PMS'), str(self.pms))
-        print
+        print('')
+        print(_('Running options:'))
+        print('\t%s: %s' % (_('Version'), self.migas_version))
+        print('\t%s: %s' % (_('Server'), self.migas_server))
+        print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
+        print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
+        print('\t%s: %s' % (_('Debug'), self._debug))
+        print('\t%s: %s' % (_('Graphic user'), self._graphic_user))
+        print('\t%s: %s' % (_('PMS'), self.pms))
+        print('')
 
     def _exit_gracefully(self, signal_number, frame):
         self._send_message(_('Killing %s before time!!!') % self.CMD)
@@ -219,27 +231,27 @@ class MigasFreeClient:
         sys.exit(errno.EINPROGRESS)
 
     def _usage_examples(self):
-        print '\n' + _('Examples:')
+        print('\n' + _('Examples:'))
 
-        print '  ' + _('Register computer at server:')
-        print '\t%s -g' % self.CMD
-        print '\t%s --register\n' % self.CMD
+        print('  ' + _('Register computer at server:'))
+        print('\t%s -g' % self.CMD)
+        print('\t%s --register\n' % self.CMD)
 
-        print '  ' + _('Update the system:')
-        print '\t%s -u' % self.CMD
-        print '\t%s --update\n' % self.CMD
+        print('  ' + _('Update the system:'))
+        print('\t%s -u' % self.CMD)
+        print('\t%s --update\n' % self.CMD)
 
-        print '  ' + _('Search package:')
-        print '\t%s -s bluefish' % self.CMD
-        print '\t%s --search=bluefish\n' % self.CMD
+        print('  ' + _('Search package:'))
+        print('\t%s -s bluefish' % self.CMD)
+        print('\t%s --search=bluefish\n' % self.CMD)
 
-        print '  ' + _('Install package:')
-        print '\t%s -ip bluefish' % self.CMD
-        print '\t%s --install --package=bluefish\n' % self.CMD
+        print('  ' + _('Install package:'))
+        print('\t%s -ip bluefish' % self.CMD)
+        print('\t%s --install --package=bluefish\n' % self.CMD)
 
-        print '  ' + _('Remove package:')
-        print '\t%s -rp bluefish' % self.CMD
-        print '\t%s --remove --package=bluefish\n' % self.CMD
+        print('  ' + _('Remove package:'))
+        print('\t%s -rp bluefish' % self.CMD)
+        print('\t%s --remove --package=bluefish\n' % self.CMD)
 
         # TODO
         #print '  ' + _('Install device:')
@@ -251,7 +263,7 @@ class MigasFreeClient:
         #print '\t%s -rd 12307' % self.CMD
         #print '\t%s --remove --device=12307' % self.CMD
 
-    def _write_error(self, msg, append = False):
+    def _write_error(self, msg, append=False):
         if append:
             _mode = 'a'
         else:
@@ -260,20 +272,22 @@ class MigasFreeClient:
         if not self._error_file_descriptor:
             self._error_file_descriptor = open(self.ERROR_FILE, _mode)
 
-        self._error_file_descriptor.write('%s\n' % ('-'*20))
-        self._error_file_descriptor.write('%s\n' % time.strftime("%Y-%m-%d %H:%M:%S"))
+        self._error_file_descriptor.write('%s\n' % ('-' * 20))
+        self._error_file_descriptor.write(
+            '%s\n' % time.strftime("%Y-%m-%d %H:%M:%S")
+        )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
-    def _send_message(self, msg = '', icon = None):
+    def _send_message(self, msg='', icon=None):
         if msg:
-            print
+            print('')
             printcolor.info(str(' ' + msg + ' ').center(76, '*'))
 
             if not icon:
-                icon = self.ICON
+                icon = os.path.join(self.ICON_PATH, self.ICON)
 
             if self._notify:
-                icon = 'file://%s' % icon
+                icon = 'file://%s' % os.path.join(self.ICON_PATH, icon)
 
                 try:
                     self._notify.update(self.APP_NAME, msg, icon)
@@ -284,14 +298,14 @@ class MigasFreeClient:
 
         _ret = self._url_request.run(
             'upload_computer_message',
-            data = msg,
-            exit_on_error = False
+            data=msg,
+            exit_on_error=False
         )
         logging.debug('Message response: %s', _ret)
         if self._debug:
-            print 'Message response: %s' % _ret
+            print(('Message response: %s' % _ret))
 
-        if _ret.has_key('errmfs') \
+        if 'errmfs' in _ret \
         and _ret['errmfs']['code'] == server_errors.COMPUTER_NOT_FOUND:
             return self._auto_register()
 
@@ -301,7 +315,7 @@ class MigasFreeClient:
                 _ret['errmfs']['info']
             )
             _operation_failed(_msg)
-            self._write_error(_msg, append = True)
+            self._write_error(_msg, append=True)
 
         return (_ret['errmfs']['code'] == server_errors.ALL_OK)
 
@@ -312,9 +326,8 @@ class MigasFreeClient:
         logging.debug('Code: %s', code)
 
         _filename = tempfile.mkstemp()[1]
-        _code_file = open(_filename, 'wb')
-        _code_file.write(code)
-        _code_file.close()
+        with open(_filename, 'wb') as _code_file:
+            _code_file.write(code)
 
         _allowed_languages = [
             'bash',
@@ -327,9 +340,9 @@ class MigasFreeClient:
         if lang in _allowed_languages:
             _cmd = '%s %s' % (lang, _filename)
         else:
-            _cmd = ':' # gracefully degradation
+            _cmd = ':'  # gracefully degradation
 
-        _ret, _output, _error = utils.execute(_cmd, interactive = False)
+        _ret, _output, _error = utils.execute(_cmd, interactive=False)
         logging.debug('Executed command: %s', _cmd)
         logging.debug('Output: %s', _output)
 
@@ -344,10 +357,10 @@ class MigasFreeClient:
         # response struct
         _response = {
             'computer': {
-                'hostname'     : utils.get_hostname(),
-                'ip'           : network.get_network_info()['ip'],
-                'version'      : self.migas_version,
-                'user'         : self._graphic_user,
+                'hostname': utils.get_hostname(),
+                'ip': network.get_network_info()['ip'],
+                'version': self.migas_version,
+                'user': self._graphic_user,
                 'user_fullname': utils.get_user_info(self._graphic_user)['fullname']
             },
             'attributes': {}
@@ -414,10 +427,12 @@ class MigasFreeClient:
         _software_before = self.pms.query_all()
         logging.debug('Actual software: %s', _software_before)
 
-        # if have been installed packages manually, information is uploaded to server
-        if os.path.isfile(self.SOFTWARE_FILE) and os.stat(self.SOFTWARE_FILE).st_size:
+        # if have been installed packages manually
+        # information is uploaded to server
+        if os.path.isfile(self.SOFTWARE_FILE) \
+        and os.stat(self.SOFTWARE_FILE).st_size:
             _diff_software = utils.compare_lists(
-                open(self.SOFTWARE_FILE, 'U').read().splitlines(), # not readlines!!!
+                open(self.SOFTWARE_FILE, 'U').read().splitlines(),  # not readlines!!!
                 _software_before
             )
 
@@ -436,7 +451,7 @@ class MigasFreeClient:
                 logging.debug('Software diff: %s', _data)
                 self._url_request.run(
                     'upload_computer_software_history',
-                    data = _data
+                    data=_data
                 )
                 _operation_ok()
 
@@ -446,11 +461,12 @@ class MigasFreeClient:
         '''
         if there are old errors, upload them to server
         '''
-        if os.path.isfile(self.ERROR_FILE) and os.stat(self.ERROR_FILE).st_size:
+        if os.path.isfile(self.ERROR_FILE) \
+        and os.stat(self.ERROR_FILE).st_size:
             self._send_message(_('Uploading old errors...'))
             self._url_request.run(
                 'upload_computer_errors',
-                data = open(self.ERROR_FILE, 'rb').read()
+                data=open(self.ERROR_FILE, 'rb').read()
             )
             _operation_ok()
             # delete old errors
@@ -527,7 +543,7 @@ class MigasFreeClient:
     def _update_hardware_inventory(self):
         self._send_message(_('Capturing hardware information...'))
         _cmd = 'lshw -json'
-        _ret, _output, _error = utils.execute(_cmd, interactive = False)
+        _ret, _output, _error = utils.execute(_cmd, interactive=False)
         if _ret == 0:
             _operation_ok()
         else:
@@ -542,8 +558,8 @@ class MigasFreeClient:
         self._send_message(_('Sending hardware information...'))
         _ret = self._url_request.run(
             'upload_computer_hardware',
-            data = _hardware,
-            exit_on_error = False
+            data=_hardware,
+            exit_on_error=False
         )
         if _ret['errmfs']['code'] == server_errors.ALL_OK:
             _operation_ok()
@@ -559,7 +575,7 @@ class MigasFreeClient:
             self._send_message(_('Sending errors to server...'))
             self._url_request.run(
                 'upload_computer_errors',
-                data = open(self.ERROR_FILE, 'rb').read()
+                data=open(self.ERROR_FILE, 'rb').read()
             )
             _operation_ok()
 
@@ -583,7 +599,7 @@ class MigasFreeClient:
         self._send_message(_('Uploading attributes...'))
         _request = self._url_request.run(
             'upload_computer_info',
-            data = _response
+            data=_response
         )
         _operation_ok()
         logging.debug('Server response: %s', _request)
@@ -596,7 +612,7 @@ class MigasFreeClient:
             self._send_message(_('Uploading faults...'))
             _request_faults = self._url_request.run(
                 'upload_computer_faults',
-                data = _response
+                data=_response
             )
             _operation_ok()
             logging.debug('Server response: %s', _request_faults)
@@ -625,10 +641,10 @@ class MigasFreeClient:
             _data = time.strftime('# %Y-%m-%d %H:%M:%S\n', time.localtime()) \
                 + '\n'.join(_diff_software)
             logging.debug('Software diff: %s', _data)
-            print _('Software diff: %s') % _data
+            print(_('Software diff: %s') % _data)
             self._url_request.run(
                 'upload_computer_software_history',
-                data = _data
+                data=_data
             )
             _operation_ok()
 
@@ -638,7 +654,7 @@ class MigasFreeClient:
             logging.info('This computer is software reference')
             self._url_request.run(
                 'upload_computer_software_base',
-                data = '\n'.join(_software_after)
+                data='\n'.join(_software_after)
             )
             _operation_ok()
 
@@ -651,7 +667,7 @@ class MigasFreeClient:
         logging.debug('Software base diff: %s', _diff_software)
         self._url_request.run(
             'upload_computer_software_base_diff',
-            data = _diff_software
+            data=_diff_software
         )
         _operation_ok()
 
@@ -664,16 +680,16 @@ class MigasFreeClient:
         self._upload_execution_errors()
 
         self._send_message(_('Completed operations'), self.ICON_COMPLETED)
-        time.sleep(3) # to see update completed icon ;)
+        time.sleep(3)  # to see update completed icon ;)
 
         # clean computer messages in server
         self._send_message()
 
     def _check_sign_keys(self):
         _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
-        _public_key  = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
+        _public_key = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
         if os.path.isfile(_private_key) and os.path.isfile(_public_key):
-            return # all OK
+            return  # all OK
 
         logging.warning('Security keys are not present!!!')
         self._auto_register()
@@ -683,9 +699,9 @@ class MigasFreeClient:
         _data = {
             'username': '',
             'password': '',
-            'version' : self.migas_version
+            'version': self.migas_version
         }
-        print _('Autoregistering computer...')
+        print(_('Autoregistering computer...'))
 
         return self._save_sign_keys(_data)
 
@@ -701,23 +717,23 @@ class MigasFreeClient:
 
         _response = self._url_request.run(
             'register_computer',
-            data = data,
-            sign = False
+            data=data,
+            sign=False
         )
         logging.debug('Response _save_sign_keys: %s', _response)
 
-        if _response.has_key('errmfs'):
+        if 'errmfs' in _response:
             _msg = _response['errmfs']['info']
             _operation_failed(_msg)
             logging.error(_msg)
             sys.exit(errno.ENOENT)
 
-        for _file, _content in _response.items():
+        for _file, _content in list(_response.items()):
             _path_file = os.path.join(settings.KEYS_PATH, _file)
             logging.debug('Trying writing file: %s', _path_file)
             _ret = utils.write_file(_path_file, str(_content))
             if _ret:
-                print _('Key %s created!') % _path_file
+                print(_('Key %s created!') % _path_file)
             else:
                 _msg = _('Error writing key file!!!')
                 _operation_failed(_msg)
@@ -745,7 +761,7 @@ class MigasFreeClient:
         _data = {
             'username': _user,
             'password': _pass,
-            'version' : self.migas_version
+            'version': self.migas_version
         }
         self._save_sign_keys(_data)
         _operation_ok(_('Computer registered at server'))
@@ -769,50 +785,50 @@ class MigasFreeClient:
     def _install_device(self, dev):
         self._send_message(_('Installing device: %s') % dev)
         #download_file_and_run "device/?CMD=install&HOST=$HOSTNAME&NUMBER=pkg" "$_DIR_TMP/install_device"
-        print 'TODO'
+        print('TODO')
         self._send_message()
 
     # TODO
     def _remove_device(self, dev):
         self._send_message(_('Removing device: %s') % dev)
         #download_file_and_run "device/?CMD=remove\HOST=$HOSTNAME\NUMBER=dev" "$_DIR_TMP/remove_device"
-        print 'TODO'
+        print('TODO')
         self._send_message()
 
     def run(self):
         _program = 'migasfree client'
         parser = optparse.OptionParser(
-            description = _program,
-            prog        = self.CMD,
-            version     = __version__,
-            usage       = '%prog options'
+            description=_program,
+            prog=self.CMD,
+            version=__version__,
+            usage='%prog options'
         )
 
-        print _('%(program)s version: %(version)s') % {
+        print(_('%(program)s version: %(version)s') % {
             'program': _program,
             'version': __version__
-        }
+        })
 
-        parser.add_option("--register", "-g", action = "store_true",
-            help = _('Register computer at server'))
-        parser.add_option("--update", "-u", action = "store_true",
-            help = _('Update system from repositories'))
-        parser.add_option("--search", "-s", action = "store",
-            help = _('Search package in repositories'))
+        parser.add_option("--register", "-g", action="store_true",
+            help=_('Register computer at server'))
+        parser.add_option("--update", "-u", action="store_true",
+            help=_('Update system from repositories'))
+        parser.add_option("--search", "-s", action="store",
+            help=_('Search package in repositories'))
         parser.add_option(
             "--install", "-i",
-            action = "store_true",
-            #help = _('Install package or device')
-            help = _('Install package')
+            action="store_true",
+            #help=_('Install package or device')
+            help=_('Install package')
         )
         parser.add_option(
             "--remove", "-r",
-            action = "store_true",
-            #help = _('Remove package or device')
-            help = _('Remove package')
+            action="store_true",
+            #help=_('Remove package or device')
+            help=_('Remove package')
         )
-        parser.add_option("--package", "-p", action = "store",
-            help = _('Package to install or remove'))
+        parser.add_option("--package", "-p", action="store",
+            help=_('Package to install or remove'))
         #parser.add_option("--device", "-d", action = "store",
         #    help = _('Device to install or remove'))
 
@@ -868,7 +884,8 @@ class MigasFreeClient:
 
         utils.remove_file(self.LOCK_FILE)
 
-        sys.exit(os.EX_OK) # no error
+        sys.exit(os.EX_OK)  # no error
+
 
 def main():
     mfc = MigasFreeClient()
