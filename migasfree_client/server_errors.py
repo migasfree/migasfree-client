@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,13 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'server_errors.py'
-__date__   = '2011-10-02'
+__file__ = 'server_errors.py'
+__date__ = '2013-01-26'
+
+# TODO common code between server & client
+
+import gettext
+_ = gettext.gettext
 
 ALL_OK               = 0
 NO_AUTHENTICATED     = 1
@@ -45,11 +50,12 @@ ERROR_INFO = {
     GENERIC             : _("Generic error")
 }
 
+
 def error_info(number):
     '''
     string error_info(int number)
     '''
-    if ERROR_INFO.has_key(number):
+    if number in ERROR_INFO:
         return ERROR_INFO[number]
 
-    return ''
+    return ''  # if not found
