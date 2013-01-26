@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'utils.py'
-__date__   = '2012-06-06'
+__file__ = 'utils.py'
+__date__ = '2013-01-26'
 
 import subprocess
 import os
@@ -36,7 +36,11 @@ import re
 import fcntl
 import select
 
+import gettext
+_ = gettext.gettext
+
 # TODO http://docs.python.org/library/unittest.html
+
 
 def get_config(ini_file, section):
     '''
@@ -44,7 +48,7 @@ def get_config(ini_file, section):
     '''
 
     if not os.path.isfile(ini_file):
-        return errno.ENOENT # FILE_NOT_FOUND
+        return errno.ENOENT  # FILE_NOT_FOUND
 
     try:
         config = ConfigParser.RawConfigParser()
@@ -52,29 +56,30 @@ def get_config(ini_file, section):
 
         return dict(config.items(section))
     except:
-        return errno.ENOMSG # INVALID_DATA
+        return errno.ENOMSG  # INVALID_DATA
 
-def execute(cmd, verbose = False, interactive = True):
+
+def execute(cmd, verbose=False, interactive=True):
     '''
     (int, string, string) execute(string cmd, bool verbose = False, bool interactive = True)
     '''
 
     if verbose:
-        print cmd
+        print(cmd)
 
     if interactive:
         _process = subprocess.Popen(
             cmd,
-            shell = True,
-            executable = '/bin/bash'
+            shell=True,
+            executable='/bin/bash'
         )
     else:
         _process = subprocess.Popen(
             cmd,
-            shell = True,
-            executable = '/bin/bash',
-            stderr = subprocess.PIPE,
-            stdout = subprocess.PIPE
+            shell=True,
+            executable='/bin/bash',
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE
         )
 
         _output_buffer = ''
@@ -85,12 +90,12 @@ def execute(cmd, verbose = False, interactive = True):
                 fcntl.fcntl(_process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
             )
 
-            while _process.poll() == None:
+            while _process.poll() is None:
                 readx = select.select([_process.stdout.fileno()], [], [])[0]
                 if readx:
                     chunk = _process.stdout.read()
                     if chunk and chunk != '\n':
-                        print chunk
+                        print(chunk)
                     _output_buffer = '%s%s' % (_output_buffer, chunk)
 
         '''
@@ -123,6 +128,7 @@ def execute(cmd, verbose = False, interactive = True):
 
     return (_process.returncode, _output, _error)
 
+
 def get_hostname():
     '''
     string get_hostname(void)
@@ -131,6 +137,7 @@ def get_hostname():
     # in Ubuntu, os.environ['HOSTNAME'] returns an error
     return platform.uname()[1]
 
+
 def get_graphic_pid():
     '''
     list get_graphic_pid(void)
@@ -138,11 +145,11 @@ def get_graphic_pid():
     '''
 
     _graphic_environments = [
-        'gnome-session',   # Gnome
-        'ksmserver',       # KDE
-        'xfce-mcs-manage', # Xfce
-        'xfce4-session',   # Xfce4
-        'lxsession'        # LXDE
+        'gnome-session',    # Gnome
+        'ksmserver',        # KDE
+        'xfce-mcs-manage',  # Xfce
+        'xfce4-session',    # Xfce4
+        'lxsession'         # LXDE
     ]
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof %s' % _process)
@@ -153,6 +160,7 @@ def get_graphic_pid():
             return [_pid_list.pop(), _process]
 
     return [None, None]
+
 
 def get_graphic_user(pid):
     '''
@@ -166,6 +174,7 @@ def get_graphic_user(pid):
 
     return _user
 
+
 def grep(string, list_strings):
     '''
     http://casa.colorado.edu/~ginsbura/pygrep.htm
@@ -177,7 +186,8 @@ def grep(string, list_strings):
     expr = re.compile(string)
     return [elem for elem in list_strings if expr.match(elem)]
 
-def get_user_display_graphic(pid, timeout = 10, interval = 1):
+
+def get_user_display_graphic(pid, timeout=10, interval=1):
     '''
     string get_user_display_graphic(string pid, int timeout = 10, int interval = 1)
     '''
@@ -185,7 +195,10 @@ def get_user_display_graphic(pid, timeout = 10, interval = 1):
     _display = []
     while not _display and timeout > 0:
         # a data line ends in 0 byte, not newline
-        _display = grep('DISPLAY', open("/proc/%s/environ" % pid).read().split('\0'))
+        _display = grep(
+            'DISPLAY',
+            open("/proc/%s/environ" % pid).read().split('\0')
+        )
         if _display:
             _display = _display[0].split('=').pop()
             return _display
@@ -198,13 +211,14 @@ def get_user_display_graphic(pid, timeout = 10, interval = 1):
 
     return _display
 
+
 def compare_lists(a, b):
     '''
     list compare_lists(list a, list b)
     returns ordered diff list
     '''
 
-    _result = list(difflib.unified_diff(a, b, n = 0))
+    _result = list(difflib.unified_diff(a, b, n=0))
     # clean lines... (only package lines are important)
     # http://docs.python.org/tutorial/controlflow.html#for-statements
     for _line in _result[:]:
@@ -213,6 +227,7 @@ def compare_lists(a, b):
             _result.remove(_line)
 
     return sorted(_result)
+
 
 def compare_files(a, b):
     '''
@@ -230,6 +245,7 @@ def compare_files(a, b):
 
     return compare_lists(_list_a, _list_b)
 
+
 def get_user_info(user):
     '''
     bool/list get_user_info(string user)
@@ -244,14 +260,15 @@ def get_user_info(user):
             return False
 
     return {
-        'name'     : _info[0],
-        'pwd'      : _info[1], # if 'x', encrypted
-        'uid'      : _info[2],
-        'gid'      : _info[3],
-        'fullname' : _info[4],
-        'home'     : _info[5],
-        'shell'    : _info[6]
+        'name': _info[0],
+        'pwd': _info[1],  # if 'x', encrypted
+        'uid': _info[2],
+        'gid': _info[3],
+        'fullname': _info[4],
+        'home': _info[5],
+        'shell': _info[6]
     }
+
 
 def write_file(filename, content):
     '''
@@ -273,12 +290,14 @@ def write_file(filename, content):
         if _file is not None:
             _file.close()
 
+
 def remove_file(archive):
     if os.path.isfile(archive):
         os.remove(archive)
 
+
 # based in http://code.activestate.com/recipes/577058/
-def query_yes_no(question, default = "yes"):
+def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.
@@ -292,7 +311,7 @@ def query_yes_no(question, default = "yes"):
         _("yes"): "yes", _("y"): "yes",
         _("no"): "no", _("n"): "no"
     }
-    if default == None:
+    if default is None:
         prompt = ' %s ' % _("[y/n]")
     elif default == "yes":
         prompt = ' %s ' % _("[Y/n]")
@@ -309,7 +328,8 @@ def query_yes_no(question, default = "yes"):
         elif choice in valid.keys():
             return valid[choice]
         else:
-            print _("Please respond with 'yes' or 'no' (or 'y' or 'n').")
+            print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
+
 
 def check_lock_file(cmd, lock_file):
     if os.path.isfile(lock_file):
@@ -330,14 +350,16 @@ def check_lock_file(cmd, lock_file):
 
         try:
             if os.getsid(_pid):
-                print _('Another instance of %(cmd)s is running: %(pid)d') % {
-                    'cmd': cmd, 'pid': int(_pid)
-                }
+                print(_('Another instance of %(cmd)s is running: %(pid)d') % {
+                    'cmd': cmd,
+                    'pid': int(_pid)
+                })
                 sys.exit(errno.EPERM)
         except OSError:
             pass
     else:
         write_file(lock_file, str(os.getpid()))
+
 
 def get_current_user():
     '''
@@ -359,12 +381,12 @@ def get_current_user():
 
     return '%s~%s' % (_graphic_user, _fullname)
 
+
 def get_mfc_version():
-    import settings
+    from . import settings
 
     _config = get_config(settings.CONF_FILE, 'client')
-    if type(_config) is dict:
-        if _config.has_key('version'):
-            return _config['version']
+    if type(_config) is dict and 'version' in _config:
+        return _config['version']
 
-    return '' # if not found
+    return ''  # if not found
