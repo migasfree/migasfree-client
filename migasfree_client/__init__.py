@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__  = 'Jose Antonio Chavarría'
-__file__    = '__init__.py'
+__author__ = 'Jose Antonio Chavarría'
+__file__ = '__init__.py'
 __version__ = '2.1'
-__date__    = '2012-06-06'
+__date__ = '2013-01-26'
 __license__ = 'GPLv3'
 
 import gettext
@@ -31,7 +31,7 @@ __builtin__._ = gettext.gettext
 
 # i18n
 APP = 'migasfree-client'
-gettext.install(APP, '/usr/share/locale', unicode = 1)
+gettext.install(APP, '/usr/share/locale', unicode=1)
 
 gettext.bindtextdomain(APP, '/usr/share/locale')
 if hasattr(gettext, 'bind_textdomain_codeset'):
