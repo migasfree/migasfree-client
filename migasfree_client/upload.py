@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__  = 'Jose Antonio Chavarría'
-__file__    = 'upload.py'
-__date__    = '2012-06-11'
+__author__ = 'Jose Antonio Chavarría'
+__file__ = 'upload.py'
+__date__ = '2013-01-26'
 __version__ = '2.0'
 __license__ = 'GPLv3'
-__all__     = ('MigasFreeUpload', 'main')
+__all__ = ('MigasFreeUpload', 'main')
 
 import os
 import sys
@@ -32,36 +32,46 @@ import logging
 import getpass
 import errno
 
+import gettext
+_ = gettext.gettext
+
 # package imports
+"""
+from . import (
+    settings,
+    utils,
+    server_errors,
+    url_request
+)
+"""
 import settings
 import utils
-import secure
 import server_errors
-import printcolor
 import url_request
 
-class MigasFreeUpload:
-    CMD        = 'migasfree-upload' # /usr/bin/migasfree-upload
-    LOCK_FILE  = '/tmp/%s.pid' % CMD
 
-    PUBLIC_KEY  = 'migasfree-server.pub'
+class MigasFreeUpload(object):
+    CMD = 'migasfree-upload'  # /usr/bin/migasfree-upload
+    LOCK_FILE = '/tmp/%s.pid' % CMD
+
+    PUBLIC_KEY = 'migasfree-server.pub'
     PRIVATE_KEY = 'migasfree-packager.pri'
 
-    migas_server  = 'migasfree.org'
-    migas_proxy   = None
+    migas_server = 'migasfree.org'
+    migas_proxy = None
 
-    packager_user    = None
-    packager_pwd     = None
+    packager_user = None
+    packager_pwd = None
     packager_version = None
-    packager_store   = None
+    packager_store = None
 
     _url_request = None
 
-    _file             = None
-    _is_regular_file  = False
-    _directory        = None
+    _file = None
+    _is_regular_file = False
+    _directory = None
     _server_directory = None
-    _create_repo      = True
+    _create_repo = True
 
     _debug = False
 
@@ -74,13 +84,11 @@ class MigasFreeUpload:
 
         _log_level = logging.INFO
         if type(_config_client) is dict:
-            #if _config_client.has_key('version'):
-            #    self.packager_version = _config['version']
-            if _config_client.has_key('server'):
+            if 'server' in _config_client:
                 self.migas_server = _config_client['server']
-            if _config_client.has_key('proxy'):
+            if 'proxy' in _config_client:
                 self.migas_proxy = _config_client['proxy']
-            if _config_client.has_key('debug'):
+            if 'debug' in _config_client:
                 if _config_client['debug'] == 'True' \
                 or _config_client['debug'] == '1' \
                 or _config_client['debug'] == 'On':
@@ -89,21 +97,21 @@ class MigasFreeUpload:
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
         if type(_config_packager) is dict:
-            if _config_packager.has_key('user'):
+            if 'user' in _config_packager:
                 self.packager_user = _config_packager['user']
-            if _config_packager.has_key('password'):
+            if 'password' in _config_packager:
                 self.packager_pwd = _config_packager['password']
-            if _config_packager.has_key('version'):
+            if 'version' in _config_packager:
                 self.packager_version = _config_packager['version']
-            if _config_packager.has_key('store'):
+            if 'store' in _config_packager:
                 self.packager_store = _config_packager['store']
 
         logging.basicConfig(
-            format   = '%(asctime)s - %(levelname)s - %(message)s',
-            level    = _log_level,
-            filename = settings.LOG_FILE
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            level=_log_level,
+            filename=settings.LOG_FILE
         )
-        logging.info('*'*76)
+        logging.info('*' * 76)
         logging.info('%s in execution', self.CMD)
         logging.debug('Config client: %s', _config_client)
         logging.debug('Config packager: %s', _config_packager)
@@ -112,10 +120,10 @@ class MigasFreeUpload:
 
         # init UrlRequest
         self._url_request = url_request.UrlRequest(
-            debug = self._debug,
-            url_base = _url_base,
-            proxy = self.migas_proxy,
-            info_keys = {
+            debug=self._debug,
+            url_base=_url_base,
+            proxy=self.migas_proxy,
+            info_keys={
                 'path': settings.KEYS_PATH,
                 'private': self.PRIVATE_KEY,
                 'public': self.PUBLIC_KEY
@@ -123,27 +131,27 @@ class MigasFreeUpload:
         )
 
     def _usage_examples(self):
-        print '\n' + _('Examples:')
+        print('\n' + _('Examples:'))
 
-        print '  ' + _('Upload single package:')
-        print '\t%s -f archive.pkg' % self.CMD
-        print '\t%s --file=archive.pkg\n' % self.CMD
+        print('  ' + _('Upload single package:'))
+        print('\t%s -f archive.pkg' % self.CMD)
+        print('\t%s --file=archive.pkg\n' % self.CMD)
 
-        print '  ' + _('Upload single package but not create repository:')
-        print '\t%s -f archive.pkg -c ' % self.CMD
-        print '\t%s --file=archive.pkg --no-create-repo\n' % self.CMD
+        print('  ' + _('Upload single package but not create repository:'))
+        print('\t%s -f archive.pkg -c ' % self.CMD)
+        print('\t%s --file=archive.pkg --no-create-repo\n' % self.CMD)
 
-        print '  ' + _('Upload a regular file:')
-        print '\t%s -f archive -r' % self.CMD
-        print '\t%s --file=archive --regular-file\n' % self.CMD
+        print('  ' + _('Upload a regular file:'))
+        print('\t%s -f archive -r' % self.CMD)
+        print('\t%s --file=archive --regular-file\n' % self.CMD)
 
-        print '  ' + _('Upload package set:')
-        print '\t%s -d local_directory -n server_directory' % self.CMD
-        print '\t%s --dir=local_directory --name=server_directory\n' % self.CMD
+        print('  ' + _('Upload package set:'))
+        print('\t%s -d local_directory -n server_directory' % self.CMD)
+        print('\t%s --dir=local_directory --name=server_directory\n' % self.CMD)
 
-        print '  ' + _('Upload regular files:')
-        print '\t%s -d local_directory -n server_directory -c' % self.CMD
-        print '\t%s --dir=local_directory --name=server_directory --no-create-repo\n' % self.CMD
+        print('  ' + _('Upload regular files:'))
+        print('\t%s -d local_directory -n server_directory -c' % self.CMD)
+        print('\t%s --dir=local_directory --name=server_directory --no-create-repo\n' % self.CMD)
 
     def _show_config_options(self):
         print
@@ -191,9 +199,9 @@ class MigasFreeUpload:
 
     def _check_sign_keys(self):
         _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
-        _public_key  = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
+        _public_key = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
         if os.path.isfile(_private_key) and os.path.isfile(_public_key):
-            return # all OK
+            return  # all OK
 
         logging.warning('Packager keys are not present!!!')
         self._auto_register()
@@ -204,7 +212,7 @@ class MigasFreeUpload:
             'username': self.packager_user,
             'password': self.packager_pwd
         }
-        print _('Getting packager keys...')
+        print(_('Getting packager keys...'))
 
         return self._save_sign_keys(_data)
 
@@ -216,18 +224,18 @@ class MigasFreeUpload:
                 logging.error('Error creating %s directory', settings.KEYS_PATH)
                 sys.exit(errno.ENOTDIR)
 
-        _response = self._url_request.run('get_key_packager', data, sign = False)
+        _response = self._url_request.run('get_key_packager', data, sign=False)
         logging.debug('Response _save_sign_keys: %s', _response)
 
-        for _file, _content in _response.items():
+        for _file, _content in list(_response.items()):
             _path_file = os.path.join(settings.KEYS_PATH, _file)
             logging.debug('Trying writing file: %s', _path_file)
             _ret = utils.write_file(_path_file, str(_content))
             if _ret:
-                print _('Key %s created!') % _path_file
+                print(_('Key %s created!') % _path_file)
             else:
                 _msg = _('Error writing key file!!!')
-                print _msg
+                print(_msg)
                 logging.error(_msg)
                 sys.exit(errno.ENOENT)
 
@@ -236,7 +244,7 @@ class MigasFreeUpload:
     def _upload_file(self):
         logging.debug('Upload file operation...')
         if not os.path.isfile(self._file):
-            print _('File not found')
+            print(_('File not found'))
             logging.error('File not found %s', self._file)
             sys.exit(errno.ENOENT)
 
@@ -245,21 +253,21 @@ class MigasFreeUpload:
         logging.debug('Uploading file: %s', self._file)
         _ret = self._url_request.run(
             'upload_server_package',
-            data = {
+            data={
                 'version': self.packager_version,
                 'store': self.packager_store,
                 'source': self._is_regular_file
             },
-            upload_file = os.path.abspath(self._file)
+            upload_file=os.path.abspath(self._file)
         )
 
         logging.debug('Uploading response: %s', _ret)
         if self._debug:
-            print 'Response: %s' % _ret
+            print('Response: %s' % _ret)
 
         if _ret['errmfs']['code'] != server_errors.ALL_OK:
             _error_info = server_errors.error_info(_ret['errmfs']['code'])
-            print _error_info
+            print(_error_info)
             logging.error('Uploading file error: %s', _error_info)
             sys.exit(errno.EINPROGRESS)
 
@@ -268,7 +276,7 @@ class MigasFreeUpload:
     def _upload_set(self):
         logging.debug('Upload set operation...')
         if not os.path.isdir(self._directory):
-            print _('Directory not found')
+            print(_('Directory not found'))
             logging.error('Directory not found %s', self._directory)
             sys.exit(errno.ENOENT)
 
@@ -281,28 +289,33 @@ class MigasFreeUpload:
                 if os.path.isfile(_filename):
                     logging.debug('Uploading server set: %s', _filename)
                     if self._debug:
-                        print 'Uploading file: %s' % os.path.abspath(_filename)
+                        print('Uploading file: %s' % os.path.abspath(_filename))
 
                     _ret = self._url_request.run(
                         'upload_server_set',
-                        data = {
+                        data={
                             'version': self.packager_version,
                             'store': self.packager_store,
                             'packageset': self._server_directory,
                             'path': os.path.dirname(
-                                os.path.join(_root, _file)[len(self._directory) + 1:]
+                                os.path.join(
+                                    _root,
+                                    _file
+                                )[len(self._directory) + 1:]
                             )
                         },
-                        upload_file = os.path.abspath(_filename)
+                        upload_file=os.path.abspath(_filename)
                     )
 
                     logging.debug('Uploading set response: %s', _ret)
                     if self._debug:
-                        print 'Response: %s' % _ret
+                        print('Response: %s' % _ret)
 
                     if _ret['errmfs']['code'] != server_errors.ALL_OK:
-                        _error_info = server_errors.error_info(_ret['errmfs']['code'])
-                        print _error_info
+                        _error_info = server_errors.error_info(
+                            _ret['errmfs']['code']
+                        )
+                        print(_error_info)
                         logging.error('Uploading set error: %s', _error_info)
                         sys.exit(errno.EINPROGRESS)
 
@@ -321,7 +334,7 @@ class MigasFreeUpload:
 
         _ret = self._url_request.run(
             'create_repositories_of_packageset',
-            data = {
+            data={
                 'version': self.packager_version,
                 'packageset': _packageset
             }
@@ -329,11 +342,11 @@ class MigasFreeUpload:
 
         logging.debug('Creating repository response: %s', _ret)
         if self._debug:
-            print 'Response: %s' % _ret
+            print('Response: %s' % _ret)
 
         if _ret['errmfs']['code'] != server_errors.ALL_OK:
             _error_info = server_errors.error_info(_ret['errmfs']['code'])
-            print _error_info
+            print(_error_info)
             logging.error('Creating repository error: %s', _error_info)
             sys.exit(errno.EINPROGRESS)
 
@@ -342,39 +355,39 @@ class MigasFreeUpload:
     def run(self):
         _program = 'migasfree upload'
         parser = optparse.OptionParser(
-            description = _program,
-            prog        = self.CMD,
-            version     = __version__,
-            usage       = '%prog options'
+            description=_program,
+            prog=self.CMD,
+            version=__version__,
+            usage='%prog options'
         )
 
-        print _('%(program)s version: %(version)s') % {
+        print(_('%(program)s version: %(version)s') % {
             'program': _program,
             'version': __version__
-        }
+        })
 
         # migasfree-upload {-f file [--regular-file] | -d dir [-n name]} [[-u user] [-p pwd] [--main-version version] [-s store] [--no-create-repo]]
 
-        parser.add_option("--file", "-f", action = "store",
-            help = _('File to upload at server'))
-        parser.add_option("--regular-file", "-r", action = "store_true",
-            help = _('File is not a software package'))
+        parser.add_option("--file", "-f", action="store",
+            help=_('File to upload at server'))
+        parser.add_option("--regular-file", "-r", action="store_true",
+            help=_('File is not a software package'))
 
-        parser.add_option("--dir", "-d", action = "store",
-            help = _('Directory with files to upload at server'))
-        parser.add_option("--name", "-n", action = "store",
-            help = _('Name of the directory at server'))
+        parser.add_option("--dir", "-d", action="store",
+            help=_('Directory with files to upload at server'))
+        parser.add_option("--name", "-n", action="store",
+            help=_('Name of the directory at server'))
 
-        parser.add_option("--user", "-u", action = "store",
-            help = _('Authorized user to upload at server'))
-        parser.add_option("--pwd", "-p", action = "store",
-            help = _('User password'))
-        parser.add_option("--main-version", "-m", action = "store",
-            help = _('Version to upload files'))
-        parser.add_option("--store", "-s", action = "store",
-            help = _('Main version repository at server'))
-        parser.add_option("--no-create-repo", "-c", action = "store_true",
-            help = _('No create repository after upload file at server'))
+        parser.add_option("--user", "-u", action="store",
+            help=_('Authorized user to upload at server'))
+        parser.add_option("--pwd", "-p", action="store",
+            help=_('User password'))
+        parser.add_option("--main-version", "-m", action="store",
+            help=_('Version to upload files'))
+        parser.add_option("--store", "-s", action="store",
+            help=_('Main version repository at server'))
+        parser.add_option("--no-create-repo", "-c", action="store_true",
+            help=_('No create repository after upload file at server'))
 
         options, arguments = parser.parse_args()
 
@@ -433,7 +446,8 @@ class MigasFreeUpload:
 
         utils.remove_file(self.LOCK_FILE)
 
-        sys.exit(os.EX_OK) # no error
+        sys.exit(os.EX_OK)  # no error
+
 
 def main():
     mfu = MigasFreeUpload()
