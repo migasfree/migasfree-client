@@ -20,7 +20,7 @@
 
 __author__ = "Jose Antonio Chavarría"
 __file__ = "secure.py"
-__date__ = '2013-01-26'
+__date__ = '2013-02-02'
 
 # TODO common code between server & client
 
@@ -97,10 +97,10 @@ def unwrap(filename, key=None):
     '''
 
     if key:
-        with open(filename, 'rb').read() as _content:
-            _n = len(_content)
-            utils.write_file('%s.sign' % filename, _content[_n - 256:_n])
-            utils.write_file(filename, _content[0:_n - 256])
+        _content = open(filename, 'rb').read()
+        _n = len(_content)
+        utils.write_file('%s.sign' % filename, _content[_n - 256:_n])
+        utils.write_file(filename, _content[0:_n - 256])
 
     try:
         _data = json.loads(open(filename, 'rb').read())
