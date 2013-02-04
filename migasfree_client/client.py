@@ -702,7 +702,8 @@ class MigasFreeClient(object):
         _data = {
             'username': '',
             'password': '',
-            'version': self.migas_version
+            'version': self.migas_version,
+            'platform': platform.system()  # new for server 3.0
         }
         print(_('Autoregistering computer...'))
 
