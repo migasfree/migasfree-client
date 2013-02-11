@@ -132,10 +132,10 @@ def execute(cmd, verbose=False, interactive=True):
 def get_hostname():
     '''
     string get_hostname(void)
+    Returns only hostname (without domain)
     '''
 
-    # in Ubuntu, os.environ['HOSTNAME'] returns an error
-    return platform.uname()[1]
+    return platform.node().split('.')[0]
 
 
 def get_graphic_pid():
@@ -387,6 +387,6 @@ def get_mfc_version():
 
     _config = get_config(settings.CONF_FILE, 'client')
     if type(_config) is dict and 'version' in _config:
-        return _config['version']
+        return _config.get('version')
 
-    return ''  # if not found
+    return '-'.join(platform.linux_distribution()[0:2])  # if not set
