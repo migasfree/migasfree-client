@@ -157,12 +157,9 @@ class MigasFreeClient(object):
         _config = utils.get_config(settings.CONF_FILE, 'client')
         _log_level = logging.INFO
 
+        self.migas_version = utils.get_mfc_version()
         if type(_config) is dict:
             self.migas_server = _config.get('server', 'migasfree.org')
-            self.migas_version = _config.get(
-                'version',
-                '-'.join(platform.linux_distribution()[0:1])
-            )
             self.migas_computer_name = _config.get(
                 'computer_name',
                 utils.get_hostname()
