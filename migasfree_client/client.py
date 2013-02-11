@@ -117,12 +117,6 @@ class MigasFreeClient(object):
     _graphic_user = None
     _notify = None
 
-    # default values for .conf options
-    migas_version = 'UBUNTU'
-    migas_server = 'migasfree.org'
-    migas_proxy = None
-    migas_ssl_cert = None
-
     pms = None
 
     _url_request = None
@@ -164,14 +158,17 @@ class MigasFreeClient(object):
         _log_level = logging.INFO
 
         if type(_config) is dict:
-            if 'version' in _config:
-                self.migas_version = _config['version']
-            if 'server' in _config:
-                self.migas_server = _config['server']
-            if 'proxy' in _config:
-                self.migas_proxy = _config['proxy']
-            if 'ssl_cert' in _config:
-                    self.migas_ssl_cert = _config['ssl_cert']
+            self.migas_server = _config.get('server', 'migasfree.org')
+            self.migas_version = _config.get(
+                'version',
+                '-'.join(platform.linux_distribution()[0:1])
+            )
+            self.migas_computer_name = _config.get(
+                'computer_name',
+                utils.get_hostname()
+            )
+            self.migas_proxy = _config.get('proxy', None)
+            self.migas_ssl_cert = _config.get('ssl_cert', None)
             if 'debug' in _config:
                 if _config['debug'] == 'True' \
                 or _config['debug'] == '1' \
@@ -358,7 +355,7 @@ class MigasFreeClient(object):
         # response struct
         _response = {
             'computer': {
-                'hostname': utils.get_hostname(),
+                'hostname': self.migas_computer_name,
                 'ip': network.get_network_info()['ip'],
                 'version': self.migas_version,
                 'platform': platform.system(),  # new for server 3.0
