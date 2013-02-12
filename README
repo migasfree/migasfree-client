@@ -3,7 +3,7 @@ migasfree client README
 =======================
 
 :Author: Jose Antonio Chavarría
-:Date: June 6, 2012
+:Date: February 12, 2013
 
 Introduction
 ============
@@ -52,6 +52,7 @@ Requirements
             - pycurl >= 7.19
             - python-notify
         + lshw >= B.02.15
+        + hal
 
 
 Features
