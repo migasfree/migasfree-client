@@ -20,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'utils.py'
-__date__ = '2013-01-26'
+__date__ = '2013-02-12'
 
 import subprocess
 import os
@@ -35,6 +35,7 @@ import errno
 import re
 import fcntl
 import select
+import uuid
 
 import gettext
 _ = gettext.gettext
@@ -61,7 +62,11 @@ def get_config(ini_file, section):
 
 def execute(cmd, verbose=False, interactive=True):
     '''
-    (int, string, string) execute(string cmd, bool verbose = False, bool interactive = True)
+    (int, string, string) execute(
+        string cmd,
+        bool verbose=False,
+        bool interactive=True
+    )
     '''
 
     if verbose:
@@ -87,7 +92,10 @@ def execute(cmd, verbose=False, interactive=True):
             fcntl.fcntl(
                 _process.stdout.fileno(),
                 fcntl.F_SETFL,
-                fcntl.fcntl(_process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
+                fcntl.fcntl(
+                    _process.stdout.fileno(),
+                    fcntl.F_GETFL
+                ) | os.O_NONBLOCK,
             )
 
             while _process.poll() is None:
@@ -154,7 +162,8 @@ def get_graphic_pid():
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof %s' % _process)
         if _pid != '':
-            # sometimes the command pidof return multiples pids, then we use the last pid
+            # sometimes the command pidof return multiples pids,
+            # then we use the last pid
             _pid_list = _pid.split(' ')
 
             return [_pid_list.pop(), _process]
@@ -189,7 +198,11 @@ def grep(string, list_strings):
 
 def get_user_display_graphic(pid, timeout=10, interval=1):
     '''
-    string get_user_display_graphic(string pid, int timeout = 10, int interval = 1)
+    string get_user_display_graphic(
+        string pid,
+        int timeout=10,
+        int interval=1
+    )
     '''
 
     _display = []
@@ -369,7 +382,7 @@ def get_current_user():
 
     _graphic_pid, _graphic_process = get_graphic_pid()
     if not _graphic_pid:
-        _graphic_user = os.environ['USER']
+        _graphic_user = os.environ.get('USER')
     else:
         _graphic_user = get_graphic_user(_graphic_pid)
 
@@ -390,3 +403,29 @@ def get_mfc_version():
         return _config.get('version')
 
     return '-'.join(platform.linux_distribution()[0:2])  # if not set
+
+
+def get_hardware_uuid():
+    _uuid = uuid.UUID(
+        commands.getoutput('hal-get-property \
+            --udi /org/freedesktop/Hal/devices/computer \
+            --key system.hardware.uuid')
+    )
+
+    _byte_array = _uuid.hex
+
+    # http://stackoverflow.com/questions/10850075/guid-uuid-compatibility-issue-between-net-and-linux
+    _ms_uuid = '%s%s%s%s-%s%s-%s%s-%s-%s' % (
+        _byte_array[6:8],
+        _byte_array[4:6],
+        _byte_array[2:4],
+        _byte_array[0:2],
+        _byte_array[10:12],
+        _byte_array[8:10],
+        _byte_array[14:16],
+        _byte_array[12:14],
+        _byte_array[16:20],
+        _byte_array[20:32]
+    )
+
+    return _ms_uuid.upper()
