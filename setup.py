@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2012 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__  = 'Jose Antonio Chavarría'
-__file__    = 'setup.py'
-__date__    = '2012-06-06'
+__author__ = 'Jose Antonio Chavarría'
+__file__ = 'setup.py'
+__date__ = '2013-02-12'
 __license__ = 'GPLv3'
 
 # http://guide.python-distribute.org/
@@ -49,13 +49,14 @@ import platform
 _dist = platform.linux_distribution()
 _requires = [
     'python (>=2.6)',
-    'lshw', #'lshw (>=B.02.15)', # invalid version number
+    'lshw',  # 'lshw (>=B.02.15)', # invalid version number
+    'hal',
 ]
 if _dist[0] == 'Fedora':
-    _requires.append('pycurl (>=7.19)') # python-pycurl
+    _requires.append('pycurl (>=7.19)')  # python-pycurl
     #_requires.append('notify-python')
 elif _dist[0] == 'openSUSE':
-    _requires.append('curl (>=7.19)') # python-curl
+    _requires.append('curl (>=7.19)')  # python-curl
     #_requires.append('python-notify')
 elif _dist[0] == 'Ubuntu':
     _requires.append('pycurl (>=7.19)')
@@ -67,11 +68,12 @@ import subprocess
 from distutils.core import setup
 from distutils.command.build import build
 from distutils.command.install_data import install_data
-from distutils.log import warn, info, error, fatal
+from distutils.log import info, error  # , fatal, warn
 from distutils.dep_util import newer
 
 PO_DIR = 'po'
 MO_DIR = os.path.join('build', 'mo')
+
 
 class BuildData(build):
     def run(self):
@@ -91,12 +93,13 @@ class BuildData(build):
                 try:
                     rc = subprocess.call(['msgfmt', '-o', mo, po])
                     if rc != 0:
-                        raise Warning, "msgfmt returned %d" % rc
+                        raise Warning("msgfmt returned %d" % rc)
                 except Exception, e:
                     error("Building gettext files failed.  Try setup.py \
                         --without-gettext [build|install]")
                     error("Error: %s" % str(e))
                     sys.exit(1)
+
 
 class InstallData(install_data):
     def run(self):
@@ -114,28 +117,34 @@ class InstallData(install_data):
         return data_files
 
 setup(
-    name         = 'migasfree-client',
-    version      = VERSION,
-    description  = 'migasfree-client rewritten in Python',
-    long_description = README,
-    license      = 'GPLv3',
-    author       = 'Jose Antonio Chavarría',
-    author_email = 'jachavar@gmail.com',
-    url          = 'http://www.migasfree.org/',
-    platforms    = ['Linux'],
-    packages     = ['migasfree_client', 'migasfree_client.backends'],
-    package_dir  = {
+    name='migasfree-client',
+    version=VERSION,
+    description='migasfree-client rewritten in Python',
+    long_description=README,
+    license='GPLv3',
+    author='Jose Antonio Chavarría',
+    author_email='jachavar@gmail.com',
+    url='http://www.migasfree.org/',
+    platforms=['Linux'],
+    packages=['migasfree_client', 'migasfree_client.backends'],
+    package_dir={
         'migasfree_client': 'migasfree_client',
         'migasfree_client.backends': 'migasfree_client/backends'
     },
-    cmdclass     = {
+    cmdclass={
         'build': BuildData,
         'install_data': InstallData,
     },
-    data_files   = [
+    data_files=[
         ('/etc', ['conf/migasfree.conf']),
-        ('/usr/share/icons/hicolor/scalable/actions', ['icons/scalable/migasfree-ok.svg']),
-        ('/usr/share/icons/hicolor/scalable/apps', ['icons/scalable/migasfree.svg']),
+        (
+            '/usr/share/icons/hicolor/scalable/actions',
+            ['icons/scalable/migasfree-ok.svg']
+        ),
+        (
+            '/usr/share/icons/hicolor/scalable/apps',
+            ['icons/scalable/migasfree.svg']
+        ),
         ('/usr/share/applications', ['launcher/migasfree-client.desktop']),
         ('/usr/share/doc/migasfree-client', [
             'AUTHORS',
@@ -147,12 +156,12 @@ setup(
             'migasfree-client.doap'
         ]),
     ],
-    scripts = [
+    scripts=[
         'bin/migasfree',
         'bin/migasfree-upload',
     ],
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
-    classifiers  = [
+    classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Environment :: X11 Applications :: Gnome',
@@ -166,5 +175,5 @@ setup(
         'Programming Language :: Python',
         'Topic :: System :: Software Distribution',
     ],
-    requires = _requires,
+    requires=_requires,
 )
