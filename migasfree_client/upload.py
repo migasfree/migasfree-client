@@ -20,8 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'upload.py'
-__date__ = '2013-01-26'
-__version__ = '2.0'
+__date__ = '2013-02-13'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeUpload', 'main')
 
@@ -48,6 +47,11 @@ import settings
 import utils
 import server_errors
 import url_request
+
+__version__ = open(os.path.join(
+    os.path.dirname(__file__),
+    'VERSION'
+)).read().splitlines()[0]
 
 
 class MigasFreeUpload(object):
@@ -366,7 +370,8 @@ class MigasFreeUpload(object):
             'version': __version__
         })
 
-        # migasfree-upload {-f file [--regular-file] | -d dir [-n name]} [[-u user] [-p pwd] [--main-version version] [-s store] [--no-create-repo]]
+        # migasfree-upload {-f file [--regular-file] | -d dir [-n name]}
+        #  [[-u user] [-p pwd] [--main-version version] [-s store] [--no-create-repo]]
 
         parser.add_option("--file", "-f", action="store",
             help=_('File to upload at server'))
