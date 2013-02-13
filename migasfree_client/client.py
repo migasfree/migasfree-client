@@ -158,12 +158,9 @@ class MigasFreeClient(object):
         _log_level = logging.INFO
 
         self.migas_version = utils.get_mfc_version()
+        self.migas_computer_name = utils.get_mfc_computer_name()
         if type(_config) is dict:
             self.migas_server = _config.get('server', 'migasfree.org')
-            self.migas_computer_name = _config.get(
-                'computer_name',
-                utils.get_hostname()
-            )
             self.migas_proxy = _config.get('proxy', None)
             self.migas_ssl_cert = _config.get('ssl_cert', None)
             if 'debug' in _config:
