@@ -405,6 +405,16 @@ def get_mfc_version():
     return '-'.join(platform.linux_distribution()[0:2])  # if not set
 
 
+def get_mfc_computer_name():
+    from . import settings
+
+    _config = get_config(settings.CONF_FILE, 'client')
+    if type(_config) is dict and 'computer_name' in _config:
+        return _config.get('computer_name')
+
+    return get_hostname()  # if not set
+
+
 def get_hardware_uuid():
     _uuid = uuid.UUID(
         commands.getoutput('hal-get-property \
