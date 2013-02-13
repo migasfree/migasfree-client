@@ -20,7 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'setup.py'
-__date__ = '2013-02-12'
+__date__ = '2013-02-13'
 __license__ = 'GPLv3'
 
 # http://guide.python-distribute.org/
@@ -40,10 +40,9 @@ if not hasattr(sys, 'version_info') or sys.version_info < (2, 6, 0, 'final'):
     raise SystemExit('migasfree-client requires Python 2.6 or later.')
 
 import os
-README = open(os.path.join(os.path.dirname(__file__), 'README')).read()
-
-import migasfree_client
-VERSION = migasfree_client.__version__
+PATH = os.path.dirname(__file__)
+README = open(os.path.join(PATH, 'README')).read()
+VERSION = open(os.path.join(PATH, 'VERSION')).read().splitlines()[0]
 
 import platform
 _dist = platform.linux_distribution()
