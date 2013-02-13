@@ -20,8 +20,7 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'client.py'
-__date__ = '2013-01-26'
-__version__ = '3.0'
+__date__ = '2013-02-13'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeClient', 'main')
 
@@ -67,6 +66,11 @@ import url_request
 import network
 
 from backends import Pms
+
+__version__ = open(os.path.join(
+    os.path.dirname(__file__),
+    'VERSION'
+)).read().splitlines()[0]
 
 
 def _operation_ok(info=''):
