@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'url_request.py'
-__date__   = '2011-10-25'
+__file__ = 'url_request.py'
+__date__ = '2013-02-13'
 
 import os
 import sys
@@ -32,7 +32,11 @@ import curl
 import utils
 import server_errors
 
-class UrlRequest:
+import gettext
+_ = gettext.gettext
+
+
+class UrlRequest(object):
     # default values
     _debug = False
 
@@ -43,17 +47,13 @@ class UrlRequest:
     _url_base = ''
     _cert = None
 
-    _path_keys = ''
-    _private_key = ''
-    _public_key = ''
-
     def __init__(
         self,
-        debug = False,
-        proxy = '',
-        url_base = '',
-        info_keys = {},
-        cert = None
+        debug=False,
+        proxy='',
+        url_base='',
+        info_keys={},
+        cert=None
     ):
         self._debug = debug
         self._proxy = proxy
@@ -63,12 +63,9 @@ class UrlRequest:
         logging.info('SSL certificate: %s', self._cert)
 
         if type(info_keys) is dict:
-            if info_keys.has_key('path'):
-                self._path_keys = info_keys['path']
-            if info_keys.has_key('private'):
-                self._private_key = info_keys['private']
-            if info_keys.has_key('public'):
-                self._public_key = info_keys['public']
+            self._path_keys = info_keys.get('path')
+            self._private_key = info_keys.get('private')
+            self._public_key = info_keys.get('public')
 
         if self._proxy:
             logging.info('Proxy selected: %s', self._proxy)
@@ -90,10 +87,10 @@ class UrlRequest:
     def run(
         self,
         cmd,
-        data = '',
-        upload_file = None,
-        sign = True,
-        exit_on_error = True
+        data='',
+        upload_file=None,
+        sign=True,
+        exit_on_error=True
     ):
         logging.debug('URL base: %s', self._url_base)
         logging.debug('URL command: %s', cmd)
@@ -102,14 +99,19 @@ class UrlRequest:
         logging.debug('Sign request: %s', sign)
         logging.debug('Exit on error: %s', exit_on_error)
 
-        _filename = '/tmp/%s.%s' % (utils.get_hostname(), cmd)
+        # API changed in server 3.0
+        _filename = '/tmp/%s.%s.%s' % (
+            utils.get_mfc_computer_name(),
+            utils.get_hardware_uuid(),
+            cmd
+        )
         if self._debug:
             print _filename
         if sign:
             secure.wrap(
                 _filename,
                 {cmd: data},
-                key = os.path.join(self._path_keys, self._private_key)
+                key=os.path.join(self._path_keys, self._private_key)
             )
         else:
             secure.wrap(_filename, {cmd: data})
@@ -125,8 +127,8 @@ class UrlRequest:
         _curl = curl.Curl(
             self._url_base,
             _post,
-            proxy = self._proxy,
-            cert = self._cert,
+            proxy=self._proxy,
+            cert=self._cert,
         )
         _curl.run()
         if not self._debug:
@@ -147,7 +149,12 @@ class UrlRequest:
                 utils.write_file(_file, str(_curl.body))
                 print _file
 
-            return {'errmfs': {'info': str(_curl.body), 'code': server_errors.GENERIC}}
+            return {
+                'errmfs': {
+                    'info': str(_curl.body),
+                    'code': server_errors.GENERIC
+                }
+            }
             #sys.exit(errno.EBADRQC)
 
         # evaluate response
@@ -156,7 +163,7 @@ class UrlRequest:
         if sign:
             _ret = secure.unwrap(
                 _response,
-                key = os.path.join(self._path_keys, self._public_key)
+                key=os.path.join(self._path_keys, self._public_key)
             )
         else:
             _ret = secure.unwrap(_response)
@@ -166,23 +173,29 @@ class UrlRequest:
         else:
             print _response
 
-        if not type(_ret) is dict or not _ret.has_key('%s.return' % cmd):
+        if not type(_ret) is dict or not ('%s.return' % cmd) in _ret:
             _msg = 'url_request unexpected response: %s. Expected: %s'
             if self._debug:
                 print _msg % (_ret, '%s.return' % cmd)
             logging.critical(_msg, _ret, '%s.return' % cmd)
             sys.exit(errno.EACCES)
 
-        _ret = _ret['%s.return' % cmd] # unwrapping cmd response
-        if type(_ret) is dict and _ret.has_key('errmfs'):
+        _ret = _ret['%s.return' % cmd]  # unwrapping cmd response
+        if type(_ret) is dict and 'errmfs' in _ret:
             if _ret['errmfs']['code'] != server_errors.ALL_OK:
                 _error = server_errors.error_info(_ret['errmfs']['code'])
                 if self._debug:
                     print _('Error: %s') % _error
                     if _ret['errmfs']['info']:
                         print _('Information: %s') % _ret['errmfs']['info']
-                logging.error('url_request server error response code: %s', _error)
-                logging.error('url_request server error response info: %s', _ret['errmfs']['info'])
+                logging.error(
+                    'url_request server error response code: %s',
+                    _error
+                )
+                logging.error(
+                    'url_request server error response info: %s',
+                    _ret['errmfs']['info']
+                )
                 if exit_on_error:
                     sys.exit(errno.EACCES)
 
