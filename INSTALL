@@ -3,13 +3,17 @@ Thanks for downloading migasfree client.
 To install it, make sure you have these programs installed:
 
     * Python >= 2.6
-    * PyCurl >= 7.19
+    * PyCurl >= 7.19 (or python-curl)
     * python-notify (or notify-python)
+    * python-gtk2 (or pygtk)
     * lshw >= B.02.15
+    * python-stdeb (to create a DEB package)
 
-Then run this command from the command prompt:
+Then run these commands from the command prompt:
 
-    python setup.py install
+    $ cd bin
+    $ ./create-package
+    # <install package (deb or rpm)>
 
 Check /etc/migasfree.conf configuration before run migasfree bin scripts.
 
