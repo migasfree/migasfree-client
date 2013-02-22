@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Permissions: root:root 700
+# Permissions: root:root 755
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'migasfree-upload'
-__date__   = '2011-10-21'
 
 import sys
 from distutils.sysconfig import get_python_lib
