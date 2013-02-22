@@ -1,0 +1,15 @@
+[install]
+prefix=/usr
+
+[bdist_rpm]
+release = 1
+doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README TODO VERSION migasfree-client.doap
+install-script = scripts/rpm-install.sh
+post-install = scripts/rpm-post-install.sh
+post-uninstall = scripts/rpm-post-uninstall.sh
+requires = python >= 2.6
+           lshw >= B.02.15
+           hal
+           curl >=7.19
+           python-gtk
+           python-notify
