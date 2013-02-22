@@ -19,8 +19,6 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'setup.py'
-__date__ = '2013-02-13'
 __license__ = 'GPLv3'
 
 # http://guide.python-distribute.org/
@@ -28,11 +26,11 @@ __license__ = 'GPLv3'
 # python setup.py build
 # python setup.py sdist
 # python setup.py bdist --format=rpm
+# python setup.py --command-packages=stdeb.command bdist_deb (python-stdeb)
 
 # http://zetcode.com/articles/packageinpython/
 # TODO https://wiki.ubuntu.com/PackagingGuide/Python
 # TODO https://help.ubuntu.com/community/PythonRecipes/DebianPackage
-# TODO https://github.com/astraw/stdeb
 
 import sys
 
@@ -43,23 +41,6 @@ import os
 PATH = os.path.dirname(__file__)
 README = open(os.path.join(PATH, 'README')).read()
 VERSION = open(os.path.join(PATH, 'VERSION')).read().splitlines()[0]
-
-import platform
-_dist = platform.linux_distribution()
-_requires = [
-    'python (>=2.6)',
-    'lshw',  # 'lshw (>=B.02.15)', # invalid version number
-    'hal',
-]
-if _dist[0] == 'Fedora':
-    _requires.append('pycurl (>=7.19)')  # python-pycurl
-    #_requires.append('notify-python')
-elif _dist[0] == 'openSUSE':
-    _requires.append('curl (>=7.19)')  # python-curl
-    #_requires.append('python-notify')
-elif _dist[0] == 'Ubuntu':
-    _requires.append('pycurl (>=7.19)')
-    #_requires.append('python-notify')
 
 import glob
 import subprocess
@@ -152,6 +133,7 @@ setup(
             'MANIFEST.in',
             'README',
             'TODO',
+            'VERSION',
             'migasfree-client.doap'
         ]),
     ],
@@ -174,5 +156,4 @@ setup(
         'Programming Language :: Python',
         'Topic :: System :: Software Distribution',
     ],
-    requires=_requires,
 )
