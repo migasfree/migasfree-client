@@ -1,0 +1,11 @@
+# Config file used by stdeb when building a Debian source package.
+
+# http://pypi.python.org/pypi/stdeb/0.5.0#stdeb-cfg-configuration-file
+
+[migasfree-client]
+Source = migasfree-client
+Package = migasfree-client
+Maintainer = Jose Antonio Chavarría <jachavar@gmail.com>
+Debian-Version = 1
+#Build-Depends =
+Depends = python (>=2.6), lshw, hal, pycurl (>=7.19), python-notify, python-gtk2
