@@ -19,12 +19,20 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'upload.py'
-__date__ = '2013-02-13'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeUpload', 'main')
 
 import os
+
+version_file = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    'VERSION'
+)
+if not os.path.exists(version_file):
+    version_file = '/usr/share/doc/migasfree-client/VERSION'
+
+__version__ = open(version_file).read().splitlines()[0]
+
 import sys
 import optparse
 import logging
@@ -47,11 +55,6 @@ import settings
 import utils
 import server_errors
 import url_request
-
-__version__ = open(os.path.join(
-    os.path.dirname(__file__),
-    'VERSION'
-)).read().splitlines()[0]
 
 
 class MigasFreeUpload(object):
