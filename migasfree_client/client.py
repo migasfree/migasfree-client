@@ -170,6 +170,14 @@ class MigasFreeClient(object):
             self.migas_server = _config.get('server', 'migasfree.org')
             self.migas_proxy = _config.get('proxy', None)
             self.migas_ssl_cert = _config.get('ssl_cert', None)
+
+            self.migas_gui_verbose = True  # by default
+            if 'gui_verbose' in _config:
+                if _config['gui_verbose'] == 'False' \
+                or _config['gui_verbose'] == '0' \
+                or _config['gui_verbose'] == 'Off':
+                    self.migas_gui_verbose = False
+
             if 'debug' in _config:
                 if _config['debug'] == 'True' \
                 or _config['debug'] == '1' \
@@ -193,7 +201,7 @@ class MigasFreeClient(object):
         logging.debug('Graphic process: %s', _graphic_process)
 
         if not _graphic_pid:
-            self._graphic_user = os.environ['USER']
+            self._graphic_user = os.environ.get('USER')
             print(_('No detected graphic process'))
         else:
             self._graphic_user = utils.get_graphic_user(_graphic_pid)
@@ -277,23 +285,24 @@ class MigasFreeClient(object):
         )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
-    def _send_message(self, msg='', icon=None):
+    def _send_message(self, msg='', icon=None, mandatory=False):
         if msg:
             print('')
             printcolor.info(str(' ' + msg + ' ').center(76, '*'))
 
-            if not icon:
-                icon = os.path.join(self.ICON_PATH, self.ICON)
+            if mandatory or self.migas_gui_verbose:
+                if not icon:
+                    icon = os.path.join(self.ICON_PATH, self.ICON)
 
-            if self._notify:
-                icon = 'file://%s' % os.path.join(self.ICON_PATH, icon)
+                if self._notify:
+                    icon = 'file://%s' % os.path.join(self.ICON_PATH, icon)
 
-                try:
-                    self._notify.update(self.APP_NAME, msg, icon)
-                    self._notify.set_timeout(pynotify.EXPIRES_DEFAULT)
-                    self._notify.show()
-                except:
-                    pass
+                    try:
+                        self._notify.update(self.APP_NAME, msg, icon)
+                        self._notify.set_timeout(pynotify.EXPIRES_DEFAULT)
+                        self._notify.show()
+                    except:
+                        pass
 
         _ret = self._url_request.run(
             'upload_computer_message',
@@ -586,7 +595,10 @@ class MigasFreeClient(object):
     def _update_system(self):
         self._check_sign_keys()
 
-        if self._send_message(_('Connecting to migasfree server...')):
+        if self._send_message(
+            _('Connecting to migasfree server...'),
+            mandatory=True
+        ):
             _operation_ok()
         else:
             sys.exit(errno.EBADRQC)
@@ -680,7 +692,11 @@ class MigasFreeClient(object):
         # upload execution errors to server
         self._upload_execution_errors()
 
-        self._send_message(_('Completed operations'), self.ICON_COMPLETED)
+        self._send_message(
+            _('Completed operations'),
+            self.ICON_COMPLETED,
+            mandatory=True
+        )
         time.sleep(3)  # to see update completed icon ;)
 
         # clean computer messages in server
