@@ -7,5 +7,5 @@ Source = migasfree-client
 Package = migasfree-client
 Maintainer = Jose Antonio Chavarría <jachavar@gmail.com>
 Debian-Version = 1
-#Build-Depends =
-Depends = python (>=2.6), lshw, hal, python-pycurl (>=7.19), python-notify, python-gtk2
+Build-Depends = python (>=2.6)
+Depends = lshw (>=02.15), hal, python-pycurl (>=7.19), python-notify, python-gtk2
