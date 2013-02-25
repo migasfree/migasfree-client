@@ -64,14 +64,6 @@ class MigasFreeUpload(object):
     PUBLIC_KEY = 'migasfree-server.pub'
     PRIVATE_KEY = 'migasfree-packager.pri'
 
-    migas_server = 'migasfree.org'
-    migas_proxy = None
-
-    packager_user = None
-    packager_pwd = None
-    packager_version = None
-    packager_store = None
-
     _url_request = None
 
     _file = None
@@ -91,10 +83,9 @@ class MigasFreeUpload(object):
 
         _log_level = logging.INFO
         if type(_config_client) is dict:
-            if 'server' in _config_client:
-                self.migas_server = _config_client['server']
-            if 'proxy' in _config_client:
-                self.migas_proxy = _config_client['proxy']
+            self.migas_server = _config_client.get('server', 'migasfree.org')
+            self.migas_proxy = _config_client.get('proxy', None)
+            self.migas_ssl_cert = _config_client.get('ssl_cert', None)
             if 'debug' in _config_client:
                 if _config_client['debug'] == 'True' \
                 or _config_client['debug'] == '1' \
@@ -104,14 +95,10 @@ class MigasFreeUpload(object):
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
         if type(_config_packager) is dict:
-            if 'user' in _config_packager:
-                self.packager_user = _config_packager['user']
-            if 'password' in _config_packager:
-                self.packager_pwd = _config_packager['password']
-            if 'version' in _config_packager:
-                self.packager_version = _config_packager['version']
-            if 'store' in _config_packager:
-                self.packager_store = _config_packager['store']
+            self.packager_user = _config_packager.get('user', None)
+            self.packager_pwd = _config_packager.get('password', None)
+            self.packager_version = _config_packager.get('version', None)
+            self.packager_store = _config_packager.get('store', None)
 
         logging.basicConfig(
             format='%(asctime)s - %(levelname)s - %(message)s',
@@ -123,9 +110,12 @@ class MigasFreeUpload(object):
         logging.debug('Config client: %s', _config_client)
         logging.debug('Config packager: %s', _config_packager)
 
-        _url_base = 'http://%s/migasfree/api/' % str(self.migas_server)
-
         # init UrlRequest
+        _url_base = '%s/api/' % str(self.migas_server)
+        if self.migas_ssl_cert:
+            _url_base = '%s://%s' % ('https', _url_base)
+        else:
+            _url_base = '%s://%s' % ('http', _url_base)
         self._url_request = url_request.UrlRequest(
             debug=self._debug,
             url_base=_url_base,
@@ -134,7 +124,8 @@ class MigasFreeUpload(object):
                 'path': settings.KEYS_PATH,
                 'private': self.PRIVATE_KEY,
                 'public': self.PUBLIC_KEY
-            }
+            },
+            cert=self.migas_ssl_cert
         )
 
     def _usage_examples(self):

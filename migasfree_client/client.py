@@ -141,7 +141,7 @@ class MigasFreeClient(object):
         self._init_environment()
 
         # init UrlRequest
-        _url_base = '%s/migasfree/api/' % str(self.migas_server)
+        _url_base = '%s/api/' % str(self.migas_server)
         if self.migas_ssl_cert:
             _url_base = '%s://%s' % ('https', _url_base)
         else:
