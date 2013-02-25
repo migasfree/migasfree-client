@@ -3,10 +3,11 @@ Thanks for downloading migasfree client.
 To install it, make sure you have these programs installed:
 
     * Python >= 2.6
-    * PyCurl >= 7.19 (or python-curl)
+    * PyCurl >= 7.19 (or python-curl or python-pycurl)
     * python-notify (or notify-python)
     * python-gtk2 (or pygtk)
-    * lshw >= B.02.15
+    * lshw >= 02.15
+    * hal
     * python-stdeb (to create a DEB package)
 
 Then run these commands from the command prompt:
