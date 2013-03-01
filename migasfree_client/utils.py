@@ -437,5 +437,10 @@ def get_hardware_uuid():
         _byte_array[16:20],
         _byte_array[20:32]
     )
+    _ms_uuid = _ms_uuid.upper()
 
-    return _ms_uuid.upper()
+    # exceptions (issue #4)
+    if _ms_uuid == '00020003-0004-0005-0006-000700080009':  # ASRock
+        _ms_uuid = get_mfc_computer_name()
+
+    return _ms_uuid
