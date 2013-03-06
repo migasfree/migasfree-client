@@ -117,9 +117,9 @@ class MigasFreeClient(object):
     PUBLIC_KEY = 'migasfree-server.pub'
     PRIVATE_KEY = 'migasfree-client.pri'
 
-    ICON_PATH = '/usr/share/icons/hicolor/scalable/apps'
-    ICON = 'migasfree.svg'
-    ICON_COMPLETED = 'migasfree-ok.svg'
+    ICON_PATH = '/usr/share/icons/hicolor/scalable'
+    ICON = 'apps/migasfree.svg'
+    ICON_COMPLETED = 'actions/migasfree-ok.svg'
 
     _graphic_user = None
     _notify = None
