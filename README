@@ -41,16 +41,16 @@ Requirements
 
     * Server:
         + Apache with WSGI
-        + Django
-        + Sqlite3 (you can use others databases Django approved)
+        + Django 1.4
+        + Sqlite3 (you can use others databases Django approved, like postgresql)
         + Python libraries:
-          - IPy (Debian/Ubuntu => python-ipy)
+            - IPy (Debian/Ubuntu => python-ipy)
 
     * Client:
         + a Linux distribution (Fedora, openSUSE, Ubuntu, ...)
         + Python >= 2.6
             - pycurl >= 7.19
-            - python-notify
+            - python-notify (optional)
         + lshw >= B.02.15
         + hal
 
@@ -100,7 +100,7 @@ For example: You want change the Firefox homepage in all PCs in a range of IPs.
 Documentation
 =============
 
-All documentation is available at http://www.migasfree.org.
+You can start viewing Migasfree Youtube channel at http://www.youtube.com/migasfree
 
 
 *That's all folks!!!*
