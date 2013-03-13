@@ -46,10 +46,6 @@ import platform
 import gettext
 _ = gettext.gettext
 
-import pygtk
-pygtk.require('2.0')
-import pynotify
-
 #sys.path.append(os.path.dirname(__file__))  # DEBUG
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
@@ -207,8 +203,17 @@ class MigasFreeClient(object):
             self._graphic_user = utils.get_graphic_user(_graphic_pid)
             _user_display = utils.get_user_display_graphic(_graphic_pid)
             logging.debug('Graphic display: %s', _user_display)
-            pynotify.init(self.APP_NAME)
-            self._notify = pynotify.Notification(self.APP_NAME)
+
+            try:
+                import pygtk
+                pygtk.require('2.0')
+                import pynotify
+
+                pynotify.init(self.APP_NAME)
+                self._notify = pynotify.Notification(self.APP_NAME)
+            except ImportError:
+                pass  # graphical notifications no available
+
         logging.debug('Graphic user: %s', self._graphic_user)
 
     def _pms_selection(self):
@@ -228,6 +233,8 @@ class MigasFreeClient(object):
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         print('\t%s: %s' % (_('Debug'), self._debug))
+        print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
+        print('\t%s: %s' % (_('GUI verbose'), self.migas_gui_verbose))
         print('\t%s: %s' % (_('Graphic user'), self._graphic_user))
         print('\t%s: %s' % (_('PMS'), self.pms))
         print('')
