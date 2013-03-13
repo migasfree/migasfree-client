@@ -99,7 +99,7 @@ class InstallData(install_data):
 setup(
     name='migasfree-client',
     version=VERSION,
-    description='migasfree-client rewritten in Python',
+    description='migasfree-client is a Python app to manage systems management',
     long_description=README,
     license='GPLv3',
     author='Jose Antonio Chavarría',
