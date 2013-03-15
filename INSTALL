@@ -6,6 +6,7 @@ To install it, make sure you have these programs installed:
     * PyCurl >= 7.19 (or python-curl or python-pycurl)
     * lshw >= 02.15
     * hal
+    * python-netifaces
     * python-notify (or notify-python) (optional for graphical notifications)
     * python-gtk2 (or pygtk) (optional for graphical notifications)
     * python-stdeb (to create a DEB package)

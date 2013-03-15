@@ -3,7 +3,7 @@ migasfree client README
 =======================
 
 :Author: Jose Antonio Chavarría
-:Date: February 12, 2013
+:Date: March 15, 2013
 
 Introduction
 ============
@@ -50,6 +50,7 @@ Requirements
         + a Linux distribution (Fedora, openSUSE, Ubuntu, ...)
         + Python >= 2.6
             - pycurl >= 7.19
+            - python-netifaces
             - python-notify (optional)
         + lshw >= B.02.15
         + hal
