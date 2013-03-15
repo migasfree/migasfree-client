@@ -20,43 +20,55 @@
 
 __author__ = 'Jose Antonio Chavarría'
 
-# based in http://stackoverflow.com/questions/4912523/python-network-cidr-calculations
-
-import os
 import socket
-import fcntl
 import struct
-
-SIOCGIFNETMASK = 0x891b
-SIOCGIFADDR = 0x8915
-
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+import netifaces
 
 
 def get_iface_mask(iface):
-    return struct.unpack('L', fcntl.ioctl(
-        s,
-        SIOCGIFNETMASK,
-        struct.pack('256s', iface)
-    )[20:24])[0]
+    '''
+    string get_iface_mask(string)
+    returns a dotted-quad string
+    '''
+    return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['netmask']
 
 
 def get_iface_address(iface):
-    return struct.unpack('L', fcntl.ioctl(
-        s,
-        SIOCGIFADDR,
-        struct.pack('256s', iface[:15])
-    )[20:24])[0]
+    '''
+    string get_iface_address(string)
+    returns a dotted-quad string
+    '''
+    return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['addr']
 
 
 def get_iface_net(iface):
-    net_address = get_iface_address(iface) & get_iface_mask(iface)
+    '''
+    string get_iface_net(string)
+    returns a dotted-quad string
+    '''
+    iface_address = struct.unpack(
+        'L',
+        socket.inet_aton(get_iface_address(iface))
+    )[0]
+    iface_mask = struct.unpack(
+        'L',
+        socket.inet_aton(get_iface_mask(iface))
+    )[0]
 
-    return socket.inet_ntoa(struct.pack('L', net_address))
+    return socket.inet_ntoa(struct.pack('L', iface_address & iface_mask))
 
 
 def get_iface_cidr(iface):
-    bin_str = bin(get_iface_mask(iface))[2:]
+    '''
+    int get_iface_cidr(string)
+    returns an integer number between 0 and 32
+    '''
+    bin_str = bin(
+        struct.unpack(
+            'L',
+            socket.inet_aton(get_iface_mask(iface))
+        )[0]
+    )[2:]
     cidr = 0
     for c in bin_str:
         if c == '1':
@@ -65,37 +77,36 @@ def get_iface_cidr(iface):
     return cidr
 
 
-def get_gateway(ifname):
+def get_gateway():
     '''
-    string get_gateway(string)
-    http://thiagodefreitas.com/blog/2010/11/19/ip-netmask-gateway-python-unix/
+    string get_gateway(void)
+    reads the default gateway directly from /proc
+    from http://stackoverflow.com/questions/2761829/
+        python-get-default-gateway-for-a-local-interface-ip-address-in-linux
     '''
-    cmd = "ip route list dev %s | awk ' /^default/ {print $3}'" % ifname
-    fin, fout = os.popen4(cmd)
+    with open('/proc/net/route') as fh:
+        for line in fh:
+            fields = line.strip().split()
+            if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+                continue
 
-    return fout.read()
+            return socket.inet_ntoa(struct.pack('<L', int(fields[2], 16)))
 
 
 def get_ifname():
     '''
     string get_ifname(void)
-    http://webcache.googleusercontent.com/search?q=cache:jfKrstmk9w0J:pkgbuild.archlinux.org/~heftig/firefox-beta/source/src/mozilla-2.0/build/mobile/devicemanager.py+get_interface_ip%28ifname%29+if+ip.startswith%28%22127.%22%29+and+os.name+!%3D+%22nt%22&cd=4&hl=en&ct=clnk&source=www.google.com
     '''
     _ret = ''
-    _interfaces = [
-        "eth0", "eth1", "eth2", "eth3", "eth4",
-        "eth5", "eth6", "eth7", "eth8", "eth9",
-        "wlan0", "wlan1", "wlan2", "wlan3", "wlan4",
-        "wifi0",
-        "ath0", "ath1", "ath2", "ath3", "ath4",
-        "ppp0"
-    ]
-    for _ifname in _interfaces:
+    _interfaces = netifaces.interfaces()
+    if 'lo' in _interfaces:
+        _interfaces.remove('lo')  # loopback interface is not interesting
+    for _interface in _interfaces:
         try:
-            if get_iface_address(_ifname):
-                _ret = _ifname
+            if get_iface_address(_interface):
+                _ret = _interface
             break
-        except IOError:
+        except ValueError:
             pass
 
     return _ret
@@ -110,7 +121,7 @@ def get_network_info():
         return {}
 
     return {
-        'ip': socket.inet_ntoa(struct.pack('L', get_iface_address(_ifname))),
-        'netmask': socket.inet_ntoa(struct.pack('L', get_iface_mask(_ifname))),
+        'ip': get_iface_address(_ifname),
+        'netmask': get_iface_mask(_ifname),
         'net': '%s/%s' % (get_iface_net(_ifname), get_iface_cidr(_ifname))
     }
