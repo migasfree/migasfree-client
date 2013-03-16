@@ -30,7 +30,11 @@ def get_iface_mask(iface):
     string get_iface_mask(string)
     returns a dotted-quad string
     '''
-    return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['netmask']
+    _addresses = netifaces.ifaddresses(iface)
+    if netifaces.AF_INET in _addresses:
+        return _addresses[netifaces.AF_INET][0]['netmask']
+
+    return ''  # empty string
 
 
 def get_iface_address(iface):
@@ -38,7 +42,11 @@ def get_iface_address(iface):
     string get_iface_address(string)
     returns a dotted-quad string
     '''
-    return netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['addr']
+    _addresses = netifaces.ifaddresses(iface)
+    if netifaces.AF_INET in _addresses:
+        return _addresses[netifaces.AF_INET][0]['addr']
+
+    return ''  # empty string
 
 
 def get_iface_net(iface):
@@ -102,12 +110,9 @@ def get_ifname():
     if 'lo' in _interfaces:
         _interfaces.remove('lo')  # loopback interface is not interesting
     for _interface in _interfaces:
-        try:
-            if get_iface_address(_interface):
-                _ret = _interface
+        if get_iface_address(_interface) != '':
+            _ret = _interface
             break
-        except ValueError:
-            pass
 
     return _ret
 
