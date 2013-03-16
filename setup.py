@@ -140,6 +140,7 @@ setup(
     scripts=[
         'bin/migasfree',
         'bin/migasfree-upload',
+        'bin/migasfree-label',
     ],
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
