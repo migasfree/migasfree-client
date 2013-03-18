@@ -24,6 +24,8 @@ import socket
 import struct
 import netifaces
 
+# http://bytes.com/topic/python/answers/504342-struct-unpack-64-bit-platforms
+
 
 def get_iface_mask(iface):
     '''
@@ -55,15 +57,15 @@ def get_iface_net(iface):
     returns a dotted-quad string
     '''
     iface_address = struct.unpack(
-        'L',
+        '=L',
         socket.inet_aton(get_iface_address(iface))
     )[0]
     iface_mask = struct.unpack(
-        'L',
+        '=L',
         socket.inet_aton(get_iface_mask(iface))
     )[0]
 
-    return socket.inet_ntoa(struct.pack('L', iface_address & iface_mask))
+    return socket.inet_ntoa(struct.pack('=L', iface_address & iface_mask))
 
 
 def get_iface_cidr(iface):
@@ -73,7 +75,7 @@ def get_iface_cidr(iface):
     '''
     bin_str = bin(
         struct.unpack(
-            'L',
+            '=L',
             socket.inet_aton(get_iface_mask(iface))
         )[0]
     )[2:]
