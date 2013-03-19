@@ -20,28 +20,26 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = '__init__.py'
-__version__ = '2.1'
-__date__ = '2013-01-26'
 __license__ = 'GPLv3'
 
-import gettext
 import locale
+import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
 # i18n
-APP = 'migasfree-client'
-gettext.install(APP, '/usr/share/locale', unicode=1)
+domain = 'migasfree-client'
+gettext.install(domain, '/usr/share/locale', unicode=1)
 
-gettext.bindtextdomain(APP, '/usr/share/locale')
+gettext.bindtextdomain(domain, '/usr/share/locale')
 if hasattr(gettext, 'bind_textdomain_codeset'):
-    gettext.bind_textdomain_codeset(APP, 'UTF-8')
-gettext.textdomain(APP)
+    gettext.bind_textdomain_codeset(domain, 'UTF-8')
+gettext.textdomain(domain)
 
-locale.bindtextdomain(APP, '/usr/share/locale')
+locale.bindtextdomain(domain, '/usr/share/locale')
 if hasattr(locale, 'bind_textdomain_codeset'):
-    locale.bind_textdomain_codeset(APP, 'UTF-8')
-locale.textdomain(APP)
+    locale.bind_textdomain_codeset(domain, 'UTF-8')
+locale.textdomain(domain)
 
 # http://fedoraproject.org/wiki/Features/PythonEncodingUsesSystemLocale
 # begin unicode hack
