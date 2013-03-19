@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011 Jose Antonio Chavarría
+# Copyright (c) 2011-2013 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,13 +18,15 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__   = 'settings.py'
-__date__   = '2011-10-01'
+__file__ = 'settings.py'
+__license__ = 'GPLv3'
 
 """
 migasfree-client settings
 """
 
-LOG_FILE   = '/var/log/migasfree.log'
-CONF_FILE  = '/etc/migasfree.conf'
-KEYS_PATH  = '/root/.migasfree-keys'
+LOG_FILE = '/var/log/migasfree.log'
+CONF_FILE = '/etc/migasfree.conf'
+
+KEYS_PATH = '/root/.migasfree-keys'
+TMP_PATH = '/tmp/migasfree-client'
