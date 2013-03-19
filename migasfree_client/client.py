@@ -376,7 +376,7 @@ class MigasFreeClient(object):
                 'ip': network.get_network_info()['ip'],
                 'version': self.migas_version,
                 'platform': platform.system(),  # new for server 3.0
-                'pms': self.pms,  # new for server 3.0
+                'pms': str(self.pms),  # new for server 3.0
                 'user': self._graphic_user,
                 'user_fullname': utils.get_user_info(self._graphic_user)['fullname']
             },
@@ -726,7 +726,7 @@ class MigasFreeClient(object):
             'password': '',
             'version': self.migas_version,
             'platform': platform.system(),  # new for server 3.0
-            'pms': self.pms,  # new for server 3.0
+            'pms': str(self.pms),  # new for server 3.0
         }
         print(_('Autoregistering computer...'))
 
@@ -790,7 +790,7 @@ class MigasFreeClient(object):
             'password': _pass,
             'version': self.migas_version,
             'platform': platform.system(),  # new for server 3.0
-            'pms': self.pms,  # new for server 3.0
+            'pms': str(self.pms),  # new for server 3.0
         }
         self._save_sign_keys(_data)
         _operation_ok(_('Computer registered at server'))
