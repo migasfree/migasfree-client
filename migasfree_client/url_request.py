@@ -19,7 +19,6 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'url_request.py'
-__date__ = '2013-02-13'
 
 import os
 import sys
@@ -34,6 +33,8 @@ import server_errors
 
 import gettext
 _ = gettext.gettext
+
+from settings import TMP_PATH
 
 
 class UrlRequest(object):
@@ -99,11 +100,27 @@ class UrlRequest(object):
         logging.debug('Sign request: %s', sign)
         logging.debug('Exit on error: %s', exit_on_error)
 
+        if not os.path.exists(TMP_PATH):
+            try:
+                os.makedirs(TMP_PATH, 0777)
+            except:
+                _msg = 'Error creating %s directory' % TMP_PATH
+                logging.exception(_msg)
+                return {
+                    'errmfs': {
+                        'info': _msg,
+                        'code': server_errors.GENERIC
+                    }
+                }
+
         # API changed in server 3.0
-        _filename = '/tmp/%s.%s.%s' % (
-            utils.get_mfc_computer_name(),
-            utils.get_hardware_uuid(),
-            cmd
+        _filename = os.path.join(
+            TMP_PATH,
+            '%s.%s.%s' % (
+                utils.get_mfc_computer_name(),
+                utils.get_hardware_uuid(),
+                cmd
+            )
         )
         if self._debug:
             print _filename
