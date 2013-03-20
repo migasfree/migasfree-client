@@ -27,16 +27,18 @@ import gettext
 import __builtin__
 __builtin__._ = gettext.gettext
 
+from settings import LOCALE_PATH
+
 # i18n
 domain = 'migasfree-client'
-gettext.install(domain, '/usr/share/locale', unicode=1)
+gettext.install(domain, LOCALE_PATH, unicode=1)
 
-gettext.bindtextdomain(domain, '/usr/share/locale')
+gettext.bindtextdomain(domain, LOCALE_PATH)
 if hasattr(gettext, 'bind_textdomain_codeset'):
     gettext.bind_textdomain_codeset(domain, 'UTF-8')
 gettext.textdomain(domain)
 
-locale.bindtextdomain(domain, '/usr/share/locale')
+locale.bindtextdomain(domain, LOCALE_PATH)
 if hasattr(locale, 'bind_textdomain_codeset'):
     locale.bind_textdomain_codeset(domain, 'UTF-8')
 locale.textdomain(domain)
