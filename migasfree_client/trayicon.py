@@ -19,22 +19,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import sys
 import os
-try:
-    import subprocess
-except ImportError:
-    # I know, let's add an ugly hack!
-    # Don't totally bail when not using python2.4 or newer.
-    # FIXME: since we aren't using any new functionality of subprocess, we
-    #    could just use the deprecated methods.
-    class subprocess:
-        PIPE = None
-        def Popen(cmd, close_fds, preexec_fn, stdin): return None
-        Popen = staticmethod(Popen)
+import sys
+import subprocess
+
 
 class TrayIcon:
-    def __init__(self, env = None):
+    def __init__(self, env=None):
         self._run_zenity(env)
 
     def _run_zenity(self, env):
@@ -51,10 +42,10 @@ class TrayIcon:
         try:
             self.proc = subprocess.Popen(
                 ['zenity', '--notification', '--listen'],
-                close_fds = True,
-                preexec_fn = preexec,
-                stdin = subprocess.PIPE,
-                env = env # jact 2011-04-20
+                close_fds=True,
+                preexec_fn=preexec,
+                stdin=subprocess.PIPE,
+                env=env  # jact 2011-04-20
             )
         except (OSError, IOError):
             self.proc = None
@@ -76,7 +67,7 @@ class TrayIcon:
         try:
             self.proc.stdin.write(cmd)
             self.proc.stdin.flush()
-        except (IOError, OSError), err:
+        except (IOError, OSError):
             self.close()
 
     def set_icon(self, icon):
