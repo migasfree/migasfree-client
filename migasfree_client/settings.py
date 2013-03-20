@@ -27,6 +27,10 @@ migasfree-client settings
 
 LOG_FILE = '/var/log/migasfree.log'
 CONF_FILE = '/etc/migasfree.conf'
+SOFTWARE_FILE = '/var/tmp/installed_software.txt'
 
 KEYS_PATH = '/root/.migasfree-keys'
 TMP_PATH = '/tmp/migasfree-client'
+LOCALE_PATH = '/usr/share/locale'
+ICON_PATH = '/usr/share/icons/hicolor/scalable'
+DOC_PATH = '/usr/share/doc/migasfree-client'
