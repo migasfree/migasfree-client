@@ -24,12 +24,30 @@ __all__ = ('MigasFreeClient', 'main')
 
 import os
 
+# package imports
+"""
+from . import (
+    settings,
+    utils,
+    server_errors,
+    printcolor,
+    url_request,
+    network
+)
+"""
+import settings
+import utils
+import server_errors
+import printcolor
+import url_request
+import network
+
 version_file = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     'VERSION'
 )
 if not os.path.exists(version_file):
-    version_file = '/usr/share/doc/migasfree-client/VERSION'
+    version_file = os.path.join(settings.DOC_PATH, 'VERSION')
 
 __version__ = open(version_file).read().splitlines()[0]
 
@@ -50,24 +68,6 @@ _ = gettext.gettext
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
-
-# package imports
-"""
-from . import (
-    settings,
-    utils,
-    server_errors,
-    printcolor,
-    url_request,
-    network
-)
-"""
-import settings
-import utils
-import server_errors
-import printcolor
-import url_request
-import network
 
 from backends import Pms
 
@@ -105,15 +105,12 @@ def _search_pms():
 class MigasFreeClient(object):
     APP_NAME = 'Migasfree'
     CMD = 'migasfree'  # /usr/bin/migasfree
-    LOCK_FILE = '/tmp/%s.pid' % CMD
-    ERROR_FILE = '/tmp/%s.err' % CMD
-
-    SOFTWARE_FILE = '/var/log/installed_software.txt'
+    LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
+    ERROR_FILE = os.path.join(settings.TMP_PATH, '%s.err' % CMD)
 
     PUBLIC_KEY = 'migasfree-server.pub'
     PRIVATE_KEY = 'migasfree-client.pri'
 
-    ICON_PATH = '/usr/share/icons/hicolor/scalable'
     ICON = 'apps/migasfree.svg'
     ICON_COMPLETED = 'actions/migasfree-ok.svg'
 
@@ -299,14 +296,14 @@ class MigasFreeClient(object):
 
             if mandatory or self.migas_gui_verbose:
                 if not icon:
-                    icon = os.path.join(self.ICON_PATH, self.ICON)
+                    icon = os.path.join(settings.ICON_PATH, self.ICON)
 
                 if self._notify:
-                    icon = 'file://%s' % os.path.join(self.ICON_PATH, icon)
+                    icon = 'file://%s' % os.path.join(settings.ICON_PATH, icon)
 
                     try:
                         self._notify.update(self.APP_NAME, msg, icon)
-                        self._notify.set_timeout(pynotify.EXPIRES_DEFAULT)
+                        #self._notify.set_timeout(pynotify.EXPIRES_DEFAULT)
                         self._notify.show()
                     except:
                         pass
@@ -378,7 +375,9 @@ class MigasFreeClient(object):
                 'platform': platform.system(),  # new for server 3.0
                 'pms': str(self.pms),  # new for server 3.0
                 'user': self._graphic_user,
-                'user_fullname': utils.get_user_info(self._graphic_user)['fullname']
+                'user_fullname': utils.get_user_info(
+                    self._graphic_user
+                )['fullname']
             },
             'attributes': {}
         }
@@ -396,7 +395,9 @@ class MigasFreeClient(object):
                 _operation_ok(_info)
             else:
                 _operation_failed(_info)
-                self._write_error('Error: property %s without value\n' % _item['name'])
+                self._write_error(
+                    'Error: property %s without value\n' % _item['name']
+                )
 
         return _response
 
@@ -446,10 +447,13 @@ class MigasFreeClient(object):
 
         # if have been installed packages manually
         # information is uploaded to server
-        if os.path.isfile(self.SOFTWARE_FILE) \
-        and os.stat(self.SOFTWARE_FILE).st_size:
+        if os.path.isfile(settings.SOFTWARE_FILE) \
+        and os.stat(settings.SOFTWARE_FILE).st_size:
             _diff_software = utils.compare_lists(
-                open(self.SOFTWARE_FILE, 'U').read().splitlines(),  # not readlines!!!
+                open(
+                    settings.SOFTWARE_FILE,
+                    'U'
+                ).read().splitlines(),  # not readlines!!!
                 _software_before
             )
 
@@ -457,7 +461,7 @@ class MigasFreeClient(object):
                 self._send_message(_('Uploading manual software...'))
                 _file_mtime = time.strftime(
                     '%Y-%m-%d %H:%M:%S',
-                    time.localtime(os.path.getmtime(self.SOFTWARE_FILE))
+                    time.localtime(os.path.getmtime(settings.SOFTWARE_FILE))
                 )
                 _now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                 _data = '# [%s, %s]\n%s' % (
@@ -654,7 +658,7 @@ class MigasFreeClient(object):
 
         # upload computer software history
         _software_after = self.pms.query_all()
-        utils.write_file(self.SOFTWARE_FILE, '\n'.join(_software_after))
+        utils.write_file(settings.SOFTWARE_FILE, '\n'.join(_software_after))
         _diff_software = utils.compare_lists(_software_before, _software_after)
         if _diff_software:
             self._send_message(_('Uploading software history...'))

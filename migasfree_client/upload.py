@@ -24,24 +24,6 @@ __all__ = ('MigasFreeUpload', 'main')
 
 import os
 
-version_file = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    'VERSION'
-)
-if not os.path.exists(version_file):
-    version_file = '/usr/share/doc/migasfree-client/VERSION'
-
-__version__ = open(version_file).read().splitlines()[0]
-
-import sys
-import optparse
-import logging
-import getpass
-import errno
-
-import gettext
-_ = gettext.gettext
-
 # package imports
 """
 from . import (
@@ -56,10 +38,28 @@ import utils
 import server_errors
 import url_request
 
+version_file = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    'VERSION'
+)
+if not os.path.exists(version_file):
+    version_file = os.path.join(settings.DOC_PATH, 'VERSION')
+
+__version__ = open(version_file).read().splitlines()[0]
+
+import sys
+import optparse
+import logging
+import getpass
+import errno
+
+import gettext
+_ = gettext.gettext
+
 
 class MigasFreeUpload(object):
     CMD = 'migasfree-upload'  # /usr/bin/migasfree-upload
-    LOCK_FILE = '/tmp/%s.pid' % CMD
+    LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
 
     PUBLIC_KEY = 'migasfree-server.pub'
     PRIVATE_KEY = 'migasfree-packager.pri'
