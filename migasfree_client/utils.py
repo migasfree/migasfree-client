@@ -288,6 +288,13 @@ def write_file(filename, content):
     bool write_file(string filename, string content)
     '''
 
+    _dir = os.path.dirname(filename)
+    if not os.path.exists(_dir):
+        try:
+            os.makedirs(_dir, 0777)
+        except:
+            return False
+
     _file = None
     try:
         _file = open(filename, 'wb')
