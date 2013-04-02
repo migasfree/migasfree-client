@@ -111,6 +111,7 @@ class Curl(object):
         self.curl.setopt(pycurl.HTTPHEADER, [
             'Accept-Language: %s' % self.accept_lang,
             'User-Agent: migasfree-client',
+            'Expect:',
         ])
         self.curl.setopt(pycurl.URL, self.url)
 
