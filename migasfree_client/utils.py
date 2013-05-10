@@ -179,7 +179,11 @@ def get_graphic_user(pid):
     _user = commands.getoutput('ps hp %s -o %s' % (str(pid), '"%U"'))
     if _user.isdigit():
         # ps command not always show username (show uid if len(username) > 8)
-        return get_user_info(_user)['name']
+        _user_info = get_user_info(_user)
+        if _user_info is False:  # p.e. chroot environment
+            return 'root'
+        else:
+            return _user_info['name']
 
     return _user
 
@@ -188,7 +192,7 @@ def grep(string, list_strings):
     '''
     http://casa.colorado.edu/~ginsbura/pygrep.htm
     py grep command
-    sample command: grep("^x",dir())
+    sample command: grep("^x", dir())
     syntax: grep(regexp_string, list_of_strings_to_search)
     '''
 
@@ -423,13 +427,14 @@ def get_mfc_computer_name():
 
 
 def get_hardware_uuid():
-    _uuid = uuid.UUID(
-        commands.getoutput('hal-get-property \
-            --udi /org/freedesktop/Hal/devices/computer \
-            --key system.hardware.uuid')
+    _uuid = commands.getoutput(
+        'hal-get-property --udi /org/freedesktop/Hal/devices/computer \
+        --key system.hardware.uuid'
     )
+    if _uuid == '' or _uuid is None:
+        return get_mfc_computer_name()
 
-    _byte_array = _uuid.hex
+    _byte_array = uuid.UUID(_uuid).hex
 
     # http://stackoverflow.com/questions/10850075/guid-uuid-compatibility-issue-between-net-and-linux
     _ms_uuid = '%s%s%s%s-%s%s-%s%s-%s-%s' % (
