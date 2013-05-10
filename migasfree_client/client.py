@@ -163,6 +163,10 @@ class MigasFreeClient(object):
             self.migas_server = _config.get('server', 'migasfree.org')
             self.migas_proxy = _config.get('proxy', None)
             self.migas_ssl_cert = _config.get('ssl_cert', None)
+            self.migas_package_proxy_cache = _config.get(
+                'package_proxy_cache',
+                None
+            )
 
             self.migas_gui_verbose = True  # by default
             if 'gui_verbose' in _config:
@@ -229,6 +233,10 @@ class MigasFreeClient(object):
         print('\t%s: %s' % (_('Server'), self.migas_server))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
+        print('\t%s: %s' % (
+            _('Package Proxy Cache'),
+            self.migas_package_proxy_cache
+        ))
         print('\t%s: %s' % (_('Debug'), self._debug))
         print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
         print('\t%s: %s' % (_('GUI verbose'), self.migas_gui_verbose))
@@ -499,8 +507,12 @@ class MigasFreeClient(object):
     def _create_repositories(self, repos):
         self._send_message(_('Creating repositories...'))
 
+        _server = self.migas_server
+        if self.migas_package_proxy_cache:
+            _server = '%s/%s' % (self.migas_package_proxy_cache, _server)
+
         _ret = self.pms.create_repos(
-            self.migas_server,
+            _server,
             self.migas_version,
             repos
         )
