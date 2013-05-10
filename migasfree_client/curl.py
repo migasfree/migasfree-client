@@ -40,7 +40,6 @@ SSL info:
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'curl.py'
-__date__ = '2013-01-26'
 
 import os
 try:
@@ -70,7 +69,7 @@ class Curl(object):
         proxy='',
         accept_lang='en-US',
         cert=None,
-        timeout=60
+        timeout=0
     ):
         self.url = url
         self.post = post
