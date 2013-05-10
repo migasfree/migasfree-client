@@ -803,28 +803,36 @@ class MigasFreeClient(object):
         return self.pms.search(pattern)
 
     def _install_package(self, pkg):
+        self._check_sign_keys()
+
         self._send_message(_('Installing package: %s') % pkg)
         _ret = self.pms.install(pkg)
         self._send_message()
+
         return _ret
 
     def _remove_package(self, pkg):
+        self._check_sign_keys()
+
         self._send_message(_('Removing package: %s') % pkg)
         _ret = self.pms.remove(pkg)
         self._send_message()
+
         return _ret
 
     # TODO
     def _install_device(self, dev):
+        self._check_sign_keys()
+
         self._send_message(_('Installing device: %s') % dev)
-        #download_file_and_run "device/?CMD=install&HOST=$HOSTNAME&NUMBER=pkg" "$_DIR_TMP/install_device"
         print('TODO')
         self._send_message()
 
     # TODO
     def _remove_device(self, dev):
+        self._check_sign_keys()
+
         self._send_message(_('Removing device: %s') % dev)
-        #download_file_and_run "device/?CMD=remove\HOST=$HOSTNAME\NUMBER=dev" "$_DIR_TMP/remove_device"
         print('TODO')
         self._send_message()
 
