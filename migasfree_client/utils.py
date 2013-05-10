@@ -20,7 +20,6 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'utils.py'
-__date__ = '2013-02-12'
 
 import subprocess
 import os
@@ -157,7 +156,8 @@ def get_graphic_pid():
         'ksmserver',        # KDE
         'xfce-mcs-manage',  # Xfce
         'xfce4-session',    # Xfce4
-        'lxsession'         # LXDE
+        'lxsession',        # LXDE
+        'mate-session',     # MATE
     ]
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof %s' % _process)
