@@ -125,7 +125,6 @@ setup(
             '/usr/share/icons/hicolor/scalable/apps',
             ['icons/scalable/migasfree.svg']
         ),
-        ('/usr/share/applications', ['launcher/migasfree-client.desktop']),
         ('/usr/share/doc/migasfree-client', [
             'AUTHORS',
             'INSTALL',
