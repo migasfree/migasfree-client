@@ -147,6 +147,12 @@ class MigasFreeTags(MigasFreeCommand):
         # Update System
         mfc._update_system()
 
+        # Pre-Install Packages
+        mfc._install_mandatory_packages(_ret["packages"]["preinstall"])
+
+        # Update System
+        mfc._update_system()
+
         # Install Packages
         mfc._install_mandatory_packages(_ret["packages"]["install"])
 
