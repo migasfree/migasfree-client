@@ -141,6 +141,7 @@ setup(
         'bin/migasfree',
         'bin/migasfree-upload',
         'bin/migasfree-label',
+        'bin/migasfree-tags',
     ],
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
