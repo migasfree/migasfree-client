@@ -39,17 +39,7 @@ import settings
 import utils
 import server_errors
 import printcolor
-import url_request
 import network
-
-version_file = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    'VERSION'
-)
-if not os.path.exists(version_file):
-    version_file = os.path.join(settings.DOC_PATH, 'VERSION')
-
-__version__ = open(version_file).read().splitlines()[0]
 
 import sys
 import errno
@@ -57,33 +47,22 @@ import logging
 import optparse
 import json
 import time
-import getpass
 import tempfile
 import platform
-
-import gettext
-_ = gettext.gettext
-
-#sys.path.append(os.path.dirname(__file__))  # DEBUG
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
 
+import gettext
+_ = gettext.gettext
+
+# sys.path.append(os.path.dirname(__file__))  # DEBUG
+
 from backends import Pms
-
-
-def _operation_ok(info=''):
-    _msg = str(' ' + _('Ok')).rjust(38, '*')
-    if info:
-        _msg = str(info)
-
-    printcolor.ok(_msg)
-
-
-def _operation_failed(info=''):
-    printcolor.fail(str(' ' + _('Failed')).rjust(38, '*'))
-    if info:
-        printcolor.fail(info)
+from .command import (
+    MigasFreeCommand,
+    __version__,
+)
 
 
 def _search_pms():
@@ -102,26 +81,15 @@ def _search_pms():
     return None  # if not found
 
 
-class MigasFreeClient(object):
+class MigasFreeClient(MigasFreeCommand):
     APP_NAME = 'Migasfree'
     CMD = 'migasfree'  # /usr/bin/migasfree
-    LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
-    ERROR_FILE = os.path.join(settings.TMP_PATH, '%s.err' % CMD)
-
-    PUBLIC_KEY = 'migasfree-server.pub'
-    PRIVATE_KEY = 'migasfree-client.pri'
-
-    ICON = 'apps/migasfree.svg'
-    ICON_COMPLETED = 'actions/migasfree-ok.svg'
 
     _graphic_user = None
     _notify = None
 
     pms = None
 
-    _url_request = None
-
-    _debug = False
     _error_file_descriptor = None
 
     def __init__(self):
@@ -129,68 +97,9 @@ class MigasFreeClient(object):
         signal.signal(signal.SIGQUIT, self._exit_gracefully)
         signal.signal(signal.SIGTERM, self._exit_gracefully)
 
-        self._read_conf_file()
-
+        MigasFreeCommand.__init__(self)
         self._init_environment()
-
-        # init UrlRequest
-        _url_base = '%s/api/' % str(self.migas_server)
-        if self.migas_ssl_cert:
-            _url_base = '%s://%s' % ('https', _url_base)
-        else:
-            _url_base = '%s://%s' % ('http', _url_base)
-        self._url_request = url_request.UrlRequest(
-            debug=self._debug,
-            url_base=_url_base,
-            proxy=self.migas_proxy,
-            info_keys={
-                'path': settings.KEYS_PATH,
-                'private': self.PRIVATE_KEY,
-                'public': self.PUBLIC_KEY
-            },
-            cert=self.migas_ssl_cert
-        )
-
         self._pms_selection()
-
-    def _read_conf_file(self):
-        _config = utils.get_config(settings.CONF_FILE, 'client')
-        _log_level = logging.INFO
-
-        self.migas_version = utils.get_mfc_version()
-        self.migas_computer_name = utils.get_mfc_computer_name()
-        if type(_config) is dict:
-            self.migas_server = _config.get('server', 'migasfree.org')
-            self.migas_proxy = _config.get('proxy', None)
-            self.migas_ssl_cert = _config.get('ssl_cert', None)
-            self.migas_package_proxy_cache = _config.get(
-                'package_proxy_cache',
-                None
-            )
-
-            self.migas_gui_verbose = True  # by default
-            if 'gui_verbose' in _config:
-                if _config['gui_verbose'] == 'False' \
-                or _config['gui_verbose'] == '0' \
-                or _config['gui_verbose'] == 'Off':
-                    self.migas_gui_verbose = False
-
-            if 'debug' in _config:
-                if _config['debug'] == 'True' \
-                or _config['debug'] == '1' \
-                or _config['debug'] == 'On':
-                    self._debug = True
-                    _log_level = logging.DEBUG
-
-        # http://www.lightbird.net/py-by-example/logging.html
-        logging.basicConfig(
-            format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
-            level=_log_level,
-            filename=settings.LOG_FILE
-        )
-        logging.info('*' * 20)
-        logging.info('%s in execution', self.CMD)
-        logging.debug('Config: %s', _config)
 
     def _init_environment(self):
         _graphic_pid, _graphic_process = utils.get_graphic_pid()
@@ -226,6 +135,11 @@ class MigasFreeClient(object):
 
         self.pms = Pms.factory(_pms_info)()
 
+    def _exit_gracefully(self, signal_number, frame):
+        self._send_message(_('Killing %s before time!!!') % self.CMD)
+        logging.critical('Exiting %s, signal: %s', self.CMD, signal_number)
+        sys.exit(errno.EINPROGRESS)
+
     def _show_running_options(self):
         print('')
         print(_('Running options:'))
@@ -243,11 +157,6 @@ class MigasFreeClient(object):
         print('\t%s: %s' % (_('Graphic user'), self._graphic_user))
         print('\t%s: %s' % (_('PMS'), self.pms))
         print('')
-
-    def _exit_gracefully(self, signal_number, frame):
-        self._send_message(_('Killing %s before time!!!') % self.CMD)
-        logging.critical('Exiting %s, signal: %s', self.CMD, signal_number)
-        sys.exit(errno.EINPROGRESS)
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
@@ -334,7 +243,7 @@ class MigasFreeClient(object):
                 server_errors.error_info(_ret['errmfs']['code']),
                 _ret['errmfs']['info']
             )
-            _operation_failed(_msg)
+            self.operation_failed(_msg)
             self._write_error(_msg, append=True)
 
         return (_ret['errmfs']['code'] == server_errors.ALL_OK)
@@ -400,9 +309,9 @@ class MigasFreeClient(object):
                 _response['attributes'][_item['name']]
             )
             if _response['attributes'][_item['name']].strip() != '':
-                _operation_ok(_info)
+                self.operation_ok(_info)
             else:
-                _operation_failed(_info)
+                self.operation_failed(_info)
                 self._write_error(
                     'Error: property %s without value\n' % _item['name']
                 )
@@ -423,9 +332,9 @@ class MigasFreeClient(object):
             if _result:
                 # only send faults with output!!!
                 _response['faults'][_item['name']] = _result
-                _operation_failed(_info)
+                self.operation_failed(_info)
             else:
-                _operation_ok(_info)
+                self.operation_ok(_info)
 
         return _response
 
@@ -438,10 +347,10 @@ class MigasFreeClient(object):
         logging.debug('Update request: %s', _request)
 
         if not _request:
-            _operation_failed(_('No data requested from server'))
+            self.operation_failed(_('No data requested from server'))
             sys.exit(errno.ENODATA)
 
-        _operation_ok()
+        self.operation_ok()
 
         _attributes = self._eval_attributes(_request['properties'])
         logging.debug('Attributes to send: %s', _attributes)
@@ -482,7 +391,7 @@ class MigasFreeClient(object):
                     'upload_computer_software_history',
                     data=_data
                 )
-                _operation_ok()
+                self.operation_ok()
 
         return _software_before
 
@@ -497,7 +406,7 @@ class MigasFreeClient(object):
                 'upload_computer_errors',
                 data=open(self.ERROR_FILE, 'rb').read()
             )
-            _operation_ok()
+            self.operation_ok()
             # delete old errors
             os.remove(self.ERROR_FILE)
 
@@ -518,10 +427,10 @@ class MigasFreeClient(object):
         )
 
         if _ret:
-            _operation_ok()
+            self.operation_ok()
         else:
             _msg = _('Error creating repositories: %s') % repos
-            _operation_failed(_msg)
+            self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
 
@@ -533,10 +442,10 @@ class MigasFreeClient(object):
         _ret = self.pms.clean_all()
 
         if _ret:
-            _operation_ok()
+            self.operation_ok()
         else:
             _msg = _('Error getting repositories metadata')
-            _operation_failed(_msg)
+            self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
 
@@ -544,10 +453,10 @@ class MigasFreeClient(object):
         self._send_message(_('Uninstalling packages...'))
         _ret, _error = self.pms.remove_silent(packages)
         if _ret:
-            _operation_ok()
+            self.operation_ok()
         else:
             _msg = _('Error uninstalling packages: %s') % _error
-            _operation_failed(_msg)
+            self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
 
@@ -555,10 +464,10 @@ class MigasFreeClient(object):
         self._send_message(_('Installing mandatory packages...'))
         _ret, _error = self.pms.install_silent(packages)
         if _ret:
-            _operation_ok()
+            self.operation_ok()
         else:
             _msg = _('Error installing packages: %s') % _error
-            _operation_failed(_msg)
+            self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
 
@@ -566,10 +475,10 @@ class MigasFreeClient(object):
         self._send_message(_('Updating packages...'))
         _ret, _error = self.pms.update_silent()
         if _ret:
-            _operation_ok()
+            self.operation_ok()
         else:
             _msg = _('Error updating packages: %s') % _error
-            _operation_failed(_msg)
+            self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
 
@@ -578,10 +487,10 @@ class MigasFreeClient(object):
         _cmd = 'lshw -json'
         _ret, _output, _error = utils.execute(_cmd, interactive=False)
         if _ret == 0:
-            _operation_ok()
+            self.operation_ok()
         else:
             _msg = _('lshw command failed: %s') % _error
-            _operation_failed(_msg)
+            self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
 
@@ -595,9 +504,9 @@ class MigasFreeClient(object):
             exit_on_error=False
         )
         if _ret['errmfs']['code'] == server_errors.ALL_OK:
-            _operation_ok()
+            self.operation_ok()
         else:
-            _operation_failed()
+            self.operation_failed()
             _msg = _ret['errmfs']['info']
             logging.error(_msg)
             self._write_error(_msg)
@@ -610,7 +519,7 @@ class MigasFreeClient(object):
                 'upload_computer_errors',
                 data=open(self.ERROR_FILE, 'rb').read()
             )
-            _operation_ok()
+            self.operation_ok()
 
             # delete errors
             if not self._debug:
@@ -623,7 +532,7 @@ class MigasFreeClient(object):
             _('Connecting to migasfree server...'),
             mandatory=True
         ):
-            _operation_ok()
+            self.operation_ok()
         else:
             sys.exit(errno.EBADRQC)
 
@@ -637,7 +546,7 @@ class MigasFreeClient(object):
             'upload_computer_info',
             data=_response
         )
-        _operation_ok()
+        self.operation_ok()
         logging.debug('Server response: %s', _request)
 
         if len(_request['faultsdef']) > 0:
@@ -650,7 +559,7 @@ class MigasFreeClient(object):
                 'upload_computer_faults',
                 data=_response
             )
-            _operation_ok()
+            self.operation_ok()
             logging.debug('Server response: %s', _request_faults)
 
         _software_before = self._software_inventory()
@@ -682,7 +591,7 @@ class MigasFreeClient(object):
                 'upload_computer_software_history',
                 data=_data
             )
-            _operation_ok()
+            self.operation_ok()
 
         # upload the software inventory
         self._send_message(_('Uploading software inventory...'))
@@ -692,7 +601,7 @@ class MigasFreeClient(object):
                 'upload_computer_software_base',
                 data='\n'.join(_software_after)
             )
-            _operation_ok()
+            self.operation_ok()
 
         _software_base = self._url_request.run('get_computer_software')
         _software_base = _software_base.split('\n')
@@ -705,7 +614,7 @@ class MigasFreeClient(object):
             'upload_computer_software_base_diff',
             data=_diff_software
         )
-        _operation_ok()
+        self.operation_ok()
 
         # update computer hardware inventory
         if _request.get('hardware_capture') is True:  # new in server 3.0
@@ -725,91 +634,6 @@ class MigasFreeClient(object):
 
         # clean computer messages in server
         self._send_message()
-
-    def _check_sign_keys(self):
-        _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
-        _public_key = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
-        if os.path.isfile(_private_key) and os.path.isfile(_public_key):
-            return  # all OK
-
-        logging.warning('Security keys are not present!!!')
-        self._auto_register()
-
-    def _auto_register(self):
-        # try to get keys
-        _data = {
-            'username': '',
-            'password': '',
-            'version': self.migas_version,
-            'platform': platform.system(),  # new for server 3.0
-            'pms': str(self.pms),  # new for server 3.0
-        }
-        print(_('Autoregistering computer...'))
-
-        return self._save_sign_keys(_data)
-
-    def _save_sign_keys(self, data):
-        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
-            try:
-                os.makedirs(os.path.abspath(settings.KEYS_PATH))
-            except:
-                _msg = _('Error creating %s directory') % settings.KEYS_PATH
-                _operation_failed(_msg)
-                logging.error(_msg)
-                sys.exit(errno.ENOTDIR)
-
-        _response = self._url_request.run(
-            'register_computer',
-            data=data,
-            sign=False
-        )
-        logging.debug('Response _save_sign_keys: %s', _response)
-
-        if 'errmfs' in _response:
-            _msg = _response['errmfs']['info']
-            _operation_failed(_msg)
-            logging.error(_msg)
-            sys.exit(errno.ENOENT)
-
-        for _file, _content in list(_response.items()):
-            _path_file = os.path.join(settings.KEYS_PATH, _file)
-            logging.debug('Trying writing file: %s', _path_file)
-            _ret = utils.write_file(_path_file, str(_content))
-            if _ret:
-                print(_('Key %s created!') % _path_file)
-            else:
-                _msg = _('Error writing key file!!!')
-                _operation_failed(_msg)
-                logging.error(_msg)
-                sys.exit(errno.ENOENT)
-
-        return True
-
-    def _register_computer(self):
-        _continue = utils.query_yes_no(
-            _('Have you check config options in this machine (%s)?') % settings.CONF_FILE
-        )
-        if _continue == 'no':
-            _operation_failed(_('Check %s file and register again') % settings.CONF_FILE)
-            sys.exit(errno.EAGAIN)
-
-        _user = raw_input('%s: ' % _('User to register computer at server'))
-        if not _user:
-            _operation_failed(_('Empty user. Exiting %s.') % self.CMD)
-            logging.info('Empty user in register computer option')
-            sys.exit(errno.EAGAIN)
-
-        _pass = getpass.getpass('%s: ' % _('Password'))
-
-        _data = {
-            'username': _user,
-            'password': _pass,
-            'version': self.migas_version,
-            'platform': platform.system(),  # new for server 3.0
-            'pms': str(self.pms),  # new for server 3.0
-        }
-        self._save_sign_keys(_data)
-        _operation_ok(_('Computer registered at server'))
 
     def _search(self, pattern):
         return self.pms.search(pattern)

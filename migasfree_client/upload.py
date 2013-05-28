@@ -23,6 +23,11 @@ __license__ = 'GPLv3'
 __all__ = ('MigasFreeUpload', 'main')
 
 import os
+import sys
+import optparse
+import logging
+import getpass
+import errno
 
 # package imports
 """
@@ -33,38 +38,22 @@ from . import (
     url_request
 )
 """
-import settings
 import utils
 import server_errors
-import url_request
-
-version_file = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    'VERSION'
-)
-if not os.path.exists(version_file):
-    version_file = os.path.join(settings.DOC_PATH, 'VERSION')
-
-__version__ = open(version_file).read().splitlines()[0]
-
-import sys
-import optparse
-import logging
-import getpass
-import errno
 
 import gettext
 _ = gettext.gettext
 
+from .command import (
+    MigasFreeCommand,
+    __version__,
+)
 
-class MigasFreeUpload(object):
+
+class MigasFreeUpload(MigasFreeCommand):
     CMD = 'migasfree-upload'  # /usr/bin/migasfree-upload
-    LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
 
-    PUBLIC_KEY = 'migasfree-server.pub'
     PRIVATE_KEY = 'migasfree-packager.pri'
-
-    _url_request = None
 
     _file = None
     _is_regular_file = False
@@ -72,61 +61,8 @@ class MigasFreeUpload(object):
     _server_directory = None
     _create_repo = True
 
-    _debug = False
-
-    def __init__(self):
-        #signal.signal(signal.SIGINT, self._exit_gracefully)
-        #signal.signal(signal.SIGQUIT, self._exit_gracefully)
-        #signal.signal(signal.SIGTERM, self._exit_gracefully)
-
-        _config_client = utils.get_config(settings.CONF_FILE, 'client')
-
-        _log_level = logging.INFO
-        if type(_config_client) is dict:
-            self.migas_server = _config_client.get('server', 'migasfree.org')
-            self.migas_proxy = _config_client.get('proxy', None)
-            self.migas_ssl_cert = _config_client.get('ssl_cert', None)
-            if 'debug' in _config_client:
-                if _config_client['debug'] == 'True' \
-                or _config_client['debug'] == '1' \
-                or _config_client['debug'] == 'On':
-                    self._debug = True
-                    _log_level = logging.DEBUG
-
-        _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
-        if type(_config_packager) is dict:
-            self.packager_user = _config_packager.get('user', None)
-            self.packager_pwd = _config_packager.get('password', None)
-            self.packager_version = _config_packager.get('version', None)
-            self.packager_store = _config_packager.get('store', None)
-
-        logging.basicConfig(
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            level=_log_level,
-            filename=settings.LOG_FILE
-        )
-        logging.info('*' * 76)
-        logging.info('%s in execution', self.CMD)
-        logging.debug('Config client: %s', _config_client)
-        logging.debug('Config packager: %s', _config_packager)
-
-        # init UrlRequest
-        _url_base = '%s/api/' % str(self.migas_server)
-        if self.migas_ssl_cert:
-            _url_base = '%s://%s' % ('https', _url_base)
-        else:
-            _url_base = '%s://%s' % ('http', _url_base)
-        self._url_request = url_request.UrlRequest(
-            debug=self._debug,
-            url_base=_url_base,
-            proxy=self.migas_proxy,
-            info_keys={
-                'path': settings.KEYS_PATH,
-                'private': self.PRIVATE_KEY,
-                'public': self.PUBLIC_KEY
-            },
-            cert=self.migas_ssl_cert
-        )
+    #def __init__(self):
+    #    MigasFreeCommand.__init__(self)
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
@@ -194,50 +130,6 @@ class MigasFreeUpload(object):
                 print _('Empty store. Exiting %s.') % self.CMD
                 logging.info('Empty store in upload operation')
                 sys.exit(errno.EAGAIN)
-
-    def _check_sign_keys(self):
-        _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
-        _public_key = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
-        if os.path.isfile(_private_key) and os.path.isfile(_public_key):
-            return  # all OK
-
-        logging.warning('Packager keys are not present!!!')
-        self._auto_register()
-
-    def _auto_register(self):
-        # try to get keys
-        _data = {
-            'username': self.packager_user,
-            'password': self.packager_pwd
-        }
-        print(_('Getting packager keys...'))
-
-        return self._save_sign_keys(_data)
-
-    def _save_sign_keys(self, data):
-        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
-            try:
-                os.makedirs(os.path.abspath(settings.KEYS_PATH))
-            except:
-                logging.error('Error creating %s directory', settings.KEYS_PATH)
-                sys.exit(errno.ENOTDIR)
-
-        _response = self._url_request.run('get_key_packager', data, sign=False)
-        logging.debug('Response _save_sign_keys: %s', _response)
-
-        for _file, _content in list(_response.items()):
-            _path_file = os.path.join(settings.KEYS_PATH, _file)
-            logging.debug('Trying writing file: %s', _path_file)
-            _ret = utils.write_file(_path_file, str(_content))
-            if _ret:
-                print(_('Key %s created!') % _path_file)
-            else:
-                _msg = _('Error writing key file!!!')
-                print(_msg)
-                logging.error(_msg)
-                sys.exit(errno.ENOENT)
-
-        return True
 
     def _upload_file(self):
         logging.debug('Upload file operation...')
