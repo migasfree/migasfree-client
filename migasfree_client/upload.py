@@ -61,9 +61,6 @@ class MigasFreeUpload(MigasFreeCommand):
     _server_directory = None
     _create_repo = True
 
-    #def __init__(self):
-    #    MigasFreeCommand.__init__(self)
-
     def _usage_examples(self):
         print('\n' + _('Examples:'))
 
@@ -87,30 +84,27 @@ class MigasFreeUpload(MigasFreeCommand):
         print('\t%s -d local_directory -n server_directory -c' % self.CMD)
         print('\t%s --dir=local_directory --name=server_directory --no-create-repo\n' % self.CMD)
 
-    def _show_config_options(self):
-        print
-        print _('Config options:')
-        print '\t%s: %s' % (_('Server'), self.migas_server)
-        print '\t%s: %s' % (_('Proxy'), self.migas_proxy)
-        print '\t%s: %s' % (_('Debug'), self._debug)
-        print '\t%s: %s' % (_('Version'), self.packager_version)
-        print '\t%s: %s' % (_('Store'), self.packager_store)
-        print '\t%s: %s' % (_('User'), self.packager_user)
-        #print '\t%s: %s' % (_('Password'), self.packager_pwd)
+    def _show_running_options(self):
+        MigasFreeCommand._show_running_options(self)
+
+        print('\t%s: %s' % (_('Version'), self.packager_version))
+        print('\t%s: %s' % (_('Store'), self.packager_store))
+        print('\t%s: %s' % (_('User'), self.packager_user))
+        #print('\t%s: %s' % (_('Password'), self.packager_pwd))
         if self._file:
-            print '\t%s: %s' % (_('File'), self._file)
-            print '\t%s: %s' % (_('Regular file'), self._is_regular_file)
+            print('\t%s: %s' % (_('File'), self._file))
+            print('\t%s: %s' % (_('Regular file'), self._is_regular_file))
         if self._directory:
-            print '\t%s: %s' % (_('Directory'), self._directory)
-            print '\t%s: %s' % (_('Server directory'), self._server_directory)
-        print '\t%s: %s' % (_('Create repository'), self._create_repo)
-        print
+            print('\t%s: %s' % (_('Directory'), self._directory))
+            print('\t%s: %s' % (_('Server directory'), self._server_directory))
+        print('\t%s: %s' % (_('Create repository'), self._create_repo))
+        print('')
 
     def _left_parameters(self):
         if not self.packager_user:
             self.packager_user = raw_input('%s: ' % _('User to upload at server'))
             if not self.packager_user:
-                print _('Empty user. Exiting %s.') % self.CMD
+                print(_('Empty user. Exiting %s.') % self.CMD)
                 logging.info('Empty user in upload operation')
                 sys.exit(errno.EAGAIN)
 
@@ -120,14 +114,14 @@ class MigasFreeUpload(MigasFreeCommand):
         if not self.packager_version:
             self.packager_version = raw_input('%s: ' % _('Version to upload at server'))
             if not self.packager_version:
-                print _('Empty version. Exiting %s.') % self.CMD
+                print(_('Empty version. Exiting %s.') % self.CMD)
                 logging.info('Empty version in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
             self.packager_store = raw_input('%s: ' % _('Store to upload at server'))
             if not self.packager_store:
-                print _('Empty store. Exiting %s.') % self.CMD
+                print(_('Empty store. Exiting %s.') % self.CMD)
                 logging.info('Empty store in upload operation')
                 sys.exit(errno.EAGAIN)
 
@@ -328,7 +322,7 @@ class MigasFreeUpload(MigasFreeCommand):
             self._usage_examples()
 
         self._left_parameters()
-        self._show_config_options()
+        self._show_running_options()
 
         if self._file:
             self._upload_file()
