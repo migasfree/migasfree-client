@@ -55,14 +55,6 @@ from .command import (
 class MigasFreeTags(MigasFreeCommand):
     CMD = 'migasfree-tags'  # /usr/bin/migasfree-tags
 
-    def _show_running_options(self):
-        print('')
-        print _('Config options:')
-        print('\t%s: %s' % (_('Server'), self.migas_server))
-        print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
-        print('\t%s: %s' % (_('Debug'), self._debug))
-        print('')
-
     def _set_tags(self):
         logging.debug('Set tags operation...')
 
