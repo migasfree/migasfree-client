@@ -55,6 +55,8 @@ import platform
 import gettext
 _ = gettext.gettext
 
+from backends import Pms
+
 
 class MigasFreeCommand(object):
     '''
@@ -74,6 +76,8 @@ class MigasFreeCommand(object):
     _url_request = None
 
     _debug = False
+
+    pms = None
 
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
@@ -139,6 +143,8 @@ class MigasFreeCommand(object):
             },
             cert=self.migas_ssl_cert
         )
+
+        self._pms_selection()
 
     def _check_sign_keys(self):
         _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
@@ -228,10 +234,48 @@ class MigasFreeCommand(object):
         self.operation_ok(_('Computer registered at server'))
 
     def _show_running_options(self):
-        raise NotImplementedError
+        print('')
+        print(_('Running options:'))
+        print('\t%s: %s' % (_('Version'), self.migas_version))
+        print('\t%s: %s' % (_('Server'), self.migas_server))
+        print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
+        print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
+        print('\t%s: %s' % (
+            _('Package Proxy Cache'),
+            self.migas_package_proxy_cache
+        ))
+        print('\t%s: %s' % (_('Debug'), self._debug))
+        print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
+        print('\t%s: %s' % (_('GUI verbose'), self.migas_gui_verbose))
+        print('\t%s: %s' % (_('PMS'), self.pms))
+        print('')
 
     def _usage_examples(self):
         raise NotImplementedError
+
+    def _search_pms(self):
+        _pms_list = {
+            'zypper': 'Zypper',
+            'yum': 'Yum',
+            'apt-get': 'Apt'
+        }
+
+        for _item in _pms_list:
+            _cmd = 'which %s' % _item
+            _ret, _output, _error = utils.execute(_cmd, interactive=False)
+            if _ret == 0:
+                return _pms_list[_item]
+
+        return None  # if not found
+
+    def _pms_selection(self):
+        _pms_info = self._search_pms()
+        logging.debug('PMS info: %s', _pms_info)
+        if not _pms_info:
+            logging.critical('Any PMS was not found. Cannot continue.')
+            sys.exit(errno.EINPROGRESS)
+
+        self.pms = Pms.factory(_pms_info)()
 
     def operation_ok(self, info=''):
         _msg = str(' ' + _('Ok')).rjust(38, '*')
