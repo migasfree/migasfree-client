@@ -58,27 +58,10 @@ _ = gettext.gettext
 
 # sys.path.append(os.path.dirname(__file__))  # DEBUG
 
-from backends import Pms
 from .command import (
     MigasFreeCommand,
     __version__,
 )
-
-
-def _search_pms():
-    _pms_list = {
-        'zypper': 'Zypper',
-        'yum': 'Yum',
-        'apt-get': 'Apt'
-    }
-
-    for _item in _pms_list:
-        _cmd = 'which %s' % _item
-        _ret, _output, _error = utils.execute(_cmd, interactive=False)
-        if _ret == 0:
-            return _pms_list[_item]
-
-    return None  # if not found
 
 
 class MigasFreeClient(MigasFreeCommand):
@@ -87,8 +70,6 @@ class MigasFreeClient(MigasFreeCommand):
 
     _graphic_user = None
     _notify = None
-
-    pms = None
 
     _error_file_descriptor = None
 
@@ -99,7 +80,6 @@ class MigasFreeClient(MigasFreeCommand):
 
         MigasFreeCommand.__init__(self)
         self._init_environment()
-        self._pms_selection()
 
     def _init_environment(self):
         _graphic_pid, _graphic_process = utils.get_graphic_pid()
@@ -126,36 +106,15 @@ class MigasFreeClient(MigasFreeCommand):
 
         logging.debug('Graphic user: %s', self._graphic_user)
 
-    def _pms_selection(self):
-        _pms_info = _search_pms()
-        logging.debug('PMS info: %s', _pms_info)
-        if not _pms_info:
-            logging.critical('Any PMS was not found. Cannot continue.')
-            sys.exit(errno.EINPROGRESS)
-
-        self.pms = Pms.factory(_pms_info)()
-
     def _exit_gracefully(self, signal_number, frame):
         self._send_message(_('Killing %s before time!!!') % self.CMD)
         logging.critical('Exiting %s, signal: %s', self.CMD, signal_number)
         sys.exit(errno.EINPROGRESS)
 
     def _show_running_options(self):
-        print('')
-        print(_('Running options:'))
-        print('\t%s: %s' % (_('Version'), self.migas_version))
-        print('\t%s: %s' % (_('Server'), self.migas_server))
-        print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
-        print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
-        print('\t%s: %s' % (
-            _('Package Proxy Cache'),
-            self.migas_package_proxy_cache
-        ))
-        print('\t%s: %s' % (_('Debug'), self._debug))
-        print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
-        print('\t%s: %s' % (_('GUI verbose'), self.migas_gui_verbose))
+        MigasFreeCommand._show_running_options(self)
+
         print('\t%s: %s' % (_('Graphic user'), self._graphic_user))
-        print('\t%s: %s' % (_('PMS'), self.pms))
         print('')
 
     def _usage_examples(self):
