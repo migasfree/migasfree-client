@@ -79,6 +79,9 @@ class MigasFreeCommand(object):
 
     pms = None
 
+    auto_register_user = ''
+    auto_register_password = ''
+
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
 
@@ -157,18 +160,14 @@ class MigasFreeCommand(object):
 
     def _auto_register(self):
         # try to get keys
-        _data = {
-            'username': '',
-            'password': '',
-            'version': self.migas_version,
-            'platform': platform.system(),  # new for server 3.0
-            'pms': str(self.pms),  # new for server 3.0
-        }
         print(_('Autoregistering computer...'))
 
-        return self._save_sign_keys(_data)
+        return self._save_sign_keys(
+            self.auto_register_user,
+            self.auto_register_password
+        )
 
-    def _save_sign_keys(self, data):
+    def _save_sign_keys(self, user, password):
         if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
             try:
                 os.makedirs(os.path.abspath(settings.KEYS_PATH))
@@ -180,7 +179,13 @@ class MigasFreeCommand(object):
 
         _response = self._url_request.run(
             'register_computer',
-            data=data,
+            data={
+                'username': user,
+                'password': password,
+                'version': self.migas_version,
+                'platform': platform.system(),  # new for server 3.0
+                'pms': str(self.pms),  # new for server 3.0
+            },
             sign=False
         )
         logging.debug('Response _save_sign_keys: %s', _response)
@@ -223,14 +228,7 @@ class MigasFreeCommand(object):
 
         _pass = getpass.getpass('%s: ' % _('Password'))
 
-        _data = {
-            'username': _user,
-            'password': _pass,
-            'version': self.migas_version,
-            'platform': platform.system(),  # new for server 3.0
-            'pms': str(self.pms),  # new for server 3.0
-        }
-        self._save_sign_keys(_data)
+        self._save_sign_keys(_user, _pass)
         self.operation_ok(_('Computer registered at server'))
 
     def _show_running_options(self):
