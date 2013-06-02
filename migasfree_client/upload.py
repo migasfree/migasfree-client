@@ -308,7 +308,7 @@ class MigasFreeUpload(MigasFreeCommand):
         # actions dispatcher
         if options.file:
             self._file = options.file
-            self._is_regular_file = options.regular_file
+            self._is_regular_file = (options.regular_file is True)
             if self._is_regular_file:
                 self._create_repo = False
         elif options.dir:
@@ -322,6 +322,9 @@ class MigasFreeUpload(MigasFreeCommand):
             self._usage_examples()
 
         self._left_parameters()
+        self.auto_register_user = self.packager_user
+        self.auto_register_password = self.packager_pwd
+
         self._show_running_options()
 
         if self._file:
