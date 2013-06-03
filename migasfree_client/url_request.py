@@ -85,6 +85,12 @@ class UrlRequest(object):
         if self._public_key:
             logging.info('Public key: %s', self._public_key)
 
+        # API changed in server 3.0
+        self._filename_pattern = '%s.%s' % (
+            utils.get_mfc_computer_name(),
+            utils.get_hardware_uuid()
+        )
+
     def run(
         self,
         cmd,
@@ -116,14 +122,13 @@ class UrlRequest(object):
         # API changed in server 3.0
         _filename = os.path.join(
             TMP_PATH,
-            '%s.%s.%s' % (
-                utils.get_mfc_computer_name(),
-                utils.get_hardware_uuid(),
+            '%s.%s' % (
+                self._filename_pattern,
                 cmd
             )
         )
         if self._debug:
-            print _filename
+            print(_filename)
         if sign:
             secure.wrap(
                 _filename,
@@ -154,17 +159,23 @@ class UrlRequest(object):
         if _curl.error:
             _msg = _('Curl error: %s') % _curl.error
             logging.error(_msg)
-            print _msg
+            print(_msg)
 
             return {'errmfs': {'info': _msg, 'code': server_errors.GENERIC}}
             #sys.exit(errno.EBADRQC)
 
         if _curl.http_code >= 400:
-            print _('HTTP error code: %s') % _curl.http_code
+            print(_('HTTP error code: %s') % _curl.http_code)
             if self._debug:
-                _file = '/tmp/response.%s.%s.html' % (_curl.http_code, cmd)
+                _file = os.path.join(
+                    TMP_PATH,
+                    'response.%s.%s.html' % (
+                        _curl.http_code,
+                        cmd
+                    )
+                )
                 utils.write_file(_file, str(_curl.body))
-                print _file
+                print(_file)
 
             return {
                 'errmfs': {
@@ -188,12 +199,12 @@ class UrlRequest(object):
         if not self._debug:
             os.remove(_response)
         else:
-            print _response
+            print(_response)
 
         if not type(_ret) is dict or not ('%s.return' % cmd) in _ret:
             _msg = 'url_request unexpected response: %s. Expected: %s'
             if self._debug:
-                print _msg % (_ret, '%s.return' % cmd)
+                print(_msg % (_ret, '%s.return' % cmd))
             logging.critical(_msg, _ret, '%s.return' % cmd)
             sys.exit(errno.EACCES)
 
@@ -202,9 +213,9 @@ class UrlRequest(object):
             if _ret['errmfs']['code'] != server_errors.ALL_OK:
                 _error = server_errors.error_info(_ret['errmfs']['code'])
                 if self._debug:
-                    print _('Error: %s') % _error
+                    print(_('Error: %s') % _error)
                     if _ret['errmfs']['info']:
-                        print _('Information: %s') % _ret['errmfs']['info']
+                        print(_('Information: %s') % _ret['errmfs']['info'])
                 logging.error(
                     'url_request server error response code: %s',
                     _error
