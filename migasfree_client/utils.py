@@ -427,11 +427,14 @@ def get_mfc_computer_name():
 
 
 def get_hardware_uuid():
-    _uuid = commands.getoutput(
+    # issue #16
+    _ret, _uuid, _ = execute(
         'hal-get-property --udi /org/freedesktop/Hal/devices/computer \
-        --key system.hardware.uuid'
+        --key system.hardware.uuid',
+        interactive=False
     )
-    if _uuid == '' or _uuid is None:
+    _uuid = _uuid.replace('\n', '')
+    if _ret != 0 or _uuid == '' or _uuid is None:
         return get_mfc_computer_name()
 
     _byte_array = uuid.UUID(_uuid).hex
