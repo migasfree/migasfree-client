@@ -153,10 +153,10 @@ class MigasFreeCommand(object):
         _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
         _public_key = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
         if os.path.isfile(_private_key) and os.path.isfile(_public_key):
-            return  # all OK
+            return True  # all OK
 
         logging.warning('Security keys are not present!!!')
-        self._auto_register()
+        return self._auto_register()
 
     def _auto_register(self):
         # try to get keys
