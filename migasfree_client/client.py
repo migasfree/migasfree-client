@@ -195,6 +195,9 @@ class MigasFreeClient(MigasFreeCommand):
 
         if 'errmfs' in _ret \
         and _ret['errmfs']['code'] == server_errors.COMPUTER_NOT_FOUND:
+            _msg = _('Computer not found. Maybe you have invalid keys.')
+            self.operation_failed(_msg)
+            logging.warning(_msg)
             return self._auto_register()
 
         if _ret['errmfs']['code'] != server_errors.ALL_OK:
@@ -472,6 +475,8 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _upload_execution_errors(self):
         self._error_file_descriptor.close()
+        self._error_file_descriptor = None
+
         if os.stat(self.ERROR_FILE).st_size:
             self._send_message(_('Sending errors to server...'))
             self._url_request.run(
