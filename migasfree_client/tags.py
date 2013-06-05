@@ -104,10 +104,10 @@ class MigasFreeTags(MigasFreeCommand):
                         _tag_active = tag in _ret["select"]["tags"]
                         cmd += " '%s' '%s' '%s'" % (_tag_active, tag, key)
 
-                (_ret, _out, _err) = utils.execute(cmd)
+                (_ret, _out, _err) = utils.execute(cmd, interactive=False)
                 if _ret == 0:
                     if type(_out) is str and _out != "":
-                        self._tags = _out.split("|")
+                        self._tags = _out.replace("\n", "").split("|")
                     else:
                         self._tags = []
                 else:
@@ -136,14 +136,11 @@ class MigasFreeTags(MigasFreeCommand):
         # Remove Packages
         mfc._uninstall_packages(_ret["packages"]["remove"])
 
-        # Update System
-        mfc._update_system()
-
         # Pre-Install Packages
         mfc._install_mandatory_packages(_ret["packages"]["preinstall"])
 
-        # Update System
-        mfc._update_system()
+        # Update metadata
+        mfc._clean_pms_cache()
 
         # Install Packages
         mfc._install_mandatory_packages(_ret["packages"]["install"])
