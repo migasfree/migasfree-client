@@ -324,6 +324,7 @@ class MigasFreeUpload(MigasFreeCommand):
         self._left_parameters()
         self.auto_register_user = self.packager_user
         self.auto_register_password = self.packager_pwd
+        self.auto_register_command = 'get_key_packager'
 
         self._show_running_options()
 
