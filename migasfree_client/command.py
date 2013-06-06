@@ -81,6 +81,7 @@ class MigasFreeCommand(object):
 
     auto_register_user = ''
     auto_register_password = ''
+    auto_register_command = 'register_computer'
 
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
@@ -168,17 +169,8 @@ class MigasFreeCommand(object):
         )
 
     def _save_sign_keys(self, user, password):
-        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
-            try:
-                os.makedirs(os.path.abspath(settings.KEYS_PATH))
-            except:
-                _msg = _('Error creating %s directory') % settings.KEYS_PATH
-                self.operation_failed(_msg)
-                logging.error(_msg)
-                sys.exit(errno.ENOTDIR)
-
         _response = self._url_request.run(
-            'register_computer',
+            self.auto_register_command,
             data={
                 'username': user,
                 'password': password,
@@ -189,6 +181,15 @@ class MigasFreeCommand(object):
             sign=False
         )
         logging.debug('Response _save_sign_keys: %s', _response)
+
+        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
+            try:
+                os.makedirs(os.path.abspath(settings.KEYS_PATH))
+            except:
+                _msg = _('Error creating %s directory') % settings.KEYS_PATH
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                sys.exit(errno.ENOTDIR)
 
         if 'errmfs' in _response:
             _msg = _response['errmfs']['info']
