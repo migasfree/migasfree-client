@@ -195,9 +195,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         if 'errmfs' in _ret \
         and _ret['errmfs']['code'] == server_errors.COMPUTER_NOT_FOUND:
-            _msg = _('Computer not found. Maybe you have invalid keys.')
-            self.operation_failed(_msg)
-            logging.warning(_msg)
+            logging.warning('Computer not found.')
             return self._auto_register()
 
         if _ret['errmfs']['code'] != server_errors.ALL_OK:
