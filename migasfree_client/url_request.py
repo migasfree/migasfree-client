@@ -203,9 +203,9 @@ class UrlRequest(object):
 
         if not type(_ret) is dict or not ('%s.return' % cmd) in _ret:
             if 'errmfs' in _ret:
-    			_msg = server_errors.error_info(_ret['errmfs']['code'])
-				logging.error(_msg)
-				print(_msg)
+                _msg = server_errors.error_info(_ret['errmfs']['code'])
+                logging.error(_msg)
+                print(_msg)
 
             _msg = 'url_request unexpected response: %s. Expected: %s'
             if self._debug:
