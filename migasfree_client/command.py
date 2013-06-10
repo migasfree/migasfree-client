@@ -84,6 +84,7 @@ class MigasFreeCommand(object):
     auto_register_command = 'register_computer'
 
     def __init__(self):
+        _log_level = logging.INFO
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
 
         self.migas_version = utils.get_mfc_version()
@@ -119,7 +120,6 @@ class MigasFreeCommand(object):
             self.packager_store = _config_packager.get('store', None)
 
         # http://www.lightbird.net/py-by-example/logging.html
-        _log_level = logging.INFO
         logging.basicConfig(
             format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
             level=_log_level,
