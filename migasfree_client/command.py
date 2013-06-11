@@ -90,7 +90,7 @@ class MigasFreeCommand(object):
         self.migas_version = utils.get_mfc_version()
         self.migas_computer_name = utils.get_mfc_computer_name()
         if type(_config_client) is dict:
-            self.migas_server = _config_client.get('server', 'migasfree.org')
+            self.migas_server = _config_client.get('server', 'localhost')
             self.migas_proxy = _config_client.get('proxy', None)
             self.migas_ssl_cert = _config_client.get('ssl_cert', None)
             self.migas_package_proxy_cache = _config_client.get(
