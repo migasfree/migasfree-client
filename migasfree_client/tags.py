@@ -55,99 +55,139 @@ from .command import (
 class MigasFreeTags(MigasFreeCommand):
     CMD = 'migasfree-tags'  # /usr/bin/migasfree-tags
 
-    def _set_tags(self):
-        logging.debug('Set tags operation...')
+    def _usage_examples(self):
+        print('\n' + _('Examples:'))
 
-        self._check_sign_keys()
+        print('  ' + _('Get assigned tags in server:'))
+        print('\t%s -g' % self.CMD)
+        print('\t%s --get\n' % self.CMD)
 
-        if not self._silent:
-            logging.debug('Set tags: %s', self._tags)
-            _ret = self._url_request.run(
-                'set_computer_tags',
-                data={'tags': self._tags, 'select': True},
+        print('  ' + _('Set tags (command line):'))
+        print('\t%s -s tag1 tag2' % self.CMD)
+        print('\t%s --set tag1 tag2\n' % self.CMD)
+
+        print('  ' + _('Set tags (with GUI):'))
+        print('\t%s -s' % self.CMD)
+        print('\t%s --set\n' % self.CMD)
+
+        print('  ' + _('Unsetting all tags (command line):'))
+        print('\t%s -s ""' % self.CMD)
+        print('\t%s --set ""\n' % self.CMD)
+
+    def _show_running_options(self):
+        MigasFreeCommand._show_running_options(self)
+
+        print('\t%s: %s' % (_('Tag list'), self._tags))
+
+    def _sanitize(self, tag_list):
+        tag_list[:] = [_item.replace('"', '') for _item in tag_list]
+        logging.info('Sanitized list: %s' % tag_list)
+
+        return tag_list
+
+    def _select_tags(self, tags):
+        _selected_tags = []
+
+        # Change tags with gui
+        _title = _("Change tags")
+        _text = _("Please, select tags for this computer")
+        _cmd = "zenity --title='%s' \
+            --text='%s' \
+            --window-icon=%s \
+            --list \
+            --width 600 \
+            --height 400 \
+            --checklist \
+            --multiple \
+            --print-column=2 \
+            --column=' ' \
+            --column='TAG' \
+            --column='TYPE'" % (
+                _title,
+                _text,
+                os.path.join(settings.ICON_PATH, self.ICON)
             )
+        for _key, _value in tags["available"].items():
+            for _item in _value:
+                _tag_active = _item in tags["selected"]
+                _cmd += " '%s' '%s' '%s'" % (_tag_active, _item, _key)
 
-            logging.debug('Uploading tags response: %s', _ret)
-            if self._debug:
-                print('Response: %s' % _ret)
+        logging.debug('Change tags command: %s' % _cmd)
+        (_ret, _out, _err) = utils.execute(_cmd, interactive=False)
+        if _ret == 0:
+            if type(_out) is str and _out != "":
+                _selected_tags = _out.replace("\n", "").split("|")
+                logging.debug('Selected tags: %s' % _selected_tags)
+        else:
+            # no action chosed -> no change tags
+            logging.debug('Return value command: %d' % _ret)
+            sys.exit(_ret)
 
-            if _ret['errmfs']['code'] != server_errors.ALL_OK:
-                _error_info = server_errors.error_info(
-                    _ret['errmfs']['code']
-                )
-                self.operation_failed(_error_info)
-                logging.error('Uploading file error: %s', _error_info)
-                sys.exit(errno.EINPROGRESS)
+        return _selected_tags
 
-            # Change tags with gui
-            if "select" in _ret:
-                _title = _("Change tags")
-                _text = _("Please, select tags for this computer")
-                cmd = "zenity --title='%s' \
-                    --text='%s' \
-                    --window-icon=%s \
-                    --list \
-                    --width 600 \
-                    --height 400 \
-                    --checklist \
-                    --multiple \
-                    --print-column=2 \
-                    --column=' ' \
-                    --column='TAG' \
-                    --column='TYPE'" % (
-                        _title,
-                        _text,
-                        os.path.join(settings.ICON_PATH, self.ICON)
-                    )
-                for key, value in _ret["select"]["availables"].items():
-                    for tag in value:
-                        _tag_active = tag in _ret["select"]["tags"]
-                        cmd += " '%s' '%s' '%s'" % (_tag_active, tag, key)
+    def _get_tags(self):
+        logging.debug('Getting tags')
+        _ret = self._url_request.run('get_computer_tags')
 
-                (_ret, _out, _err) = utils.execute(cmd, interactive=False)
-                if _ret == 0:
-                    if type(_out) is str and _out != "":
-                        self._tags = _out.replace("\n", "").split("|")
-                    else:
-                        self._tags = []
-                else:
-                    return _ret
-            else:
-                return True
-
-        logging.debug('Set tags: %s', self._tags)
-        _ret = self._url_request.run(
-            'set_computer_tags',
-            data={
-                'tags': self._tags,
-                'select': False
-            }
-        )
-
-        logging.debug('Uploading tags response: %s', _ret)
+        logging.debug('Getting tags response: %s', _ret)
         if self._debug:
             print('Response: %s' % _ret)
 
+        if 'errmfs' in _ret and _ret['errmfs']['code'] != server_errors.ALL_OK:
+            _error_info = server_errors.error_info(
+                _ret['errmfs']['code']
+            )
+            self.operation_failed(_error_info)
+            logging.error('Error: %s', _error_info)
+            sys.exit(errno.EINPROGRESS)
+
+        return _ret
+
+    def _set_tags(self):
+        self._check_sign_keys()
+
+        if not self._tags:
+            self._tags = self._select_tags(self._get_tags())
+
+        # unsettings all tags?
+        if len(self._tags) == 1 and self._tags[0] == '':
+            logging.debug('Unsetting all tags')
+            self._tags = []
+
+        logging.debug('Setting tags: %s', self._tags)
+        _ret = self._url_request.run(
+            'set_computer_tags',
+            data={'tags': self._tags}
+        )
+
+        print('')
+        self.operation_ok(_('Tags setted: %s') % self._tags)
+
+        logging.debug('Setting tags response: %s', _ret)
+        if self._debug:
+            print('Response: %s' % _ret)
+
+        return _ret
+
+    def _apply_rules(self, rules):
         mfc = MigasFreeClient()
 
         # Update metadata
         mfc._clean_pms_cache()
 
         # Remove Packages
-        mfc._uninstall_packages(_ret["packages"]["remove"])
+        mfc._uninstall_packages(rules["packages"]["remove"])
 
         # Pre-Install Packages
-        mfc._install_mandatory_packages(_ret["packages"]["preinstall"])
+        mfc._install_mandatory_packages(rules["packages"]["preinstall"])
 
         # Update metadata
         mfc._clean_pms_cache()
 
         # Install Packages
-        mfc._install_mandatory_packages(_ret["packages"]["install"])
+        mfc._install_mandatory_packages(rules["packages"]["install"])
 
         mfc._send_message()
-
-        return True
 
     def run(self):
         _program = 'migasfree tags'
@@ -158,28 +198,51 @@ class MigasFreeTags(MigasFreeCommand):
             usage='%prog [options] [tag]...'
         )
 
-        print(_('%(program)s version: %(version)s') % {
-            'program': _program,
-            'version': __version__
-        })
+        parser.add_option(
+            '--set', '-s',
+            action='store_true',
+            help=_('Set tags in server')
+        )
 
         parser.add_option(
-            '--silent', '-s',
+            '--get', '-g',
             action='store_true',
-            help=_('Silent mode')
+            help=_('Get assigned tags in server')
         )
 
         options, arguments = parser.parse_args()
+        logging.info('Program options: %s' % options)
+        logging.info('Program arguments: %s' % arguments)
 
-        self._silent = options.silent
+        # check restrictions
+        if not options.get and not options.set:
+            self._usage_examples()
+            parser.error(_('Get or Set options are mandatory!!!'))
+        if options.get and options.set:
+            self._usage_examples()
+            parser.error(_('Get and Set options are exclusive!!!'))
 
         utils.check_lock_file(self.CMD, self.LOCK_FILE)
 
-        self._show_running_options()
+        # actions dispatcher
+        if options.get:
+            _response = self._get_tags()
+            for _item in _response['selected']:
+                print('"' + _item + '"'),
+        elif options.set:
+            self._tags = self._sanitize(arguments)
 
-        self._tags = arguments
+            print(_('%(program)s version: %(version)s') % {
+                'program': _program,
+                'version': __version__
+            })
+            self._show_running_options()
 
-        self._set_tags()
+            _response = self._set_tags()
+            self._apply_rules(_response)
+        else:
+            parser.print_help()
+            self._usage_examples()
 
         utils.remove_file(self.LOCK_FILE)
 
