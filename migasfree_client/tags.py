@@ -173,7 +173,7 @@ class MigasFreeTags(MigasFreeCommand):
         mfc = MigasFreeClient()
 
         # Update metadata
-        mfc._clean_pms_cache()
+        mfc._update_system()
 
         # Remove Packages
         mfc._uninstall_packages(rules["packages"]["remove"])
