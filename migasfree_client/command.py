@@ -91,6 +91,10 @@ class MigasFreeCommand(object):
         self.migas_computer_name = utils.get_mfc_computer_name()
         if type(_config_client) is dict:
             self.migas_server = _config_client.get('server', 'localhost')
+            self.migas_auto_update = _config_client.get(
+                'auto_update_packages',
+                True
+            )
             self.migas_proxy = _config_client.get('proxy', None)
             self.migas_ssl_cert = _config_client.get('ssl_cert', None)
             self.migas_package_proxy_cache = _config_client.get(
@@ -237,6 +241,7 @@ class MigasFreeCommand(object):
         print(_('Running options:'))
         print('\t%s: %s' % (_('Version'), self.migas_version))
         print('\t%s: %s' % (_('Server'), self.migas_server))
+        print('\t%s: %s' % (_('Auto update packages'), self.migas_auto_update))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         print('\t%s: %s' % (
