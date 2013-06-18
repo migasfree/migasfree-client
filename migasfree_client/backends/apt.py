@@ -20,7 +20,6 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __file__ = 'apt.py'
-__date__ = '2013-01-26'
 
 import re
 import logging
@@ -45,6 +44,8 @@ class Apt(Pms):
 
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'
+
+        self._silent_options = '-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o Debug::pkgProblemResolver=1 --assume-yes --force-yes --allow-unauthenticated --auto-remove'
 
     def install(self, package):
         '''
@@ -81,7 +82,10 @@ class Apt(Pms):
         (bool, string) update_silent(void)
         '''
 
-        self._cmd = '%s --assume-yes --force-yes --allow-unauthenticated dist-upgrade' % self._pms
+        self._cmd = '%s %s dist-upgrade' % (
+            self._pms,
+            self._silent_options
+        )
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
@@ -106,8 +110,9 @@ class Apt(Pms):
         if not package_set:
             return (True, None)
 
-        self._cmd = '%s --assume-yes --force-yes --allow-unauthenticated install %s' % (
+        self._cmd = '%s %s install %s' % (
             self._pms,
+            self._silent_options,
             ' '.join(package_set)
         )
         logging.debug(self._cmd)
@@ -134,8 +139,11 @@ class Apt(Pms):
         if not package_set:
             return (True, None)
 
-        self._cmd = '%s --assume-yes remove %s' \
-            % (self._pms, ' '.join(package_set))
+        self._cmd = '%s %s remove %s' % (
+            self._pms,
+            self._silent_options,
+            ' '.join(package_set)
+        )
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
