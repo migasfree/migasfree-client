@@ -244,6 +244,9 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (_('Auto update packages'), self.migas_auto_update))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
+        if self.migas_ssl_cert is not None and \
+        not os.path.exists(self.migas_ssl_cert):
+            print('\t\t%s: %s' % (_('Warning'), _('Certificate does not exist and authentication is not guaranteed')))
         print('\t%s: %s' % (
             _('Package Proxy Cache'),
             self.migas_package_proxy_cache
