@@ -536,8 +536,9 @@ class MigasFreeClient(MigasFreeCommand):
         # then install new packages
         self._install_mandatory_packages(_request['packages']['install'])
 
-        # finally update packages
-        self._update_packages()
+        if self.migas_auto_update is True:
+            # finally update packages
+            self._update_packages()
 
         # upload computer software history
         _software_after = self.pms.query_all()
@@ -588,7 +589,7 @@ class MigasFreeClient(MigasFreeCommand):
         self._upload_execution_errors()
 
         self._send_message(
-            _('Completed operations'),
+            _('Operations completed'),
             self.ICON_COMPLETED,
             mandatory=True
         )
