@@ -62,7 +62,7 @@ class Apt(Pms):
         bool remove(string package)
         '''
 
-        self._cmd = '%s remove %s' % (self._pms, package.strip())
+        self._cmd = '%s purge %s' % (self._pms, package.strip())
         logging.debug(self._cmd)
 
         return (execute(self._cmd)[0] == 0)
@@ -139,7 +139,7 @@ class Apt(Pms):
         if not package_set:
             return (True, None)
 
-        self._cmd = '%s %s remove %s' % (
+        self._cmd = '%s %s purge %s' % (
             self._pms,
             self._silent_options,
             ' '.join(package_set)
