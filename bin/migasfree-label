@@ -13,14 +13,15 @@ if not get_python_lib() in sys.path:
 
 import webbrowser
 
-from migasfree_client.utils import get_config, get_hardware_uuid
+from migasfree_client.utils import get_config, get_hardware_uuid, get_mfc_computer_name 
 from migasfree_client import settings
 
 if __name__ == '__main__':
     config = get_config(settings.CONF_FILE, 'client')
     webbrowser.open(
-        'http://%s/computer_label/?uuid=%s' % (
+        'http://%s/computer_label/?uuid=%s&name=%s' % (
             config.get('server', 'migasfree.org'),
-            get_hardware_uuid()
+            get_hardware_uuid(),
+            get_mfc_computer_name()
         )
     )
