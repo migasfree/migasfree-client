@@ -55,6 +55,8 @@ import platform
 import gettext
 _ = gettext.gettext
 
+import utils
+
 from backends import Pms
 
 
@@ -157,6 +159,14 @@ class MigasFreeCommand(object):
         )
 
         self._pms_selection()
+
+    def _check_user_is_root(self):
+        return utils.get_user_info(os.environ.get('USER'))['guid'] == 0
+
+    def _user_is_not_root(self):
+        if not self._check_user_is_root():
+            self.operation_failed(_('User has insufficient privileges to execute this command'))
+            sys.exit(errno.EACCES)
 
     def _check_sign_keys(self):
         _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
