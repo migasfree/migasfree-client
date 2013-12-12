@@ -25,7 +25,7 @@ __license__ = 'GPLv3'
 migasfree-client settings
 """
 
-LOG_FILE = '/var/log/migasfree.log'
+LOG_FILE = '/var/tmp/migasfree.log'
 CONF_FILE = '/etc/migasfree.conf'
 SOFTWARE_FILE = '/var/tmp/installed_software.txt'
 
