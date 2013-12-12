@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-12 10:55+0100\n"
+"POT-Creation-Date: 2013-12-12 12:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,387 +17,391 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../migasfree_client/client.py:91
+#: ../migasfree_client/client.py:93
 msgid "No detected graphic process"
 msgstr ""
 
-#: ../migasfree_client/client.py:110
+#: ../migasfree_client/client.py:112
 #, python-format
 msgid "Killing %s before time!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:117
+#: ../migasfree_client/client.py:119
 msgid "Graphic user"
 msgstr ""
 
-#: ../migasfree_client/client.py:121 ../migasfree_client/tags.py:59
+#: ../migasfree_client/client.py:123 ../migasfree_client/tags.py:63
 #: ../migasfree_client/upload.py:65
 msgid "Examples:"
 msgstr ""
 
-#: ../migasfree_client/client.py:123
+#: ../migasfree_client/client.py:125
 msgid "Register computer at server:"
 msgstr ""
 
-#: ../migasfree_client/client.py:127
+#: ../migasfree_client/client.py:129
 msgid "Update the system:"
 msgstr ""
 
-#: ../migasfree_client/client.py:131
+#: ../migasfree_client/client.py:133
 msgid "Search package:"
 msgstr ""
 
-#: ../migasfree_client/client.py:135
+#: ../migasfree_client/client.py:137
 msgid "Install package:"
 msgstr ""
 
-#: ../migasfree_client/client.py:139
+#: ../migasfree_client/client.py:141
 msgid "Remove package:"
 msgstr ""
 
-#: ../migasfree_client/client.py:263
+#: ../migasfree_client/client.py:265
 msgid "Evaluating attributes..."
 msgstr ""
 
-#: ../migasfree_client/client.py:288
+#: ../migasfree_client/client.py:290
 msgid "Executing faults..."
 msgstr ""
 
-#: ../migasfree_client/client.py:305
+#: ../migasfree_client/client.py:307
 msgid "Getting properties..."
 msgstr ""
 
-#: ../migasfree_client/client.py:310
+#: ../migasfree_client/client.py:312
 msgid "No data requested from server"
 msgstr ""
 
-#: ../migasfree_client/client.py:338
+#: ../migasfree_client/client.py:340
 msgid "Uploading manual software..."
 msgstr ""
 
-#: ../migasfree_client/client.py:364
+#: ../migasfree_client/client.py:366
 msgid "Uploading old errors..."
 msgstr ""
 
-#: ../migasfree_client/client.py:377
+#: ../migasfree_client/client.py:379
 msgid "Creating repositories..."
 msgstr ""
 
-#: ../migasfree_client/client.py:392
+#: ../migasfree_client/client.py:394
 #, python-format
 msgid "Error creating repositories: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:401
+#: ../migasfree_client/client.py:403
 msgid "Getting repositories metadata..."
 msgstr ""
 
-#: ../migasfree_client/client.py:407
+#: ../migasfree_client/client.py:409
 msgid "Error getting repositories metadata"
 msgstr ""
 
-#: ../migasfree_client/client.py:413
+#: ../migasfree_client/client.py:415
 msgid "Uninstalling packages..."
 msgstr ""
 
-#: ../migasfree_client/client.py:418
+#: ../migasfree_client/client.py:420
 #, python-format
 msgid "Error uninstalling packages: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:424
+#: ../migasfree_client/client.py:426
 msgid "Installing mandatory packages..."
 msgstr ""
 
-#: ../migasfree_client/client.py:429
+#: ../migasfree_client/client.py:431
 #, python-format
 msgid "Error installing packages: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:435
+#: ../migasfree_client/client.py:437
 msgid "Updating packages..."
 msgstr ""
 
-#: ../migasfree_client/client.py:440
+#: ../migasfree_client/client.py:442
 #, python-format
 msgid "Error updating packages: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:446
+#: ../migasfree_client/client.py:448
 msgid "Capturing hardware information..."
 msgstr ""
 
-#: ../migasfree_client/client.py:452
+#: ../migasfree_client/client.py:454
 #, python-format
 msgid "lshw command failed: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:460
+#: ../migasfree_client/client.py:462
 msgid "Sending hardware information..."
 msgstr ""
 
-#: ../migasfree_client/client.py:479
+#: ../migasfree_client/client.py:481
 msgid "Sending errors to server..."
 msgstr ""
 
-#: ../migasfree_client/client.py:494
+#: ../migasfree_client/client.py:496
 msgid "Connecting to migasfree server..."
 msgstr ""
 
-#: ../migasfree_client/client.py:506
+#: ../migasfree_client/client.py:508
 msgid "Uploading attributes..."
 msgstr ""
 
-#: ../migasfree_client/client.py:519
+#: ../migasfree_client/client.py:521
 msgid "Uploading faults..."
 msgstr ""
 
-#: ../migasfree_client/client.py:548
+#: ../migasfree_client/client.py:550
 msgid "Uploading software history..."
 msgstr ""
 
-#: ../migasfree_client/client.py:552
+#: ../migasfree_client/client.py:554
 #, python-format
 msgid "Software diff: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:560
+#: ../migasfree_client/client.py:562
 msgid "Uploading software inventory..."
 msgstr ""
 
-#: ../migasfree_client/client.py:592
+#: ../migasfree_client/client.py:594
 msgid "Operations completed"
 msgstr ""
 
-#: ../migasfree_client/client.py:607
+#: ../migasfree_client/client.py:609
 #, python-format
 msgid "Installing package: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:616
+#: ../migasfree_client/client.py:618
 #, python-format
 msgid "Removing package: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:626
+#: ../migasfree_client/client.py:628
 #, python-format
 msgid "Installing device: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:634
+#: ../migasfree_client/client.py:636
 #, python-format
 msgid "Removing device: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:647 ../migasfree_client/tags.py:235
+#: ../migasfree_client/client.py:649 ../migasfree_client/tags.py:239
 #: ../migasfree_client/upload.py:248
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr ""
 
-#: ../migasfree_client/client.py:653
+#: ../migasfree_client/client.py:655
 msgid "Register computer at server"
 msgstr ""
 
-#: ../migasfree_client/client.py:655
+#: ../migasfree_client/client.py:657
 msgid "Update system from repositories"
 msgstr ""
 
-#: ../migasfree_client/client.py:657
+#: ../migasfree_client/client.py:659
 msgid "Search package in repositories"
 msgstr ""
 
-#: ../migasfree_client/client.py:662
+#: ../migasfree_client/client.py:664
 msgid "Install package"
 msgstr ""
 
-#: ../migasfree_client/client.py:668
+#: ../migasfree_client/client.py:670
 msgid "Remove package"
 msgstr ""
 
-#: ../migasfree_client/client.py:671
+#: ../migasfree_client/client.py:673
 msgid "Package to install or remove"
 msgstr ""
 
-#: ../migasfree_client/client.py:676
+#: ../migasfree_client/client.py:678
 msgid "Force package upgrades"
 msgstr ""
 
-#: ../migasfree_client/client.py:684
+#: ../migasfree_client/client.py:686
 msgid "Register option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:688
+#: ../migasfree_client/client.py:690
 msgid "Update option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:691
+#: ../migasfree_client/client.py:693
 msgid "Search option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:695
+#: ../migasfree_client/client.py:697
 msgid "Install and remove are exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:699
+#: ../migasfree_client/client.py:701
 msgid "Install needs a package!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:703
+#: ../migasfree_client/client.py:705
 msgid "Remove needs a package!!!"
 msgstr ""
 
-#: ../migasfree_client/command.py:172
+#: ../migasfree_client/command.py:168
+msgid "User has insufficient privileges to execute this command"
+msgstr ""
+
+#: ../migasfree_client/command.py:182
 msgid "Autoregistering computer..."
 msgstr ""
 
-#: ../migasfree_client/command.py:197
+#: ../migasfree_client/command.py:207
 #, python-format
 msgid "Error creating %s directory"
 msgstr ""
 
-#: ../migasfree_client/command.py:213
+#: ../migasfree_client/command.py:223
 #, python-format
 msgid "Key %s created!"
 msgstr ""
 
-#: ../migasfree_client/command.py:215
+#: ../migasfree_client/command.py:225
 msgid "Error writing key file!!!"
 msgstr ""
 
-#: ../migasfree_client/command.py:224
+#: ../migasfree_client/command.py:234
 #, python-format
 msgid "Have you check config options in this machine (%s)?"
 msgstr ""
 
-#: ../migasfree_client/command.py:228
+#: ../migasfree_client/command.py:238
 #, python-format
 msgid "Check %s file and register again"
 msgstr ""
 
-#: ../migasfree_client/command.py:232
+#: ../migasfree_client/command.py:242
 msgid "User to register computer at server"
 msgstr ""
 
-#: ../migasfree_client/command.py:234 ../migasfree_client/upload.py:107
+#: ../migasfree_client/command.py:244 ../migasfree_client/upload.py:107
 #, python-format
 msgid "Empty user. Exiting %s."
 msgstr ""
 
-#: ../migasfree_client/command.py:238
+#: ../migasfree_client/command.py:248
 msgid "Password"
 msgstr ""
 
-#: ../migasfree_client/command.py:241
+#: ../migasfree_client/command.py:251
 msgid "Computer registered at server"
 msgstr ""
 
-#: ../migasfree_client/command.py:245
+#: ../migasfree_client/command.py:255
 msgid "Running options:"
 msgstr ""
 
-#: ../migasfree_client/command.py:246 ../migasfree_client/upload.py:90
+#: ../migasfree_client/command.py:256 ../migasfree_client/upload.py:90
 msgid "Version"
 msgstr ""
 
-#: ../migasfree_client/command.py:247
+#: ../migasfree_client/command.py:257
 msgid "Server"
 msgstr ""
 
-#: ../migasfree_client/command.py:248
+#: ../migasfree_client/command.py:258
 msgid "Auto update packages"
 msgstr ""
 
-#: ../migasfree_client/command.py:249
+#: ../migasfree_client/command.py:259
 msgid "Proxy"
 msgstr ""
 
-#: ../migasfree_client/command.py:250
+#: ../migasfree_client/command.py:260
 msgid "SSL certificate"
 msgstr ""
 
-#: ../migasfree_client/command.py:253
+#: ../migasfree_client/command.py:263
 msgid "Warning"
 msgstr ""
 
-#: ../migasfree_client/command.py:253
+#: ../migasfree_client/command.py:263
 msgid "Certificate does not exist and authentication is not guaranteed"
 msgstr ""
 
-#: ../migasfree_client/command.py:255
+#: ../migasfree_client/command.py:265
 msgid "Package Proxy Cache"
 msgstr ""
 
-#: ../migasfree_client/command.py:258
+#: ../migasfree_client/command.py:268
 msgid "Debug"
 msgstr ""
 
-#: ../migasfree_client/command.py:259
+#: ../migasfree_client/command.py:269
 msgid "Computer name"
 msgstr ""
 
-#: ../migasfree_client/command.py:260
+#: ../migasfree_client/command.py:270
 msgid "GUI verbose"
 msgstr ""
 
-#: ../migasfree_client/command.py:261
+#: ../migasfree_client/command.py:271
 msgid "PMS"
 msgstr ""
 
-#: ../migasfree_client/command.py:292
+#: ../migasfree_client/command.py:302
 msgid "Ok"
 msgstr ""
 
-#: ../migasfree_client/command.py:299
+#: ../migasfree_client/command.py:309
 msgid "Failed"
 msgstr ""
 
-#: ../migasfree_client/tags.py:61
+#: ../migasfree_client/tags.py:65
 msgid "Get assigned tags in server:"
 msgstr ""
 
-#: ../migasfree_client/tags.py:65
+#: ../migasfree_client/tags.py:69
 msgid "Set tags (command line):"
 msgstr ""
 
-#: ../migasfree_client/tags.py:69
+#: ../migasfree_client/tags.py:73
 msgid "Set tags (with GUI):"
 msgstr ""
 
-#: ../migasfree_client/tags.py:73
+#: ../migasfree_client/tags.py:77
 msgid "Unsetting all tags (command line):"
 msgstr ""
 
-#: ../migasfree_client/tags.py:80
+#: ../migasfree_client/tags.py:84
 msgid "Tag list"
 msgstr ""
 
-#: ../migasfree_client/tags.py:92
+#: ../migasfree_client/tags.py:96
 msgid "Change tags"
 msgstr ""
 
-#: ../migasfree_client/tags.py:93
+#: ../migasfree_client/tags.py:97
 msgid "Please, select tags for this computer"
 msgstr ""
 
-#: ../migasfree_client/tags.py:164
+#: ../migasfree_client/tags.py:168
 #, python-format
 msgid "Tags setted: %s"
 msgstr ""
 
-#: ../migasfree_client/tags.py:204
+#: ../migasfree_client/tags.py:208
 msgid "Set tags in server"
 msgstr ""
 
-#: ../migasfree_client/tags.py:210
+#: ../migasfree_client/tags.py:214
 msgid "Get assigned tags in server"
 msgstr ""
 
-#: ../migasfree_client/tags.py:220
+#: ../migasfree_client/tags.py:224
 msgid "Get or Set options are mandatory!!!"
 msgstr ""
 
-#: ../migasfree_client/tags.py:223
+#: ../migasfree_client/tags.py:227
 msgid "Get and Set options are exclusive!!!"
 msgstr ""
 
