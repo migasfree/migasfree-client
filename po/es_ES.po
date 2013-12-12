@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-18 17:34+0200\n"
-"PO-Revision-Date: 2013-06-18 17:35+0100\n"
+"POT-Creation-Date: 2013-12-12 10:55+0100\n"
+"PO-Revision-Date: 2013-12-12 10:56+0100\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
 "Language: \n"
@@ -220,134 +220,138 @@ msgstr "Desinstalar paquete"
 msgid "Package to install or remove"
 msgstr "Paquete para instalar o desinstalar"
 
-#: ../migasfree_client/client.py:681
+#: ../migasfree_client/client.py:676
+msgid "Force package upgrades"
+msgstr "Fuerza la actualización de software"
+
+#: ../migasfree_client/client.py:684
 msgid "Register option is exclusive!!!"
 msgstr "¡La opción de registro es exclusiva!"
 
-#: ../migasfree_client/client.py:685
+#: ../migasfree_client/client.py:688
 msgid "Update option is exclusive!!!"
 msgstr "¡La opción de actualización es exclusiva!"
 
-#: ../migasfree_client/client.py:688
+#: ../migasfree_client/client.py:691
 msgid "Search option is exclusive!!!"
 msgstr "¡La opción de búsqueda es exclusiva!"
 
-#: ../migasfree_client/client.py:692
+#: ../migasfree_client/client.py:695
 msgid "Install and remove are exclusive!!!"
 msgstr "¡Instalar y desinstalar son excluyentes!"
 
-#: ../migasfree_client/client.py:696
+#: ../migasfree_client/client.py:699
 msgid "Install needs a package!!!"
 msgstr "¡Instalar requiere un paquete!"
 
-#: ../migasfree_client/client.py:700
+#: ../migasfree_client/client.py:703
 msgid "Remove needs a package!!!"
 msgstr "¡Desinstalar requiere un paquete!"
 
-#: ../migasfree_client/command.py:168
+#: ../migasfree_client/command.py:172
 msgid "Autoregistering computer..."
 msgstr "Autoregistrando ordenador..."
 
-#: ../migasfree_client/command.py:193
+#: ../migasfree_client/command.py:197
 #, python-format
 msgid "Error creating %s directory"
 msgstr "Error creando el directorio %s"
 
-#: ../migasfree_client/command.py:209
+#: ../migasfree_client/command.py:213
 #, python-format
 msgid "Key %s created!"
 msgstr "¡Clave %s creada!"
 
-#: ../migasfree_client/command.py:211
+#: ../migasfree_client/command.py:215
 msgid "Error writing key file!!!"
 msgstr "¡Error escribiendo fichero de clave!"
 
-#: ../migasfree_client/command.py:220
+#: ../migasfree_client/command.py:224
 #, python-format
 msgid "Have you check config options in this machine (%s)?"
 msgstr "¿Has revisado las opciones de configuración en este ordenador (%s)?"
 
-#: ../migasfree_client/command.py:224
+#: ../migasfree_client/command.py:228
 #, python-format
 msgid "Check %s file and register again"
 msgstr "Verifique el fichero %s y registre de nuevo"
 
-#: ../migasfree_client/command.py:228
+#: ../migasfree_client/command.py:232
 msgid "User to register computer at server"
 msgstr "Usuario para registrar el ordenador en el servidor"
 
-#: ../migasfree_client/command.py:230
+#: ../migasfree_client/command.py:234
 #: ../migasfree_client/upload.py:107
 #, python-format
 msgid "Empty user. Exiting %s."
 msgstr "El usuario está vacío. Saliendo de %s."
 
-#: ../migasfree_client/command.py:234
+#: ../migasfree_client/command.py:238
 msgid "Password"
 msgstr "Contraseña"
 
-#: ../migasfree_client/command.py:237
+#: ../migasfree_client/command.py:241
 msgid "Computer registered at server"
 msgstr "Ordenador registrado en el servidor"
 
-#: ../migasfree_client/command.py:241
+#: ../migasfree_client/command.py:245
 msgid "Running options:"
 msgstr "Opciones de ejecución:"
 
-#: ../migasfree_client/command.py:242
+#: ../migasfree_client/command.py:246
 #: ../migasfree_client/upload.py:90
 msgid "Version"
 msgstr "Versión"
 
-#: ../migasfree_client/command.py:243
+#: ../migasfree_client/command.py:247
 msgid "Server"
 msgstr "Servidor"
 
-#: ../migasfree_client/command.py:244
+#: ../migasfree_client/command.py:248
 msgid "Auto update packages"
 msgstr "Actualizar paquetes automáticamente"
 
-#: ../migasfree_client/command.py:245
+#: ../migasfree_client/command.py:249
 msgid "Proxy"
 msgstr "Proxy"
 
-#: ../migasfree_client/command.py:246
+#: ../migasfree_client/command.py:250
 msgid "SSL certificate"
 msgstr "Certificado SSL"
 
-#: ../migasfree_client/command.py:249
+#: ../migasfree_client/command.py:253
 msgid "Warning"
 msgstr "Aviso"
 
-#: ../migasfree_client/command.py:249
+#: ../migasfree_client/command.py:253
 msgid "Certificate does not exist and authentication is not guaranteed"
 msgstr "El certificado no existe y la autenticación no está garantizada"
 
-#: ../migasfree_client/command.py:251
+#: ../migasfree_client/command.py:255
 msgid "Package Proxy Cache"
 msgstr "Proxy caché de paquetes"
 
-#: ../migasfree_client/command.py:254
+#: ../migasfree_client/command.py:258
 msgid "Debug"
 msgstr "Depuración"
 
-#: ../migasfree_client/command.py:255
+#: ../migasfree_client/command.py:259
 msgid "Computer name"
 msgstr "Nombre del ordenador"
 
-#: ../migasfree_client/command.py:256
+#: ../migasfree_client/command.py:260
 msgid "GUI verbose"
 msgstr "GUI detallado"
 
-#: ../migasfree_client/command.py:257
+#: ../migasfree_client/command.py:261
 msgid "PMS"
 msgstr "PMS"
 
-#: ../migasfree_client/command.py:288
+#: ../migasfree_client/command.py:292
 msgid "Ok"
 msgstr "Correcto"
 
-#: ../migasfree_client/command.py:295
+#: ../migasfree_client/command.py:299
 msgid "Failed"
 msgstr "Fallo"
 
@@ -654,9 +658,6 @@ msgstr "Error genérico"
 
 #~ msgid "Install package or device"
 #~ msgstr "Instalar paquete o dispositivo"
-
-#~ msgid "Remove package or device"
-#~ msgstr "Quitar paquete o dispositivo"
 
 #~ msgid "Device to install or remove"
 #~ msgstr "Dispositivo para instalar o quitar"

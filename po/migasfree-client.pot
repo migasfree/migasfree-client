@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-18 17:34+0200\n"
+"POT-Creation-Date: 2013-12-12 10:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -219,132 +219,136 @@ msgstr ""
 msgid "Package to install or remove"
 msgstr ""
 
-#: ../migasfree_client/client.py:681
+#: ../migasfree_client/client.py:676
+msgid "Force package upgrades"
+msgstr ""
+
+#: ../migasfree_client/client.py:684
 msgid "Register option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:685
+#: ../migasfree_client/client.py:688
 msgid "Update option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:688
+#: ../migasfree_client/client.py:691
 msgid "Search option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:692
+#: ../migasfree_client/client.py:695
 msgid "Install and remove are exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:696
+#: ../migasfree_client/client.py:699
 msgid "Install needs a package!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:700
+#: ../migasfree_client/client.py:703
 msgid "Remove needs a package!!!"
 msgstr ""
 
-#: ../migasfree_client/command.py:168
+#: ../migasfree_client/command.py:172
 msgid "Autoregistering computer..."
 msgstr ""
 
-#: ../migasfree_client/command.py:193
+#: ../migasfree_client/command.py:197
 #, python-format
 msgid "Error creating %s directory"
 msgstr ""
 
-#: ../migasfree_client/command.py:209
+#: ../migasfree_client/command.py:213
 #, python-format
 msgid "Key %s created!"
 msgstr ""
 
-#: ../migasfree_client/command.py:211
+#: ../migasfree_client/command.py:215
 msgid "Error writing key file!!!"
-msgstr ""
-
-#: ../migasfree_client/command.py:220
-#, python-format
-msgid "Have you check config options in this machine (%s)?"
 msgstr ""
 
 #: ../migasfree_client/command.py:224
 #, python-format
-msgid "Check %s file and register again"
+msgid "Have you check config options in this machine (%s)?"
 msgstr ""
 
 #: ../migasfree_client/command.py:228
+#, python-format
+msgid "Check %s file and register again"
+msgstr ""
+
+#: ../migasfree_client/command.py:232
 msgid "User to register computer at server"
 msgstr ""
 
-#: ../migasfree_client/command.py:230 ../migasfree_client/upload.py:107
+#: ../migasfree_client/command.py:234 ../migasfree_client/upload.py:107
 #, python-format
 msgid "Empty user. Exiting %s."
 msgstr ""
 
-#: ../migasfree_client/command.py:234
+#: ../migasfree_client/command.py:238
 msgid "Password"
 msgstr ""
 
-#: ../migasfree_client/command.py:237
+#: ../migasfree_client/command.py:241
 msgid "Computer registered at server"
 msgstr ""
 
-#: ../migasfree_client/command.py:241
+#: ../migasfree_client/command.py:245
 msgid "Running options:"
 msgstr ""
 
-#: ../migasfree_client/command.py:242 ../migasfree_client/upload.py:90
+#: ../migasfree_client/command.py:246 ../migasfree_client/upload.py:90
 msgid "Version"
 msgstr ""
 
-#: ../migasfree_client/command.py:243
+#: ../migasfree_client/command.py:247
 msgid "Server"
 msgstr ""
 
-#: ../migasfree_client/command.py:244
+#: ../migasfree_client/command.py:248
 msgid "Auto update packages"
 msgstr ""
 
-#: ../migasfree_client/command.py:245
+#: ../migasfree_client/command.py:249
 msgid "Proxy"
 msgstr ""
 
-#: ../migasfree_client/command.py:246
+#: ../migasfree_client/command.py:250
 msgid "SSL certificate"
 msgstr ""
 
-#: ../migasfree_client/command.py:249
+#: ../migasfree_client/command.py:253
 msgid "Warning"
 msgstr ""
 
-#: ../migasfree_client/command.py:249
+#: ../migasfree_client/command.py:253
 msgid "Certificate does not exist and authentication is not guaranteed"
 msgstr ""
 
-#: ../migasfree_client/command.py:251
+#: ../migasfree_client/command.py:255
 msgid "Package Proxy Cache"
 msgstr ""
 
-#: ../migasfree_client/command.py:254
+#: ../migasfree_client/command.py:258
 msgid "Debug"
 msgstr ""
 
-#: ../migasfree_client/command.py:255
+#: ../migasfree_client/command.py:259
 msgid "Computer name"
 msgstr ""
 
-#: ../migasfree_client/command.py:256
+#: ../migasfree_client/command.py:260
 msgid "GUI verbose"
 msgstr ""
 
-#: ../migasfree_client/command.py:257
+#: ../migasfree_client/command.py:261
 msgid "PMS"
 msgstr ""
 
-#: ../migasfree_client/command.py:288
+#: ../migasfree_client/command.py:292
 msgid "Ok"
 msgstr ""
 
-#: ../migasfree_client/command.py:295
+#: ../migasfree_client/command.py:299
 msgid "Failed"
 msgstr ""
 
