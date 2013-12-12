@@ -672,6 +672,9 @@ class MigasFreeClient(MigasFreeCommand):
         #parser.add_option("--device", "-d", action = "store",
         #    help = _('Device to install or remove'))
 
+        parser.add_option("--force-upgrade", "-a", action="store_true",
+            help=_('Force package upgrades'))
+
         options, arguments = parser.parse_args()
 
         # check restrictions
@@ -698,6 +701,9 @@ class MigasFreeClient(MigasFreeCommand):
             self._usage_examples()
             #parser.error(_('Remove needs package or device!!!'))
             parser.error(_('Remove needs a package!!!'))
+
+        if options.force_upgrade:
+            self.migas_auto_update = True
 
         utils.check_lock_file(self.CMD, self.LOCK_FILE)
 
