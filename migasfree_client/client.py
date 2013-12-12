@@ -74,6 +74,8 @@ class MigasFreeClient(MigasFreeCommand):
     _error_file_descriptor = None
 
     def __init__(self):
+        self._user_is_not_root()
+
         signal.signal(signal.SIGINT, self._exit_gracefully)
         signal.signal(signal.SIGQUIT, self._exit_gracefully)
         signal.signal(signal.SIGTERM, self._exit_gracefully)

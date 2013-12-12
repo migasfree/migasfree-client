@@ -55,6 +55,10 @@ from .command import (
 class MigasFreeTags(MigasFreeCommand):
     CMD = 'migasfree-tags'  # /usr/bin/migasfree-tags
 
+    def __init__(self):
+        self._user_is_not_root()
+        MigasFreeCommand.__init__(self)
+
     def _usage_examples(self):
         print('\n' + _('Examples:'))
 
