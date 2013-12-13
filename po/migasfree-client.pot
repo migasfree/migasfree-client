@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-12 12:21+0100\n"
+"POT-Creation-Date: 2013-12-13 11:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -555,39 +555,44 @@ msgstr ""
 msgid "Information: %s"
 msgstr ""
 
-#: ../migasfree_client/utils.py:335
+#: ../migasfree_client/utils.py:159
+#, python-format
+msgid "\"%s\" command expired timeout"
+msgstr ""
+
+#: ../migasfree_client/utils.py:362
 msgid "yes"
 msgstr ""
 
-#: ../migasfree_client/utils.py:335
+#: ../migasfree_client/utils.py:362
 msgid "y"
 msgstr ""
 
-#: ../migasfree_client/utils.py:336
+#: ../migasfree_client/utils.py:363
 msgid "no"
 msgstr ""
 
-#: ../migasfree_client/utils.py:336
+#: ../migasfree_client/utils.py:363
 msgid "n"
 msgstr ""
 
-#: ../migasfree_client/utils.py:339
+#: ../migasfree_client/utils.py:366
 msgid "[y/n]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:341
+#: ../migasfree_client/utils.py:368
 msgid "[Y/n]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:343
+#: ../migasfree_client/utils.py:370
 msgid "[y/N]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:355
+#: ../migasfree_client/utils.py:382
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
 msgstr ""
 
-#: ../migasfree_client/utils.py:377
+#: ../migasfree_client/utils.py:404
 #, python-format
 msgid "Another instance of %(cmd)s is running: %(pid)d"
 msgstr ""
