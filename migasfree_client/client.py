@@ -233,7 +233,7 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             _cmd = ':'  # gracefully degradation
 
-        _ret, _output, _error = utils.execute(_cmd, interactive=False)
+        _ret, _output, _error = utils.timeout_execute(_cmd)
         logging.debug('Executed command: %s', _cmd)
         logging.debug('Output: %s', _output)
 
