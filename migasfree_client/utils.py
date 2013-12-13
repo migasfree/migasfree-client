@@ -35,6 +35,8 @@ import re
 import fcntl
 import select
 import uuid
+import datetime
+import signal
 
 import gettext
 _ = gettext.gettext
@@ -132,6 +134,31 @@ def execute(cmd, verbose=False, interactive=True):
 
     if not interactive and _output_buffer:
         _output = _output_buffer
+
+    return (_process.returncode, _output, _error)
+
+
+def timeout_execute(cmd, timeout=60):
+    # based in http://amix.dk/blog/post/19408
+
+    _start = datetime.datetime.now()
+    _process = subprocess.Popen(
+        cmd,
+        shell=True,
+        executable='/bin/bash',
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    if timeout > 0:
+        while _process.poll() is None:
+            time.sleep(1)
+            _now = datetime.datetime.now()
+            if (_now - _start).seconds > timeout:
+                os.kill(_process.pid, signal.SIGKILL)
+                os.waitpid(-1, os.WNOHANG)
+                return (1, '', _('"%s" command expired timeout') % cmd)
+
+    _output, _error = _process.communicate()
 
     return (_process.returncode, _output, _error)
 
