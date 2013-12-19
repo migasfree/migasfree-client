@@ -454,10 +454,9 @@ def get_mfc_computer_name():
 
 
 def get_hardware_uuid():
-    # issue #16
+    # issue #16, issue #28
     _ret, _uuid, _ = execute(
-        'hal-get-property --udi /org/freedesktop/Hal/devices/computer \
-        --key system.hardware.uuid',
+        'sudo dmidecode --string system-uuid',
         interactive=False
     )
     _uuid = _uuid.replace('\n', '')
