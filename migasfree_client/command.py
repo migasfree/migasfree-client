@@ -161,7 +161,7 @@ class MigasFreeCommand(object):
         self._pms_selection()
 
     def _check_user_is_root(self):
-        return utils.get_user_info(os.environ.get('USER'))['guid'] == 0
+        return utils.get_user_info(os.environ.get('USER'))['gid'] == 0
 
     def _user_is_not_root(self):
         if not self._check_user_is_root():
