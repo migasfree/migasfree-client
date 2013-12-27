@@ -94,12 +94,12 @@ class MigasFreeCommand(object):
         if type(_config_client) is dict:
             self.migas_server = _config_client.get('server', 'localhost')
 
-            self.auto_update_packages = True  # by default
+            self.migas_auto_update_packages = True  # by default
             if 'auto_update_packages' in _config_client:
                 if _config_client['auto_update_packages'] == 'False' \
                 or _config_client['auto_update_packages'] == '0' \
                 or _config_client['auto_update_packages'] == 'Off':
-                    self.auto_update_packages = False
+                    self.migas_auto_update_packages = False
 
             self.migas_proxy = _config_client.get('proxy', None)
             self.migas_ssl_cert = _config_client.get('ssl_cert', None)
@@ -255,7 +255,7 @@ class MigasFreeCommand(object):
         print(_('Running options:'))
         print('\t%s: %s' % (_('Version'), self.migas_version))
         print('\t%s: %s' % (_('Server'), self.migas_server))
-        print('\t%s: %s' % (_('Auto update packages'), self.migas_auto_update))
+        print('\t%s: %s' % (_('Auto update packages'), self.migas_auto_update_packages))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         if self.migas_ssl_cert is not None and \

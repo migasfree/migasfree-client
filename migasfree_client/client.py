@@ -538,7 +538,7 @@ class MigasFreeClient(MigasFreeCommand):
         # then install new packages
         self._install_mandatory_packages(_request['packages']['install'])
 
-        if self.migas_auto_update is True:
+        if self.migas_auto_update_packages is True:
             # finally update packages
             self._update_packages()
 
@@ -705,7 +705,7 @@ class MigasFreeClient(MigasFreeCommand):
             parser.error(_('Remove needs a package!!!'))
 
         if options.force_upgrade:
-            self.migas_auto_update = True
+            self.migas_auto_update_packages = True
 
         utils.check_lock_file(self.CMD, self.LOCK_FILE)
 
