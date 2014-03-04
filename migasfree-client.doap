@@ -6,7 +6,7 @@
 
   <name xml:lang="en">migasfree-client</name>
   <shortdesc xml:lang="en">
-      migasfree client rewritten in Python
+      migasfree is a very simple, but effective, systems management system
   </shortdesc>
   <homepage rdf:resource="http://migasfree.org/" />
 
