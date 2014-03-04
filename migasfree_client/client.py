@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2014 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -595,7 +595,6 @@ class MigasFreeClient(MigasFreeCommand):
             self.ICON_COMPLETED,
             mandatory=True
         )
-        time.sleep(3)  # to see update completed icon ;)
 
         # clean computer messages in server
         self._send_message()
