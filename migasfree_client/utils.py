@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2014 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -453,7 +453,22 @@ def get_mfc_computer_name():
     return get_hostname()  # if not set
 
 
+def get_smbios_version():
+    # issue #33
+    _ret, _smbios, _ = execute(
+        'sudo dmidecode -t 0 | grep SMBIOS',
+        interactive=False
+    )
+    if _ret != 0 or _smbios == '' or _smbios is None:
+        return (0, 0)
+
+    _smbios = _smbios.split()[1]  # expected: "SMBIOS x.x present."
+    return tuple(int(x) for x in _smbios.split('.'))
+
+
 def get_hardware_uuid():
+    _uuid_format = '%s%s%s%s-%s%s-%s%s-%s-%s'
+
     # issue #16, issue #28
     _ret, _uuid, _ = execute(
         'sudo dmidecode --string system-uuid',
@@ -465,19 +480,35 @@ def get_hardware_uuid():
 
     _byte_array = uuid.UUID(_uuid).hex
 
-    # http://stackoverflow.com/questions/10850075/guid-uuid-compatibility-issue-between-net-and-linux
-    _ms_uuid = '%s%s%s%s-%s%s-%s%s-%s-%s' % (
-        _byte_array[6:8],
-        _byte_array[4:6],
-        _byte_array[2:4],
-        _byte_array[0:2],
-        _byte_array[10:12],
-        _byte_array[8:10],
-        _byte_array[14:16],
-        _byte_array[12:14],
-        _byte_array[16:20],
-        _byte_array[20:32]
-    )
+    # issue #33
+    if get_smbios_version() >= (2, 6):
+        _ms_uuid = _uuid_format % (
+            _byte_array[0:2],
+            _byte_array[2:4],
+            _byte_array[4:6],
+            _byte_array[6:8],
+            _byte_array[8:10],
+            _byte_array[10:12],
+            _byte_array[12:14],
+            _byte_array[14:16],
+            _byte_array[16:20],
+            _byte_array[20:32]
+        )
+    else:
+        # http://stackoverflow.com/questions/10850075/guid-uuid-compatibility-issue-between-net-and-linux
+        _ms_uuid = _uuid_format % (
+            _byte_array[6:8],
+            _byte_array[4:6],
+            _byte_array[2:4],
+            _byte_array[0:2],
+            _byte_array[10:12],
+            _byte_array[8:10],
+            _byte_array[14:16],
+            _byte_array[12:14],
+            _byte_array[16:20],
+            _byte_array[20:32]
+        )
+
     _ms_uuid = _ms_uuid.upper()
 
     # exceptions (issue #4)
