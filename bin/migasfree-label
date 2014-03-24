@@ -20,7 +20,7 @@ if __name__ == '__main__':
     config = get_config(settings.CONF_FILE, 'client')
     webbrowser.open(
         'http://%s/computer_label/?uuid=%s&name=%s' % (
-            config.get('server', 'migasfree.org'),
+            config.get('server', 'localhost'),
             get_hardware_uuid(),
             get_mfc_computer_name()
         )
