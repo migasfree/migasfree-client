@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2014 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ import subprocess
 from distutils.core import setup
 from distutils.command.build import build
 from distutils.command.install_data import install_data
-from distutils.log import info, error  # , fatal, warn
+from distutils.log import info, error
 from distutils.dep_util import newer
 
 PO_DIR = 'po'
@@ -106,10 +106,15 @@ setup(
     author_email='jachavar@gmail.com',
     url='http://www.migasfree.org/',
     platforms=['Linux'],
-    packages=['migasfree_client', 'migasfree_client.backends'],
+    packages=[
+        'migasfree_client',
+        'migasfree_client.backends',
+        'migasfree_client.devices',
+    ],
     package_dir={
         'migasfree_client': 'migasfree_client',
-        'migasfree_client.backends': 'migasfree_client/backends'
+        'migasfree_client.backends': 'migasfree_client/backends',
+        'migasfree_client.devices': 'migasfree_client/devices',
     },
     cmdclass={
         'build': BuildData,
