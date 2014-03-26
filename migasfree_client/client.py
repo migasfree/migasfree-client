@@ -62,6 +62,7 @@ from .command import (
     MigasFreeCommand,
     __version__,
 )
+from .devices import Printer
 
 
 class MigasFreeClient(MigasFreeCommand):
@@ -141,16 +142,6 @@ class MigasFreeClient(MigasFreeCommand):
         print('  ' + _('Remove package:'))
         print('\t%s -rp bluefish' % self.CMD)
         print('\t%s --remove --package=bluefish\n' % self.CMD)
-
-        # TODO
-        #print '  ' + _('Install device:')
-        #print '\t%s -id 12307' % self.CMD
-        #print '\t%s --install --device=12307\n' % self.CMD
-
-        # TODO
-        #print '  ' + _('Remove device:')
-        #print '\t%s -rd 12307' % self.CMD
-        #print '\t%s --remove --device=12307' % self.CMD
 
     def _write_error(self, msg, append=False):
         if append:
@@ -585,7 +576,22 @@ class MigasFreeClient(MigasFreeCommand):
         if _request.get('hardware_capture') is True:  # new in server 3.0
             self._update_hardware_inventory()
 
-        # TODO remove and install devices
+        # remove and install devices (new in server 4.2) (issue #31)
+        if 'devices' in _request:
+            _installed = []
+            _removed = []
+            if 'remove' in _request['devices'] \
+            and len(_request['devices']['remove']):
+                _removed = self._remove_devices(_request['devices']['remove'])
+
+            if 'install' in _request['devices'] \
+            and len(_request['devices']['install']):
+                _installed = self._install_devices(_request['devices']['install'])
+
+            self._url_request.run(
+                'upload_devices_changes',
+                data={'installed': _installed, 'removed': _removed}
+            )
 
         # upload execution errors to server
         self._upload_execution_errors()
@@ -620,21 +626,74 @@ class MigasFreeClient(MigasFreeCommand):
 
         return _ret
 
-    # TODO
-    def _install_device(self, dev):
-        self._check_sign_keys()
+    def _install_printer(self, device):
+        if device['packages']:
+            self._install_mandatory_packages(device['packages'])
 
-        self._send_message(_('Installing device: %s') % dev)
-        print('TODO')
+        self._send_message(_('Installing device: %s') % device['model'])
+        _installed, _output = Printer.install(device)
+        if _installed:
+            _ret = _output
+            self.operation_ok()
+            logging.debug('Device installed: %s', device['model'])
+        else:
+            _ret = 0
+            _msg = _('Error installing device: %s') % _output
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            self._write_error(_msg)
+
         self._send_message()
 
-    # TODO
-    def _remove_device(self, dev):
+        return _ret
+
+    def _install_devices(self, devices):
         self._check_sign_keys()
 
-        self._send_message(_('Removing device: %s') % dev)
-        print('TODO')
+        _installed_ids = []
+        for device in devices:
+            if 'PRINTER' in device:
+                _id = self._install_printer(device['PRINTER'])
+                if _id:
+                    _installed_ids.append(_id)
+
+        return _installed_ids
+
+    def _remove_printer(self, device_id):
+        # expected pattern: PRINTER.name__PRINTER.model__PRINTER.id (issue #31)
+        _printer_name = Printer.search('__%d$' % device_id)
+        if _printer_name == '':
+            return device_id  # not installed, removed for server
+
+        self._send_message(_('Removing device: %s') % _printer_name)
+
+        _removed, _output = Printer.remove(_printer_name)
+        if _removed:
+            _ret = device_id
+            self.operation_ok()
+            logging.debug('Device removed: %s', _printer_name)
+        else:
+            _ret = 0
+            _msg = _('Error removing device: %s') % _output
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            self._write_error(_msg)
+
         self._send_message()
+
+        return _ret
+
+    def _remove_devices(self, devices):
+        self._check_sign_keys()
+
+        _removed_ids = []
+        for device in devices:
+            if 'PRINTER' in device:
+                _id = self._remove_printer(device['PRINTER'])
+                if _id:
+                    _removed_ids.append(_id)
+
+        return _removed_ids
 
     def run(self):
         _program = 'migasfree client'
@@ -659,19 +718,15 @@ class MigasFreeClient(MigasFreeCommand):
         parser.add_option(
             "--install", "-i",
             action="store_true",
-            #help=_('Install package or device')
             help=_('Install package')
         )
         parser.add_option(
             "--remove", "-r",
             action="store_true",
-            #help=_('Remove package or device')
             help=_('Remove package')
         )
         parser.add_option("--package", "-p", action="store",
             help=_('Package to install or remove'))
-        #parser.add_option("--device", "-d", action = "store",
-        #    help = _('Device to install or remove'))
 
         parser.add_option("--force-upgrade", "-a", action="store_true",
             help=_('Force package upgrades'))
@@ -696,11 +751,9 @@ class MigasFreeClient(MigasFreeCommand):
             parser.error(_('Install and remove are exclusive!!!'))
         if options.install and not (options.package or options.device):
             self._usage_examples()
-            #parser.error(_('Install needs package or device!!!'))
             parser.error(_('Install needs a package!!!'))
         if options.remove and not (options.package or options.device):
             self._usage_examples()
-            #parser.error(_('Remove needs package or device!!!'))
             parser.error(_('Remove needs a package!!!'))
 
         if options.force_upgrade:
