@@ -108,7 +108,7 @@ class Printer(object):
         '''
         # depends cups-client
         _cmd = 'lpstat -a | cut -d " " -f 1 | grep %s' % pattern
-        _ret, _output, _error = execute(_cmd)
+        _ret, _output, _error = execute(_cmd, interactive=False)
         if _ret != 0:
             return ''
 
