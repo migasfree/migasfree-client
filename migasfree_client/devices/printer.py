@@ -43,9 +43,10 @@ class Printer(object):
             }
         }
         '''
-        _name = '%s__%s__%d' % (
+        _name = '%s__%s__%s__%d' % (
             device['name'],
             device['model'],
+            device['feature'],
             int(device['id'])
         )
         _connect = ''
