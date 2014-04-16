@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2014 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'apt.py'
+__license__ = 'GPLv3'
 
 import re
 import logging
@@ -45,14 +45,17 @@ class Apt(Pms):
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'
 
-        self._silent_options = '-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o Debug::pkgProblemResolver=1 --assume-yes --force-yes --allow-unauthenticated --auto-remove'
+        self._silent_options = '-o APT::Get::Purge=true -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o Debug::pkgProblemResolver=1 --assume-yes --force-yes --allow-unauthenticated --auto-remove'
 
     def install(self, package):
         '''
         bool install(string package)
         '''
 
-        self._cmd = '%s install %s' % (self._pms, package.strip())
+        self._cmd = '%s install -o APT::Get::Purge=true %s' % (
+            self._pms,
+            package.strip()
+        )
         logging.debug(self._cmd)
 
         return (execute(self._cmd)[0] == 0)
