@@ -276,9 +276,9 @@ class MigasFreeCommand(object):
 
     def _search_pms(self):
         _pms_list = {
-            'zypper': 'Zypper',
+            'apt-get': 'Apt',
             'yum': 'Yum',
-            'apt-get': 'Apt'
+            'zypper': 'Zypper',
         }
 
         for _item in _pms_list:
