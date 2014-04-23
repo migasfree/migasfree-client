@@ -24,23 +24,6 @@ __all__ = ('MigasFreeClient', 'main')
 
 import os
 
-# package imports
-"""
-from . import (
-    settings,
-    utils,
-    server_errors,
-    printcolor,
-    url_request,
-    network
-)
-"""
-import settings
-import utils
-import server_errors
-import printcolor
-import network
-
 import sys
 import errno
 import logging
@@ -57,6 +40,14 @@ import gettext
 _ = gettext.gettext
 
 # sys.path.append(os.path.dirname(__file__))  # DEBUG
+
+from . import (
+    settings,
+    utils,
+    server_errors,
+    printcolor,
+    network,
+)
 
 from .command import (
     MigasFreeCommand,
@@ -172,7 +163,6 @@ class MigasFreeClient(MigasFreeCommand):
 
                     try:
                         self._notify.update(self.APP_NAME, msg, icon)
-                        #self._notify.set_timeout(pynotify.EXPIRES_DEFAULT)
                         self._notify.show()
                     except:
                         pass
@@ -236,14 +226,13 @@ class MigasFreeClient(MigasFreeCommand):
         return _output
 
     def _eval_attributes(self, properties):
-        # response struct
         _response = {
             'computer': {
                 'hostname': self.migas_computer_name,
                 'ip': network.get_network_info()['ip'],
                 'version': self.migas_version,
-                'platform': platform.system(),  # new for server 3.0
-                'pms': str(self.pms),  # new for server 3.0
+                'platform': platform.system(),
+                'pms': str(self.pms),
                 'user': self._graphic_user,
                 'user_fullname': utils.get_user_info(
                     self._graphic_user
@@ -272,7 +261,6 @@ class MigasFreeClient(MigasFreeCommand):
         return _response
 
     def _eval_faults(self, faultsdef):
-        # response struct
         _response = {
             'faults': {}
         }
@@ -360,10 +348,8 @@ class MigasFreeClient(MigasFreeCommand):
                 data=open(self.ERROR_FILE, 'rb').read()
             )
             self.operation_ok()
-            # delete old errors
             os.remove(self.ERROR_FILE)
 
-        # create new error file and open to write
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
     def _create_repositories(self, repos):
@@ -476,7 +462,6 @@ class MigasFreeClient(MigasFreeCommand):
             )
             self.operation_ok()
 
-            # delete errors
             if not self._debug:
                 os.remove(self.ERROR_FILE)
 
@@ -495,7 +480,6 @@ class MigasFreeClient(MigasFreeCommand):
 
         _response = self._get_attributes()
 
-        # send response to server and evaluate new request
         self._send_message(_('Uploading attributes...'))
         _request = self._url_request.run(
             'upload_computer_info',
@@ -508,7 +492,6 @@ class MigasFreeClient(MigasFreeCommand):
             _response = self._eval_faults(_request['faultsdef'])
             logging.debug('Faults to send: %s', _response)
 
-            # send faults to server
             self._send_message(_('Uploading faults...'))
             _request_faults = self._url_request.run(
                 'upload_computer_faults',
@@ -523,14 +506,9 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._clean_pms_cache()
 
-        # first remove packages
         self._uninstall_packages(_request['packages']['remove'])
-
-        # then install new packages
         self._install_mandatory_packages(_request['packages']['install'])
-
         if self.migas_auto_update_packages is True:
-            # finally update packages
             self._update_packages()
 
         # upload computer software history
@@ -549,7 +527,6 @@ class MigasFreeClient(MigasFreeCommand):
             )
             self.operation_ok()
 
-        # upload the software inventory
         self._send_message(_('Uploading software inventory...'))
         if _request['base']:
             logging.info('This computer is software reference')
@@ -572,8 +549,7 @@ class MigasFreeClient(MigasFreeCommand):
         )
         self.operation_ok()
 
-        # update computer hardware inventory
-        if _request.get('hardware_capture') is True:  # new in server 3.0
+        if _request.get('hardware_capture') is True:
             self._update_hardware_inventory()
 
         # remove and install devices (new in server 4.2) (issue #31)
@@ -593,7 +569,6 @@ class MigasFreeClient(MigasFreeCommand):
                 data={'installed': _installed, 'removed': _removed}
             )
 
-        # upload execution errors to server
         self._upload_execution_errors()
 
         self._send_message(
@@ -749,10 +724,10 @@ class MigasFreeClient(MigasFreeCommand):
             parser.print_help()
             self._usage_examples()
             parser.error(_('Install and remove are exclusive!!!'))
-        if options.install and not (options.package or options.device):
+        if options.install and not options.package:
             self._usage_examples()
             parser.error(_('Install needs a package!!!'))
-        if options.remove and not (options.package or options.device):
+        if options.remove and not options.package:
             self._usage_examples()
             parser.error(_('Remove needs a package!!!'))
 
@@ -772,19 +747,15 @@ class MigasFreeClient(MigasFreeCommand):
             self._search(options.search)
         elif options.install and options.package:
             self._install_package(options.package)
-        elif options.install and options.device:
-            self._install_device(options.device)
         elif options.remove and options.package:
             self._remove_package(options.package)
-        elif options.remove and options.device:
-            self._remove_device(options.device)
         else:
             parser.print_help()
             self._usage_examples()
 
         utils.remove_file(self.LOCK_FILE)
 
-        sys.exit(os.EX_OK)  # no error
+        sys.exit(os.EX_OK)
 
 
 def main():
