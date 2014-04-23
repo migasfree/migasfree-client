@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013 Jose Antonio Chavarría
+# Copyright (c) 2013-2014 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,22 +20,16 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-__all__ = ('MigasFreeCommand', 'operation_ok', 'operation_failed')
+__all__ = ('MigasFreeCommand')
 
 import os
 
-# package imports
-"""
 from . import (
     settings,
     utils,
-    url_request
+    url_request,
+    printcolor,
 )
-"""
-import settings
-import utils
-import url_request
-import printcolor
 
 version_file = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
@@ -55,9 +49,7 @@ import platform
 import gettext
 _ = gettext.gettext
 
-import utils
-
-from backends import Pms
+from .backends import Pms
 
 
 class MigasFreeCommand(object):
@@ -87,47 +79,52 @@ class MigasFreeCommand(object):
 
     def __init__(self):
         _log_level = logging.INFO
+
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
+        if type(_config_client) is not dict:
+            _config_client = {}
 
         self.migas_version = utils.get_mfc_version()
         self.migas_computer_name = utils.get_mfc_computer_name()
-        if type(_config_client) is dict:
-            self.migas_server = _config_client.get('server', 'localhost')
 
-            self.migas_auto_update_packages = True  # by default
-            if 'auto_update_packages' in _config_client:
-                if _config_client['auto_update_packages'] == 'False' \
-                or _config_client['auto_update_packages'] == '0' \
-                or _config_client['auto_update_packages'] == 'Off':
-                    self.migas_auto_update_packages = False
+        self.migas_server = _config_client.get('server', 'localhost')
 
-            self.migas_proxy = _config_client.get('proxy', None)
-            self.migas_ssl_cert = _config_client.get('ssl_cert', None)
-            self.migas_package_proxy_cache = _config_client.get(
-                'package_proxy_cache',
-                None
-            )
+        self.migas_auto_update_packages = True
+        if 'auto_update_packages' in _config_client:
+            if _config_client['auto_update_packages'] == 'False' \
+            or _config_client['auto_update_packages'] == '0' \
+            or _config_client['auto_update_packages'] == 'Off':
+                self.migas_auto_update_packages = False
 
-            self.migas_gui_verbose = True  # by default
-            if 'gui_verbose' in _config_client:
-                if _config_client['gui_verbose'] == 'False' \
-                or _config_client['gui_verbose'] == '0' \
-                or _config_client['gui_verbose'] == 'Off':
-                    self.migas_gui_verbose = False
+        self.migas_proxy = _config_client.get('proxy', None)
+        self.migas_ssl_cert = _config_client.get('ssl_cert', None)
+        self.migas_package_proxy_cache = _config_client.get(
+            'package_proxy_cache',
+            None
+        )
 
-            if 'debug' in _config_client:
-                if _config_client['debug'] == 'True' \
-                or _config_client['debug'] == '1' \
-                or _config_client['debug'] == 'On':
-                    self._debug = True
-                    _log_level = logging.DEBUG
+        self.migas_gui_verbose = True
+        if 'gui_verbose' in _config_client:
+            if _config_client['gui_verbose'] == 'False' \
+            or _config_client['gui_verbose'] == '0' \
+            or _config_client['gui_verbose'] == 'Off':
+                self.migas_gui_verbose = False
+
+        if 'debug' in _config_client:
+            if _config_client['debug'] == 'True' \
+            or _config_client['debug'] == '1' \
+            or _config_client['debug'] == 'On':
+                self._debug = True
+                _log_level = logging.DEBUG
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
-        if type(_config_packager) is dict:
-            self.packager_user = _config_packager.get('user', None)
-            self.packager_pwd = _config_packager.get('password', None)
-            self.packager_version = _config_packager.get('version', None)
-            self.packager_store = _config_packager.get('store', None)
+        if type(_config_packager) is not dict:
+            _config_packager = {}
+
+        self.packager_user = _config_packager.get('user', None)
+        self.packager_pwd = _config_packager.get('password', None)
+        self.packager_version = _config_packager.get('version', None)
+        self.packager_store = _config_packager.get('store', None)
 
         # http://www.lightbird.net/py-by-example/logging.html
         logging.basicConfig(
@@ -137,6 +134,7 @@ class MigasFreeCommand(object):
         )
         logging.info('*' * 20)
         logging.info('%s in execution', self.CMD)
+        logging.info('Config file: %s', settings.CONF_FILE)
         logging.debug('Config client: %s', _config_client)
         logging.debug('Config packager: %s', _config_packager)
 
@@ -165,7 +163,9 @@ class MigasFreeCommand(object):
 
     def _user_is_not_root(self):
         if not self._check_user_is_root():
-            self.operation_failed(_('User has insufficient privileges to execute this command'))
+            self.operation_failed(
+                _('User has insufficient privileges to execute this command')
+            )
             sys.exit(errno.EACCES)
 
     def _check_sign_keys(self):
@@ -193,8 +193,8 @@ class MigasFreeCommand(object):
                 'username': user,
                 'password': password,
                 'version': self.migas_version,
-                'platform': platform.system(),  # new for server 3.0
-                'pms': str(self.pms),  # new for server 3.0
+                'platform': platform.system(),
+                'pms': str(self.pms),
             },
             sign=False
         )
@@ -252,7 +252,7 @@ class MigasFreeCommand(object):
 
     def _show_running_options(self):
         print('')
-        print(_('Running options:'))
+        print(_('Running options: %s') % settings.CONF_FILE)
         print('\t%s: %s' % (_('Version'), self.migas_version))
         print('\t%s: %s' % (_('Server'), self.migas_server))
         print('\t%s: %s' % (_('Auto update packages'), self.migas_auto_update_packages))
