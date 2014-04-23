@@ -19,7 +19,7 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'utils.py'
+__license__ = 'GPLv3'
 
 import subprocess
 import os
