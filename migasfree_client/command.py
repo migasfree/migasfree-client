@@ -51,6 +51,15 @@ _ = gettext.gettext
 
 from .backends import Pms
 
+# implicit print flush
+buf_arg = 0
+if sys.version_info[0] == 3:
+    os.environ['PYTHONUNBUFFERED'] = '1'
+    buf_arg = 1
+
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buf_arg)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buf_arg)
+
 
 class MigasFreeCommand(object):
     '''
