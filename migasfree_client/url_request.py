@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2014 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'url_request.py'
+__license__ = 'GPLv3'
 
 import os
 import sys
@@ -38,7 +38,6 @@ from settings import TMP_PATH
 
 
 class UrlRequest(object):
-    # default values
     _debug = False
 
     _sign = True
@@ -85,7 +84,6 @@ class UrlRequest(object):
         if self._public_key:
             logging.info('Public key: %s', self._public_key)
 
-        # API changed in server 3.0
         self._filename_pattern = '%s.%s' % (
             utils.get_mfc_computer_name(),
             utils.get_hardware_uuid()
@@ -119,7 +117,6 @@ class UrlRequest(object):
                     }
                 }
 
-        # API changed in server 3.0
         _filename = os.path.join(
             TMP_PATH,
             '%s.%s' % (
@@ -162,7 +159,6 @@ class UrlRequest(object):
             print(_msg)
 
             return {'errmfs': {'info': _msg, 'code': server_errors.GENERIC}}
-            #sys.exit(errno.EBADRQC)
 
         if _curl.http_code >= 400:
             print(_('HTTP error code: %s') % _curl.http_code)
@@ -183,7 +179,6 @@ class UrlRequest(object):
                     'code': server_errors.GENERIC
                 }
             }
-            #sys.exit(errno.EBADRQC)
 
         # evaluate response
         _response = '%s.return' % _filename
@@ -222,6 +217,7 @@ class UrlRequest(object):
                     print(_('Error: %s') % _error)
                     if _ret['errmfs']['info']:
                         print(_('Information: %s') % _ret['errmfs']['info'])
+
                 logging.error(
                     'url_request server error response code: %s',
                     _error
@@ -230,7 +226,9 @@ class UrlRequest(object):
                     'url_request server error response info: %s',
                     _ret['errmfs']['info']
                 )
+
                 if exit_on_error:
+                    print(_('Error: %s') % _error)
                     sys.exit(errno.EACCES)
 
         return _ret
