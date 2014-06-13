@@ -456,7 +456,7 @@ def get_mfc_computer_name():
 def get_smbios_version():
     # issue #33
     _ret, _smbios, _ = execute(
-        'sudo dmidecode -t 0 | grep SMBIOS',
+        'LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present',
         interactive=False
     )
     if _ret != 0 or _smbios == '' or _smbios is None:
