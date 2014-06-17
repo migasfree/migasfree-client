@@ -141,7 +141,6 @@ def execute(cmd, verbose=False, interactive=True):
 def timeout_execute(cmd, timeout=60):
     # based in http://amix.dk/blog/post/19408
 
-    _start = datetime.datetime.now()
     _process = subprocess.Popen(
         cmd,
         shell=True,
@@ -150,10 +149,13 @@ def timeout_execute(cmd, timeout=60):
         stderr=subprocess.PIPE
     )
     if timeout > 0:
+        _seconds_elapsed = 0
+        _interval = 0.2
         while _process.poll() is None:
-            time.sleep(1)
-            _now = datetime.datetime.now()
-            if (_now - _start).seconds > timeout:
+            time.sleep(_interval)
+            _seconds_elapsed += _interval
+
+            if _seconds_elapsed > timeout:
                 os.kill(_process.pid, signal.SIGKILL)
                 os.waitpid(-1, os.WNOHANG)
                 return (1, '', _('"%s" command expired timeout') % cmd)
@@ -478,7 +480,10 @@ def get_hardware_uuid():
     if _ret != 0 or _uuid == '' or _uuid is None:
         return get_mfc_computer_name()
 
-    _byte_array = uuid.UUID(_uuid).hex
+    try:
+        _byte_array = uuid.UUID(_uuid).hex
+    except:
+        return get_mfc_computer_name()
 
     # issue #33
     if get_smbios_version() >= (2, 6):
