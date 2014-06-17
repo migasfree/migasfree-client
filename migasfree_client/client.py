@@ -217,6 +217,8 @@ class MigasFreeClient(MigasFreeCommand):
         _ret, _output, _error = utils.timeout_execute(_cmd)
         logging.debug('Executed command: %s', _cmd)
         logging.debug('Output: %s', _output)
+        if _ret != 0:
+            logging.error('Error: %s', _error)
 
         try:
             os.remove(_filename)
