@@ -521,3 +521,13 @@ def get_hardware_uuid():
         _ms_uuid = get_mfc_computer_name()
 
     return _ms_uuid
+
+
+def cast_to_bool(value, default=False):
+    if str(value).lower() in ['false', 'off', 'no', 'n', '0']:
+        return False
+
+    if str(value).lower() in ['true', 'on', 'yes', 'y', '1']:
+        return True
+
+    return default
