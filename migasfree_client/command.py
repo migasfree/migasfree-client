@@ -93,47 +93,72 @@ class MigasFreeCommand(object):
         if type(_config_client) is not dict:
             _config_client = {}
 
-        self.migas_version = utils.get_mfc_version()
-        self.migas_computer_name = utils.get_mfc_computer_name()
-
-        self.migas_server = _config_client.get('server', 'localhost')
-
-        self.migas_auto_update_packages = True
-        if 'auto_update_packages' in _config_client:
-            if _config_client['auto_update_packages'] == 'False' \
-            or _config_client['auto_update_packages'] == '0' \
-            or _config_client['auto_update_packages'] == 'Off':
-                self.migas_auto_update_packages = False
-
-        self.migas_proxy = _config_client.get('proxy', None)
-        self.migas_ssl_cert = _config_client.get('ssl_cert', None)
-        self.migas_package_proxy_cache = _config_client.get(
-            'package_proxy_cache',
-            None
+        self.migas_version = os.environ.get(
+            'MIGASFREE_CLIENT_VERSION', utils.get_mfc_version()
+        )
+        self.migas_computer_name = os.environ.get(
+            'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
         )
 
-        self.migas_gui_verbose = True
-        if 'gui_verbose' in _config_client:
-            if _config_client['gui_verbose'] == 'False' \
-            or _config_client['gui_verbose'] == '0' \
-            or _config_client['gui_verbose'] == 'Off':
-                self.migas_gui_verbose = False
+        self.migas_server = os.environ.get(
+            'MIGASFREE_CLIENT_SERVER',
+            _config_client.get('server', 'localhost')
+        )
 
-        if 'debug' in _config_client:
-            if _config_client['debug'] == 'True' \
-            or _config_client['debug'] == '1' \
-            or _config_client['debug'] == 'On':
-                self._debug = True
-                _log_level = logging.DEBUG
+        self.migas_auto_update_packages = utils.cast_to_bool(
+            os.environ.get(
+                'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES',
+                _config_client.get('auto_update_packages', True)
+            ),
+            default=True
+        )
+
+        self.migas_proxy = os.environ.get(
+            'MIGASFREE_CLIENT_PROXY', _config_client.get('proxy', None)
+        )
+        self.migas_ssl_cert = os.environ.get(
+            'MIGASFREE_CLIENT_SSL_CERT', _config_client.get('ssl_cert', None)
+        )
+        self.migas_package_proxy_cache = os.environ.get(
+            'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE',
+            _config_client.get('package_proxy_cache', None)
+        )
+
+        self.migas_gui_verbose = utils.cast_to_bool(
+            os.environ.get(
+                'MIGASFREE_CLIENT_GUI_VERBOSE',
+                _config_client.get('gui_verbose', True)
+            ),
+            default=True
+        )
+
+        self._debug = utils.cast_to_bool(
+            os.environ.get(
+                'MIGASFREE_CLIENT_DEBUG',
+                _config_client.get('debug', False)
+            ),
+            default=False
+        )
+        if self._debug:
+            _log_level = logging.DEBUG
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
         if type(_config_packager) is not dict:
             _config_packager = {}
 
-        self.packager_user = _config_packager.get('user', None)
-        self.packager_pwd = _config_packager.get('password', None)
-        self.packager_version = _config_packager.get('version', None)
-        self.packager_store = _config_packager.get('store', None)
+        self.packager_user = os.environ.get(
+            'MIGASFREE_PACKAGER_USER', _config_packager.get('user', None)
+        )
+        self.packager_pwd = os.environ.get(
+            'MIGASFREE_PACKAGER_PASSWORD',
+            _config_packager.get('password', None)
+        )
+        self.packager_version = os.environ.get(
+            'MIGASFREE_PACKAGER_VERSION', _config_packager.get('version', None)
+        )
+        self.packager_store = os.environ.get(
+            'MIGASFREE_PACKAGER_STORE', _config_packager.get('store', None)
+        )
 
         # http://www.lightbird.net/py-by-example/logging.html
         logging.basicConfig(
