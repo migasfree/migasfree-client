@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013 Jose Antonio Chavarría
+# Copyright (c) 2013-2014 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,19 +31,12 @@ import errno
 import gettext
 _ = gettext.gettext
 
-# package imports
-"""
 from . import (
     settings,
     utils,
     server_errors,
     url_request
 )
-"""
-import utils
-import server_errors
-
-import settings
 
 from .client import MigasFreeClient
 from .command import (
@@ -66,9 +59,17 @@ class MigasFreeTags(MigasFreeCommand):
         print('\t%s -g' % self.CMD)
         print('\t%s --get\n' % self.CMD)
 
+        print('  ' + _('Communicate tags to server (command line):'))
+        print('\t%s -c tag... ' % self.CMD)
+        print('\t%s --communicate tag...\n' % self.CMD)
+
+        print('  ' + _('Communicate tags to server (with GUI):'))
+        print('\t%s -c' % self.CMD)
+        print('\t%s --communicate\n' % self.CMD)
+
         print('  ' + _('Set tags (command line):'))
-        print('\t%s -s tag1 tag2' % self.CMD)
-        print('\t%s --set tag1 tag2\n' % self.CMD)
+        print('\t%s -s tag...' % self.CMD)
+        print('\t%s --set tag...\n' % self.CMD)
 
         print('  ' + _('Set tags (with GUI):'))
         print('\t%s -s' % self.CMD)
@@ -214,17 +215,29 @@ class MigasFreeTags(MigasFreeCommand):
             help=_('Get assigned tags in server')
         )
 
+        parser.add_option(
+            '--communicate', '-c',
+            action='store_true',
+            help=_('Communicate tags to server')
+        )
+
         options, arguments = parser.parse_args()
         logging.info('Program options: %s' % options)
         logging.info('Program arguments: %s' % arguments)
 
         # check restrictions
-        if not options.get and not options.set:
+        if not options.get and not options.set and not options.communicate:
             self._usage_examples()
-            parser.error(_('Get or Set options are mandatory!!!'))
+            parser.error(_('Get or Set or Communicate options are mandatory!!!'))
         if options.get and options.set:
             self._usage_examples()
             parser.error(_('Get and Set options are exclusive!!!'))
+        if options.get and options.communicate:
+            self._usage_examples()
+            parser.error(_('Get and Communicate options are exclusive!!!'))
+        if options.set and options.communicate:
+            self._usage_examples()
+            parser.error(_('Set and Communicate options are exclusive!!!'))
 
         utils.check_lock_file(self.CMD, self.LOCK_FILE)
 
@@ -233,7 +246,7 @@ class MigasFreeTags(MigasFreeCommand):
             _response = self._get_tags()
             for _item in _response['selected']:
                 print('"' + _item + '"'),
-        elif options.set:
+        elif options.set or options.communicate:
             self._tags = self._sanitize(arguments)
 
             print(_('%(program)s version: %(version)s') % {
@@ -243,14 +256,15 @@ class MigasFreeTags(MigasFreeCommand):
             self._show_running_options()
 
             _response = self._set_tags()
-            self._apply_rules(_response)
+            if options.set:
+                self._apply_rules(_response)
         else:
             parser.print_help()
             self._usage_examples()
 
         utils.remove_file(self.LOCK_FILE)
 
-        sys.exit(os.EX_OK)  # no error
+        sys.exit(os.EX_OK)
 
 
 def main():
