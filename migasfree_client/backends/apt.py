@@ -177,7 +177,7 @@ class Apt(Pms):
         self._cmd = '%s clean' % self._pms
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            self._cmd = '%s --assume-yes update' % self._pms
+            self._cmd = '%s -o Acquire::Languages=none --assume-yes update' % self._pms
             logging.debug(self._cmd)
             return (execute(self._cmd)[0] == 0)
 
