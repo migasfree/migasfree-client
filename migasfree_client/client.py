@@ -149,12 +149,12 @@ class MigasFreeClient(MigasFreeCommand):
         )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
-    def _send_message(self, msg='', icon=None, mandatory=False):
+    def _send_message(self, msg='', icon=None):
         if msg:
             print('')
             printcolor.info(str(' ' + msg + ' ').center(76, '*'))
 
-            if mandatory or self.migas_gui_verbose:
+            if self.migas_gui_verbose:
                 if not icon:
                     icon = os.path.join(settings.ICON_PATH, self.ICON)
 
@@ -470,10 +470,7 @@ class MigasFreeClient(MigasFreeCommand):
     def _update_system(self):
         self._check_sign_keys()
 
-        if self._send_message(
-            _('Connecting to migasfree server...'),
-            mandatory=True
-        ):
+        if self._send_message(_('Connecting to migasfree server...')):
             self.operation_ok()
         else:
             sys.exit(errno.EBADRQC)
@@ -573,11 +570,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._upload_execution_errors()
 
-        self._send_message(
-            _('Operations completed'),
-            self.ICON_COMPLETED,
-            mandatory=True
-        )
+        self._send_message(_('Operations completed'), self.ICON_COMPLETED)
 
         # clean computer messages in server
         self._send_message()
