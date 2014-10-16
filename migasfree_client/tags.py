@@ -239,8 +239,6 @@ class MigasFreeTags(MigasFreeCommand):
             self._usage_examples()
             parser.error(_('Set and Communicate options are exclusive!!!'))
 
-        utils.check_lock_file(self.CMD, self.LOCK_FILE)
-
         # actions dispatcher
         if options.get:
             _response = self._get_tags()
@@ -257,12 +255,12 @@ class MigasFreeTags(MigasFreeCommand):
 
             _response = self._set_tags()
             if options.set:
+                utils.check_lock_file(self.CMD, self.LOCK_FILE)
                 self._apply_rules(_response)
+                utils.remove_file(self.LOCK_FILE)
         else:
             parser.print_help()
             self._usage_examples()
-
-        utils.remove_file(self.LOCK_FILE)
 
         sys.exit(os.EX_OK)
 
