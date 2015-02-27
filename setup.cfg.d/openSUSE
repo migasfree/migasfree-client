@@ -13,5 +13,6 @@ requires = python >= 2.7
            dmidecode
            python-requests
            python-netifaces
+           python-crypto
            python-gtk
            cups-client

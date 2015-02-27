@@ -8,5 +8,5 @@ Package = migasfree-client
 Maintainer = Jose Antonio Chavarría <jachavar@gmail.com>
 Debian-Version = 1
 Build-Depends = python (>=2.7), python-stdeb
-Depends = lshw (>=02.15), sudo, dmidecode, python-requests, python-netifaces, python-gtk2, cups-client
+Depends = lshw (>=02.15), sudo, dmidecode, python-requests, python-netifaces, python-crypto, python-gtk2, cups-client
 Suggests = python-notify
