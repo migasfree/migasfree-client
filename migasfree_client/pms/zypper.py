@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,13 +19,12 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'zypper.py'
-__date__ = '2013-01-26'
+__license__ = 'GPLv3'
 
 import logging
 
 from .pms import Pms
-from migasfree_client.utils import execute
+from ..utils import execute, write_file
 
 
 @Pms.register('Zypper')
@@ -170,7 +169,6 @@ class Zypper(Pms):
         self._cmd = '%s clean --all' % self._pms
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            #self._cmd = '%s refresh --force-resolution' % self._pms
             self._cmd = '%s --non-interactive refresh' % self._pms
             logging.debug(self._cmd)
             return (execute(self._cmd)[0] == 0)
@@ -182,7 +180,7 @@ class Zypper(Pms):
         ordered list query_all(void)
         '''
 
-        self._cmd = '%s -qa' % self._pm
+        self._cmd = '%s --queryformat "%{NAME}_%{VERSION}-%{RELEASE}_%{ARCH}" -qa' % self._pm
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret != 0:
@@ -190,30 +188,23 @@ class Zypper(Pms):
 
         return sorted(_output.split('\n'))
 
-    def create_repos(self, server, version, repositories):
+    def create_repos(self, server, project, repositories):
         '''
-        bool create_repos(string server, string version, list repositories)
+        bool create_repos(string server, string project, list repositories)
         '''
 
-        _template = \
+        template = \
 """[%(repo)s]
 name=%(repo)s
-baseurl=http://%(server)s/repo/%(version)s/REPOSITORIES/%(repo)s
+baseurl=http://%(server)s/pub/%(project)s/repos/%(repo)s
 gpgcheck=0
 enabled=1
 http_caching=none
 metadata_expire=1
-""" % {'server': server, 'version': version, 'repo': '%(repo)s'}
+""" % {'server': server, 'project': project, 'repo': '%(repo)s'}
 
-        _file = None
-        try:
-            _file = open(self._repo, 'wb')
-            for _repo in repositories:
-                _file.write(_template % {'repo': _repo['name']})
+        content = ''
+        for repo in repositories:
+            content += template % {'repo': repo['name']}
 
-            return True
-        except IOError:
-            return False
-        finally:
-            if _file is not None:
-                _file.close()
+        return write_file(self._repo, content)
