@@ -3,7 +3,7 @@ migasfree client README
 =======================
 
 :Author: Jose Antonio Chavarría
-:Date: March 4, 2014
+:Date: February 25, 2015
 
 Introduction
 ============
@@ -16,7 +16,7 @@ First of all, thanks a lot for downloading this software. We hope that this soft
 Description
 ===========
 
-'migasfree' is a very simple, but effective, systems management system. Actually, it is used in ``Ayuntamiento de Zaragoza`` (Spain) by initial authors in the project **migration to open source software for desktops**. They use AZLinux distribution <http://zaragozaciudad.net/azlinux>, which is based on SUSE <http://www.novell.com/linux> and Ubuntu <http://www.ubuntu.com/>.
+'migasfree' is a very simple, but effective, systems management system. Actually, it is used in ``Ayuntamiento de Zaragoza`` (Spain) by initial authors in the project **migration to open source software for desktops**. They use AZLinux distribution <http://zaragozaciudad.net/azlinux>, which is based on Ubuntu <http://www.ubuntu.com/>.
 
 You can learn about systems management systems at:
 
@@ -39,22 +39,13 @@ See AUTHORS file.
 Requirements
 ============
 
-    * Server:
-        + Apache with WSGI
-        + Django 1.6
-        + postgresql
-        + Python libraries:
-            - python-django-south
-            - django-ajax-selects
-
-    * Client:
-        + a Linux distribution (Fedora, openSUSE, Ubuntu, ...)
-        + Python >= 2.6
-            - pycurl >= 7.19
-            - python-netifaces
-            - python-notify (optional)
-        + lshw >= B.02.15
-        + dmidecode
+    * a Linux distribution (Fedora, openSUSE, Ubuntu, ...)
+    * Python >= 2.7
+        + python-requests
+        + python-netifaces
+        + python-notify (optional)
+    * lshw >= B.02.15
+    * dmidecode
 
 
 Features
