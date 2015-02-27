@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2014 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,6 +40,8 @@ import signal
 
 import gettext
 _ = gettext.gettext
+
+from . import settings
 
 # TODO http://docs.python.org/library/unittest.html
 
@@ -106,29 +108,6 @@ def execute(cmd, verbose=False, interactive=True):
                     if chunk and chunk != '\n':
                         print(chunk)
                     _output_buffer = '%s%s' % (_output_buffer, chunk)
-
-        '''
-        # simple progress indicator
-        # does not work with some commands (lshw, getting repositories...)
-        if progress:
-            while True:
-                _output = _process.stdout.readline()
-                sys.stdout.write('.')
-                sys.stdout.flush()
-
-                if not _output:
-                    break
-        '''
-
-        '''
-        while True:
-            _out = _process.stdout.read(1)
-            if _out == '' and _process.poll() != None:
-                break
-            if _out != '':
-                sys.stdout.write(_out)
-                sys.stdout.flush()
-        '''
 
     _output, _error = _process.communicate()
 
@@ -316,6 +295,13 @@ def get_user_info(user):
     }
 
 
+def read_file(filename):
+    with open(filename, 'rb') as fp:
+        ret = fp.read()
+
+    return ret
+
+
 def write_file(filename, content):
     '''
     bool write_file(string filename, string content)
@@ -435,19 +421,15 @@ def get_current_user():
     return '%s~%s' % (_graphic_user, _fullname)
 
 
-def get_mfc_version():
-    from . import settings
-
+def get_mfc_project():
     _config = get_config(settings.CONF_FILE, 'client')
-    if type(_config) is dict and 'version' in _config:
-        return _config.get('version')
+    if type(_config) is dict and 'project' in _config:
+        return _config.get('project')
 
     return '-'.join(platform.linux_distribution()[0:2])  # if not set
 
 
 def get_mfc_computer_name():
-    from . import settings
-
     _config = get_config(settings.CONF_FILE, 'client')
     if type(_config) is dict and 'computer_name' in _config:
         return _config.get('computer_name')
@@ -456,7 +438,6 @@ def get_mfc_computer_name():
 
 
 def get_smbios_version():
-    # issue #33
     _ret, _smbios, _ = execute(
         'LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present',
         interactive=False
@@ -471,7 +452,6 @@ def get_smbios_version():
 def get_hardware_uuid():
     _uuid_format = '%s%s%s%s-%s%s-%s%s-%s-%s'
 
-    # issue #16, issue #28
     _ret, _uuid, _ = execute(
         'sudo dmidecode --string system-uuid',
         interactive=False
@@ -485,7 +465,6 @@ def get_hardware_uuid():
     except:
         return get_mfc_computer_name()
 
-    # issue #33
     if get_smbios_version() >= (2, 6):
         _ms_uuid = _uuid_format % (
             _byte_array[0:2],
@@ -516,7 +495,6 @@ def get_hardware_uuid():
 
     _ms_uuid = _ms_uuid.upper()
 
-    # exceptions (issue #4)
     if _ms_uuid == '03000200-0400-0500-0006-000700080009':  # ASRock
         _ms_uuid = get_mfc_computer_name()
 
