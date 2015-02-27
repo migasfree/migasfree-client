@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2014 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import re
 import logging
 
 from .pms import Pms
-from migasfree_client.utils import execute
+from ..utils import execute, write_file
 
 
 @Pms.register('Apt')
@@ -37,7 +37,7 @@ class Apt(Pms):
     def __init__(self):
         Pms.__init__(self)
 
-        self._name = 'apt-get'      # Package Management System name
+        self._name = 'apt'          # Package Management System name
         self._pm = '/usr/bin/dpkg'  # Package Manager command
         self._pms = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get'  # Package Management System command
         self._repo = '/etc/apt/sources.list.d/migasfree.list'  # Repositories file
@@ -204,24 +204,17 @@ class Apt(Pms):
 
         return _result
 
-    def create_repos(self, server, version, repositories):
+    def create_repos(self, server, project, repositories):
         '''
-        bool create_repos(string server, string version, list repositories)
+        bool create_repos(string server, string project, list repositories)
         '''
 
-        _template = \
-"""deb http://%(server)s/repo/%(version)s/REPOSITORIES %(repo)s PKGS
-""" % {'server': server, 'version': version, 'repo': '%(repo)s'}
+        template = \
+"""deb http://%(server)s/pub/%(project)s/repos %(repo)s PKGS
+""" % {'server': server, 'project': project, 'repo': '%(repo)s'}
 
-        _file = None
-        try:
-            _file = open(self._repo, 'wb')
-            for _repo in repositories:
-                _file.write(_template % {'repo': _repo['name']})
+        content = ''
+        for repo in repositories:
+            content += template % {'repo': repo['name']}
 
-            return True
-        except IOError:
-            return False
-        finally:
-            if _file is not None:
-                _file.close()
+        return write_file(self._repo, content)
