@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2014 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ __license__ = 'GPLv3'
 
 import sys
 
-if not hasattr(sys, 'version_info') or sys.version_info < (2, 6, 0, 'final'):
-    raise SystemExit('migasfree-client requires Python 2.6 or later.')
+if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):
+    raise SystemExit('migasfree-client requires Python 2.7 or later.')
 
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -108,12 +108,12 @@ setup(
     platforms=['Linux'],
     packages=[
         'migasfree_client',
-        'migasfree_client.backends',
+        'migasfree_client.pms',
         'migasfree_client.devices',
     ],
     package_dir={
         'migasfree_client': 'migasfree_client',
-        'migasfree_client.backends': 'migasfree_client/backends',
+        'migasfree_client.pms': 'migasfree_client/pms',
         'migasfree_client.devices': 'migasfree_client/devices',
     },
     cmdclass={
