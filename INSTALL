@@ -2,8 +2,8 @@ Thanks for downloading migasfree client.
 
 To install it, make sure you have these programs installed:
 
-    * Python >= 2.6
-    * PyCurl >= 7.19 (or python-curl or python-pycurl)
+    * Python >= 2.7
+    * python-requests
     * lshw >= 02.15
     * hal
     * python-netifaces
