@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'pms.py'
-__date__ = '2013-01-26'
+__license__ = 'GPLv3'
 
 
 class Pms(object):
@@ -122,9 +121,9 @@ class Pms(object):
 
         raise NotImplementedError
 
-    def create_repos(self, server, version, repositories):
+    def create_repos(self, server, project, repositories):
         '''
-        bool create_repos(string server, string version, list repositories)
+        bool create_repos(string server, string project, list repositories)
         '''
 
         raise NotImplementedError
