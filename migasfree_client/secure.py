@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,108 +16,100 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
-# Author: Alberto Gacías <agacias@ono.com>
 
 __author__ = "Jose Antonio Chavarría"
-__file__ = "secure.py"
-__date__ = '2013-02-02'
-
-# TODO common code between server & client
+__license__ = 'GPLv3'
 
 import os
-import json
+import jose
 
-import utils
-import server_errors
+from Crypto.PublicKey import RSA
+
+from .utils import read_file, write_file
+from . import settings
 
 
-def sign(filename, private_key):
+def sign(claims, priv_key):
     '''
-    void sign(string filename, string private_key)
-    Creates a temporal file named 'filename.sign'
-    TODO find python equivalent
+    string sign(dict claims, string priv_key)
     '''
-
-    os.system(
-        "openssl dgst -sha1 -sign %s -out %s %s" % (
-            private_key,
-            '%s.sign' % filename,
-            filename
-        )
+    rsa_key = RSA.importKey(
+        read_file(os.path.join(settings.KEYS_PATH, priv_key))
     )
+    jwk = {'k': rsa_key.exportKey('PEM')}
+
+    jws = jose.sign(claims, jwk, alg='RS256')  # Asymmetric!!!
+    jwt = jose.serialize_compact(jws)
+
+    return jwt
 
 
-def verify(filename, public_key):
+def verify(jwt, pub_key):
     '''
-    bool verify(string filename, string public_key)
-    TODO find python equivalent
+    dict verify(string jwt, string pub_key)
     '''
-
-    return (os.system(
-        "openssl dgst -sha1 -verify %s -signature %s %s 1>/dev/null" % (
-            public_key,
-            '%s.sign' % filename,
-            filename
-        )) == 0)
-
-'''
-def genKeysRSA(filename):
-    # Private Key
-    os.system("openssl genrsa -out %s.pri 2048" % filename)
-    # Public Key
-    os.system("openssl rsa -in %s.pri -pubout > %s.pub" % (filename, filename))
-'''
-
-
-def wrap(filename, data, key=None):
-    '''
-    void wrap(string filename, data, string key = None)
-    Creates a JSON file with data
-    If key, signs JSON file
-    '''
-
-    with open(filename, 'wb') as _fp:
-        json.dump(data, _fp)
-
-    #os.system('less %s; read' % filename)  # DEBUG
-
-    if key:
-        sign(filename, key)
-        with open(filename, 'ab') as _fp:
-            _fp.write(open('%s.sign' % filename, 'rb').read())
-        os.remove('%s.sign' % filename)  # remove temp file (sign function)
-
-
-def unwrap(filename, key=None):
-    '''
-    dict unwrap(string filename, string key = None)
-    filename is a JSON file (signed or not)
-    If key, verifies JSON file
-    Returns data from filename or {} if sign is not verificable
-    '''
-
-    if key:
-        _content = open(filename, 'rb').read()
-        _n = len(_content)
-        utils.write_file('%s.sign' % filename, _content[_n - 256:_n])
-        utils.write_file(filename, _content[0:_n - 256])
-
+    rsa_key = RSA.importKey(
+        read_file(os.path.join(settings.KEYS_PATH, pub_key))
+    )
+    jwk = {'k': rsa_key.exportKey('PEM')}
     try:
-        _data = json.loads(open(filename, 'rb').read())
-    except ValueError:
-        print(filename)
-        return {}  # no response in JSON format
+        jwe = jose.deserialize_compact(jwt)
+        return jose.verify(jwe, jwk, validate_claims=False)  # FIXME True!!!
+    except:
+        # DEBUG
+        # import sys, traceback
+        # traceback.print_exc(file=sys.stdout)
+        return None
 
-    if not key:
-        return _data
 
-    if not verify(filename, key):
-        return {
-            'errmfs': {
-                'code': server_errors.SIGN_NOT_OK,
-                'info': ''
-            }
-        }  # Sign not OK
+def encrypt(claims, pub_key):
+    '''
+    string encrypt(dict claims, string pub_key)
+    '''
+    rsa_key = RSA.importKey(
+        read_file(os.path.join(settings.KEYS_PATH, pub_key))
+    )
+    pub_jwk = {'k': rsa_key.publickey().exportKey('PEM')}
 
-    os.remove('%s.sign' % filename)  # remove temp file (verify function)
-    return _data
+    jwe = jose.encrypt(claims, pub_jwk)
+    jwt = jose.serialize_compact(jwe)
+
+    return jwt
+
+
+def decrypt(jwt, priv_key):
+    '''
+    string decrypt(string jwt, string priv_key)
+    '''
+    rsa_key = RSA.importKey(
+        read_file(os.path.join(settings.KEYS_PATH, priv_key))
+    )
+    priv_jwk = {'k': rsa_key.exportKey('PEM')}
+    try:
+        jwe = jose.deserialize_compact(jwt)
+        return jose.decrypt(jwe, priv_jwk)
+    except:
+        return None
+
+
+def wrap(data, sign_key, encrypt_key):
+    '''
+    string wrap(dict data, string sign_key, string encrypt_key)
+    '''
+    claims = {
+        'data': data,
+        'sign': sign(data, sign_key)
+    }
+    return encrypt(claims, encrypt_key)
+
+
+def unwrap(data, decrypt_key, verify_key):
+    '''
+    dict unwrap(string data, string decrypt_key, string verify_key)
+    '''
+    jwt = decrypt(data, decrypt_key)
+    jws = verify(jwt.claims['sign'], verify_key)
+    if jws:
+        return jwt.claims['data']
+
+    return None
