@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2014 Jose Antonio Chavarría
+# Copyright (c) 2013-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ import platform
 import gettext
 _ = gettext.gettext
 
-from .backends import Pms
+from .pms import Pms
 
 # implicit print flush
 buf_arg = 0
@@ -84,7 +84,7 @@ class MigasFreeCommand(object):
 
     auto_register_user = ''
     auto_register_password = ''
-    auto_register_command = 'register_computer'
+    auto_register_end_point = 'public/keys/project/'
 
     def __init__(self):
         _log_level = logging.INFO
@@ -93,8 +93,8 @@ class MigasFreeCommand(object):
         if type(_config_client) is not dict:
             _config_client = {}
 
-        self.migas_version = os.environ.get(
-            'MIGASFREE_CLIENT_VERSION', utils.get_mfc_version()
+        self.migas_project = os.environ.get(
+            'MIGASFREE_CLIENT_PROJECT', utils.get_mfc_project()
         )
         self.migas_computer_name = os.environ.get(
             'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
@@ -173,7 +173,7 @@ class MigasFreeCommand(object):
         logging.debug('Config packager: %s', _config_packager)
 
         # init UrlRequest
-        _url_base = '%s/api/' % str(self.migas_server)
+        _url_base = '%s/api/v1/' % str(self.migas_server)
         if self.migas_ssl_cert:
             _url_base = '%s://%s' % ('https', _url_base)
         else:
@@ -182,8 +182,8 @@ class MigasFreeCommand(object):
             debug=self._debug,
             url_base=_url_base,
             proxy=self.migas_proxy,
-            info_keys={
-                'path': settings.KEYS_PATH,
+            project=self.migas_project,
+            keys={
                 'private': self.PRIVATE_KEY,
                 'public': self.PUBLIC_KEY
             },
@@ -212,7 +212,6 @@ class MigasFreeCommand(object):
         return self._auto_register()
 
     def _auto_register(self):
-        # try to get keys
         print(_('Autoregistering computer...'))
 
         return self._save_sign_keys(
@@ -222,15 +221,15 @@ class MigasFreeCommand(object):
 
     def _save_sign_keys(self, user, password):
         _response = self._url_request.run(
-            self.auto_register_command,
+            self.auto_register_end_point,
             data={
                 'username': user,
                 'password': password,
-                'version': self.migas_version,
+                'project': self.migas_project,
                 'platform': platform.system(),
                 'pms': str(self.pms),
             },
-            sign=False
+            safe=False
         )
         logging.debug('Response _save_sign_keys: %s', _response)
 
@@ -243,8 +242,9 @@ class MigasFreeCommand(object):
                 logging.error(_msg)
                 sys.exit(errno.ENOTDIR)
 
-        if 'errmfs' in _response:
-            _msg = _response['errmfs']['info']
+        if self.PRIVATE_KEY not in _response or self.PUBLIC_KEY not in _response:
+            _msg = _('An error has occurred while autoregistering computer. '
+            'Unable to continue.')
             self.operation_failed(_msg)
             logging.error(_msg)
             sys.exit(errno.ENOENT)
@@ -288,7 +288,7 @@ class MigasFreeCommand(object):
     def _show_running_options(self):
         print('')
         print(_('Running options: %s') % settings.CONF_FILE)
-        print('\t%s: %s' % (_('Version'), self.migas_version))
+        print('\t%s: %s' % (_('Project'), self.migas_project))
         print('\t%s: %s' % (_('Server'), self.migas_server))
         print('\t%s: %s' % (_('Auto update packages'), self.migas_auto_update_packages))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
