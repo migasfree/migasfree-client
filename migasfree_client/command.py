@@ -27,6 +27,7 @@ import os
 from . import (
     settings,
     utils,
+    network,
     url_request,
     printcolor,
 )
@@ -85,6 +86,8 @@ class MigasFreeCommand(object):
     auto_register_user = ''
     auto_register_password = ''
     auto_register_end_point = 'public/keys/project/'
+
+    _computer_id = None
 
     def __init__(self):
         _log_level = logging.INFO
@@ -206,21 +209,34 @@ class MigasFreeCommand(object):
         _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
         _public_key = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
         if os.path.isfile(_private_key) and os.path.isfile(_public_key):
+            if not self._computer_id:
+                self.get_computer_id()
+
             return True  # all OK
 
         logging.warning('Security keys are not present!!!')
         return self._auto_register()
 
+    def _check_keys_path(self):
+        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
+            try:
+                os.makedirs(os.path.abspath(settings.KEYS_PATH))
+            except:
+                _msg = _('Error creating %s directory') % settings.KEYS_PATH
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                sys.exit(errno.ENOTDIR)
+
     def _auto_register(self):
         print(_('Autoregistering computer...'))
 
-        return self._save_sign_keys(
-            self.auto_register_user,
-            self.auto_register_password
-        )
+        if self._save_sign_keys(
+            self.auto_register_user, self.auto_register_password
+        ):
+            return self._save_computer()
 
     def _save_sign_keys(self, user, password):
-        _response = self._url_request.run(
+        response = self._url_request.run(
             self.auto_register_end_point,
             data={
                 'username': user,
@@ -231,34 +247,26 @@ class MigasFreeCommand(object):
             },
             safe=False
         )
-        logging.debug('Response _save_sign_keys: %s', _response)
+        logging.debug('Response _save_sign_keys: %s', response)
 
-        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
-            try:
-                os.makedirs(os.path.abspath(settings.KEYS_PATH))
-            except:
-                _msg = _('Error creating %s directory') % settings.KEYS_PATH
-                self.operation_failed(_msg)
-                logging.error(_msg)
-                sys.exit(errno.ENOTDIR)
-
-        if self.PRIVATE_KEY not in _response or self.PUBLIC_KEY not in _response:
-            _msg = _('An error has occurred while autoregistering computer. '
+        self._check_keys_path()
+        if self.PRIVATE_KEY not in response or self.PUBLIC_KEY not in response:
+            msg = _('An error has occurred while autoregistering computer. '
             'Unable to continue.')
-            self.operation_failed(_msg)
-            logging.error(_msg)
+            self.operation_failed(msg)
+            logging.error(msg)
             sys.exit(errno.ENOENT)
 
-        for _file, _content in list(_response.items()):
+        for _file, _content in list(response.items()):
             _path_file = os.path.join(settings.KEYS_PATH, _file)
             logging.debug('Trying writing file: %s', _path_file)
             _ret = utils.write_file(_path_file, str(_content))
             if _ret:
                 print(_('Key %s created!') % _path_file)
             else:
-                _msg = _('Error writing key file!!!')
-                self.operation_failed(_msg)
-                logging.error(_msg)
+                msg = _('Error writing key file!!!')
+                self.operation_failed(msg)
+                logging.error(msg)
                 sys.exit(errno.ENOENT)
 
         return True
@@ -284,6 +292,36 @@ class MigasFreeCommand(object):
 
             self._save_sign_keys(_user, _pass)
             self.operation_ok(_('Computer registered at server'))
+
+    def _save_computer(self):
+        response = self._url_request.run(
+            'safe/computers/',
+            data={
+                'uuid': utils.get_hardware_uuid(),
+                'name': self.migas_computer_name,
+                'ip_address': network.get_network_info()['ip']
+            }
+        )
+        logging.debug('Response _save_computer: %s', response)
+
+        self._computer_id = response.get('id')
+        return True
+
+    def get_computer_id(self):
+        if self._computer_id:
+            return self._computer_id
+
+        response = self._url_request.run(
+            'safe/computers/id/',
+            data={
+                'uuid': utils.get_hardware_uuid(),
+                'name': self.migas_computer_name
+            }
+        )
+        logging.debug('Response get_computer_id: %s', response)
+
+        self._computer_id = response
+        return self._computer_id
 
     def _show_running_options(self):
         print('')
