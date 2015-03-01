@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2014 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import os
 import sys
 import errno
 import logging
-import optparse
+import argparse
 import json
 import time
 import tempfile
@@ -41,10 +41,11 @@ _ = gettext.gettext
 
 # sys.path.append(os.path.dirname(__file__))  # DEBUG
 
+from datetime import datetime
+
 from . import (
     settings,
     utils,
-    server_errors,
     printcolor,
     network,
 )
@@ -101,7 +102,7 @@ class MigasFreeClient(MigasFreeCommand):
         logging.debug('Graphic user: %s', self._graphic_user)
 
     def _exit_gracefully(self, signal_number, frame):
-        self._send_message(_('Killing %s before time!!!') % self.CMD)
+        self._show_message(_('Killing %s before time!!!') % self.CMD)
         logging.critical('Exiting %s, signal: %s', self.CMD, signal_number)
         sys.exit(errno.EINPROGRESS)
 
@@ -115,7 +116,7 @@ class MigasFreeClient(MigasFreeCommand):
         print('\n' + _('Examples:'))
 
         print('  ' + _('Register computer at server:'))
-        print('\t%s -g' % self.CMD)
+        print('\t%s -r' % self.CMD)
         print('\t%s --register\n' % self.CMD)
 
         print('  ' + _('Update the system:'))
@@ -127,12 +128,12 @@ class MigasFreeClient(MigasFreeCommand):
         print('\t%s --search=bluefish\n' % self.CMD)
 
         print('  ' + _('Install package:'))
-        print('\t%s -ip bluefish' % self.CMD)
-        print('\t%s --install --package=bluefish\n' % self.CMD)
+        print('\t%s -i bluefish' % self.CMD)
+        print('\t%s --install bluefish\n' % self.CMD)
 
-        print('  ' + _('Remove package:'))
-        print('\t%s -rp bluefish' % self.CMD)
-        print('\t%s --remove --package=bluefish\n' % self.CMD)
+        print('  ' + _('Purge package:'))
+        print('\t%s -p bluefish' % self.CMD)
+        print('\t%s --purge bluefish\n' % self.CMD)
 
     def _write_error(self, msg, append=False):
         if append:
@@ -149,47 +150,22 @@ class MigasFreeClient(MigasFreeCommand):
         )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
-    def _send_message(self, msg='', icon=None):
-        if msg:
-            print('')
-            printcolor.info(str(' ' + msg + ' ').center(76, '*'))
+    def _show_message(self, msg, icon=None):
+        print('')
+        printcolor.info(str(' ' + msg + ' ').center(76, '*'))
 
-            if self.migas_gui_verbose:
-                if not icon:
-                    icon = os.path.join(settings.ICON_PATH, self.ICON)
+        if self.migas_gui_verbose:
+            if not icon:
+                icon = os.path.join(settings.ICON_PATH, self.ICON)
 
-                if self._notify:
-                    icon = 'file://%s' % os.path.join(settings.ICON_PATH, icon)
+            if self._notify:
+                icon = 'file://%s' % os.path.join(settings.ICON_PATH, icon)
 
-                    try:
-                        self._notify.update(self.APP_NAME, msg, icon)
-                        self._notify.show()
-                    except:
-                        pass
-
-        _ret = self._url_request.run(
-            'upload_computer_message',
-            data=msg,
-            exit_on_error=False
-        )
-        logging.debug('Message response: %s', _ret)
-        if self._debug:
-            print(('Message response: %s' % _ret))
-
-        if 'errmfs' in _ret \
-        and _ret['errmfs']['code'] == server_errors.COMPUTER_NOT_FOUND:
-            logging.warning('Computer not found.')
-            return self._auto_register()
-
-        if _ret['errmfs']['code'] != server_errors.ALL_OK:
-            _msg = 'Error: %s\nInfo: %s' % (
-                server_errors.error_info(_ret['errmfs']['code']),
-                _ret['errmfs']['info']
-            )
-            self.operation_failed(_msg)
-            self._write_error(_msg, append=True)
-
-        return (_ret['errmfs']['code'] == server_errors.ALL_OK)
+                try:
+                    self._notify.update(self.APP_NAME, msg, icon)
+                    self._notify.show()
+                except:
+                    pass
 
     def _eval_code(self, lang, code):
         # clean code...
@@ -228,48 +204,46 @@ class MigasFreeClient(MigasFreeCommand):
         return _output
 
     def _eval_attributes(self, properties):
-        _response = {
-            'computer': {
-                'hostname': self.migas_computer_name,
-                'ip': network.get_network_info()['ip'],
-                'version': self.migas_version,
-                'platform': platform.system(),
-                'pms': str(self.pms),
-                'user': self._graphic_user,
-                'user_fullname': utils.get_user_info(
-                    self._graphic_user
-                )['fullname']
-            },
-            'attributes': {}
+        response = {
+            'id': self._computer_id,
+            'uuid': utils.get_hardware_uuid(),
+            'name': self.migas_computer_name,
+            'ip_address': network.get_network_info()['ip'],
+            'login_user': self._graphic_user,
+            'login_fullname': utils.get_user_info(
+                self._graphic_user
+            )['fullname'],
+            'login_attributes': {}
         }
 
         # properties converted in attributes
-        self._send_message(_('Evaluating attributes...'))
+        self._show_message(_('Evaluating attributes...'))
         for _item in properties:
-            _response['attributes'][_item['name']] = \
+            response['login_attributes'][_item['prefix']] = \
                 self._eval_code(_item['language'], _item['code'])
             _info = '%s: %s' % (
-                _item['name'],
-                _response['attributes'][_item['name']]
+                _item['prefix'],
+                response['login_attributes'][_item['prefix']]
             )
-            if _response['attributes'][_item['name']].strip() != '':
+            if response['login_attributes'][_item['prefix']].strip() != '':
                 self.operation_ok(_info)
             else:
                 self.operation_failed(_info)
                 self._write_error(
-                    'Error: property %s without value\n' % _item['name']
+                    'Error: property %s without value\n' % _item['prefix']
                 )
 
-        return _response
+        return response
 
-    def _eval_faults(self, faultsdef):
+    def _eval_faults(self, fault_definitions):
         _response = {
+            'id': self._computer_id,
             'faults': {}
         }
 
         # evaluate faults
-        self._send_message(_('Executing faults...'))
-        for _item in faultsdef:
+        self._show_message(_('Executing faults...'))
+        for _item in fault_definitions:
             _result = self._eval_code(_item['language'], _item['code'])
             _info = '%s: %s' % (_item['name'], _result)
             if _result:
@@ -281,62 +255,121 @@ class MigasFreeClient(MigasFreeCommand):
 
         return _response
 
-    def _get_attributes(self):
-        '''
-        get properties and returns attributes to send
-        '''
-        self._send_message(_('Getting properties...'))
-        _request = self._url_request.run('get_properties')
-        logging.debug('Update request: %s', _request)
+    def get_properties(self):
+        if not self._computer_id:
+            self.get_computer_id()
 
-        if not _request:
-            self.operation_failed(_('No data requested from server'))
+        self._show_message(_('Getting properties...'))
+        response = self._url_request.run(
+            'safe/computers/properties/',
+            data={
+                'id': self._computer_id
+            }
+        )
+        logging.debug('Response get_properties_id: %s', response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
-        _attributes = self._eval_attributes(_request['properties'])
-        logging.debug('Attributes to send: %s', _attributes)
+        return response
 
-        return _attributes
+    def get_fault_definitions(self):
+        if not self._computer_id:
+            self.get_computer_id()
 
-    def _software_inventory(self):
-        # actual software
-        _software_before = self.pms.query_all()
-        logging.debug('Actual software: %s', _software_before)
+        self._show_message(_('Getting fault definitions...'))
+        response = self._url_request.run(
+            'safe/computers/faults/definitions/',
+            data={
+                'id': self._computer_id
+            }
+        )
+        logging.debug('Response get_fault_definitions: %s', response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+
+        self.operation_ok()
+
+        return response
+
+    def get_repositories(self):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        self._show_message(_('Getting repositories...'))
+        response = self._url_request.run(
+            'safe/computers/repositories/',
+            data={
+                'id': self._computer_id
+            },
+            exit_on_error=False
+        )
+        logging.debug('Response get_repositories: %s', response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+
+        self.operation_ok()
+
+        return response
+
+    def get_mandatory_packages(self):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        self._show_message(_('Getting mandatory packages...'))
+        response = self._url_request.run(
+            'safe/computers/packages/mandatory/',
+            data={
+                'id': self._computer_id
+            },
+            exit_on_error=False
+        )
+        logging.debug('Response get_mandatory_packages: %s', response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+
+        self.operation_ok()
+
+        return response
+
+    def _software_history(self, software):
+        history = ''
 
         # if have been installed packages manually
         # information is uploaded to server
         if os.path.isfile(settings.SOFTWARE_FILE) \
         and os.stat(settings.SOFTWARE_FILE).st_size:
-            _diff_software = utils.compare_lists(
+            diff_software = utils.compare_lists(
                 open(
                     settings.SOFTWARE_FILE,
                     'U'
                 ).read().splitlines(),  # not readlines!!!
-                _software_before
+                software
             )
 
-            if _diff_software:
-                self._send_message(_('Uploading manual software...'))
-                _file_mtime = time.strftime(
+            if diff_software:
+                file_mtime = time.strftime(
                     '%Y-%m-%d %H:%M:%S',
                     time.localtime(os.path.getmtime(settings.SOFTWARE_FILE))
                 )
-                _now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-                _data = '# [%s, %s]\n%s' % (
-                    _file_mtime,
-                    _now,
-                    '\n'.join(_diff_software)
+                now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+                history = '# [%s, %s]\n%s' % (
+                    file_mtime,
+                    now,
+                    '\n'.join(diff_software)
                 )
-                logging.debug('Software diff: %s', _data)
-                self._url_request.run(
-                    'upload_computer_software_history',
-                    data=_data
-                )
-                self.operation_ok()
+                logging.debug('Software diff: %s', history)
 
-        return _software_before
+        return history
 
     def _upload_old_errors(self):
         '''
@@ -344,18 +377,25 @@ class MigasFreeClient(MigasFreeCommand):
         '''
         if os.path.isfile(self.ERROR_FILE) \
         and os.stat(self.ERROR_FILE).st_size:
-            self._send_message(_('Uploading old errors...'))
-            self._url_request.run(
-                'upload_computer_errors',
-                data=open(self.ERROR_FILE, 'rb').read()
+            self._show_message(_('Uploading old errors...'))
+            response = self._url_request.run(
+                'safe/computers/errors/',
+                #data=open(self.ERROR_FILE, 'rb').read()
+                data={
+                    'id': self._computer_id,
+                    'description': utils.read_file(self.ERROR_FILE)
+                }
             )
+            logging.debug('Response _upload_old_errors: %s', response)
             self.operation_ok()
             os.remove(self.ERROR_FILE)
 
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
-    def _create_repositories(self, repos):
-        self._send_message(_('Creating repositories...'))
+    def _create_repositories(self):
+        repos = self.get_repositories()
+
+        self._show_message(_('Creating repositories...'))
 
         _server = self.migas_server
         if self.migas_package_proxy_cache:
@@ -363,7 +403,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         _ret = self.pms.create_repos(
             _server,
-            self.migas_version,
+            utils.slugify(unicode(self.migas_project)),
             repos
         )
 
@@ -379,7 +419,7 @@ class MigasFreeClient(MigasFreeCommand):
         '''
         clean cache of Package Management System
         '''
-        self._send_message(_('Getting repositories metadata...'))
+        self._show_message(_('Getting repositories metadata...'))
         _ret = self.pms.clean_all()
 
         if _ret:
@@ -391,7 +431,7 @@ class MigasFreeClient(MigasFreeCommand):
             self._write_error(_msg)
 
     def _uninstall_packages(self, packages):
-        self._send_message(_('Uninstalling packages...'))
+        self._show_message(_('Uninstalling packages...'))
         _ret, _error = self.pms.remove_silent(packages)
         if _ret:
             self.operation_ok()
@@ -402,7 +442,7 @@ class MigasFreeClient(MigasFreeCommand):
             self._write_error(_msg)
 
     def _install_mandatory_packages(self, packages):
-        self._send_message(_('Installing mandatory packages...'))
+        self._show_message(_('Installing mandatory packages...'))
         _ret, _error = self.pms.install_silent(packages)
         if _ret:
             self.operation_ok()
@@ -413,7 +453,7 @@ class MigasFreeClient(MigasFreeCommand):
             self._write_error(_msg)
 
     def _update_packages(self):
-        self._send_message(_('Updating packages...'))
+        self._show_message(_('Updating packages...'))
         _ret, _error = self.pms.update_silent()
         if _ret:
             self.operation_ok()
@@ -424,7 +464,7 @@ class MigasFreeClient(MigasFreeCommand):
             self._write_error(_msg)
 
     def _update_hardware_inventory(self):
-        self._send_message(_('Capturing hardware information...'))
+        self._show_message(_('Capturing hardware information...'))
         _cmd = 'lshw -json'
         _ret, _output, _error = utils.execute(_cmd, interactive=False)
         if _ret == 0:
@@ -438,7 +478,7 @@ class MigasFreeClient(MigasFreeCommand):
         _hardware = json.loads(_output)
         logging.debug('Hardware inventory: %s', _hardware)
 
-        self._send_message(_('Sending hardware information...'))
+        self._show_message(_('Sending hardware information...'))
         _ret = self._url_request.run(
             'upload_computer_hardware',
             data=_hardware,
@@ -457,97 +497,134 @@ class MigasFreeClient(MigasFreeCommand):
         self._error_file_descriptor = None
 
         if os.stat(self.ERROR_FILE).st_size:
-            self._send_message(_('Sending errors to server...'))
+            self._show_message(_('Sending errors to server...'))
             self._url_request.run(
-                'upload_computer_errors',
-                data=open(self.ERROR_FILE, 'rb').read()
+                'safe/computers/errors/',
+                data={
+                    'id': self._computer_id,
+                    'description': utils.read_file(self.ERROR_FILE)
+                }
             )
             self.operation_ok()
 
             if not self._debug:
                 os.remove(self.ERROR_FILE)
 
-    def _update_system(self):
-        self._check_sign_keys()
+    def upload_attributes(self):
+        response = self.get_properties()
 
-        if self._send_message(_('Connecting to migasfree server...')):
-            self.operation_ok()
-        else:
-            sys.exit(errno.EBADRQC)
+        attributes = self._eval_attributes(response)
+        logging.debug('Attributes to send: %s', attributes)
 
-        self._upload_old_errors()
-
-        _response = self._get_attributes()
-
-        self._send_message(_('Uploading attributes...'))
-        _request = self._url_request.run(
-            'upload_computer_info',
-            data=_response
+        self._show_message(_('Uploading attributes...'))
+        response = self._url_request.run(
+            'safe/computers/attributes/',
+            data=attributes
         )
         self.operation_ok()
-        logging.debug('Server response: %s', _request)
+        logging.debug('Response upload_attributes: %s', response)
 
-        if len(_request['faultsdef']) > 0:
-            _response = self._eval_faults(_request['faultsdef'])
-            logging.debug('Faults to send: %s', _response)
+        return response
 
-            self._send_message(_('Uploading faults...'))
-            _request_faults = self._url_request.run(
-                'upload_computer_faults',
-                data=_response
+    def upload_faults(self):
+        response = self.get_fault_definitions()
+        if len(response) > 0:
+            data = self._eval_faults(response)
+            logging.debug('Faults to send: %s', data)
+
+            self._show_message(_('Uploading faults...'))
+            response = self._url_request.run(
+                'safe/computers/faults/',
+                data=data
             )
             self.operation_ok()
-            logging.debug('Server response: %s', _request_faults)
+            logging.debug('Response upload_faults: %s', response)
 
-        _software_before = self._software_inventory()
+        return response
 
-        self._create_repositories(_request['repositories'])
+    def _mandatory_pkgs(self):
+        response = self.get_mandatory_packages()
+        if 'remove' in response:
+            self._uninstall_packages(response['remove'])
+        if 'install' in response:
+            self._install_mandatory_packages(response['install'])
 
+    def _upload_software(self, before, history):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        after = self.pms.query_all()
+        utils.write_file(settings.SOFTWARE_FILE, '\n'.join(after))
+
+        diff_software = utils.compare_lists(before, after)
+        if diff_software:
+            data = time.strftime('# %Y-%m-%d %H:%M:%S\n', time.localtime()) \
+                + '\n'.join(diff_software)
+            logging.debug('Software diff: %s', data)
+            history = data + history  # reverse chronological
+            print(_('Software diff: %s') % history)
+
+        self._show_message(_('Uploading software...'))
+        response = self._url_request.run(
+            'safe/computers/software/',
+            data={
+                'id': self._computer_id,
+                'inventory': after,
+                'history': history
+            }
+        )
+        logging.debug('Response _upload_software: %s', response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+
+        self.operation_ok()
+
+        return response
+
+    def upload_accurate_connection(self, start_date):
+        self._show_message(_('Uploading accurate connection...'))
+        response = self._url_request.run(
+            'safe/accurate-connection/',
+            data={
+                'id': self._computer_id,
+                'start_date': start_date,
+                'consumer': 'migasfree client %s' % __version__
+            }
+        )
+        self.operation_ok()
+        logging.debug('Response upload_accurate_connection: %s', response)
+
+        return response
+
+
+    def _update_system(self):
+        start_date = datetime.now().isoformat()
+
+        self._check_sign_keys()
+
+        self._show_message(_('Connecting to migasfree server...'))
+
+        self._upload_old_errors()
+        self.upload_attributes()
+        self.upload_faults()
+
+        software_before = self.pms.query_all()
+        logging.debug('Actual software: %s', software_before)
+
+        software_history = self._software_history(software_before)
+
+        self._create_repositories()
         self._clean_pms_cache()
-
-        self._uninstall_packages(_request['packages']['remove'])
-        self._install_mandatory_packages(_request['packages']['install'])
+        self._mandatory_pkgs()
         if self.migas_auto_update_packages is True:
             self._update_packages()
 
-        # upload computer software history
-        _software_after = self.pms.query_all()
-        utils.write_file(settings.SOFTWARE_FILE, '\n'.join(_software_after))
-        _diff_software = utils.compare_lists(_software_before, _software_after)
-        if _diff_software:
-            self._send_message(_('Uploading software history...'))
-            _data = time.strftime('# %Y-%m-%d %H:%M:%S\n', time.localtime()) \
-                + '\n'.join(_diff_software)
-            logging.debug('Software diff: %s', _data)
-            print(_('Software diff: %s') % _data)
-            self._url_request.run(
-                'upload_computer_software_history',
-                data=_data
-            )
-            self.operation_ok()
+        self._upload_software(software_before, software_history)
 
-        self._send_message(_('Uploading software inventory...'))
-        if _request['base']:
-            logging.info('This computer is software reference')
-            self._url_request.run(
-                'upload_computer_software_base',
-                data='\n'.join(_software_after)
-            )
-            self.operation_ok()
-
-        _software_base = self._url_request.run('get_computer_software')
-        _software_base = _software_base.split('\n')
-        logging.debug('Software base: %s', _software_base)
-
-        _diff_software = utils.compare_lists(_software_base, _software_after)
-        _diff_software = '\n'.join(_diff_software)
-        logging.debug('Software base diff: %s', _diff_software)
-        self._url_request.run(
-            'upload_computer_software_base_diff',
-            data=_diff_software
-        )
-        self.operation_ok()
-
+        """
+        # TODO
         if _request.get('hardware_capture') is True:
             self._update_hardware_inventory()
 
@@ -567,13 +644,11 @@ class MigasFreeClient(MigasFreeCommand):
                 'upload_devices_changes',
                 data={'installed': _installed, 'removed': _removed}
             )
+        """
 
         self._upload_execution_errors()
-
-        self._send_message(_('Operations completed'), self.ICON_COMPLETED)
-
-        # clean computer messages in server
-        self._send_message()
+        self.upload_accurate_connection(start_date)
+        self._show_message(_('Operations completed'), self.ICON_COMPLETED)
 
     def _search(self, pattern):
         return self.pms.search(pattern)
@@ -581,18 +656,18 @@ class MigasFreeClient(MigasFreeCommand):
     def _install_package(self, pkg):
         self._check_sign_keys()
 
-        self._send_message(_('Installing package: %s') % pkg)
+        self._show_message(_('Installing package: %s') % pkg)
         _ret = self.pms.install(pkg)
-        self._send_message()
+        self._show_message()
 
         return _ret
 
     def _remove_package(self, pkg):
         self._check_sign_keys()
 
-        self._send_message(_('Removing package: %s') % pkg)
+        self._show_message(_('Removing package: %s') % pkg)
         _ret = self.pms.remove(pkg)
-        self._send_message()
+        self._show_message()
 
         return _ret
 
@@ -600,7 +675,7 @@ class MigasFreeClient(MigasFreeCommand):
         if device['packages']:
             self._install_mandatory_packages(device['packages'])
 
-        self._send_message(_('Installing device: %s') % device['model'])
+        self._show_message(_('Installing device: %s') % device['model'])
         _installed, _output = Printer.install(device)
         if _installed:
             _ret = _output
@@ -613,7 +688,7 @@ class MigasFreeClient(MigasFreeCommand):
             logging.error(_msg)
             self._write_error(_msg)
 
-        self._send_message()
+        self._show_message()
 
         return _ret
 
@@ -635,7 +710,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _printer_name == '':
             return device_id  # not installed, removed for server
 
-        self._send_message(_('Removing device: %s') % _printer_name)
+        self._show_message(_('Removing device: %s') % _printer_name)
 
         _removed, _output = Printer.remove(_printer_name)
         if _removed:
@@ -649,7 +724,7 @@ class MigasFreeClient(MigasFreeCommand):
             logging.error(_msg)
             self._write_error(_msg)
 
-        self._send_message()
+        self._show_message()
 
         return _ret
 
@@ -665,88 +740,114 @@ class MigasFreeClient(MigasFreeCommand):
 
         return _removed_ids
 
-    def run(self):
-        _program = 'migasfree client'
-        parser = optparse.OptionParser(
-            description=_program,
-            prog=self.CMD,
-            version=__version__,
-            usage='%prog options'
-        )
-
+    def _parse_args(self):
+        program = 'migasfree client'
         print(_('%(program)s version: %(version)s') % {
-            'program': _program,
+            'program': program,
             'version': __version__
         })
 
-        parser.add_option("--register", "-g", action="store_true",
-            help=_('Register computer at server'))
-        parser.add_option("--update", "-u", action="store_true",
-            help=_('Update system from repositories'))
-        parser.add_option("--search", "-s", action="store",
-            help=_('Search package in repositories'))
-        parser.add_option(
-            "--install", "-i",
-            action="store_true",
+        parser = argparse.ArgumentParser(
+            prog=self.CMD,
+            description=program
+        )
+
+        parser.add_argument(
+            '-d', '--debug',
+            action='store_true',
+            help=_('Enable debug mode')
+        )
+
+        register_group = parser.add_argument_group('register')
+        register_group.add_argument(
+            '-r', '--register',
+            action='store_true',
+            help=_('Register computer at server')
+        )
+
+        update_group = parser.add_argument_group('update')
+        update_group.add_argument(
+            '-u', '--update',
+            action='store_true',
+            help=_('Update system from repositories')
+        )
+
+        update_group.add_argument(
+            '-f', '--force-upgrade',
+            action='store_true',
+            help=_('Force package upgrades')
+        )
+
+        search_group = parser.add_argument_group('search')
+        search_group.add_argument(
+            '-s', '--search',
+            action='store',
+            metavar='STRING',
+            help=_('Search package in repositories')
+        )
+
+        install_group = parser.add_argument_group('install')
+        install_group.add_argument(
+            '-i', '--install',
+            action='store',
+            metavar='PACKAGE',
             help=_('Install package')
         )
-        parser.add_option(
-            "--remove", "-r",
-            action="store_true",
-            help=_('Remove package')
+
+        purge_group = parser.add_argument_group('purge')
+        install_group.add_argument(
+            '-p', '--purge',
+            action='store',
+            metavar='PACKAGE',
+            help=_('Purge package')
         )
-        parser.add_option("--package", "-p", action="store",
-            help=_('Package to install or remove'))
 
-        parser.add_option("--force-upgrade", "-a", action="store_true",
-            help=_('Force package upgrades'))
-
-        options, arguments = parser.parse_args()
+        args = parser.parse_args()
 
         # check restrictions
-        if options.register and \
-        (options.install or options.remove or options.update or options.search):
+        if args.register and \
+        (args.install or args.purge or args.update or args.search):
             self._usage_examples()
             parser.error(_('Register option is exclusive!!!'))
-        if options.update and \
-        (options.install or options.remove or options.search):
+        if args.update and \
+        (args.install or args.purge or args.search):
             self._usage_examples()
             parser.error(_('Update option is exclusive!!!'))
-        if options.search and (options.install or options.remove):
+        if args.search and (args.install or args.purge):
             self._usage_examples()
             parser.error(_('Search option is exclusive!!!'))
-        if options.install and options.remove:
+        if args.install and args.purge:
             parser.print_help()
             self._usage_examples()
-            parser.error(_('Install and remove are exclusive!!!'))
-        if options.install and not options.package:
-            self._usage_examples()
-            parser.error(_('Install needs a package!!!'))
-        if options.remove and not options.package:
-            self._usage_examples()
-            parser.error(_('Remove needs a package!!!'))
+            parser.error(_('Install and purge are exclusive!!!'))
 
-        if options.force_upgrade:
+        return args
+
+    def run(self):
+        args = self._parse_args()
+
+        if args.force_upgrade:
             self.migas_auto_update_packages = True
+
+        if args.debug:
+            self._debug = True
+            #logging.setLevel(logging.DEBUG)  # FIXME
 
         utils.check_lock_file(self.CMD, self.LOCK_FILE)
 
         self._show_running_options()
 
         # actions dispatcher
-        if options.update:
+        if args.update:
             self._update_system()
-        elif options.register:
+        elif args.register:
             self._register_computer()
-        elif options.search:
-            self._search(options.search)
-        elif options.install and options.package:
-            self._install_package(options.package)
-        elif options.remove and options.package:
-            self._remove_package(options.package)
-        else:
-            parser.print_help()
-            self._usage_examples()
+        elif args.search:
+            self._search(args.search)
+        elif args.install:
+            self._install_package(args.install)
+        elif args.purge:
+            self._remove_package(args.purge)
 
         utils.remove_file(self.LOCK_FILE)
 
