@@ -46,6 +46,12 @@ class UrlRequest(object):
     _url_base = ''
     _cert = None
 
+    _ok_codes = [
+        requests.codes.ok, requests.codes.created,
+        requests.codes.moved, requests.codes.found,
+        requests.codes.temporary_redirect, requests.codes.resume
+    ]
+
     def __init__(
         self,
         debug=False,
@@ -140,12 +146,12 @@ class UrlRequest(object):
             files=files, proxies=proxies, cert=self._cert
         )
 
-        if r.status_code != requests.codes.ok:
-            self._error_response(r, end_point)
+        if r.status_code not in self._ok_codes:
+            return self._error_response(r, end_point)
 
         return self._evaluate_response(r.json(), safe)
 
-    def _evaluate_response(self, json, safe):
+    def _evaluate_response(self, json, safe=True):
         if safe:
             response = secure.unwrap(
                 json['msg'],
@@ -171,8 +177,13 @@ class UrlRequest(object):
             str(request.text)
         )
 
-        print(_('HTTP error code: %s') % request.status_code)
+        info = request.text
+        if 'json' in request.headers['content-type']:
+            info = self._evaluate_response(request.json())
+
         if self._debug:
+            print(_('HTTP error code: %s') % request.status_code)
+
             if not self._check_tmp_path():
                 msg = _('Error creating %s directory') % settings.TMP_PATH
                 logging.exception(_msg)
@@ -196,16 +207,17 @@ class UrlRequest(object):
                     extension
                 )
             )
-            utils.write_file(_file, str(request.text))
+            utils.write_file(_file, str(info))
             print(_file)
 
-        if exit_on_error:
-            print(_('Error: %s') % str(request.text))
+        if self._exit_on_error:
+            if 'html' not in request.headers['content-type']:
+                print(_('Error: %s') % str(info))
             sys.exit(errno.EACCES)
 
         return {
             'error': {
-                'info': str(request.text),
+                'info': str(info),
                 'code': request.status_code
             }
         }
