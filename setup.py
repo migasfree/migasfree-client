@@ -106,6 +106,9 @@ setup(
     author_email='jachavar@gmail.com',
     url='http://www.migasfree.org/',
     platforms=['Linux'],
+    install_requires = [
+        'jose',
+    ],
     packages=[
         'migasfree_client',
         'migasfree_client.pms',
