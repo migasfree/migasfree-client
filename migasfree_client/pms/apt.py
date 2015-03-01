@@ -186,6 +186,7 @@ class Apt(Pms):
     def query_all(self):
         '''
         ordered list query_all(void)
+        list format: name_version_architecture.extension
         '''
 
         _ret, _packages, _error = execute(
@@ -200,7 +201,7 @@ class Apt(Pms):
         for _line in _packages:
             if _line.startswith('ii'):
                 _tmp = re.split(' +', _line)
-                _result.append('%s-%s' % (_tmp[1], _tmp[2]))
+                _result.append('%s_%s_%s.deb' % (_tmp[1], _tmp[2], _tmp[3]))
 
         return _result
 
@@ -215,6 +216,6 @@ class Apt(Pms):
 
         content = ''
         for repo in repositories:
-            content += template % {'repo': repo['name']}
+            content += template % {'repo': repo}
 
         return write_file(self._repo, content)

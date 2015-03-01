@@ -117,6 +117,7 @@ class Pms(object):
     def query_all(self):
         '''
         ordered list query_all(void)
+        list format: name_version_architecture.extension
         '''
 
         raise NotImplementedError
