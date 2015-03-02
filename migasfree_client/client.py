@@ -26,7 +26,6 @@ import os
 
 import sys
 import errno
-import logging
 import argparse
 import json
 import time
@@ -38,6 +37,9 @@ import signal
 
 import gettext
 _ = gettext.gettext
+
+import logging
+logger = logging.getLogger(__name__)
 
 # sys.path.append(os.path.dirname(__file__))  # DEBUG
 
@@ -78,8 +80,8 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _init_environment(self):
         _graphic_pid, _graphic_process = utils.get_graphic_pid()
-        logging.debug('Graphic pid: %s', _graphic_pid)
-        logging.debug('Graphic process: %s', _graphic_process)
+        logger.debug('Graphic pid: %s', _graphic_pid)
+        logger.debug('Graphic process: %s', _graphic_process)
 
         if not _graphic_pid:
             self._graphic_user = os.environ.get('USER')
@@ -87,7 +89,7 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             self._graphic_user = utils.get_graphic_user(_graphic_pid)
             _user_display = utils.get_user_display_graphic(_graphic_pid)
-            logging.debug('Graphic display: %s', _user_display)
+            logger.debug('Graphic display: %s', _user_display)
 
             try:
                 import pygtk
@@ -99,11 +101,11 @@ class MigasFreeClient(MigasFreeCommand):
             except ImportError:
                 pass  # graphical notifications no available
 
-        logging.debug('Graphic user: %s', self._graphic_user)
+        logger.debug('Graphic user: %s', self._graphic_user)
 
     def _exit_gracefully(self, signal_number, frame):
         self._show_message(_('Killing %s before time!!!') % self.CMD)
-        logging.critical('Exiting %s, signal: %s', self.CMD, signal_number)
+        logger.critical('Exiting %s, signal: %s', self.CMD, signal_number)
         sys.exit(errno.EINPROGRESS)
 
     def _show_running_options(self):
@@ -170,8 +172,8 @@ class MigasFreeClient(MigasFreeCommand):
     def _eval_code(self, lang, code):
         # clean code...
         code = code.replace('\r', '').strip()
-        logging.debug('Language code: %s', lang)
-        logging.debug('Code: %s', code)
+        logger.debug('Language code: %s', lang)
+        logger.debug('Code: %s', code)
 
         _filename = tempfile.mkstemp()[1]
         with open(_filename, 'wb') as _code_file:
@@ -191,10 +193,10 @@ class MigasFreeClient(MigasFreeCommand):
             _cmd = ':'  # gracefully degradation
 
         _ret, _output, _error = utils.timeout_execute(_cmd)
-        logging.debug('Executed command: %s', _cmd)
-        logging.debug('Output: %s', _output)
+        logger.debug('Executed command: %s', _cmd)
+        logger.debug('Output: %s', _output)
         if _ret != 0:
-            logging.error('Error: %s', _error)
+            logger.error('Error: %s', _error)
 
         try:
             os.remove(_filename)
@@ -261,12 +263,13 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting properties...'))
         response = self._url_request.run(
-            'safe/computers/properties/',
+            url=self._url_base + 'safe/computers/properties/',
             data={
                 'id': self._computer_id
-            }
+            },
+            debug=self._debug
         )
-        logging.debug('Response get_properties_id: %s', response)
+        logger.debug('Response get_properties_id: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -282,12 +285,13 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting fault definitions...'))
         response = self._url_request.run(
-            'safe/computers/faults/definitions/',
+            url=self._url_base + 'safe/computers/faults/definitions/',
             data={
                 'id': self._computer_id
-            }
+            },
+            debug=self._debug
         )
-        logging.debug('Response get_fault_definitions: %s', response)
+        logger.debug('Response get_fault_definitions: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -303,17 +307,19 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting repositories...'))
         response = self._url_request.run(
-            'safe/computers/repositories/',
+            url=self._url_base + 'safe/computers/repositories/',
             data={
                 'id': self._computer_id
             },
-            exit_on_error=False
+            exit_on_error=False,
+            debug=self._debug
         )
-        logging.debug('Response get_repositories: %s', response)
+        logger.debug('Response get_repositories: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
+            #sys.exit(errno.ENODATA)
+            return None
 
         self.operation_ok()
 
@@ -325,17 +331,19 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting mandatory packages...'))
         response = self._url_request.run(
-            'safe/computers/packages/mandatory/',
+            url=self._url_base + 'safe/computers/packages/mandatory/',
             data={
                 'id': self._computer_id
             },
-            exit_on_error=False
+            exit_on_error=False,
+            debug=self._debug
         )
-        logging.debug('Response get_mandatory_packages: %s', response)
+        logger.debug('Response get_mandatory_packages: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
+            #sys.exit(errno.ENODATA)
+            return None
 
         self.operation_ok()
 
@@ -367,7 +375,7 @@ class MigasFreeClient(MigasFreeCommand):
                     now,
                     '\n'.join(diff_software)
                 )
-                logging.debug('Software diff: %s', history)
+                logger.debug('Software diff: %s', history)
 
         return history
 
@@ -379,14 +387,15 @@ class MigasFreeClient(MigasFreeCommand):
         and os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Uploading old errors...'))
             response = self._url_request.run(
-                'safe/computers/errors/',
+                url=self._url_base + 'safe/computers/errors/',
                 #data=open(self.ERROR_FILE, 'rb').read()
                 data={
                     'id': self._computer_id,
                     'description': utils.read_file(self.ERROR_FILE)
-                }
+                },
+                debug=self._debug
             )
-            logging.debug('Response _upload_old_errors: %s', response)
+            logger.debug('Response _upload_old_errors: %s', response)
             self.operation_ok()
             os.remove(self.ERROR_FILE)
 
@@ -394,6 +403,8 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _create_repositories(self):
         repos = self.get_repositories()
+        if not repos:
+            return
 
         self._show_message(_('Creating repositories...'))
 
@@ -412,7 +423,7 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             _msg = _('Error creating repositories: %s') % repos
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
     def _clean_pms_cache(self):
@@ -427,7 +438,7 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             _msg = _('Error getting repositories metadata')
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
     def _uninstall_packages(self, packages):
@@ -438,7 +449,7 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             _msg = _('Error uninstalling packages: %s') % _error
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
     def _install_mandatory_packages(self, packages):
@@ -449,7 +460,7 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             _msg = _('Error installing packages: %s') % _error
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
     def _update_packages(self):
@@ -460,7 +471,7 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             _msg = _('Error updating packages: %s') % _error
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
     def _update_hardware_inventory(self):
@@ -472,24 +483,25 @@ class MigasFreeClient(MigasFreeCommand):
         else:
             _msg = _('lshw command failed: %s') % _error
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
         _hardware = json.loads(_output)
-        logging.debug('Hardware inventory: %s', _hardware)
+        logger.debug('Hardware inventory: %s', _hardware)
 
         self._show_message(_('Sending hardware information...'))
         _ret = self._url_request.run(
-            'upload_computer_hardware',
+            url=self._url_base + 'upload_computer_hardware',
             data=_hardware,
-            exit_on_error=False
+            exit_on_error=False,
+            debug=self._debug
         )
         if _ret['errmfs']['code'] == server_errors.ALL_OK:
             self.operation_ok()
         else:
             self.operation_failed()
             _msg = _ret['errmfs']['info']
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
     def _upload_execution_errors(self):
@@ -499,11 +511,12 @@ class MigasFreeClient(MigasFreeCommand):
         if os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Sending errors to server...'))
             self._url_request.run(
-                'safe/computers/errors/',
+                url=self._url_base + 'safe/computers/errors/',
                 data={
                     'id': self._computer_id,
                     'description': utils.read_file(self.ERROR_FILE)
-                }
+                },
+                debug=self._debug
             )
             self.operation_ok()
 
@@ -514,15 +527,16 @@ class MigasFreeClient(MigasFreeCommand):
         response = self.get_properties()
 
         attributes = self._eval_attributes(response)
-        logging.debug('Attributes to send: %s', attributes)
+        logger.debug('Attributes to send: %s', attributes)
 
         self._show_message(_('Uploading attributes...'))
         response = self._url_request.run(
-            'safe/computers/attributes/',
-            data=attributes
+            url=self._url_base + 'safe/computers/attributes/',
+            data=attributes,
+            debug=self._debug
         )
         self.operation_ok()
-        logging.debug('Response upload_attributes: %s', response)
+        logger.debug('Response upload_attributes: %s', response)
 
         return response
 
@@ -530,20 +544,24 @@ class MigasFreeClient(MigasFreeCommand):
         response = self.get_fault_definitions()
         if len(response) > 0:
             data = self._eval_faults(response)
-            logging.debug('Faults to send: %s', data)
+            logger.debug('Faults to send: %s', data)
 
             self._show_message(_('Uploading faults...'))
             response = self._url_request.run(
-                'safe/computers/faults/',
-                data=data
+                url=self._url_base + 'safe/computers/faults/',
+                data=data,
+                debug=self._debug
             )
             self.operation_ok()
-            logging.debug('Response upload_faults: %s', response)
+            logger.debug('Response upload_faults: %s', response)
 
         return response
 
     def _mandatory_pkgs(self):
         response = self.get_mandatory_packages()
+        if not response:
+            return
+
         if 'remove' in response:
             self._uninstall_packages(response['remove'])
         if 'install' in response:
@@ -560,20 +578,21 @@ class MigasFreeClient(MigasFreeCommand):
         if diff_software:
             data = time.strftime('# %Y-%m-%d %H:%M:%S\n', time.localtime()) \
                 + '\n'.join(diff_software)
-            logging.debug('Software diff: %s', data)
+            logger.debug('Software diff: %s', data)
             history = data + history  # reverse chronological
             print(_('Software diff: %s') % history)
 
         self._show_message(_('Uploading software...'))
         response = self._url_request.run(
-            'safe/computers/software/',
+            url=self._url_base + 'safe/computers/software/',
             data={
                 'id': self._computer_id,
                 'inventory': after,
                 'history': history
-            }
+            },
+            debug=self._debug
         )
-        logging.debug('Response _upload_software: %s', response)
+        logger.debug('Response _upload_software: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -586,15 +605,16 @@ class MigasFreeClient(MigasFreeCommand):
     def upload_accurate_connection(self, start_date):
         self._show_message(_('Uploading accurate connection...'))
         response = self._url_request.run(
-            'safe/accurate-connection/',
+            url=self._url_base + 'safe/accurate-connection/',
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
                 'consumer': 'migasfree client %s' % __version__
-            }
+            },
+            debug=self._debug
         )
         self.operation_ok()
-        logging.debug('Response upload_accurate_connection: %s', response)
+        logger.debug('Response upload_accurate_connection: %s', response)
 
         return response
 
@@ -611,7 +631,7 @@ class MigasFreeClient(MigasFreeCommand):
         self.upload_faults()
 
         software_before = self.pms.query_all()
-        logging.debug('Actual software: %s', software_before)
+        logger.debug('Actual software: %s', software_before)
 
         software_history = self._software_history(software_before)
 
@@ -641,8 +661,9 @@ class MigasFreeClient(MigasFreeCommand):
                 _installed = self._install_devices(_request['devices']['install'])
 
             self._url_request.run(
-                'upload_devices_changes',
-                data={'installed': _installed, 'removed': _removed}
+                url=self._url_base + 'upload_devices_changes',
+                data={'installed': _installed, 'removed': _removed},
+                debug=self._debug
             )
         """
 
@@ -654,20 +675,22 @@ class MigasFreeClient(MigasFreeCommand):
         return self.pms.search(pattern)
 
     def _install_package(self, pkg):
-        self._check_sign_keys()
+        # FIXME communicate changes to server?
+        # self._check_sign_keys()
 
         self._show_message(_('Installing package: %s') % pkg)
         _ret = self.pms.install(pkg)
-        self._show_message()
+        # self._show_message()
 
         return _ret
 
     def _remove_package(self, pkg):
-        self._check_sign_keys()
+        # FIXME communicate changes to server?
+        # self._check_sign_keys()
 
         self._show_message(_('Removing package: %s') % pkg)
         _ret = self.pms.remove(pkg)
-        self._show_message()
+        # self._show_message()
 
         return _ret
 
@@ -680,12 +703,12 @@ class MigasFreeClient(MigasFreeCommand):
         if _installed:
             _ret = _output
             self.operation_ok()
-            logging.debug('Device installed: %s', device['model'])
+            logger.debug('Device installed: %s', device['model'])
         else:
             _ret = 0
             _msg = _('Error installing device: %s') % _output
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
         self._show_message()
@@ -716,12 +739,12 @@ class MigasFreeClient(MigasFreeCommand):
         if _removed:
             _ret = device_id
             self.operation_ok()
-            logging.debug('Device removed: %s', _printer_name)
+            logger.debug('Device removed: %s', _printer_name)
         else:
             _ret = 0
             _msg = _('Error removing device: %s') % _output
             self.operation_failed(_msg)
-            logging.error(_msg)
+            logger.error(_msg)
             self._write_error(_msg)
 
         self._show_message()
@@ -831,25 +854,29 @@ class MigasFreeClient(MigasFreeCommand):
 
         if args.debug:
             self._debug = True
-            #logging.setLevel(logging.DEBUG)  # FIXME
-
-        utils.check_lock_file(self.CMD, self.LOCK_FILE)
+            logger.setLevel(logging.DEBUG)
 
         self._show_running_options()
 
         # actions dispatcher
         if args.update:
+            utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self._update_system()
+            utils.remove_file(self.LOCK_FILE)
         elif args.register:
             self._register_computer()
         elif args.search:
             self._search(args.search)
         elif args.install:
+            utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self._install_package(args.install)
+            utils.remove_file(self.LOCK_FILE)
         elif args.purge:
+            utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self._remove_package(args.purge)
-
-        utils.remove_file(self.LOCK_FILE)
+            utils.remove_file(self.LOCK_FILE)
+        else:
+            self._usage_examples()
 
         sys.exit(os.EX_OK)
 
