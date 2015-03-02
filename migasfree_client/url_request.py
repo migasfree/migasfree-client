@@ -23,7 +23,6 @@ __license__ = 'GPLv3'
 import os
 import sys
 import errno
-import logging
 import requests
 import json
 
@@ -32,6 +31,9 @@ import utils
 
 import gettext
 _ = gettext.gettext
+
+import logging
+logger = logging.getLogger(__name__)
 
 from . import settings
 
@@ -43,7 +45,6 @@ class UrlRequest(object):
     _exit_on_error = True
 
     _proxy = ''
-    _url_base = ''
     _cert = None
 
     _ok_codes = [
@@ -56,36 +57,29 @@ class UrlRequest(object):
         self,
         debug=False,
         proxy='',
-        url_base='',
         project='',
         keys={},
         cert=None
     ):
         self._debug = debug
         self._proxy = proxy
-        self._url_base = url_base
         self._project = project
         self._cert = cert
 
-        logging.info('SSL certificate: %s', self._cert)
+        logger.info('SSL certificate: %s', self._cert)
 
         if type(keys) is dict:
             self._private_key = keys.get('private')
             self._public_key = keys.get('public')
 
         if self._proxy:
-            logging.info('Proxy selected: %s', self._proxy)
-
-        if self._url_base:
-            logging.info('URL base: %s', self._url_base)
-        else:
-            logging.critical('URL base not assigned!!!')
+            logger.info('Proxy selected: %s', self._proxy)
 
         if self._private_key:
-            logging.info('Private key: %s', self._private_key)
+            logger.info('Private key: %s', self._private_key)
 
         if self._public_key:
-            logging.info('Public key: %s', self._public_key)
+            logger.info('Public key: %s', self._public_key)
 
     def _check_tmp_path(self):
         if not os.path.exists(settings.TMP_PATH):
@@ -98,20 +92,21 @@ class UrlRequest(object):
 
     def run(
         self,
-        end_point,
+        url,
         data='',
         upload_file=None,
         safe=True,
-        exit_on_error=True
+        exit_on_error=True,
+        debug=False
     ):
+        self._debug = debug
         self._exit_on_error = exit_on_error
 
-        logging.debug('URL base: %s', self._url_base)
-        logging.debug('URL end point: %s', end_point)
-        logging.debug('URL data: %s', data)
-        logging.debug('URL upload file: %s', upload_file)
-        logging.debug('Safe request: %s', safe)
-        logging.debug('Exit on error: %s', exit_on_error)
+        logger.debug('URL: %s', url)
+        logger.debug('URL data: %s', data)
+        logger.debug('URL upload file: %s', upload_file)
+        logger.debug('Safe request: %s', safe)
+        logger.debug('Exit on error: %s', exit_on_error)
 
         headers = None
         if safe:
@@ -137,7 +132,6 @@ class UrlRequest(object):
               "https": self._proxy,
             }
 
-        url = self._url_base + end_point
         if not url.endswith('/'):
             url += '/'
 
@@ -147,7 +141,7 @@ class UrlRequest(object):
         )
 
         if r.status_code not in self._ok_codes:
-            return self._error_response(r, end_point)
+            return self._error_response(r, url)
 
         return self._evaluate_response(r.json(), safe)
 
@@ -161,18 +155,18 @@ class UrlRequest(object):
         else:
             response = json
 
-        logging.debug('Response text: %s' % response)
+        logger.debug('Response text: %s' % response)
         if self._debug:
             print(response)
 
         return response
 
-    def _error_response(self, request, end_point):
-        logging.error(
+    def _error_response(self, request, url):
+        logger.error(
             'url_request server error response code: %s',
             str(request.status_code)
         )
-        logging.error(
+        logger.error(
             'url_request server error response info: %s',
             str(request.text)
         )
@@ -186,7 +180,7 @@ class UrlRequest(object):
 
             if not self._check_tmp_path():
                 msg = _('Error creating %s directory') % settings.TMP_PATH
-                logging.exception(_msg)
+                logger.exception(_msg)
                 print(msg)
                 if self._exit_on_error:
                     sys.exit(errno.EPERM)
@@ -203,7 +197,7 @@ class UrlRequest(object):
                 settings.TMP_PATH,
                 'response.%s.%s.%s' % (
                     request.status_code,
-                    end_point.replace('/', '.').rstrip('.'),
+                    url.replace('/', '.').rstrip('.'),
                     extension
                 )
             )
