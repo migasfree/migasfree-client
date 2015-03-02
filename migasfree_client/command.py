@@ -42,13 +42,15 @@ if not os.path.exists(version_file):
 __version__ = open(version_file).read().splitlines()[0]
 
 import sys
-import logging
 import errno
 import getpass
 import platform
 
 import gettext
 _ = gettext.gettext
+
+import logging
+logger = logging.getLogger(__name__)
 
 from .pms import Pms
 
@@ -77,6 +79,7 @@ class MigasFreeCommand(object):
     ICON = 'apps/migasfree.svg'
     ICON_COMPLETED = 'actions/migasfree-ok.svg'
 
+    _url_base = None
     _url_request = None
 
     _debug = False
@@ -169,21 +172,17 @@ class MigasFreeCommand(object):
             level=_log_level,
             filename=settings.LOG_FILE
         )
-        logging.info('*' * 20)
-        logging.info('%s in execution', self.CMD)
-        logging.info('Config file: %s', settings.CONF_FILE)
-        logging.debug('Config client: %s', _config_client)
-        logging.debug('Config packager: %s', _config_packager)
+        logger.info('*' * 20)
+        logger.info('%s in execution', self.CMD)
+        logger.info('Config file: %s', settings.CONF_FILE)
+        logger.debug('Config client: %s', _config_client)
+        logger.debug('Config packager: %s', _config_packager)
+
+        self._init_url_base()
 
         # init UrlRequest
-        _url_base = '%s/api/v1/' % str(self.migas_server)
-        if self.migas_ssl_cert:
-            _url_base = '%s://%s' % ('https', _url_base)
-        else:
-            _url_base = '%s://%s' % ('http', _url_base)
         self._url_request = url_request.UrlRequest(
             debug=self._debug,
-            url_base=_url_base,
             proxy=self.migas_proxy,
             project=self.migas_project,
             keys={
@@ -194,6 +193,13 @@ class MigasFreeCommand(object):
         )
 
         self._pms_selection()
+
+    def _init_url_base(self):
+        self._url_base = '%s/api/v1/' % str(self.migas_server)
+        if self.migas_ssl_cert:
+            self._url_base = '%s://%s' % ('https', self._url_base)
+        else:
+            self._url_base = '%s://%s' % ('http', self._url_base)
 
     def _check_user_is_root(self):
         return utils.get_user_info(os.environ.get('USER'))['gid'] == 0
@@ -214,7 +220,7 @@ class MigasFreeCommand(object):
 
             return True  # all OK
 
-        logging.warning('Security keys are not present!!!')
+        logger.warning('Security keys are not present!!!')
         return self._auto_register()
 
     def _check_keys_path(self):
@@ -224,7 +230,7 @@ class MigasFreeCommand(object):
             except:
                 _msg = _('Error creating %s directory') % settings.KEYS_PATH
                 self.operation_failed(_msg)
-                logging.error(_msg)
+                logger.error(_msg)
                 sys.exit(errno.ENOTDIR)
 
     def _auto_register(self):
@@ -237,7 +243,7 @@ class MigasFreeCommand(object):
 
     def _save_sign_keys(self, user, password):
         response = self._url_request.run(
-            self.auto_register_end_point,
+            url=self._url_base + self.auto_register_end_point,
             data={
                 'username': user,
                 'password': password,
@@ -245,28 +251,29 @@ class MigasFreeCommand(object):
                 'platform': platform.system(),
                 'pms': str(self.pms),
             },
-            safe=False
+            safe=False,
+            debug=self._debug
         )
-        logging.debug('Response _save_sign_keys: %s', response)
+        logger.debug('Response _save_sign_keys: %s', response)
 
         self._check_keys_path()
         if self.PRIVATE_KEY not in response or self.PUBLIC_KEY not in response:
             msg = _('An error has occurred while autoregistering computer. '
             'Unable to continue.')
             self.operation_failed(msg)
-            logging.error(msg)
+            logger.error(msg)
             sys.exit(errno.ENOENT)
 
         for _file, _content in list(response.items()):
             _path_file = os.path.join(settings.KEYS_PATH, _file)
-            logging.debug('Trying writing file: %s', _path_file)
+            logger.debug('Trying writing file: %s', _path_file)
             _ret = utils.write_file(_path_file, str(_content))
             if _ret:
                 print(_('Key %s created!') % _path_file)
             else:
                 msg = _('Error writing key file!!!')
                 self.operation_failed(msg)
-                logging.error(msg)
+                logger.error(msg)
                 sys.exit(errno.ENOENT)
 
         return True
@@ -285,7 +292,7 @@ class MigasFreeCommand(object):
             _user = raw_input('%s: ' % _('User to register computer at server'))
             if not _user:
                 self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
-                logging.info('Empty user in register computer option')
+                logger.info('Empty user in register computer option')
                 sys.exit(errno.EAGAIN)
 
             _pass = getpass.getpass('%s: ' % _('Password'))
@@ -295,14 +302,15 @@ class MigasFreeCommand(object):
 
     def _save_computer(self):
         response = self._url_request.run(
-            'safe/computers/',
+            url=self._url_base + 'safe/computers/',
             data={
                 'uuid': utils.get_hardware_uuid(),
                 'name': self.migas_computer_name,
                 'ip_address': network.get_network_info()['ip']
-            }
+            },
+            debug=self._debug
         )
-        logging.debug('Response _save_computer: %s', response)
+        logger.debug('Response _save_computer: %s', response)
 
         self._computer_id = response.get('id')
         return True
@@ -312,13 +320,14 @@ class MigasFreeCommand(object):
             return self._computer_id
 
         response = self._url_request.run(
-            'safe/computers/id/',
+            url=self._url_base + 'safe/computers/id/',
             data={
                 'uuid': utils.get_hardware_uuid(),
                 'name': self.migas_computer_name
-            }
+            },
+            debug=self._debug
         )
-        logging.debug('Response get_computer_id: %s', response)
+        logger.debug('Response get_computer_id: %s', response)
 
         self._computer_id = response
         return self._computer_id
@@ -364,9 +373,9 @@ class MigasFreeCommand(object):
 
     def _pms_selection(self):
         _pms_info = self._search_pms()
-        logging.debug('PMS info: %s', _pms_info)
+        logger.debug('PMS info: %s', _pms_info)
         if not _pms_info:
-            logging.critical('Any PMS was not found. Cannot continue.')
+            logger.critical('Any PMS was not found. Cannot continue.')
             sys.exit(errno.EINPROGRESS)
 
         self.pms = Pms.factory(_pms_info)()
