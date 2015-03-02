@@ -176,7 +176,7 @@ class Yum(Pms):
         list format: name_version_architecture.extension
         '''
 
-        self._cmd = '%s --queryformat "%{NAME}_%{VERSION}-%{RELEASE}_%{ARCH}.rpm\n" -qa' % self._pm
+        self._cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret != 0:
