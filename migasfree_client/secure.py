@@ -21,6 +21,10 @@ __author__ = "Jose Antonio Chavarría"
 __license__ = 'GPLv3'
 
 import os
+
+import logging
+logger = logging.getLogger(__name__)
+
 import jose
 
 from Crypto.PublicKey import RSA
