@@ -90,7 +90,15 @@ class MigasFreeTags(MigasFreeCommand):
 
     def _sanitize(self, tag_list):
         if tag_list:
-            tag_list[:] = [_item.replace('"', '') for _item in tag_list]
+            for item in tag_list[:]:
+                item = item.replace('"', '')
+                try:
+                    prefix, value = item.split('-', 1)
+                except:
+                    msg = _('Tags must be in "prefix-value" format')
+                    self.operation_failed(msg)
+                    sys.exit(errno.ENODATA)
+
             logger.info('Sanitized list: %s' % tag_list)
 
         return tag_list
@@ -156,6 +164,10 @@ class MigasFreeTags(MigasFreeCommand):
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
+        if not response:
+            self.operation_failed(_('There are not assigned tags'))
+            sys.exit(errno.ENODATA)
+
         return response
 
     def _get_available_tags(self):
@@ -168,6 +180,7 @@ class MigasFreeTags(MigasFreeCommand):
             data={
                 'id': self._computer_id
             },
+            exit_on_error=False,
             debug=self._debug
         )
 
@@ -203,15 +216,20 @@ class MigasFreeTags(MigasFreeCommand):
                 'id': self._computer_id,
                 'tags': self._tags
             },
+            exit_on_error=False,
             debug=self._debug
         )
 
-        print('')
-        self.operation_ok(_('Tags setted: %s') % self._tags)
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
 
         logger.debug('Setting tags response: %s', response)
         if self._debug:
             print('Response: %s' % response)
+
+        print('')
+        self.operation_ok(_('Tags setted: %s') % self._tags)
 
         return response
 
