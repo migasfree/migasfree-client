@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,25 +24,22 @@ __all__ = ('MigasFreeUpload', 'main')
 
 import os
 import sys
+#import argparse
 import optparse
-import logging
 import getpass
 import errno
 
-# package imports
-"""
+import gettext
+_ = gettext.gettext
+
+import logging
+logger = logging.getLogger(__name__)
+
 from . import (
     settings,
     utils,
-    server_errors,
     url_request
 )
-"""
-import utils
-import server_errors
-
-import gettext
-_ = gettext.gettext
 
 from .command import (
     MigasFreeCommand,
@@ -105,7 +102,7 @@ class MigasFreeUpload(MigasFreeCommand):
             self.packager_user = raw_input('%s: ' % _('User to upload at server'))
             if not self.packager_user:
                 print(_('Empty user. Exiting %s.') % self.CMD)
-                logging.info('Empty user in upload operation')
+                logger.info('Empty user in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_pwd:
@@ -115,26 +112,26 @@ class MigasFreeUpload(MigasFreeCommand):
             self.packager_version = raw_input('%s: ' % _('Version to upload at server'))
             if not self.packager_version:
                 print(_('Empty version. Exiting %s.') % self.CMD)
-                logging.info('Empty version in upload operation')
+                logger.info('Empty version in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
             self.packager_store = raw_input('%s: ' % _('Store to upload at server'))
             if not self.packager_store:
                 print(_('Empty store. Exiting %s.') % self.CMD)
-                logging.info('Empty store in upload operation')
+                logger.info('Empty store in upload operation')
                 sys.exit(errno.EAGAIN)
 
     def _upload_file(self):
-        logging.debug('Upload file operation...')
+        logger.debug('Upload file operation...')
         if not os.path.isfile(self._file):
             print(_('File not found'))
-            logging.error('File not found %s', self._file)
+            logger.error('File not found %s', self._file)
             sys.exit(errno.ENOENT)
 
         self._check_sign_keys()
 
-        logging.debug('Uploading file: %s', self._file)
+        logger.debug('Uploading file: %s', self._file)
         _ret = self._url_request.run(
             'upload_server_package',
             data={
@@ -145,23 +142,23 @@ class MigasFreeUpload(MigasFreeCommand):
             upload_file=os.path.abspath(self._file)
         )
 
-        logging.debug('Uploading response: %s', _ret)
+        logger.debug('Uploading response: %s', _ret)
         if self._debug:
             print('Response: %s' % _ret)
 
         if _ret['errmfs']['code'] != server_errors.ALL_OK:
             _error_info = server_errors.error_info(_ret['errmfs']['code'])
             print(_error_info)
-            logging.error('Uploading file error: %s', _error_info)
+            logger.error('Uploading file error: %s', _error_info)
             sys.exit(errno.EINPROGRESS)
 
         return self._create_repository()
 
     def _upload_set(self):
-        logging.debug('Upload set operation...')
+        logger.debug('Upload set operation...')
         if not os.path.isdir(self._directory):
             print(_('Directory not found'))
-            logging.error('Directory not found %s', self._directory)
+            logger.error('Directory not found %s', self._directory)
             sys.exit(errno.ENOENT)
 
         self._check_sign_keys()
@@ -171,7 +168,7 @@ class MigasFreeUpload(MigasFreeCommand):
                 _filename = os.path.join(_root, _file)
 
                 if os.path.isfile(_filename):
-                    logging.debug('Uploading server set: %s', _filename)
+                    logger.debug('Uploading server set: %s', _filename)
                     if self._debug:
                         print('Uploading file: %s' % os.path.abspath(_filename))
 
@@ -191,7 +188,7 @@ class MigasFreeUpload(MigasFreeCommand):
                         upload_file=os.path.abspath(_filename)
                     )
 
-                    logging.debug('Uploading set response: %s', _ret)
+                    logger.debug('Uploading set response: %s', _ret)
                     if self._debug:
                         print('Response: %s' % _ret)
 
@@ -200,7 +197,7 @@ class MigasFreeUpload(MigasFreeCommand):
                             _ret['errmfs']['code']
                         )
                         print(_error_info)
-                        logging.error('Uploading set error: %s', _error_info)
+                        logger.error('Uploading set error: %s', _error_info)
                         sys.exit(errno.EINPROGRESS)
 
         return self._create_repository()
@@ -209,7 +206,7 @@ class MigasFreeUpload(MigasFreeCommand):
         if not self._create_repo:
             return True
 
-        logging.debug('Creating repository operation...')
+        logger.debug('Creating repository operation...')
 
         if self._file:
             _packageset = self._file
@@ -224,14 +221,14 @@ class MigasFreeUpload(MigasFreeCommand):
             }
         )
 
-        logging.debug('Creating repository response: %s', _ret)
+        logger.debug('Creating repository response: %s', _ret)
         if self._debug:
             print('Response: %s' % _ret)
 
         if _ret['errmfs']['code'] != server_errors.ALL_OK:
             _error_info = server_errors.error_info(_ret['errmfs']['code'])
             print(_error_info)
-            logging.error('Creating repository error: %s', _error_info)
+            logger.error('Creating repository error: %s', _error_info)
             sys.exit(errno.EINPROGRESS)
 
         return True
@@ -324,7 +321,7 @@ class MigasFreeUpload(MigasFreeCommand):
         self._left_parameters()
         self.auto_register_user = self.packager_user
         self.auto_register_password = self.packager_pwd
-        self.auto_register_command = 'get_key_packager'
+        self.auto_register_end_point = 'public/keys/packager/'
 
         self._show_running_options()
 
