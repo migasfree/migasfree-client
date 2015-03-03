@@ -51,6 +51,8 @@ from .command import (
 class MigasFreeTags(MigasFreeCommand):
     CMD = 'migasfree-tags'  # /usr/bin/migasfree-tags
 
+    _tags = None
+
     def __init__(self):
         self._user_is_not_root()
         MigasFreeCommand.__init__(self)
@@ -84,12 +86,12 @@ class MigasFreeTags(MigasFreeCommand):
 
     def _show_running_options(self):
         MigasFreeCommand._show_running_options(self)
-
         print('\t%s: %s' % (_('Tag list'), self._tags))
 
     def _sanitize(self, tag_list):
-        tag_list[:] = [_item.replace('"', '') for _item in tag_list]
-        logger.info('Sanitized list: %s' % tag_list)
+        if tag_list:
+            tag_list[:] = [_item.replace('"', '') for _item in tag_list]
+            logger.info('Sanitized list: %s' % tag_list)
 
         return tag_list
 
@@ -170,12 +172,13 @@ class MigasFreeTags(MigasFreeCommand):
         )
 
         logger.debug('Response _get_available_tags: %s', response)
-        if self._debug:
-            print('Response: %s' % response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
+
+        if self._debug:
+            print('Response: %s' % response)
 
         return response
 
@@ -252,7 +255,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         group.add_argument(
             '-s', '--set',
-            action='store',
+            action='store_true',
             help=_('Set tags in server')
         )
 
@@ -266,6 +269,12 @@ class MigasFreeTags(MigasFreeCommand):
             '-c', '--communicate',
             action='store_true',
             help=_('Communicate tags to server')
+        )
+
+        parser.add_argument(
+            'tag',
+            nargs='*',
+            action='store'
         )
 
         return parser.parse_args()
@@ -283,12 +292,9 @@ class MigasFreeTags(MigasFreeCommand):
             for item in response:
                 print('"' + item + '"'),
         elif args.set or args.communicate:
-            self._tags = self._sanitize(arguments)
+            if args.tag:
+                self._tags = self._sanitize(args.tag)
 
-            print(_('%(program)s version: %(version)s') % {
-                'program': self.CMD,
-                'version': __version__
-            })
             self._show_running_options()
 
             rules = self._set_tags()
