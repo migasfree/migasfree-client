@@ -23,6 +23,7 @@ __license__ = 'GPLv3'
 import os
 
 import logging
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 import jose
