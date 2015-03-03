@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2014 Jose Antonio Chavarría
+# Copyright (c) 2013-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,17 +24,20 @@ __all__ = ('MigasFreeTags', 'main')
 
 import os
 import sys
-import optparse
-import logging
+import argparse
 import errno
 
 import gettext
 _ = gettext.gettext
 
+import logging
+logger = logging.getLogger(__name__)
+
+from datetime import datetime
+
 from . import (
     settings,
     utils,
-    server_errors,
     url_request
 )
 
@@ -86,11 +89,11 @@ class MigasFreeTags(MigasFreeCommand):
 
     def _sanitize(self, tag_list):
         tag_list[:] = [_item.replace('"', '') for _item in tag_list]
-        logging.info('Sanitized list: %s' % tag_list)
+        logger.info('Sanitized list: %s' % tag_list)
 
         return tag_list
 
-    def _select_tags(self, tags):
+    def _select_tags(self, assigned, available):
         _selected_tags = []
 
         # Change tags with gui
@@ -112,67 +115,102 @@ class MigasFreeTags(MigasFreeCommand):
                 _text,
                 os.path.join(settings.ICON_PATH, self.ICON)
             )
-        for _key, _value in tags["available"].items():
+        for _key, _value in available.items():
             for _item in _value:
-                _tag_active = _item in tags["selected"]
+                _tag_active = _item in assigned
                 _cmd += " '%s' '%s' '%s'" % (_tag_active, _item, _key)
 
-        logging.debug('Change tags command: %s' % _cmd)
+        logger.debug('Change tags command: %s' % _cmd)
         (_ret, _out, _err) = utils.execute(_cmd, interactive=False)
         if _ret == 0:
             if type(_out) is str and _out != "":
                 _selected_tags = _out.replace("\n", "").split("|")
-                logging.debug('Selected tags: %s' % _selected_tags)
+                logger.debug('Selected tags: %s' % _selected_tags)
         else:
             # no action chosed -> no change tags
-            logging.debug('Return value command: %d' % _ret)
+            logger.debug('Return value command: %d' % _ret)
             sys.exit(_ret)
 
         return _selected_tags
 
-    def _get_tags(self):
-        logging.debug('Getting tags')
-        _ret = self._url_request.run('get_computer_tags')
+    def _get_assigned_tags(self):
+        if not self._computer_id:
+            self.get_computer_id()
 
-        logging.debug('Getting tags response: %s', _ret)
+        logger.debug('Getting assigned tags')
+        response = self._url_request.run(
+            url=self._url_base + 'safe/computers/tags/assigned/',
+            data={
+                'id': self._computer_id
+            },
+            debug=self._debug
+        )
+
+        logger.debug('Response _get_assigned_tags: %s', response)
         if self._debug:
-            print('Response: %s' % _ret)
+            print('Response: %s' % response)
 
-        if 'errmfs' in _ret and _ret['errmfs']['code'] != server_errors.ALL_OK:
-            _error_info = server_errors.error_info(
-                _ret['errmfs']['code']
-            )
-            self.operation_failed(_error_info)
-            logging.error('Error: %s', _error_info)
-            sys.exit(errno.EINPROGRESS)
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
 
-        return _ret
+        return response
+
+    def _get_available_tags(self):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        logger.debug('Getting avaiable tags')
+        response = self._url_request.run(
+            url=self._url_base + 'safe/computers/tags/available/',
+            data={
+                'id': self._computer_id
+            },
+            debug=self._debug
+        )
+
+        logger.debug('Response _get_available_tags: %s', response)
+        if self._debug:
+            print('Response: %s' % response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+
+        return response
 
     def _set_tags(self):
         self._check_sign_keys()
 
         if not self._tags:
-            self._tags = self._select_tags(self._get_tags())
+            self._tags = self._select_tags(
+                assigned=self._get_assigned_tags(),
+                available=self._get_available_tags(),
+            )
 
         # unsettings all tags?
         if len(self._tags) == 1 and self._tags[0] == '':
-            logging.debug('Unsetting all tags')
+            logger.debug('Unsetting all tags')
             self._tags = []
 
-        logging.debug('Setting tags: %s', self._tags)
-        _ret = self._url_request.run(
-            'set_computer_tags',
-            data={'tags': self._tags}
+        logger.debug('Setting tags: %s', self._tags)
+        response = self._url_request.run(
+            url=self._url_base + 'safe/computers/tags/',
+            data={
+                'id': self._computer_id,
+                'tags': self._tags
+            },
+            debug=self._debug
         )
 
         print('')
         self.operation_ok(_('Tags setted: %s') % self._tags)
 
-        logging.debug('Setting tags response: %s', _ret)
+        logger.debug('Setting tags response: %s', response)
         if self._debug:
-            print('Response: %s' % _ret)
+            print('Response: %s' % response)
 
-        return _ret
+        return response
 
     def _apply_rules(self, rules):
         mfc = MigasFreeClient()
@@ -180,86 +218,85 @@ class MigasFreeTags(MigasFreeCommand):
         # Update metadata
         mfc._update_system()
 
+        start_date = datetime.now().isoformat()
+
         # Remove Packages
-        mfc._uninstall_packages(rules["packages"]["remove"])
+        mfc._uninstall_packages(rules["remove"])
 
         # Pre-Install Packages
-        mfc._install_mandatory_packages(rules["packages"]["preinstall"])
+        mfc._install_mandatory_packages(rules["preinstall"])
 
         # Update metadata
         mfc._clean_pms_cache()
 
         # Install Packages
-        mfc._install_mandatory_packages(rules["packages"]["install"])
+        mfc._install_mandatory_packages(rules["install"])
 
-        mfc._send_message()
+        mfc.upload_accurate_connection(start_date, self.CMD)
 
-    def run(self):
-        _program = 'migasfree tags'
-        parser = optparse.OptionParser(
-            description=_program,
-            prog=self.CMD,
-            version=__version__,
-            usage='%prog [options] [tag]...'
+    def _parse_args(self):
+        print(_('%(program)s version: %(version)s') % {
+            'program': self.CMD,
+            'version': __version__
+        })
+
+        parser = argparse.ArgumentParser(prog=self.CMD)
+
+        parser.add_argument(
+            '-d', '--debug',
+            action='store_true',
+            help=_('Enable debug mode')
         )
 
-        parser.add_option(
-            '--set', '-s',
-            action='store_true',
+        group = parser.add_mutually_exclusive_group(required=True)
+
+        group.add_argument(
+            '-s', '--set',
+            action='store',
             help=_('Set tags in server')
         )
 
-        parser.add_option(
-            '--get', '-g',
+        group.add_argument(
+            '-g', '--get',
             action='store_true',
             help=_('Get assigned tags in server')
         )
 
-        parser.add_option(
-            '--communicate', '-c',
+        group.add_argument(
+            '-c', '--communicate',
             action='store_true',
             help=_('Communicate tags to server')
         )
 
-        options, arguments = parser.parse_args()
-        logging.info('Program options: %s' % options)
-        logging.info('Program arguments: %s' % arguments)
+        return parser.parse_args()
 
-        # check restrictions
-        if not options.get and not options.set and not options.communicate:
-            self._usage_examples()
-            parser.error(_('Get or Set or Communicate options are mandatory!!!'))
-        if options.get and options.set:
-            self._usage_examples()
-            parser.error(_('Get and Set options are exclusive!!!'))
-        if options.get and options.communicate:
-            self._usage_examples()
-            parser.error(_('Get and Communicate options are exclusive!!!'))
-        if options.set and options.communicate:
-            self._usage_examples()
-            parser.error(_('Set and Communicate options are exclusive!!!'))
+    def run(self):
+        args = self._parse_args()
+
+        if args.debug:
+            self._debug = True
+            logger.setLevel(logging.DEBUG)
 
         # actions dispatcher
-        if options.get:
-            _response = self._get_tags()
-            for _item in _response['selected']:
-                print('"' + _item + '"'),
-        elif options.set or options.communicate:
+        if args.get:
+            response = self._get_assigned_tags()
+            for item in response:
+                print('"' + item + '"'),
+        elif args.set or args.communicate:
             self._tags = self._sanitize(arguments)
 
             print(_('%(program)s version: %(version)s') % {
-                'program': _program,
+                'program': self.CMD,
                 'version': __version__
             })
             self._show_running_options()
 
-            _response = self._set_tags()
-            if options.set:
+            rules = self._set_tags()
+            if args.set:
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
-                self._apply_rules(_response)
+                self._apply_rules(rules)
                 utils.remove_file(self.LOCK_FILE)
         else:
-            parser.print_help()
             self._usage_examples()
 
         sys.exit(os.EX_OK)
