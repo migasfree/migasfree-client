@@ -108,7 +108,7 @@ setup(
     platforms=['Linux'],
     install_requires = [
         'jose',
-    ],
+    ],  # FIXME Unknown distribution option
     packages=[
         'migasfree_client',
         'migasfree_client.pms',
