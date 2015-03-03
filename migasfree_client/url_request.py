@@ -197,7 +197,7 @@ class UrlRequest(object):
                 settings.TMP_PATH,
                 'response.%s.%s.%s' % (
                     request.status_code,
-                    url.replace('/', '.').rstrip('.'),
+                    url.replace('/', '.').replace(':', '.').rstrip('.'),
                     extension
                 )
             )
