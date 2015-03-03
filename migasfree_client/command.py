@@ -50,6 +50,11 @@ import gettext
 _ = gettext.gettext
 
 import logging
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
+    level=logging.INFO,
+    filename=settings.LOG_FILE
+)
 logger = logging.getLogger(__name__)
 
 from .pms import Pms
@@ -93,8 +98,6 @@ class MigasFreeCommand(object):
     _computer_id = None
 
     def __init__(self):
-        _log_level = logging.INFO
-
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
         if type(_config_client) is not dict:
             _config_client = {}
@@ -146,7 +149,7 @@ class MigasFreeCommand(object):
             default=False
         )
         if self._debug:
-            _log_level = logging.DEBUG
+            logger.setLevel(logging.DEBUG)
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
         if type(_config_packager) is not dict:
@@ -167,11 +170,6 @@ class MigasFreeCommand(object):
         )
 
         # http://www.lightbird.net/py-by-example/logging.html
-        logging.basicConfig(
-            format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
-            level=_log_level,
-            filename=settings.LOG_FILE
-        )
         logger.info('*' * 20)
         logger.info('%s in execution', self.CMD)
         logger.info('Config file: %s', settings.CONF_FILE)
