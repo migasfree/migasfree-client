@@ -602,14 +602,14 @@ class MigasFreeClient(MigasFreeCommand):
 
         return response
 
-    def upload_accurate_connection(self, start_date):
+    def upload_accurate_connection(self, start_date, consumer=self.CMD):
         self._show_message(_('Uploading accurate connection...'))
         response = self._url_request.run(
             url=self._url_base + 'safe/accurate-connection/',
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
-                'consumer': 'migasfree client %s' % __version__
+                'consumer': '%s %s' % (consumer, __version__)
             },
             debug=self._debug
         )
