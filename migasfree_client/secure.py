@@ -22,16 +22,20 @@ __license__ = 'GPLv3'
 
 import os
 
-import logging
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
-
-import jose
-
 from Crypto.PublicKey import RSA
 
 from .utils import read_file, write_file
 from . import settings
+
+import logging
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
+    level=logging.ERROR,
+    filename=settings.LOG_FILE
+)
+logger = logging.getLogger(__name__)
+
+import jose
 
 
 def sign(claims, priv_key):
