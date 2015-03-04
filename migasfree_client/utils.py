@@ -523,3 +523,32 @@ def slugify(value):
     value = re.sub('[^\w\s-]', '', value).strip().lower()
 
     return re.sub('[-\s]+', '-', value)
+
+
+def execute_as_user(args):
+    # http://stackoverflow.com/questions/1770209/run-child-processes-as-different-user-from-a-long-running-process
+    user_name, _ = get_current_user().split('~')
+
+    pw_record = pwd.getpwnam(user_name)
+    user_name = pw_record.pw_name
+    user_home_dir = pw_record.pw_dir
+    user_uid = pw_record.pw_uid
+    user_gid = pw_record.pw_gid
+
+    env = os.environ.copy()
+    env['HOME'] = user_home_dir
+    env['LOGNAME'] = user_name
+    env['PWD'] = user_home_dir
+    env['USER'] = user_name
+    process = subprocess.Popen(
+        args, preexec_fn=demote(user_uid, user_gid), cwd=user_home_dir, env=env
+    )
+    result = process.wait()
+
+
+def demote(user_uid, user_gid):
+    def result():
+        os.setgid(user_gid)
+        os.setuid(user_uid)
+
+    return result
