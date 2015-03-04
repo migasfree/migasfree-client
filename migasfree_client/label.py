@@ -26,7 +26,6 @@ import os
 import sys
 import argparse
 import errno
-import webbrowser
 
 import gettext
 _ = gettext.gettext
@@ -132,22 +131,20 @@ class MigasFreeLabel(MigasFreeCommand):
 
         info = self.get_label()
 
-        image = utils.read_file(os.path.join(settings.ICON_PATH, self.ICON))
-        image = image.replace('\n', '')
+        image = 'file://%s' % os.path.join(settings.ICON_PATH, self.ICON)
 
         html = HTML_TEMPLATE % {
             'search': info.get('search'),
             'uuid': info.get('uuid'),
             'server': '%s: %s' % (_('Server'), self.migas_server),
             'helpdesk': info.get('helpdesk'),
-            'image': 'data:image/svg+xml;utf8,{0}'.format(image)
+            'image': image
         }
 
         _file = os.path.join(settings.TMP_PATH, 'label.html')
         utils.write_file(_file, html)
-        url = 'file://' + _file
 
-        webbrowser.open(url)
+        utils.execute_as_user(['xdg-open', _file])
 
     def run(self):
         args = self._parse_args()
