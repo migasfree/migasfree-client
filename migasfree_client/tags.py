@@ -237,7 +237,7 @@ class MigasFreeTags(MigasFreeCommand):
         mfc = MigasFreeClient()
 
         # Update metadata
-        mfc._update_system()
+        mfc.synchronize()
 
         start_date = datetime.now().isoformat()
 
@@ -252,8 +252,6 @@ class MigasFreeTags(MigasFreeCommand):
 
         # Install Packages
         mfc._install_mandatory_packages(rules["install"])
-
-        mfc.upload_accurate_connection(start_date, self.CMD)
 
     def _parse_args(self):
         print(_('%(program)s version: %(version)s') % {
