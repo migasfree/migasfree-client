@@ -121,9 +121,9 @@ class MigasFreeClient(MigasFreeCommand):
         print('\t%s -r' % self.CMD)
         print('\t%s --register\n' % self.CMD)
 
-        print('  ' + _('Update the system:'))
-        print('\t%s -u' % self.CMD)
-        print('\t%s --update\n' % self.CMD)
+        print('  ' + _('Synchronize computer with server:'))
+        print('\t%s -y' % self.CMD)
+        print('\t%s --sync\n' % self.CMD)
 
         print('  ' + _('Search package:'))
         print('\t%s -s bluefish' % self.CMD)
@@ -211,23 +211,23 @@ class MigasFreeClient(MigasFreeCommand):
             'uuid': utils.get_hardware_uuid(),
             'name': self.migas_computer_name,
             'ip_address': network.get_network_info()['ip'],
-            'login_user': self._graphic_user,
-            'login_fullname': utils.get_user_info(
+            'sync_user': self._graphic_user,
+            'sync_fullname': utils.get_user_info(
                 self._graphic_user
             )['fullname'],
-            'login_attributes': {}
+            'sync_attributes': {}
         }
 
         # properties converted in attributes
         self._show_message(_('Evaluating attributes...'))
         for _item in properties:
-            response['login_attributes'][_item['prefix']] = \
+            response['sync_attributes'][_item['prefix']] = \
                 self._eval_code(_item['language'], _item['code'])
             _info = '%s: %s' % (
                 _item['prefix'],
-                response['login_attributes'][_item['prefix']]
+                response['sync_attributes'][_item['prefix']]
             )
-            if response['login_attributes'][_item['prefix']].strip() != '':
+            if response['sync_attributes'][_item['prefix']].strip() != '':
                 self.operation_ok(_info)
             else:
                 self.operation_failed(_info)
@@ -602,13 +602,13 @@ class MigasFreeClient(MigasFreeCommand):
 
         return response
 
-    def upload_accurate_connection(self, start_date, consumer=''):
+    def end_synchronization(self, start_date, consumer=''):
         if not consumer:
             consumer = self.CMD
 
-        self._show_message(_('Uploading accurate connection...'))
+        self._show_message(_('Ending synchronization...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/accurate-connection/',
+            url=self._url_base + 'safe/synchronization/',
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
@@ -622,7 +622,7 @@ class MigasFreeClient(MigasFreeCommand):
         return response
 
 
-    def _update_system(self):
+    def synchronize(self):
         start_date = datetime.now().isoformat()
 
         self._check_sign_keys()
@@ -671,29 +671,31 @@ class MigasFreeClient(MigasFreeCommand):
         """
 
         self._upload_execution_errors()
-        self.upload_accurate_connection(start_date)
+        self.end_synchronization(start_date)
         self._show_message(_('Operations completed'), self.ICON_COMPLETED)
 
     def _search(self, pattern):
         return self.pms.search(pattern)
 
     def _install_package(self, pkg):
-        # FIXME communicate changes to server?
-        # self._check_sign_keys()
+        software_before = self.pms.query_all()
+        software_history = self._software_history(software_before)
 
         self._show_message(_('Installing package: %s') % pkg)
         _ret = self.pms.install(pkg)
-        # self._show_message()
+
+        self._upload_software(software_before, software_history)
 
         return _ret
 
     def _remove_package(self, pkg):
-        # FIXME communicate changes to server?
-        # self._check_sign_keys()
+        software_before = self.pms.query_all()
+        software_history = self._software_history(software_before)
 
         self._show_message(_('Removing package: %s') % pkg)
         _ret = self.pms.remove(pkg)
-        # self._show_message()
+
+        self._upload_software(software_before, software_history)
 
         return _ret
 
@@ -791,14 +793,14 @@ class MigasFreeClient(MigasFreeCommand):
             help=_('Register computer at server')
         )
 
-        update_group = parser.add_argument_group('update')
-        update_group.add_argument(
-            '-u', '--update',
+        sync_group = parser.add_argument_group('sync')
+        sync_group.add_argument(
+            '-y', '--sync',
             action='store_true',
-            help=_('Update system from repositories')
+            help=_('Synchronize computer with server')
         )
 
-        update_group.add_argument(
+        sync_group.add_argument(
             '-f', '--force-upgrade',
             action='store_true',
             help=_('Force package upgrades')
@@ -832,13 +834,13 @@ class MigasFreeClient(MigasFreeCommand):
 
         # check restrictions
         if args.register and \
-        (args.install or args.purge or args.update or args.search):
+        (args.install or args.purge or args.sync or args.search):
             self._usage_examples()
             parser.error(_('Register option is exclusive!!!'))
-        if args.update and \
+        if args.sync and \
         (args.install or args.purge or args.search):
             self._usage_examples()
-            parser.error(_('Update option is exclusive!!!'))
+            parser.error(_('Sync option is exclusive!!!'))
         if args.search and (args.install or args.purge):
             self._usage_examples()
             parser.error(_('Search option is exclusive!!!'))
@@ -862,9 +864,9 @@ class MigasFreeClient(MigasFreeCommand):
         self._show_running_options()
 
         # actions dispatcher
-        if args.update:
+        if args.sync:
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self._update_system()
+            self.synchronize()
             utils.remove_file(self.LOCK_FILE)
         elif args.register:
             self._register_computer()
