@@ -31,6 +31,7 @@ import json
 import time
 import tempfile
 import platform
+import requests
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -341,9 +342,12 @@ class MigasFreeClient(MigasFreeCommand):
         logger.debug('Response get_mandatory_packages: %s', response)
 
         if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            #sys.exit(errno.ENODATA)
-            return None
+            if response['error']['code'] == requests.codes.not_found:
+                self.operation_ok()
+                return None
+            else:
+                self.operation_failed(response['error']['info'])
+                sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
@@ -491,12 +495,12 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Sending hardware information...'))
         _ret = self._url_request.run(
-            url=self._url_base + 'upload_computer_hardware',
+            url=self._url_base + 'upload_computer_hardware',  # FIXME
             data=_hardware,
             exit_on_error=False,
             debug=self._debug
         )
-        if _ret['errmfs']['code'] == server_errors.ALL_OK:
+        if _ret['errmfs']['code'] == server_errors.ALL_OK:  # FIXME
             self.operation_ok()
         else:
             self.operation_failed()
