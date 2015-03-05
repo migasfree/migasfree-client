@@ -21,8 +21,9 @@
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
-# http://guide.python-distribute.org/
+# https://pythonhosted.org/setuptools
 # python setup.py --help-commands
+# python setup.py bdist_egg
 # python setup.py build
 # python setup.py sdist
 # python setup.py bdist --format=rpm
@@ -42,10 +43,13 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 README = open(os.path.join(PATH, 'README')).read()
 VERSION = open(os.path.join(PATH, 'VERSION')).read().splitlines()[0]
 
+REQUIRES = filter(lambda s: len(s) > 0,
+    open(os.path.join(PATH, 'requirements.txt')).read().split('\n'))
+
 import glob
 import subprocess
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 from distutils.command.build import build
 from distutils.command.install_data import install_data
 from distutils.log import info, error
@@ -102,23 +106,13 @@ setup(
     description='migasfree-client is a Python app to manage systems management',
     long_description=README,
     license='GPLv3',
+    keywords='migasfree systems management',
     author='Jose Antonio Chavarría',
     author_email='jachavar@gmail.com',
     url='http://www.migasfree.org/',
     platforms=['Linux'],
-    install_requires = [
-        'jose',
-    ],  # FIXME Unknown distribution option
-    packages=[
-        'migasfree_client',
-        'migasfree_client.pms',
-        'migasfree_client.devices',
-    ],
-    package_dir={
-        'migasfree_client': 'migasfree_client',
-        'migasfree_client.pms': 'migasfree_client/pms',
-        'migasfree_client.devices': 'migasfree_client/devices',
-    },
+    install_requires=REQUIRES,
+    packages=find_packages(),
     cmdclass={
         'build': BuildData,
         'install_data': InstallData,
