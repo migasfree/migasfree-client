@@ -45,6 +45,7 @@ import sys
 import errno
 import getpass
 import platform
+import requests
 
 import gettext
 _ = gettext.gettext
@@ -237,7 +238,7 @@ class MigasFreeCommand(object):
         if self._save_sign_keys(
             self.auto_register_user, self.auto_register_password
         ):
-            return self._save_computer()
+            return (self._save_computer() != 0)
 
     def _save_sign_keys(self, user, password):
         response = self._url_request.run(
@@ -311,7 +312,7 @@ class MigasFreeCommand(object):
         logger.debug('Response _save_computer: %s', response)
 
         self._computer_id = response.get('id')
-        return True
+        return self._computer_id
 
     def get_computer_id(self):
         if self._computer_id:
@@ -323,9 +324,17 @@ class MigasFreeCommand(object):
                 'uuid': utils.get_hardware_uuid(),
                 'name': self.migas_computer_name
             },
+            exit_on_error=False,
             debug=self._debug
         )
         logger.debug('Response get_computer_id: %s', response)
+
+        if type(response) == dict and 'error' in response:
+            if response['error']['code'] == requests.codes.not_found:
+                response = self._save_computer()
+            else:
+                self.operation_failed(response['error']['info'])
+                sys.exit(errno.ENODATA)
 
         self._computer_id = response
         return self._computer_id
