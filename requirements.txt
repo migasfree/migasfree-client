@@ -1,1 +1,4 @@
-jose==0.2.2
+netifaces>=0.8
+jose>=0.2.2
+requests>=2.2.1
+pycrypto>=2.6.1
