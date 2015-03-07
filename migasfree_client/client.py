@@ -612,7 +612,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Ending synchronization...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/synchronization/',
+            url=self._url_base + 'safe/synchronizations/',
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
