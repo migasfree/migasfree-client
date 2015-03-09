@@ -339,6 +339,19 @@ class MigasFreeCommand(object):
         self._computer_id = response
         return self._computer_id
 
+    def end_of_transmission(self):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        response = self._url_request.run(
+            url=self._url_base + 'safe/eot/',
+            data={
+                'id': self._computer_id,
+            },
+            debug=self._debug
+        )
+        logger.debug('Response end_of_transmission: %s', response)
+
     def _show_running_options(self):
         print('')
         print(_('Running options: %s') % settings.CONF_FILE)
