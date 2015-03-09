@@ -307,6 +307,8 @@ class MigasFreeTags(MigasFreeCommand):
             response = self._get_assigned_tags()
             for item in response:
                 print('"' + item + '"'),
+
+            self.end_of_transmission()
         elif args.set or args.communicate:
             if args.tag:
                 self._tags = self._sanitize(args.tag)
@@ -318,6 +320,8 @@ class MigasFreeTags(MigasFreeCommand):
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
                 self._apply_rules(rules)
                 utils.remove_file(self.LOCK_FILE)
+
+            self.end_of_transmission()
         else:
             self._usage_examples()
 

@@ -154,6 +154,7 @@ class MigasFreeLabel(MigasFreeCommand):
             logger.setLevel(logging.DEBUG)
 
         self._show_label()
+        self.end_of_transmission()
 
         sys.exit(os.EX_OK)
 

@@ -625,7 +625,6 @@ class MigasFreeClient(MigasFreeCommand):
 
         return response
 
-
     def synchronize(self):
         start_date = datetime.now().isoformat()
 
@@ -676,6 +675,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._upload_execution_errors()
         self.end_synchronization(start_date)
+        self.end_of_transmission()
         self._show_message(_('Operations completed'), self.ICON_COMPLETED)
 
     def _search(self, pattern):
@@ -689,6 +689,7 @@ class MigasFreeClient(MigasFreeCommand):
         _ret = self.pms.install(pkg)
 
         self._upload_software(software_before, software_history)
+        self.end_of_transmission()
 
         return _ret
 
@@ -700,6 +701,7 @@ class MigasFreeClient(MigasFreeCommand):
         _ret = self.pms.remove(pkg)
 
         self._upload_software(software_before, software_history)
+        self.end_of_transmission()
 
         return _ret
 
