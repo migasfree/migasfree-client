@@ -69,6 +69,8 @@ class MigasFreeClient(MigasFreeCommand):
 
     _error_file_descriptor = None
 
+    _pms_status_ok = True  # indicates the status of transactions with PMS
+
     def __init__(self):
         self._user_is_not_root()
 
@@ -425,6 +427,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error creating repositories: %s') % repos
             self.operation_failed(_msg)
             logger.error(_msg)
@@ -451,6 +454,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error uninstalling packages: %s') % _error
             self.operation_failed(_msg)
             logger.error(_msg)
@@ -462,6 +466,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error installing packages: %s') % _error
             self.operation_failed(_msg)
             logger.error(_msg)
@@ -473,6 +478,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error updating packages: %s') % _error
             self.operation_failed(_msg)
             logger.error(_msg)
@@ -616,7 +622,8 @@ class MigasFreeClient(MigasFreeCommand):
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
-                'consumer': '%s %s' % (consumer, __version__)
+                'consumer': '%s %s' % (consumer, __version__),
+                'pms_status_ok': self._pms_status_ok
             },
             debug=self._debug
         )
