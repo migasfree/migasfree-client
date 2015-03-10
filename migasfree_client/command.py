@@ -163,8 +163,8 @@ class MigasFreeCommand(object):
             'MIGASFREE_PACKAGER_PASSWORD',
             _config_packager.get('password', None)
         )
-        self.packager_version = os.environ.get(
-            'MIGASFREE_PACKAGER_VERSION', _config_packager.get('version', None)
+        self.packager_project = os.environ.get(
+            'MIGASFREE_PACKAGER_PROJECT', _config_packager.get('project', None)
         )
         self.packager_store = os.environ.get(
             'MIGASFREE_PACKAGER_STORE', _config_packager.get('store', None)
