@@ -1,4 +1,5 @@
 netifaces>=0.8
 jose>=0.2.2
-requests>=2.2.1
+requests>=2.4.3
 pycrypto>=2.6.1
+requests-toolbelt>=0.3.1
