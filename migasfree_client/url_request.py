@@ -25,6 +25,7 @@ import sys
 import errno
 import requests
 import json
+import magic
 
 import secure
 import utils
@@ -34,6 +35,8 @@ _ = gettext.gettext
 
 import logging
 logger = logging.getLogger(__name__)
+
+from requests_toolbelt import MultipartEncoder
 
 from . import settings
 
@@ -75,12 +78,6 @@ class UrlRequest(object):
         if self._proxy:
             logger.info('Proxy selected: %s', self._proxy)
 
-        if self._private_key:
-            logger.info('Private key: %s', self._private_key)
-
-        if self._public_key:
-            logger.info('Public key: %s', self._public_key)
-
     def _check_tmp_path(self):
         if not os.path.exists(settings.TMP_PATH):
             try:
@@ -94,19 +91,32 @@ class UrlRequest(object):
         self,
         url,
         data='',
-        upload_file=None,
+        upload_files=None,
         safe=True,
         exit_on_error=True,
-        debug=False
+        debug=False,
+        keys={}
     ):
         self._debug = debug
+        if self._debug:
+            logger.setLevel(logging.DEBUG)
+
         self._exit_on_error = exit_on_error
+        if 'private' in keys:
+            self._private_key = keys.get('private')
+        if 'public' in keys:
+            self._public_key = keys.get('public')
 
         logger.debug('URL: %s', url)
         logger.debug('URL data: %s', data)
-        logger.debug('URL upload file: %s', upload_file)
         logger.debug('Safe request: %s', safe)
         logger.debug('Exit on error: %s', exit_on_error)
+
+        if self._private_key:
+            logger.info('Private key: %s', self._private_key)
+
+        if self._public_key:
+            logger.info('Public key: %s', self._public_key)
 
         headers = None
         if safe:
@@ -120,10 +130,26 @@ class UrlRequest(object):
             })
             headers = {'content-type': 'application/json'}
 
-        # FIXME multiple files
         files = None
-        if upload_file:
-            files = {'file': utils.read_file(upload_file)}
+        if upload_files:
+            files = []
+            for _file in upload_files:
+                mime = magic.from_buffer(utils.read_file(_file), mime=True)
+                files.append(
+                    ('file', (_file, open(_file, 'rb'), mime))
+                )
+            #headers = {'content-type': 'multipart/form-data'}
+            logger.debug('URL upload files: %s', files)
+            # http://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request
+            if safe:
+                data = json.loads(data)
+
+            fields = data
+            fields.update(dict(files))
+            data = MultipartEncoder(
+                fields=fields
+            )
+            headers = {'content-type': data.content_type}
 
         proxies = None
         if self._proxy:
@@ -137,7 +163,7 @@ class UrlRequest(object):
 
         r = requests.post(
             url, data=data, headers=headers,
-            files=files, proxies=proxies, cert=self._cert
+            proxies=proxies, cert=self._cert
         )
 
         if r.status_code not in self._ok_codes:
