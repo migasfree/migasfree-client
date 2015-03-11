@@ -50,7 +50,7 @@ from .command import (
 class MigasFreeUpload(MigasFreeCommand):
     CMD = 'migasfree-upload'  # /usr/bin/migasfree-upload
 
-    PRIVATE_KEY = 'migasfree-packager.pri'
+    PACKAGER_PRIVATE_KEY = 'migasfree-packager.pri'
 
     _file = None
     _is_regular_file = False
@@ -99,7 +99,9 @@ class MigasFreeUpload(MigasFreeCommand):
 
     def _left_parameters(self):
         if not self.packager_user:
-            self.packager_user = raw_input('%s: ' % _('User to upload at server'))
+            self.packager_user = raw_input(
+                '%s: ' % _('User to upload at server')
+            )
             if not self.packager_user:
                 print(_('Empty user. Exiting %s.') % self.CMD)
                 logger.info('Empty user in upload operation')
@@ -109,14 +111,18 @@ class MigasFreeUpload(MigasFreeCommand):
             self.packager_pwd = getpass.getpass('%s: ' % _('User password'))
 
         if not self.packager_project:
-            self.packager_project = raw_input('%s: ' % _('Project to upload at server'))
+            self.packager_project = raw_input(
+                '%s: ' % _('Project to upload at server')
+            )
             if not self.packager_project:
                 print(_('Empty project. Exiting %s.') % self.CMD)
                 logger.info('Empty project in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
-            self.packager_store = raw_input('%s: ' % _('Store to upload at server'))
+            self.packager_store = raw_input(
+                '%s: ' % _('Store to upload at server')
+            )
             if not self.packager_store:
                 print(_('Empty store. Exiting %s.') % self.CMD)
                 logger.info('Empty store in upload operation')
@@ -132,20 +138,24 @@ class MigasFreeUpload(MigasFreeCommand):
         self._check_sign_keys()
 
         logger.debug('Uploading file: %s', self._file)
-        _ret = self._url_request.run(
+        response = self._url_request.run(
             url=self._url_base + 'safe/packages/',
             data={
                 'project': self.packager_project,
                 'store': self.packager_store,
                 'is_package': not self._is_regular_file
             },
-            upload_file=os.path.abspath(self._file),
-            debug=self._debug
+            upload_files=[os.path.abspath(self._file)],
+            debug=self._debug,
+            keys={
+                'private': self.PACKAGER_PRIVATE_KEY,
+                'public': self.PUBLIC_KEY
+            }
         )
 
-        logger.debug('Uploading response: %s', _ret)
+        logger.debug('Uploading response: %s', response)
         if self._debug:
-            print('Response: %s' % _ret)
+            print('Response: %s' % response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -184,7 +194,11 @@ class MigasFreeUpload(MigasFreeCommand):
                                 )[len(self._directory) + 1:]
                             )
                         },
-                        upload_file=os.path.abspath(_filename)
+                        upload_file=os.path.abspath(_filename),
+                        keys={
+                            'private': self.PACKAGER_PRIVATE_KEY,
+                            'public': self.PUBLIC_KEY
+                        }
                     )
 
                     logger.debug('Uploading set response: %s', _ret)
@@ -217,6 +231,10 @@ class MigasFreeUpload(MigasFreeCommand):
             data={
                 'project': self.packager_project,
                 'packageset': _packageset
+            },
+            keys={
+                'private': self.PACKAGER_PRIVATE_KEY,
+                'public': self.PUBLIC_KEY
             }
         )
 
