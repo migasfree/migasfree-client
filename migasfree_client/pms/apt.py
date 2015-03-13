@@ -41,6 +41,10 @@ class Apt(Pms):
         self._pm = '/usr/bin/dpkg'  # Package Manager command
         self._pms = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get'  # Package Management System command
         self._repo = '/etc/apt/sources.list.d/migasfree.list'  # Repositories file
+        self._mimetype = [
+            'application/x-debian-package',
+            'application/vnd.debian.binary-package',
+        ]
 
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'

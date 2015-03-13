@@ -47,6 +47,11 @@ class Yum(Pms):
         else:
             self._repo = '/etc/yum/repos.d/migasfree.repo'
 
+        self._mimetype = [
+            'application/x-rpm',
+            'application/x-redhat-package-manager'
+        ]
+
     def install(self, package):
         '''
         bool install(string package)

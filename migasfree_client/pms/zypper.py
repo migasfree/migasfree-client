@@ -40,6 +40,10 @@ class Zypper(Pms):
         self._pm = '/bin/rpm'          # Package Manager command
         self._pms = '/usr/bin/zypper'  # Package Management System command
         self._repo = '/etc/zypp/repos.d/migasfree.repo'  # Repositories file
+        self._mimetype = [
+            'application/x-rpm',
+            'application/x-redhat-package-manager'
+        ]
 
     def install(self, package):
         '''
