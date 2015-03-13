@@ -24,10 +24,10 @@ __all__ = ('MigasFreeUpload', 'main')
 
 import os
 import sys
-#import argparse
-import optparse
+import argparse
 import getpass
 import errno
+import magic
 
 import gettext
 _ = gettext.gettext
@@ -69,17 +69,13 @@ class MigasFreeUpload(MigasFreeCommand):
         print('\t%s -f archive.pkg -c ' % self.CMD)
         print('\t%s --file=archive.pkg --no-create-repo\n' % self.CMD)
 
-        print('  ' + _('Upload a regular file:'))
-        print('\t%s -f archive -r' % self.CMD)
-        print('\t%s --file=archive --regular-file\n' % self.CMD)
-
         print('  ' + _('Upload package set:'))
-        print('\t%s -d local_directory -n server_directory' % self.CMD)
-        print('\t%s --dir=local_directory --name=server_directory\n' % self.CMD)
+        print('\t%s -r local_directory' % self.CMD)
+        print('\t%s --dir=local_directory\n' % self.CMD)
 
         print('  ' + _('Upload regular files:'))
-        print('\t%s -d local_directory -n server_directory -c' % self.CMD)
-        print('\t%s --dir=local_directory --name=server_directory --no-create-repo\n' % self.CMD)
+        print('\t%s -r local_directory -c' % self.CMD)
+        print('\t%s --dir=local_directory --no-create-repo\n' % self.CMD)
 
     def _show_running_options(self):
         MigasFreeCommand._show_running_options(self)
@@ -87,10 +83,9 @@ class MigasFreeUpload(MigasFreeCommand):
         print('\t%s: %s' % (_('Project'), self.packager_project))
         print('\t%s: %s' % (_('Store'), self.packager_store))
         print('\t%s: %s' % (_('User'), self.packager_user))
-        #print('\t%s: %s' % (_('Password'), self.packager_pwd))
+        # print('\t%s: %s' % (_('Password'), self.packager_pwd))
         if self._file:
             print('\t%s: %s' % (_('File'), self._file))
-            print('\t%s: %s' % (_('Regular file'), self._is_regular_file))
         if self._directory:
             print('\t%s: %s' % (_('Directory'), self._directory))
             print('\t%s: %s' % (_('Server directory'), self._server_directory))
@@ -138,12 +133,15 @@ class MigasFreeUpload(MigasFreeCommand):
         self._check_sign_keys()
 
         logger.debug('Uploading file: %s', self._file)
+
+        mime = magic.from_buffer(utils.read_file(self._file), mime=True)
+        is_package = mime in self.pms._mimetype
         response = self._url_request.run(
             url=self._url_base + 'safe/packages/',
             data={
                 'project': self.packager_project,
                 'store': self.packager_store,
-                'is_package': not self._is_regular_file
+                'is_package': is_package
             },
             upload_files=[os.path.abspath(self._file)],
             debug=self._debug,
@@ -161,7 +159,7 @@ class MigasFreeUpload(MigasFreeCommand):
             self.operation_failed(response['error']['info'])
             sys.exit(errno.EINPROGRESS)
 
-        return self._create_repository()
+        return self._create_repository() if is_package else True
 
     def _upload_set(self):
         logger.debug('Upload set operation...')
@@ -178,11 +176,10 @@ class MigasFreeUpload(MigasFreeCommand):
 
                 if os.path.isfile(_filename):
                     logger.debug('Uploading server set: %s', _filename)
-                    if self._debug:
-                        print('Uploading file: %s' % os.path.abspath(_filename))
+                    print('Uploading file: %s' % os.path.abspath(_filename))
 
-                    _ret = self._url_request.run(
-                        'upload_server_set',
+                    response = self._url_request.run(
+                        url=self._url_base + 'safe/packages/set/',
                         data={
                             'project': self.packager_project,
                             'store': self.packager_store,
@@ -194,23 +191,23 @@ class MigasFreeUpload(MigasFreeCommand):
                                 )[len(self._directory) + 1:]
                             )
                         },
-                        upload_file=os.path.abspath(_filename),
+                        upload_files=[os.path.abspath(_filename)],
                         keys={
                             'private': self.PACKAGER_PRIVATE_KEY,
                             'public': self.PUBLIC_KEY
-                        }
+                        },
+                        debug=self._debug,
                     )
 
-                    logger.debug('Uploading set response: %s', _ret)
+                    logger.debug('Uploading set response: %s', response)
                     if self._debug:
-                        print('Response: %s' % _ret)
+                        print('Response: %s' % response)
 
-                    if _ret['errmfs']['code'] != server_errors.ALL_OK:
-                        _error_info = server_errors.error_info(
-                            _ret['errmfs']['code']
+                    if 'error' in response:
+                        self.operation_failed(response['error']['info'])
+                        logger.error(
+                            'Uploading set error: %s', response['error']['info']
                         )
-                        print(_error_info)
-                        logger.error('Uploading set error: %s', _error_info)
                         sys.exit(errno.EINPROGRESS)
 
         return self._create_repository()
@@ -219,122 +216,129 @@ class MigasFreeUpload(MigasFreeCommand):
         if not self._create_repo:
             return True
 
-        logger.debug('Creating repository operation...')
+        print(_('Creating repository operation...'))
 
         if self._file:
-            _packageset = self._file
+            packageset = self._file
         else:
-            _packageset = self._server_directory
+            packageset = self._server_directory
 
-        _ret = self._url_request.run(
-            'create_repositories_of_packageset',
+        response = self._url_request.run(
+            url=self._url_base + 'safe/packages/repos/',
             data={
                 'project': self.packager_project,
-                'packageset': _packageset
+                'packageset': packageset
             },
             keys={
                 'private': self.PACKAGER_PRIVATE_KEY,
                 'public': self.PUBLIC_KEY
-            }
+            },
+            debug=self._debug
         )
 
-        logger.debug('Creating repository response: %s', _ret)
+        logger.debug('Creating repository response: %s', response)
         if self._debug:
-            print('Response: %s' % _ret)
+            print('Response: %s' % response)
 
-        if _ret['errmfs']['code'] != server_errors.ALL_OK:
-            _error_info = server_errors.error_info(_ret['errmfs']['code'])
-            print(_error_info)
-            logger.error('Creating repository error: %s', _error_info)
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            logger.error(
+                'Creating repository error: %s', response['error']['info']
+            )
             sys.exit(errno.EINPROGRESS)
 
         return True
 
-    def run(self):
-        _program = 'migasfree upload'
-        parser = optparse.OptionParser(
-            description=_program,
-            prog=self.CMD,
-            version=__version__,
-            usage='%prog options'
-        )
-
+    def _parse_args(self):
+        program = 'migasfree upload'
         print(_('%(program)s version: %(version)s') % {
-            'program': _program,
+            'program': program,
             'version': __version__
         })
 
-        # migasfree-upload {-f file [--regular-file] | -d dir [-n name]}
-        #  [[-u user] [-p pwd] [--project project] [-s store] [--no-create-repo]]
+        parser = argparse.ArgumentParser(
+            prog=self.CMD,
+            description=program,
+            usage=self._usage_examples()
+        )
 
-        parser.add_option("--file", "-f", action="store",
-            help=_('File to upload at server'))
-        parser.add_option("--regular-file", "-r", action="store_true",
-            help=_('File is not a software package'))
+        parser.add_argument(
+            '-d', '--debug',
+            action='store_true',
+            help=_('Enable debug mode')
+        )
 
-        parser.add_option("--dir", "-d", action="store",
-            help=_('Directory with files to upload at server'))
-        parser.add_option("--name", "-n", action="store",
-            help=_('Name of the directory at server'))
+        parser.add_argument(
+            '-u', '--user',
+            action='store',
+            help=_('Authorized user to upload at server')
+        )
 
-        parser.add_option("--user", "-u", action="store",
-            help=_('Authorized user to upload at server'))
-        parser.add_option("--pwd", "-p", action="store",
-            help=_('User password'))
-        parser.add_option("--main-version", "-m", action="store",
-            help=_('Project to upload files'))
-        parser.add_option("--store", "-s", action="store",
-            help=_('Main version repository at server'))
-        parser.add_option("--no-create-repo", "-c", action="store_true",
-            help=_('No create repository after upload file at server'))
+        parser.add_argument(
+            '-p', '--pwd',
+            action='store',
+            help=_('User password')
+        )
 
-        options, arguments = parser.parse_args()
+        parser.add_argument(
+            '-j', '--project',
+            action='store',
+            help=_('Project to upload files')
+        )
 
-        # check restrictions
-        if not options.file and not options.dir:
-            self._usage_examples()
-            parser.error(_('File or Dir options are mandatory!!!'))
-        if options.file and options.dir:
-            self._usage_examples()
-            parser.error(_('File and Dir options are exclusive!!!'))
-        if options.regular_file and options.dir:
-            self._usage_examples()
-            parser.error(_('This option does not apply with Dir option!!!'))
-        if options.name and options.file:
-            self._usage_examples()
-            parser.error(_('This option does not apply with File option!!!'))
+        parser.add_argument(
+            '-s', '--store',
+            action='store',
+            help=_('Store at server')
+        )
 
-        utils.check_lock_file(self.CMD, self.LOCK_FILE)
+        parser.add_argument(
+            '-c', '--no-create-repo',
+            action='store_true',
+            help=_('No create repository after upload file(s) at server')
+        )
+
+        group = parser.add_mutually_exclusive_group(required=True)
+
+        group.add_argument(
+            '-f', '--file',
+            action='store',
+            help=_('File to upload at server')
+        )
+
+        group.add_argument(
+            '-r', '--dir',
+            action='store',
+            help=_('Directory with files to upload at server')
+        )
+
+        return parser.parse_args()
+
+    def run(self):
+        args = self._parse_args()
+
+        if args.debug:
+            self._debug = True
+            logger.setLevel(logging.DEBUG)
 
         # assign config options
-        if options.user:
-            self.packager_user = options.user
-        if options.pwd:
-            self.packager_pwd = options.pwd
-        if options.main_version:
-            self.packager_project = options.main_version
-        if options.store:
-            self.packager_store = options.store
-
-        if options.no_create_repo:
-            self._create_repo = not options.no_create_repo
-
-        logger.setLevel(logging.DEBUG)  # FIXME
+        if args.user:
+            self.packager_user = args.user
+        if args.pwd:
+            self.packager_pwd = args.pwd
+        if args.project:
+            self.packager_project = args.project
+        if args.store:
+            self.packager_store = args.store
+        if args.no_create_repo:
+            self._create_repo = not args.no_create_repo
 
         # actions dispatcher
-        if options.file:
-            self._file = options.file
-            self._is_regular_file = (options.regular_file is True)
-            if self._is_regular_file:
-                self._create_repo = False
-        elif options.dir:
-            self._directory = options.dir
-            if options.name:
-                self._server_directory = options.name
-            else:
-                self._server_directory = options.dir
+        if args.file:
+            self._file = args.file
+        elif args.dir:
+            self._directory = args.dir.split('/')[-1]
         else:
-            parser.print_help()
             self._usage_examples()
 
         self._left_parameters()
@@ -344,11 +348,11 @@ class MigasFreeUpload(MigasFreeCommand):
 
         self._show_running_options()
 
+        utils.check_lock_file(self.CMD, self.LOCK_FILE)
         if self._file:
             self._upload_file()
         else:
             self._upload_set()
-
         utils.remove_file(self.LOCK_FILE)
 
         sys.exit(os.EX_OK)  # no error
