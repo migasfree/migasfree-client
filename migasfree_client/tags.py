@@ -254,12 +254,17 @@ class MigasFreeTags(MigasFreeCommand):
         mfc._install_mandatory_packages(rules["install"])
 
     def _parse_args(self):
+        program = 'migasfree tags'
         print(_('%(program)s version: %(version)s') % {
             'program': self.CMD,
             'version': __version__
         })
 
-        parser = argparse.ArgumentParser(prog=self.CMD)
+        parser = argparse.ArgumentParser(
+            prog=self.CMD,
+            description=program,
+            usage=self._usage_examples()
+        )
 
         parser.add_argument(
             '-d', '--debug',
