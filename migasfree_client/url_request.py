@@ -172,7 +172,7 @@ class UrlRequest(object):
         return self._evaluate_response(r.json(), safe)
 
     def _evaluate_response(self, json, safe=True):
-        if safe:
+        if safe and 'msg' in json:
             response = secure.unwrap(
                 json['msg'],
                 decrypt_key=self._private_key,
@@ -182,8 +182,6 @@ class UrlRequest(object):
             response = json
 
         logger.debug('Response text: %s' % response)
-        if self._debug:
-            print(response)
 
         return response
 
