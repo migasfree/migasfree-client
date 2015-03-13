@@ -790,7 +790,8 @@ class MigasFreeClient(MigasFreeCommand):
 
         parser = argparse.ArgumentParser(
             prog=self.CMD,
-            description=program
+            description=program,
+            usage=self._usage_examples()
         )
 
         parser.add_argument(
