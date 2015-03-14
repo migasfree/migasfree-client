@@ -484,35 +484,65 @@ class MigasFreeClient(MigasFreeCommand):
             logger.error(_msg)
             self._write_error(_msg)
 
-    def _update_hardware_inventory(self):
-        self._show_message(_('Capturing hardware information...'))
-        _cmd = 'lshw -json'
-        _ret, _output, _error = utils.execute(_cmd, interactive=False)
-        if _ret == 0:
-            self.operation_ok()
-        else:
-            _msg = _('lshw command failed: %s') % _error
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+    def hardware_capture_is_required(self):
+        if not self._computer_id:
+            self.get_computer_id()
 
-        _hardware = json.loads(_output)
-        logger.debug('Hardware inventory: %s', _hardware)
-
-        self._show_message(_('Sending hardware information...'))
-        _ret = self._url_request.run(
-            url=self._url_base + 'upload_computer_hardware',  # FIXME
-            data=_hardware,
+        response = self._url_request.run(
+            url=self._url_base + 'safe/computers/hardware/required/',
+            data={
+                'id': self._computer_id,
+            },
             exit_on_error=False,
             debug=self._debug
         )
-        if _ret['errmfs']['code'] == server_errors.ALL_OK:  # FIXME
+        logger.debug('Response _hardware_capture_is_required: %s', response)
+
+        if type(response) == dict and 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+
+        return response.get('capture', False)
+
+    def _update_hardware_inventory(self):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        self._show_message(_('Capturing hardware information...'))
+        cmd = 'lshw -json'
+        ret, output, error = utils.execute(cmd, interactive=False)
+        if ret == 0:
             self.operation_ok()
         else:
-            self.operation_failed()
-            _msg = _ret['errmfs']['info']
-            logger.error(_msg)
-            self._write_error(_msg)
+            msg = _('lshw command failed: %s') % error
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
+            return
+
+        hardware = json.loads(output)
+        logger.debug('Hardware inventory: %s', hardware)
+
+        self._show_message(_('Sending hardware information...'))
+        response = self._url_request.run(
+            url=self._url_base + 'safe/computers/hardware/',
+            data={
+                'id': self._computer_id,
+                'hardware': hardware
+            },
+            exit_on_error=False,
+            debug=self._debug
+        )
+        logger.debug('Response _upload_software: %s', response)
+
+        if 'error' in response:
+            msg = response['error']['info']
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
+            return
+
+        self.operation_ok()
 
     def _upload_execution_errors(self):
         self._error_file_descriptor.close()
@@ -656,11 +686,11 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._upload_software(software_before, software_history)
 
-        """
-        # TODO
-        if _request.get('hardware_capture') is True:
+        if self.hardware_capture_is_required():
             self._update_hardware_inventory()
 
+        """
+        # TODO
         # remove and install devices (new in server 4.2) (issue #31)
         if 'devices' in _request:
             _installed = []
