@@ -53,10 +53,7 @@ class MigasFreeUpload(MigasFreeCommand):
     PACKAGER_PRIVATE_KEY = 'migasfree-packager.pri'
 
     _file = None
-    _is_regular_file = False
     _directory = None
-    _server_directory = None
-    _create_repo = True
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
@@ -65,17 +62,9 @@ class MigasFreeUpload(MigasFreeCommand):
         print('\t%s -f archive.pkg' % self.CMD)
         print('\t%s --file=archive.pkg\n' % self.CMD)
 
-        print('  ' + _('Upload single package but not create repository:'))
-        print('\t%s -f archive.pkg -c ' % self.CMD)
-        print('\t%s --file=archive.pkg --no-create-repo\n' % self.CMD)
-
         print('  ' + _('Upload package set:'))
         print('\t%s -r local_directory' % self.CMD)
         print('\t%s --dir=local_directory\n' % self.CMD)
-
-        print('  ' + _('Upload regular files:'))
-        print('\t%s -r local_directory -c' % self.CMD)
-        print('\t%s --dir=local_directory --no-create-repo\n' % self.CMD)
 
     def _show_running_options(self):
         MigasFreeCommand._show_running_options(self)
@@ -88,8 +77,6 @@ class MigasFreeUpload(MigasFreeCommand):
             print('\t%s: %s' % (_('File'), self._file))
         if self._directory:
             print('\t%s: %s' % (_('Directory'), self._directory))
-            print('\t%s: %s' % (_('Server directory'), self._server_directory))
-        print('\t%s: %s' % (_('Create repository'), self._create_repo))
         print('')
 
     def _left_parameters(self):
@@ -183,7 +170,7 @@ class MigasFreeUpload(MigasFreeCommand):
                         data={
                             'project': self.packager_project,
                             'store': self.packager_store,
-                            'packageset': self._server_directory,
+                            'packageset': self._directory,
                             'path': os.path.dirname(
                                 os.path.join(
                                     _root,
@@ -213,15 +200,12 @@ class MigasFreeUpload(MigasFreeCommand):
         return self._create_repository()
 
     def _create_repository(self):
-        if not self._create_repo:
-            return True
-
         print(_('Creating repository operation...'))
 
         if self._file:
             packageset = self._file
         else:
-            packageset = self._server_directory
+            packageset = self._directory
 
         response = self._url_request.run(
             url=self._url_base + 'safe/packages/repos/',
@@ -292,12 +276,6 @@ class MigasFreeUpload(MigasFreeCommand):
             help=_('Store at server')
         )
 
-        parser.add_argument(
-            '-c', '--no-create-repo',
-            action='store_true',
-            help=_('No create repository after upload file(s) at server')
-        )
-
         group = parser.add_mutually_exclusive_group(required=True)
 
         group.add_argument(
@@ -330,8 +308,6 @@ class MigasFreeUpload(MigasFreeCommand):
             self.packager_project = args.project
         if args.store:
             self.packager_store = args.store
-        if args.no_create_repo:
-            self._create_repo = not args.no_create_repo
 
         # actions dispatcher
         if args.file:
