@@ -161,10 +161,19 @@ class UrlRequest(object):
         if not url.endswith('/'):
             url += '/'
 
-        r = requests.post(
-            url, data=data, headers=headers,
-            proxies=proxies, cert=self._cert
-        )
+        try:
+            r = requests.post(
+                url, data=data, headers=headers,
+                proxies=proxies, cert=self._cert
+            )
+        except requests.exceptions.ConnectionError as e:
+            logger.error(str(e))
+            return {
+                'error': {
+                    'info': e,
+                    'code': errno.ECONNREFUSED
+                }
+            }
 
         if r.status_code not in self._ok_codes:
             return self._error_response(r, url)
