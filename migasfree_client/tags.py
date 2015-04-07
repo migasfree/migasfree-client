@@ -104,12 +104,12 @@ class MigasFreeTags(MigasFreeCommand):
         return tag_list
 
     def _select_tags(self, assigned, available):
-        _selected_tags = []
+        selected_tags = []
 
         # Change tags with gui
-        _title = _("Change tags")
-        _text = _("Please, select tags for this computer")
-        _cmd = "zenity --title='%s' \
+        title = _("Change tags")
+        text = _("Please, select tags for this computer")
+        cmd = "zenity --title='%s' \
             --text='%s' \
             --window-icon=%s \
             --list \
@@ -121,27 +121,27 @@ class MigasFreeTags(MigasFreeCommand):
             --column=' ' \
             --column='TAG' \
             --column='TYPE'" % (
-                _title,
-                _text,
+                title,
+                text,
                 os.path.join(settings.ICON_PATH, self.ICON)
             )
-        for _key, _value in available.items():
-            for _item in _value:
-                _tag_active = _item in assigned
-                _cmd += " '%s' '%s' '%s'" % (_tag_active, _item, _key)
+        for key, value in available.items():
+            for item in value:
+                tag_active = item in assigned
+                cmd += " '%s' '%s' '%s'" % (tag_active, item, key)
 
-        logger.debug('Change tags command: %s' % _cmd)
-        (_ret, _out, _err) = utils.execute(_cmd, interactive=False)
-        if _ret == 0:
-            if type(_out) is str and _out != "":
-                _selected_tags = _out.replace("\n", "").split("|")
-                logger.debug('Selected tags: %s' % _selected_tags)
+        logger.debug('Change tags command: %s' % cmd)
+        ret, out, err = utils.execute(cmd, interactive=False)
+        if ret == 0:
+            if type(out) is str and out != "":
+                selected_tags = out.replace("\n", "").split("|")
+                logger.debug('Selected tags: %s' % selected_tags)
         else:
             # no action chosed -> no change tags
-            logger.debug('Return value command: %d' % _ret)
-            sys.exit(_ret)
+            logger.debug('Return value command: %d' % ret)
+            sys.exit(ret)
 
-        return _selected_tags
+        return selected_tags
 
     def _get_assigned_tags(self):
         if not self._computer_id:
@@ -241,16 +241,12 @@ class MigasFreeTags(MigasFreeCommand):
 
         start_date = datetime.now().isoformat()
 
-        # Remove Packages
         mfc._uninstall_packages(rules["remove"])
-
-        # Pre-Install Packages
         mfc._install_mandatory_packages(rules["preinstall"])
 
         # Update metadata
         mfc._clean_pms_cache()
 
-        # Install Packages
         mfc._install_mandatory_packages(rules["install"])
 
     def _parse_args(self):
