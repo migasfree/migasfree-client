@@ -240,6 +240,8 @@ class UrlRequest(object):
         if self._exit_on_error:
             if 'html' not in request.headers['content-type']:
                 print(_('Error: %s') % str(info))
+            else:
+                print(_('Status code: %s') % str(request.status_code))
             sys.exit(errno.EACCES)
 
         return {
