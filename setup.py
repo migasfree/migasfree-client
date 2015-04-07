@@ -118,7 +118,6 @@ setup(
         'install_data': InstallData,
     },
     data_files=[
-        ('/etc', ['conf/migasfree.conf']),
         (
             '/usr/share/icons/hicolor/scalable/actions',
             ['icons/scalable/migasfree-ok.svg']
@@ -135,7 +134,8 @@ setup(
             'README',
             'TODO',
             'VERSION',
-            'migasfree-client.doap'
+            'migasfree-client.doap',
+            'conf/migasfree.conf'
         ]),
     ],
     scripts=[
