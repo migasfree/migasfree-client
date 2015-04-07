@@ -65,7 +65,6 @@ class MigasFreeClient(MigasFreeCommand):
     CMD = 'migasfree'  # /usr/bin/migasfree
 
     _graphic_user = None
-    _notify = None
 
     _error_file_descriptor = None
 
@@ -82,27 +81,17 @@ class MigasFreeClient(MigasFreeCommand):
         self._init_environment()
 
     def _init_environment(self):
-        _graphic_pid, _graphic_process = utils.get_graphic_pid()
-        logger.debug('Graphic pid: %s', _graphic_pid)
-        logger.debug('Graphic process: %s', _graphic_process)
+        graphic_pid, graphic_process = utils.get_graphic_pid()
+        logger.debug('Graphic pid: %s', graphic_pid)
+        logger.debug('Graphic process: %s', graphic_process)
 
-        if not _graphic_pid:
+        if not graphic_pid:
             self._graphic_user = os.environ.get('USER')
             print(_('No detected graphic process'))
         else:
-            self._graphic_user = utils.get_graphic_user(_graphic_pid)
-            _user_display = utils.get_user_display_graphic(_graphic_pid)
-            logger.debug('Graphic display: %s', _user_display)
-
-            try:
-                import pygtk
-                pygtk.require('2.0')
-                import pynotify
-
-                pynotify.init(self.APP_NAME)
-                self._notify = pynotify.Notification(self.APP_NAME)
-            except ImportError:
-                pass  # graphical notifications no available
+            self._graphic_user = utils.get_graphic_user(graphic_pid)
+            user_display = utils.get_user_display_graphic(graphic_pid)
+            logger.debug('Graphic display: %s', user_display)
 
         logger.debug('Graphic user: %s', self._graphic_user)
 
@@ -155,22 +144,9 @@ class MigasFreeClient(MigasFreeCommand):
         )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
-    def _show_message(self, msg, icon=None):
+    def _show_message(self, msg):
         print('')
         printcolor.info(str(' ' + msg + ' ').center(76, '*'))
-
-        if self.migas_gui_verbose:
-            if not icon:
-                icon = os.path.join(settings.ICON_PATH, self.ICON)
-
-            if self._notify:
-                icon = 'file://%s' % os.path.join(settings.ICON_PATH, icon)
-
-                try:
-                    self._notify.update(self.APP_NAME, msg, icon)
-                    self._notify.show()
-                except:
-                    pass
 
     def _eval_code(self, lang, code):
         # clean code...
@@ -178,11 +154,11 @@ class MigasFreeClient(MigasFreeCommand):
         logger.debug('Language code: %s', lang)
         logger.debug('Code: %s', code)
 
-        _filename = tempfile.mkstemp()[1]
-        with open(_filename, 'wb') as _code_file:
-            _code_file.write(code)
+        filename = tempfile.mkstemp()[1]
+        with open(filename, 'wb') as code_file:
+            code_file.write(code)
 
-        _allowed_languages = [
+        allowed_languages = [
             'bash',
             'python',
             'perl',
@@ -190,23 +166,23 @@ class MigasFreeClient(MigasFreeCommand):
             'ruby'
         ]
 
-        if lang in _allowed_languages:
-            _cmd = '%s %s' % (lang, _filename)
+        if lang in allowed_languages:
+            cmd = '%s %s' % (lang, filename)
         else:
-            _cmd = ':'  # gracefully degradation
+            cmd = ':'  # gracefully degradation
 
-        _ret, _output, _error = utils.timeout_execute(_cmd)
-        logger.debug('Executed command: %s', _cmd)
-        logger.debug('Output: %s', _output)
-        if _ret != 0:
-            logger.error('Error: %s', _error)
+        ret, output, error = utils.timeout_execute(cmd)
+        logger.debug('Executed command: %s', cmd)
+        logger.debug('Output: %s', output)
+        if ret != 0:
+            logger.error('Error: %s', error)
 
         try:
-            os.remove(_filename)
+            os.remove(filename)
         except IOError:
             pass
 
-        return _output
+        return output
 
     def _eval_attributes(self, properties):
         response = {
@@ -223,42 +199,41 @@ class MigasFreeClient(MigasFreeCommand):
 
         # properties converted in attributes
         self._show_message(_('Evaluating attributes...'))
-        for _item in properties:
-            response['sync_attributes'][_item['prefix']] = \
-                self._eval_code(_item['language'], _item['code'])
-            _info = '%s: %s' % (
-                _item['prefix'],
-                response['sync_attributes'][_item['prefix']]
+        for item in properties:
+            response['sync_attributes'][item['prefix']] = \
+                self._eval_code(item['language'], item['code'])
+            info = '%s: %s' % (
+                item['prefix'],
+                response['sync_attributes'][item['prefix']]
             )
-            if response['sync_attributes'][_item['prefix']].strip() != '':
-                self.operation_ok(_info)
+            if response['sync_attributes'][item['prefix']].strip() != '':
+                self.operation_ok(info)
             else:
-                self.operation_failed(_info)
+                self.operation_failed(info)
                 self._write_error(
-                    'Error: property %s without value\n' % _item['prefix']
+                    'Error: property %s without value\n' % item['prefix']
                 )
 
         return response
 
     def _eval_faults(self, fault_definitions):
-        _response = {
+        response = {
             'id': self._computer_id,
             'faults': {}
         }
 
-        # evaluate faults
         self._show_message(_('Executing faults...'))
-        for _item in fault_definitions:
-            _result = self._eval_code(_item['language'], _item['code'])
-            _info = '%s: %s' % (_item['name'], _result)
-            if _result:
+        for item in fault_definitions:
+            result = self._eval_code(item['language'], item['code'])
+            info = '%s: %s' % (item['name'], result)
+            if result:
                 # only send faults with output!!!
-                _response['faults'][_item['name']] = _result
-                self.operation_failed(_info)
+                response['faults'][item['name']] = result
+                self.operation_failed(info)
             else:
-                self.operation_ok(_info)
+                self.operation_ok(info)
 
-        return _response
+        return response
 
     def get_properties(self):
         if not self._computer_id:
@@ -321,7 +296,6 @@ class MigasFreeClient(MigasFreeCommand):
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
-            #sys.exit(errno.ENODATA)
             return None
 
         self.operation_ok()
@@ -414,75 +388,75 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Creating repositories...'))
 
-        _server = self.migas_server
+        server = self.migas_server
         if self.migas_package_proxy_cache:
-            _server = '%s/%s' % (self.migas_package_proxy_cache, _server)
+            server = '%s/%s' % (self.migas_package_proxy_cache, server)
 
-        _ret = self.pms.create_repos(
-            _server,
+        ret = self.pms.create_repos(
+            server,
             utils.slugify(unicode(self.migas_project)),
             repos
         )
 
-        if _ret:
+        if ret:
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            _msg = _('Error creating repositories: %s') % repos
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+            msg = _('Error creating repositories: %s') % repos
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
 
     def _clean_pms_cache(self):
         '''
         clean cache of Package Management System
         '''
         self._show_message(_('Getting repositories metadata...'))
-        _ret = self.pms.clean_all()
+        ret = self.pms.clean_all()
 
-        if _ret:
+        if ret:
             self.operation_ok()
         else:
-            _msg = _('Error getting repositories metadata')
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+            msg = _('Error getting repositories metadata')
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
 
     def _uninstall_packages(self, packages):
         self._show_message(_('Uninstalling packages...'))
-        _ret, _error = self.pms.remove_silent(packages)
-        if _ret:
+        ret, error = self.pms.remove_silent(packages)
+        if ret:
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            _msg = _('Error uninstalling packages: %s') % _error
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+            msg = _('Error uninstalling packages: %s') % error
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
 
     def _install_mandatory_packages(self, packages):
         self._show_message(_('Installing mandatory packages...'))
-        _ret, _error = self.pms.install_silent(packages)
-        if _ret:
+        ret, error = self.pms.install_silent(packages)
+        if ret:
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            _msg = _('Error installing packages: %s') % _error
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+            msg = _('Error installing packages: %s') % error
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
 
     def _update_packages(self):
         self._show_message(_('Updating packages...'))
-        _ret, _error = self.pms.update_silent()
-        if _ret:
+        ret, error = self.pms.update_silent()
+        if ret:
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            _msg = _('Error updating packages: %s') % _error
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+            msg = _('Error updating packages: %s') % error
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
 
     def hardware_capture_is_required(self):
         if not self._computer_id:
@@ -713,7 +687,7 @@ class MigasFreeClient(MigasFreeCommand):
         self._upload_execution_errors()
         self.end_synchronization(start_date)
         self.end_of_transmission()
-        self._show_message(_('Operations completed'), self.ICON_COMPLETED)
+        self._show_message(_('Operations completed'))
 
     def _search(self, pattern):
         return self.pms.search(pattern)
@@ -723,93 +697,89 @@ class MigasFreeClient(MigasFreeCommand):
         software_history = self._software_history(software_before)
 
         self._show_message(_('Installing package: %s') % pkg)
-        _ret = self.pms.install(pkg)
+        ret = self.pms.install(pkg)
 
         self._upload_software(software_before, software_history)
         self.end_of_transmission()
 
-        return _ret
+        return ret
 
     def _remove_package(self, pkg):
         software_before = self.pms.query_all()
         software_history = self._software_history(software_before)
 
         self._show_message(_('Removing package: %s') % pkg)
-        _ret = self.pms.remove(pkg)
+        ret = self.pms.remove(pkg)
 
         self._upload_software(software_before, software_history)
         self.end_of_transmission()
 
-        return _ret
+        return ret
 
     def _install_printer(self, device):
         if device['packages']:
             self._install_mandatory_packages(device['packages'])
 
         self._show_message(_('Installing device: %s') % device['model'])
-        _installed, _output = Printer.install(device)
-        if _installed:
-            _ret = _output
+        installed, output = Printer.install(device)
+        if installed:
+            ret = output
             self.operation_ok()
             logger.debug('Device installed: %s', device['model'])
         else:
-            _ret = 0
-            _msg = _('Error installing device: %s') % _output
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+            ret = 0
+            msg = _('Error installing device: %s') % output
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
 
-        self._show_message()
-
-        return _ret
+        return ret
 
     def _install_devices(self, devices):
         self._check_sign_keys()
 
-        _installed_ids = []
+        installed_ids = []
         for device in devices:
             if 'PRINTER' in device:
                 _id = self._install_printer(device['PRINTER'])
                 if _id:
-                    _installed_ids.append(_id)
+                    installed_ids.append(_id)
 
-        return _installed_ids
+        return installed_ids
 
     def _remove_printer(self, device_id):
         # expected pattern: PRINTER.name__PRINTER.model__PRINTER.id (issue #31)
-        _printer_name = Printer.search('__%d$' % device_id)
-        if _printer_name == '':
+        printer_name = Printer.search('__%d$' % device_id)
+        if printer_name == '':
             return device_id  # not installed, removed for server
 
-        self._show_message(_('Removing device: %s') % _printer_name)
+        self._show_message(_('Removing device: %s') % printer_name)
 
-        _removed, _output = Printer.remove(_printer_name)
-        if _removed:
-            _ret = device_id
+        removed, output = Printer.remove(printer_name)
+        if removed:
+            ret = device_id
             self.operation_ok()
-            logger.debug('Device removed: %s', _printer_name)
+            logger.debug('Device removed: %s', printer_name)
         else:
-            _ret = 0
-            _msg = _('Error removing device: %s') % _output
-            self.operation_failed(_msg)
-            logger.error(_msg)
-            self._write_error(_msg)
+            ret = 0
+            msg = _('Error removing device: %s') % output
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
 
-        self._show_message()
-
-        return _ret
+        return ret
 
     def _remove_devices(self, devices):
         self._check_sign_keys()
 
-        _removed_ids = []
+        removed_ids = []
         for device in devices:
             if 'PRINTER' in device:
                 _id = self._remove_printer(device['PRINTER'])
                 if _id:
-                    _removed_ids.append(_id)
+                    removed_ids.append(_id)
 
-        return _removed_ids
+        return removed_ids
 
     def _parse_args(self):
         program = 'migasfree client'
