@@ -47,6 +47,18 @@ from .command import (
 )
 
 
+def build_magic():
+    # http://www.zak.co.il/tddpirate/2013/03/03/the-python-module-for-file-type-identification-called-magic-is-not-standardized/
+    try:
+        my_magic = magic.open(magic.MAGIC_MIME_TYPE)
+        my_magic.load()
+    except AttributeError, e:
+        my_magic = magic.Magic(mime=True)
+        my_magic.file = my_magic.from_file
+
+    return my_magic
+
+
 class MigasFreeUpload(MigasFreeCommand):
     CMD = 'migasfree-upload'  # /usr/bin/migasfree-upload
 
@@ -121,8 +133,9 @@ class MigasFreeUpload(MigasFreeCommand):
 
         logger.debug('Uploading file: %s', self._file)
 
-        mime = magic.from_buffer(utils.read_file(self._file), mime=True)
-        is_package = mime in self.pms._mimetype
+        my_magic = build_magic()
+        is_package = my_magic.file(self._file) in self.pms._mimetype
+
         response = self._url_request.run(
             url=self._url_base + 'safe/packages/',
             data={
