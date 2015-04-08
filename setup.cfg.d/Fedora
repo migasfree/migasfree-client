@@ -12,3 +12,4 @@ requires = python >= 2.7
            sudo
            dmidecode
            cups
+           python-magic
