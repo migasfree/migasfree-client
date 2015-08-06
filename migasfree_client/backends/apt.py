@@ -225,3 +225,12 @@ class Apt(Pms):
         finally:
             if _file is not None:
                 _file.close()
+
+    def import_server_key(self, file_key):
+        '''
+        bool import_server_key( file )
+        '''
+
+        self._cmd = "apt-key add %s >/dev/null" % file_key
+        logging.debug(self._cmd)
+        return (execute(self._cmd)[0] == 0)
