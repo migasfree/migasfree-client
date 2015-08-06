@@ -468,7 +468,8 @@ class MigasFreeClient(MigasFreeCommand):
                 os.remove(self.ERROR_FILE)
 
     def _update_system(self):
-        self._check_sign_keys()
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
 
         if self._send_message(_('Connecting to migasfree server...')):
             self.operation_ok()

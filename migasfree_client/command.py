@@ -29,6 +29,7 @@ from . import (
     utils,
     url_request,
     printcolor,
+    curl
 )
 
 version_file = os.path.join(
@@ -70,8 +71,9 @@ class MigasFreeCommand(object):
     LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
     ERROR_FILE = os.path.join(settings.TMP_PATH, '%s.err' % CMD)
 
-    PUBLIC_KEY = 'migasfree-server.pub'
-    PRIVATE_KEY = 'migasfree-client.pri'
+    PUBLIC_KEY = 'server.pub'
+    PRIVATE_KEY = ''
+    REPOS_KEY = "repositories.pub"
 
     ICON = 'apps/migasfree.svg'
     ICON_COMPLETED = 'actions/migasfree-ok.svg'
@@ -85,6 +87,7 @@ class MigasFreeCommand(object):
     auto_register_user = ''
     auto_register_password = ''
     auto_register_command = 'register_computer'
+    get_key_repositories_command = 'get_key_repositories'
 
     def __init__(self):
         _log_level = logging.INFO
@@ -96,6 +99,9 @@ class MigasFreeCommand(object):
         self.migas_version = os.environ.get(
             'MIGASFREE_CLIENT_VERSION', utils.get_mfc_version()
         )
+
+        self.PRIVATE_KEY = '%s.pri' % self.migas_version
+
         self.migas_computer_name = os.environ.get(
             'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
         )
@@ -172,7 +178,10 @@ class MigasFreeCommand(object):
         logging.debug('Config client: %s', _config_client)
         logging.debug('Config packager: %s', _config_packager)
 
-        # init UrlRequest
+        self._pms_selection()
+        self._init_url_request()
+
+    def _init_url_request(self):
         _url_base = '%s/api/' % str(self.migas_server)
         if self.migas_ssl_cert:
             _url_base = '%s://%s' % ('https', _url_base)
@@ -183,14 +192,12 @@ class MigasFreeCommand(object):
             url_base=_url_base,
             proxy=self.migas_proxy,
             info_keys={
-                'path': settings.KEYS_PATH,
+                'path': os.path.join(settings.KEYS_PATH, self.migas_server),
                 'private': self.PRIVATE_KEY,
                 'public': self.PUBLIC_KEY
             },
             cert=self.migas_ssl_cert
         )
-
-        self._pms_selection()
 
     def _check_user_is_root(self):
         return utils.get_user_info(os.environ.get('USER'))['gid'] == 0
@@ -203,9 +210,18 @@ class MigasFreeCommand(object):
             sys.exit(errno.EACCES)
 
     def _check_sign_keys(self):
-        _private_key = os.path.join(settings.KEYS_PATH, self.PRIVATE_KEY)
-        _public_key = os.path.join(settings.KEYS_PATH, self.PUBLIC_KEY)
-        if os.path.isfile(_private_key) and os.path.isfile(_public_key):
+        _private_key = os.path.join(
+            settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
+        )
+        _public_key = os.path.join(
+            settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
+        )
+        _repos_key = os.path.join(
+            settings.KEYS_PATH, self.migas_server, self.REPOS_KEY
+        )
+        if os.path.isfile(_private_key) and \
+            os.path.isfile(_public_key) and \
+            os.path.isfile(_repos_key):
             return True  # all OK
 
         logging.warning('Security keys are not present!!!')
@@ -221,6 +237,7 @@ class MigasFreeCommand(object):
         )
 
     def _save_sign_keys(self, user, password):
+        # API keys
         _response = self._url_request.run(
             self.auto_register_command,
             data={
@@ -230,7 +247,8 @@ class MigasFreeCommand(object):
                 'platform': platform.system(),
                 'pms': str(self.pms),
             },
-            sign=False
+            sign=False,
+            exit_on_error=(user != self.auto_register_user)
         )
         logging.debug('Response _save_sign_keys: %s', _response)
 
@@ -241,16 +259,26 @@ class MigasFreeCommand(object):
                 _msg = _('Error creating %s directory') % settings.KEYS_PATH
                 self.operation_failed(_msg)
                 logging.error(_msg)
-                sys.exit(errno.ENOTDIR)
+                return False
 
         if 'errmfs' in _response:
             _msg = _response['errmfs']['info']
             self.operation_failed(_msg)
             logging.error(_msg)
-            sys.exit(errno.ENOENT)
+            return False
 
         for _file, _content in list(_response.items()):
-            _path_file = os.path.join(settings.KEYS_PATH, _file)
+
+            if _file == "migasfree-server.pub":
+                _file = self.PUBLIC_KEY
+            if _file == "migasfree-client.pri":
+                _file = self.PRIVATE_KEY
+            if _file == "migasfree-packager.pri":
+                _file = self.PRIVATE_KEY
+
+            _path_file = os.path.join(
+                settings.KEYS_PATH, self.migas_server, _file
+            )
             logging.debug('Trying writing file: %s', _path_file)
             _ret = utils.write_file(_path_file, str(_content))
             if _ret:
@@ -259,7 +287,49 @@ class MigasFreeCommand(object):
                 _msg = _('Error writing key file!!!')
                 self.operation_failed(_msg)
                 logging.error(_msg)
-                sys.exit(errno.ENOENT)
+                return False
+
+        # Repositories key
+        return self._save_repos_key()
+
+    def _save_repos_key(self):
+        _curl = curl.Curl(
+            '%s/%s' % (self.migas_server, self.get_key_repositories_command),
+            post=None,
+            proxy=self.migas_proxy,
+            cert=self.migas_ssl_cert,
+        )
+        _curl.run()
+
+        _response = str(_curl.body)
+
+        logging.debug('Response _save_repos_key: %s', _response)
+
+        _path = os.path.abspath(
+            os.path.join(settings.KEYS_PATH, self.migas_server)
+        )
+        if not os.path.isdir(_path):
+            try:
+                os.makedirs(_path)
+            except:
+                _msg = _('Error creating %s directory') % _path
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                return False
+
+        _path_file = os.path.join(_path, self.REPOS_KEY)
+        logging.debug('Trying writing file: %s', _path_file)
+        _ret = utils.write_file(_path_file, _response)
+        if _ret:
+            if  self.pms.import_server_key(_path_file):
+                print(_('Key %s created!') % _path_file)
+            else:
+                print(_('ERROR: not import key: %s!') % _path_file)
+        else:
+            _msg = _('Error writing key file!!!')
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            return False
 
         return True
 
