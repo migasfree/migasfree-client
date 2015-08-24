@@ -339,7 +339,7 @@ class MigasFreeCommand(object):
             logging.error(msg)
             return False
 
-         return True
+        return True
 
     def _register_computer(self):
         carry_on = utils.query_yes_no(
