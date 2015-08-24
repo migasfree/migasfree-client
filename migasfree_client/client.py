@@ -639,7 +639,8 @@ class MigasFreeClient(MigasFreeCommand):
     def synchronize(self):
         start_date = datetime.now().isoformat()
 
-        self._check_sign_keys()
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
 
         self._show_message(_('Connecting to migasfree server...'))
 
