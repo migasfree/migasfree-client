@@ -209,3 +209,13 @@ metadata_expire=1
             content += template % {'repo': repo}
 
         return write_file(self._repo, content)
+
+    def import_server_key(self, file_key):
+        '''
+        bool import_server_key(string file_key)
+        '''
+
+        self._cmd = 'rpm --import %s > /dev/null' % file_key
+        logging.debug(self._cmd)
+
+        return (execute(self._cmd)[0] == 0)

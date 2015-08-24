@@ -129,3 +129,10 @@ class Pms(object):
         '''
 
         raise NotImplementedError
+
+    def import_server_key(self, file_key):
+        '''
+        bool import_server_key(string file_key)
+        '''
+
+        raise NotImplementedError
