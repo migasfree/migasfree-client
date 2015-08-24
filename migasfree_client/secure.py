@@ -42,9 +42,7 @@ def sign(claims, priv_key):
     '''
     string sign(dict claims, string priv_key)
     '''
-    rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.KEYS_PATH, priv_key))
-    )
+    rsa_key = RSA.importKey(read_file(priv_key))
     jwk = {'k': rsa_key.exportKey('PEM')}
 
     jws = jose.sign(claims, jwk, alg='RS256')  # Asymmetric!!!
@@ -57,9 +55,7 @@ def verify(jwt, pub_key):
     '''
     dict verify(string jwt, string pub_key)
     '''
-    rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.KEYS_PATH, pub_key))
-    )
+    rsa_key = RSA.importKey(read_file(pub_key))
     jwk = {'k': rsa_key.exportKey('PEM')}
     try:
         jwe = jose.deserialize_compact(jwt)
@@ -75,9 +71,7 @@ def encrypt(claims, pub_key):
     '''
     string encrypt(dict claims, string pub_key)
     '''
-    rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.KEYS_PATH, pub_key))
-    )
+    rsa_key = RSA.importKey(read_file(pub_key))
     pub_jwk = {'k': rsa_key.publickey().exportKey('PEM')}
 
     jwe = jose.encrypt(claims, pub_jwk)
@@ -90,9 +84,7 @@ def decrypt(jwt, priv_key):
     '''
     string decrypt(string jwt, string priv_key)
     '''
-    rsa_key = RSA.importKey(
-        read_file(os.path.join(settings.KEYS_PATH, priv_key))
-    )
+    rsa_key = RSA.importKey(read_file(priv_key))
     priv_jwk = {'k': rsa_key.exportKey('PEM')}
     try:
         jwe = jose.deserialize_compact(jwt)

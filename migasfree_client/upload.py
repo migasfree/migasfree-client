@@ -62,10 +62,13 @@ def build_magic():
 class MigasFreeUpload(MigasFreeCommand):
     CMD = 'migasfree-upload'  # /usr/bin/migasfree-upload
 
-    PACKAGER_PRIVATE_KEY = 'migasfree-packager.pri'
-
     _file = None
     _directory = None
+
+    def __init__(self):
+        MigasFreeCommand.__init__(self)
+        self.PRIVATE_KEY = 'packager.pri'
+        self._init_url_request()
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
