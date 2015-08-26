@@ -29,8 +29,7 @@ from . import (
     utils,
     network,
     url_request,
-    printcolor,
-    curl
+    printcolor
 )
 
 version_file = os.path.join(
@@ -97,7 +96,7 @@ class MigasFreeCommand(object):
     auto_register_user = ''
     auto_register_password = ''
     auto_register_end_point = 'public/keys/project/'
-    get_key_repositories_command = 'get_key_repositories'
+    get_key_repositories_end_point = 'public/keys/repositories/'
 
     _computer_id = None
 
@@ -232,11 +231,14 @@ class MigasFreeCommand(object):
         return self._auto_register()
 
     def _check_keys_path(self):
-        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
+        path = os.path.abspath(
+            os.path.join(settings.KEYS_PATH, self.migas_server)
+        )
+        if not os.path.isdir(path):
             try:
-                os.makedirs(os.path.abspath(settings.KEYS_PATH))
+                os.makedirs(path)
             except:
-                msg = _('Error creating %s directory') % settings.KEYS_PATH
+                msg = _('Error creating %s directory') % path
                 self.operation_failed(msg)
                 logger.error(msg)
                 sys.exit(errno.ENOTDIR)
@@ -267,12 +269,6 @@ class MigasFreeCommand(object):
         logger.debug('Response _save_sign_keys: %s', response)
 
         self._check_keys_path()
-        if self.PRIVATE_KEY not in response or self.PUBLIC_KEY not in response:
-            msg = _('An error has occurred while autoregistering computer. '
-            'Unable to continue.')
-            self.operation_failed(msg)
-            logger.error(msg)
-            return False
 
         for _file, content in list(response.items()):
             if _file == 'migasfree-server.pub':
@@ -300,17 +296,13 @@ class MigasFreeCommand(object):
         return self._save_repos_key()
 
     def _save_repos_key(self):
-        _curl = curl.Curl(
-            '%s/%s' % (self.migas_server, self.get_key_repositories_command),
-            post=None,
-            proxy=self.migas_proxy,
-            cert=self.migas_ssl_cert,
+        response = self._url_request.run(
+            url=self._url_base + self.get_key_repositories_end_point,
+            safe=False,
+            exit_on_error=False,
+            debug=self._debug
         )
-        _curl.run()
-
-        response = str(_curl.body)
-
-        logging.debug('Response _save_repos_key: %s', response)
+        logger.debug('Response _save_repos_key: %s', response)
 
         path = os.path.abspath(
             os.path.join(settings.KEYS_PATH, self.migas_server)
@@ -321,11 +313,11 @@ class MigasFreeCommand(object):
             except:
                 msg = _('Error creating %s directory') % path
                 self.operation_failed(msg)
-                logging.error(msg)
+                logger.error(msg)
                 return False
 
         path_file = os.path.join(path, self.REPOS_KEY)
-        logging.debug('Trying writing file: %s', path_file)
+        logger.debug('Trying writing file: %s', path_file)
 
         ret = utils.write_file(path_file, response)
         if ret:
@@ -336,7 +328,7 @@ class MigasFreeCommand(object):
         else:
             msg = _('Error writing key file!!!')
             self.operation_failed(msg)
-            logging.error(msg)
+            logger.error(msg)
             return False
 
         return True
