@@ -258,8 +258,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         parser = argparse.ArgumentParser(
             prog=self.CMD,
-            description=program,
-            usage=self._usage_examples()
+            description=program
         )
 
         parser.add_argument(
