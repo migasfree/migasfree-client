@@ -215,7 +215,19 @@ metadata_expire=1
         bool import_server_key(string file_key)
         '''
 
-        self._cmd = 'rpm --import %s > /dev/null' % file_key
+        self._cmd = '%s --import %s > /dev/null' % (self._pm, file_key)
         logging.debug(self._cmd)
 
         return (execute(self._cmd)[0] == 0)
+
+    def get_system_architecture(self):
+        '''
+        string get_system_architecture(void)
+        '''
+
+        self._cmd = 'echo $(%s -q --qf "%{arch}" -f /etc/$(sed -n "s/^distroverpkg=//p" /etc/yum.conf))' % self._pm
+        logging.debug(self._cmd)
+
+        _ret, _arch, _error = execute(self._cmd, interactive=False)
+
+        return _arch.strip() if _ret == 0 else ''

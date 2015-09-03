@@ -261,7 +261,7 @@ class MigasFreeCommand(object):
                 'project': self.migas_project,
                 'platform': platform.system(),
                 'pms': str(self.pms),
-                'architecture': platform.machine()
+                'architecture': self.pms.get_system_architecture()
             },
             safe=False,
             exit_on_error=(user != self.auto_register_user),

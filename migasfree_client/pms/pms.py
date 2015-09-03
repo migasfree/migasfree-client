@@ -136,3 +136,10 @@ class Pms(object):
         '''
 
         raise NotImplementedError
+
+    def get_system_architecture(self):
+        '''
+        string get_system_architecture(void)
+        '''
+
+        raise NotImplementedError

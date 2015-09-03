@@ -233,3 +233,15 @@ class Apt(Pms):
         logging.debug(self._cmd)
 
         return (execute(self._cmd)[0] == 0)
+
+    def get_system_architecture(self):
+        '''
+        string get_system_architecture(void)
+        '''
+
+        self._cmd = 'echo "$(%s --print-architecture) $(%s --print-foreign-architectures)"' % self._pm
+        logging.debug(self._cmd)
+
+        _ret, _arch, _error = execute(self._cmd, interactive=False)
+
+        return _arch.strip() if _ret == 0 else ''
