@@ -239,7 +239,7 @@ class Apt(Pms):
         string get_system_architecture(void)
         '''
 
-        self._cmd = 'echo "$(%s --print-architecture) $(%s --print-foreign-architectures)"' % self._pm
+        self._cmd = 'echo "$(%(pm)s --print-architecture) $(%(pm)s --print-foreign-architectures)"' % {'pm': self._pm}
         logging.debug(self._cmd)
 
         _ret, _arch, _error = execute(self._cmd, interactive=False)
