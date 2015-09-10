@@ -296,7 +296,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
-            return None
+            return []
 
         self.operation_ok()
 
@@ -383,8 +383,6 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _create_repositories(self):
         repos = self.get_repositories()
-        if not repos:
-            return
 
         self._show_message(_('Creating repositories...'))
 
