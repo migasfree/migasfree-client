@@ -481,7 +481,7 @@ class MigasFreeClient(MigasFreeCommand):
             self.get_computer_id()
 
         self._show_message(_('Capturing hardware information...'))
-        cmd = 'lshw -json'
+        cmd = 'LC_ALL=C lshw -json'
         ret, output, error = utils.execute(cmd, interactive=False)
         if ret == 0:
             self.operation_ok()
