@@ -13,3 +13,4 @@ requires = python >= 2.7
            dmidecode
            cups
            python-magic
+           zenity
