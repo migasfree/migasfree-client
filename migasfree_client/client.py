@@ -425,7 +425,7 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _update_hardware_inventory(self):
         self._send_message(_('Capturing hardware information...'))
-        _cmd = 'lshw -json'
+        _cmd = 'LC_ALL=C lshw -json'
         _ret, _output, _error = utils.execute(_cmd, interactive=False)
         if _ret == 0:
             self.operation_ok()
