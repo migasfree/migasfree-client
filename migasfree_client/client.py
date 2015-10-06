@@ -598,8 +598,10 @@ class MigasFreeClient(MigasFreeCommand):
         return _ret
 
     def _install_printer(self, device):
-        if device['packages']:
+        if 'packages' in device and device['packages']:
             self._install_mandatory_packages(device['packages'])
+
+        self._remove_printer(device['id'])
 
         self._send_message(_('Installing device: %s') % device['model'])
         _installed, _output = Printer.install(device)
