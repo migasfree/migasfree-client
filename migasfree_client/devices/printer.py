@@ -38,45 +38,104 @@ class Printer(object):
             'packages': ['azl-printers'],
             'TCP': {
                 'IP': '192.168.100.254',
-                'PORT': 9100,
+                'PORT': '9100',
                 'LOCATION': 'Entry',
             }
         }
         '''
-        _name = '%s__%s__%s__%d' % (
-            device['name'],
-            device['model'],
-            device['feature'],
-            int(device['id'])
-        )
+
         _connect = ''
         _location = ''
 
         if 'TCP' in device:
             _conn = device['TCP']
+
+            if 'PORT' in _conn and \
+            not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):
+                _port = _conn['PORT']
+            else:
+                _port = '9100'
+
             if 'IP' in _conn and 'PORT' in _conn and 'LOCATION' in _conn:
-                _connect = '-v socket://%s:%d' % (
-                    _conn['IP'],
-                    int(_conn['PORT'])
-                )
+                _connect = '-v socket://%s:%s' % (_conn['IP'], _port)
                 if _conn['LOCATION'] != '':
                     _location = '-L "%s"' % _conn['LOCATION']
         elif 'LPT' in device:
-            _connect = '-v parallel:/dev/lp0'
+            _conn = device['LPT']
+            if 'PORT' in _conn and \
+            not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):
+                _port = _conn['PORT']
+            else:
+                _port = '0'
+
+            _connect = '-v parallel:/dev/lp%s' % _port
+        elif 'USB' in device:
+            _conn = device['USB']
+            _connect = '-v parallel:/dev/usb/lp0'
+        elif 'SRL' in device:
+            _conn = device['SRL']
+            if 'PORT' in _conn and \
+            not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):
+                _port = _conn['PORT']
+            else:
+                _port = '0'
+
+            _connect = '-v serial:/dev/ttyS%s' % _port
+        elif 'LPD' in device:
+            _conn = device['LPD']
+            if 'IP' in _conn and 'PORT' in _conn and 'LOCATION' in _conn:
+                _connect = '-v lpd://%s/%s' % (
+                    _conn['IP'],
+                    _conn['PORT']
+                )
+                if _conn['LOCATION'] != '':
+                    _location = '-L "%s"' % _conn['LOCATION']
+
+        _description = '%s__%s__%s__%s__%d' % (
+                device['manufacturer'],
+                device['model'],
+                device['feature'],
+                device['name'],
+                int(device['id'])
+            )
+
+        if 'NAME' in _conn and \
+        not (_conn['NAME'] == 'undefined' or _conn['NAME'] == ''):
+            _name = '%s__%s__%s' % (
+                _conn['NAME'],
+                device['feature'],
+                device['name'],
+            )
+        else:
+            _name = '%s__%s__%s__%s' % (
+                device['manufacturer'],
+                device['model'],
+                device['feature'],
+                device['name'],
+            )
 
         # depends cups-client
-        _cmd = 'lpadmin -p %(name)s -P %(driver)s %(conn)s %(location)s -E' % {
-            'name': _name,
-            'driver': device['driver'],
-            'conn': _connect,
-            'location': _location
-        }
+        if 'driver' in device and device['driver']:
+            _cmd = 'lpadmin -p %(name)s -P %(driver)s -D %(description)s %(conn)s %(location)s -E' % {
+                'name': _name,
+                'driver': device['driver'],
+                'conn': _connect,
+                'location': _location,
+                'description': _description
+            }
+        else:  # is RAW
+            _cmd = 'lpadmin -p %(name)s -D %(description)s %(conn)s %(location)s -E' % {
+                'name': _name,
+                'conn': _connect,
+                'location': _location,
+                'description': _description
+            }
+
         _ret, _output, _error = execute(_cmd)
         if _ret != 0:
             return (False, _error)
 
         return (True, int(device['id']))
-
 
     @staticmethod
     def remove(device_name):
@@ -90,7 +149,6 @@ class Printer(object):
 
         return (True, _output)
 
-
     @staticmethod
     def is_installed(device_name):
         '''
@@ -101,16 +159,16 @@ class Printer(object):
 
         return _ret == 0
 
-
     @staticmethod
     def search(pattern):
         '''
         string search(string pattern)
         '''
         # depends cups-client
-        _cmd = 'lpstat -a | cut -d " " -f 1 | grep %s' % pattern
+        # searching in description field
+        _cmd = "for p in `lpstat -a | awk '{print $1}'`; do lpstat -l -p $p | grep %s > /dev/null; if [ $? = 0 ] ;then echo $p;fi ; done" % pattern
         _ret, _output, _error = execute(_cmd, interactive=False)
         if _ret != 0:
             return ''
 
-        return _output
+        return _output.split("\n")[0]
