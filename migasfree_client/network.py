@@ -132,3 +132,14 @@ def get_network_info():
         'netmask': get_iface_mask(_ifname),
         'net': '%s/%s' % (get_iface_net(_ifname), get_iface_cidr(_ifname))
     }
+
+
+def get_mac(iface):
+    addres = netifaces.ifaddresses(iface)
+    return addres[netifaces.AF_LINK][0]['addr']
+
+
+def get_first_mac():
+    _ifaces=netifaces.interfaces()
+    _ifaces.remove('lo')
+    return get_mac(_ifaces[0]).replace(":","").upper()
