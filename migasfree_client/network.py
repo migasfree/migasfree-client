@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -132,3 +132,17 @@ def get_network_info():
         'netmask': get_iface_mask(_ifname),
         'net': '%s/%s' % (get_iface_net(_ifname), get_iface_cidr(_ifname))
     }
+
+
+def get_mac(iface):
+    _address = netifaces.ifaddresses(iface)
+
+    return _address[netifaces.AF_LINK][0]['addr']
+
+
+def get_first_mac():
+    _interfaces = netifaces.interfaces()
+    if 'lo' in _interfaces:
+        _interfaces.remove('lo')  # loopback interface is not interesting
+
+    return get_mac(_interfaces[0]).replace(':', '').upper()

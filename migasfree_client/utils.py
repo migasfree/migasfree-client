@@ -42,7 +42,7 @@ import signal
 import gettext
 _ = gettext.gettext
 
-from . import settings
+from . import settings, network
 
 # TODO http://docs.python.org/library/unittest.html
 
@@ -451,6 +451,10 @@ def get_smbios_version():
     return tuple(int(x) for x in _smbios.split('.'))
 
 
+def get_uuid_from_mac():
+    return "00000000-0000-0000-0000-%s" % network.get_first_mac()
+
+
 def get_hardware_uuid():
     _uuid_format = '%s%s%s%s-%s%s-%s%s-%s-%s'
 
@@ -460,12 +464,12 @@ def get_hardware_uuid():
     )
     _uuid = _uuid.replace('\n', '')
     if _ret != 0 or _uuid == '' or _uuid is None:
-        return get_mfc_computer_name()
+        return get_uuid_from_mac()
 
     try:
         _byte_array = uuid.UUID(_uuid).hex
     except:
-        return get_mfc_computer_name()
+        return get_uuid_from_mac()
 
     if get_smbios_version() >= (2, 6):
         _ms_uuid = _uuid_format % (
@@ -498,7 +502,7 @@ def get_hardware_uuid():
     _ms_uuid = _ms_uuid.upper()
 
     if _ms_uuid == '03000200-0400-0500-0006-000700080009':  # ASRock
-        _ms_uuid = get_mfc_computer_name()
+        _ms_uuid = get_uuid_from_mac()
 
     return _ms_uuid
 
