@@ -42,16 +42,12 @@ if hasattr(locale, 'bind_textdomain_codeset'):
     locale.bind_textdomain_codeset(domain, 'UTF-8')
 locale.textdomain(domain)
 
-# http://fedoraproject.org/wiki/Features/PythonEncodingUsesSystemLocale
+# http://www.ianbicking.org/illusive-setdefaultencoding.html
 # begin unicode hack
 import sys
 
 if sys.getdefaultencoding() != 'utf-8':
-    try:
-        sys.setdefaultencoding('utf-8')
-    except AttributeError:
-        pass
-
-    import pango
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
     # now default enconding is 'utf-8' ;)
 # end unicode hack
