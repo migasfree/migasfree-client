@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2015 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,16 +43,12 @@ if hasattr(locale, 'bind_textdomain_codeset'):
     locale.bind_textdomain_codeset(domain, 'UTF-8')
 locale.textdomain(domain)
 
-# http://fedoraproject.org/wiki/Features/PythonEncodingUsesSystemLocale
+# http://www.ianbicking.org/illusive-setdefaultencoding.html
 # begin unicode hack
 import sys
 
 if sys.getdefaultencoding() != 'utf-8':
-    try:
-        sys.setdefaultencoding('utf-8')
-    except AttributeError:
-        pass
-
-    import pango
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
     # now default enconding is 'utf-8' ;)
 # end unicode hack
