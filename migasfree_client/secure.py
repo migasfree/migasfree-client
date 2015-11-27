@@ -59,7 +59,8 @@ def verify(jwt, pub_key):
     jwk = {'k': rsa_key.exportKey('PEM')}
     try:
         jwe = jose.deserialize_compact(jwt)
-        return jose.verify(jwe, jwk, validate_claims=False)  # FIXME True!!!
+        # FIXME validate_claims=True!!!
+        return jose.verify(jwe, jwk, alg='RS256', validate_claims=False)
     except:
         # DEBUG
         # import sys, traceback
