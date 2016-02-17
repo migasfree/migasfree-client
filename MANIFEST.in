@@ -4,6 +4,5 @@ include AUTHORS INSTALL LICENSE README TODO VERSION MANIFEST.in migasfree-client
 include bin/migasfree
 include conf/migasfree.conf
 recursive-include icons *.svg
-include launcher/migasfree-client.desktop
 recursive-include migasfree_client *.py
 include po/*
