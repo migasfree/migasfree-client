@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -157,16 +155,17 @@ def get_hostname():
 def get_graphic_pid():
     '''
     list get_graphic_pid(void)
-    Detects Gnome, KDE, Xfce, Xfce4, LXDE
+    Detects Gnome, KDE, Xfce, Xfce4, LXDE, Unity
     '''
 
     _graphic_environments = [
-        'gnome-session',    # Gnome
-        'ksmserver',        # KDE
-        'xfce-mcs-manage',  # Xfce
-        'xfce4-session',    # Xfce4
-        'lxsession',        # LXDE
-        'mate-session',     # MATE
+        'gnome-session-binary',  # Gnome & Unity
+        'gnome-session',         # Gnome
+        'ksmserver',             # KDE
+        'xfce-mcs-manage',       # Xfce
+        'xfce4-session',         # Xfce4
+        'lxsession',             # LXDE
+        'mate-session',          # MATE
     ]
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof %s' % _process)
