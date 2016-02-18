@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2014 Jose Antonio Chavarría
+# Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -93,36 +91,51 @@ class MigasFreeTags(MigasFreeCommand):
     def _select_tags(self, tags):
         _selected_tags = []
 
+        if len(tags["available"]) == 0:
+            print(_('There is not available tags to select'))
+            sys.exit(os.EX_OK)
+
         # Change tags with gui
         _title = _("Change tags")
         _text = _("Please, select tags for this computer")
-        _cmd = "zenity --title='%s' \
-            --text='%s' \
-            --window-icon=%s \
-            --list \
-            --width 600 \
-            --height 400 \
-            --checklist \
-            --multiple \
-            --print-column=2 \
-            --column=' ' \
-            --column='TAG' \
-            --column='TYPE'" % (
-                _title,
-                _text,
-                os.path.join(settings.ICON_PATH, self.ICON)
-            )
-        for _key, _value in tags["available"].items():
-            for _item in _value:
-                _tag_active = _item in tags["selected"]
-                _cmd += " '%s' '%s' '%s'" % (_tag_active, _item, _key)
+        if utils.is_xsession() and utils.is_zenity():
+            _cmd = "zenity --title='%s' \
+                --text='%s' \
+                --separator='\n' \
+                --window-icon=%s \
+                --list \
+                --width 600 \
+                --height 400 \
+                --checklist \
+                --multiple \
+                --print-column=2 \
+                --column=' ' \
+                --column='TAG' \
+                --column='TYPE'" % (
+                    _title,
+                    _text,
+                    os.path.join(settings.ICON_PATH, self.ICON)
+                )
+            for _key, _value in tags["available"].items():
+                for _item in _value:
+                    _tag_active = _item in tags["selected"]
+                    _cmd += " '%s' '%s' '%s'" % (_tag_active, _item, _key)
+        else:
+            _cmd = "dialog --backtitle '%s' \
+                --separate-output \
+                --stdout \
+                --checklist '%s' \
+                0 0 8" % (_title, _text)
+            for _key, _value in tags["available"].items():
+                for _item in _value:
+                    _tag_active = 'on' if _item in tags["selected"] else 'off'
+                    _cmd += " '%s' '%s' %s" % (_item, _key, _tag_active)
 
         logging.debug('Change tags command: %s' % _cmd)
-        (_ret, _out, _err) = utils.execute(_cmd, interactive=False)
+        _ret, _out, _err = utils.execute(_cmd, interactive=False)
         if _ret == 0:
-            if type(_out) is str and _out != "":
-                _selected_tags = _out.replace("\n", "").split("|")
-                logging.debug('Selected tags: %s' % _selected_tags)
+            _selected_tags = filter(None, _out.split("\n"))
+            logging.debug('Selected tags: %s' % _selected_tags)
         else:
             # no action chosed -> no change tags
             logging.debug('Return value command: %d' % _ret)
@@ -153,11 +166,6 @@ class MigasFreeTags(MigasFreeCommand):
 
         if not self._tags:
             self._tags = self._select_tags(self._get_tags())
-
-        # unsettings all tags?
-        if len(self._tags) == 1 and self._tags[0] == '':
-            logging.debug('Unsetting all tags')
-            self._tags = []
 
         logging.debug('Setting tags: %s', self._tags)
         _ret = self._url_request.run(
