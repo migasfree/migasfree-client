@@ -516,6 +516,15 @@ def cast_to_bool(value, default=False):
     return default
 
 
+def is_xsession():
+    return (os.environ.get('DISPLAY') is not None)
+
+
+def is_zenity():
+    _ret, _, _ = execute('which zenity', interactive=False)
+    return (_ret == 0)
+
+
 def slugify(value):
     """
     From https://docs.djangoproject.com/en/1.7/_modules/django/utils/text/
