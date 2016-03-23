@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015 Jose Antonio Chavarría
+# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__ = 'Jose Antonio Chavarría'
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeLabel', 'main')
 
@@ -39,12 +36,9 @@ from . import (
     url_request
 )
 
-from .command import (
-    MigasFreeCommand,
-    __version__,
-)
+from .command import MigasFreeCommand
 
-HTML_TEMPLATE = """<!doctype>
+HTML_TEMPLATE = """<!doctype html>
 <html>
     <head>
         <title>%(search)s</title>
@@ -81,8 +75,6 @@ HTML_TEMPLATE = """<!doctype>
 
 
 class MigasFreeLabel(MigasFreeCommand):
-    CMD = 'migasfree-label'  # /usr/bin/migasfree-label
-
     def __init__(self):
         self._user_is_not_root()
         MigasFreeCommand.__init__(self)
@@ -110,22 +102,6 @@ class MigasFreeLabel(MigasFreeCommand):
 
         return response
 
-    def _parse_args(self):
-        print(_('%(program)s version: %(version)s') % {
-            'program': self.CMD,
-            'version': __version__
-        })
-
-        parser = argparse.ArgumentParser(prog=self.CMD)
-
-        parser.add_argument(
-            '-d', '--debug',
-            action='store_true',
-            help=_('Enable debug mode')
-        )
-
-        return parser.parse_args()
-
     def _show_label(self):
         self._check_sign_keys()
 
@@ -146,10 +122,8 @@ class MigasFreeLabel(MigasFreeCommand):
 
         utils.execute_as_user(['xdg-open', _file])
 
-    def run(self):
-        args = self._parse_args()
-
-        if args.debug:
+    def run(self, args=None):
+        if hasattr(args, 'debug') and args.debug:
             self._debug = True
             logger.setLevel(logging.DEBUG)
 
@@ -157,11 +131,3 @@ class MigasFreeLabel(MigasFreeCommand):
         self.end_of_transmission()
 
         sys.exit(os.EX_OK)
-
-
-def main():
-    mfl = MigasFreeLabel()
-    mfl.run()
-
-if __name__ == "__main__":
-    main()

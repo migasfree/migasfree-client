@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
@@ -16,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeTags', 'main')
 
@@ -40,15 +39,10 @@ from . import (
 )
 
 from .client import MigasFreeClient
-from .command import (
-    MigasFreeCommand,
-    __version__,
-)
+from .command import MigasFreeCommand
 
 
 class MigasFreeTags(MigasFreeCommand):
-    CMD = 'migasfree-tags'  # /usr/bin/migasfree-tags
-
     _tags = None
 
     def __init__(self):
@@ -59,28 +53,28 @@ class MigasFreeTags(MigasFreeCommand):
         print('\n' + _('Examples:'))
 
         print('  ' + _('Get assigned tags in server:'))
-        print('\t%s -g' % self.CMD)
-        print('\t%s --get\n' % self.CMD)
+        print('\t%s tags -g' % self.CMD)
+        print('\t%s tags --get\n' % self.CMD)
 
         print('  ' + _('Communicate tags to server (command line):'))
-        print('\t%s -c tag... ' % self.CMD)
-        print('\t%s --communicate tag...\n' % self.CMD)
+        print('\t%s tags -c tag... ' % self.CMD)
+        print('\t%s tags --communicate tag...\n' % self.CMD)
 
         print('  ' + _('Communicate tags to server (with GUI):'))
-        print('\t%s -c' % self.CMD)
-        print('\t%s --communicate\n' % self.CMD)
+        print('\t%s tags -c' % self.CMD)
+        print('\t%s tags --communicate\n' % self.CMD)
 
         print('  ' + _('Set tags (command line):'))
-        print('\t%s -s tag...' % self.CMD)
-        print('\t%s --set tag...\n' % self.CMD)
+        print('\t%s tags -s tag...' % self.CMD)
+        print('\t%s tags --set tag...\n' % self.CMD)
 
         print('  ' + _('Set tags (with GUI):'))
-        print('\t%s -s' % self.CMD)
-        print('\t%s --set\n' % self.CMD)
+        print('\t%s tags -s' % self.CMD)
+        print('\t%s tags --set\n' % self.CMD)
 
         print('  ' + _('Unsetting all tags (command line):'))
-        print('\t%s -s ""' % self.CMD)
-        print('\t%s --set ""\n' % self.CMD)
+        print('\t%s tags -s ""' % self.CMD)
+        print('\t%s tags --set ""\n' % self.CMD)
 
     def _show_running_options(self):
         MigasFreeCommand._show_running_options(self)
@@ -257,56 +251,12 @@ class MigasFreeTags(MigasFreeCommand):
 
         mfc._install_mandatory_packages(rules["install"])
 
-    def _parse_args(self):
-        program = 'migasfree tags'
-        print(_('%(program)s version: %(version)s') % {
-            'program': self.CMD,
-            'version': __version__
-        })
+    def run(self, args=None):
+        if not args or not hasattr(args, 'cmd'):
+            self._usage_examples()
+            sys.exit(os.EX_OK)
 
-        parser = argparse.ArgumentParser(
-            prog=self.CMD,
-            description=program
-        )
-
-        parser.add_argument(
-            '-d', '--debug',
-            action='store_true',
-            help=_('Enable debug mode')
-        )
-
-        group = parser.add_mutually_exclusive_group(required=True)
-
-        group.add_argument(
-            '-s', '--set',
-            action='store_true',
-            help=_('Set tags in server')
-        )
-
-        group.add_argument(
-            '-g', '--get',
-            action='store_true',
-            help=_('Get assigned tags in server')
-        )
-
-        group.add_argument(
-            '-c', '--communicate',
-            action='store_true',
-            help=_('Communicate tags to server')
-        )
-
-        parser.add_argument(
-            'tag',
-            nargs='*',
-            action='store'
-        )
-
-        return parser.parse_args()
-
-    def run(self):
-        args = self._parse_args()
-
-        if args.debug:
+        if hasattr(args, 'debug') and args.debug:
             self._debug = True
             logger.setLevel(logging.DEBUG)
 
@@ -318,27 +268,19 @@ class MigasFreeTags(MigasFreeCommand):
 
             self.end_of_transmission()
         elif args.set or args.communicate:
-            if args.tag:
-                self._tags = self._sanitize(args.tag)
+            if args.set != [] and args.set != [None]:
+                self._tags = self._sanitize(args.set)
+            elif args.communicate != [] and args.communicate != [None]:
+                self._tags = self._sanitize(args.communicate)
 
             self._show_running_options()
 
             rules = self._set_tags()
-            if args.set:
+            if args.set != []:
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
                 self._apply_rules(rules)
                 utils.remove_file(self.LOCK_FILE)
 
             self.end_of_transmission()
-        else:
-            self._usage_examples()
 
         sys.exit(os.EX_OK)
-
-
-def main():
-    mft = MigasFreeTags()
-    mft.run()
-
-if __name__ == "__main__":
-    main()

@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__ = 'Jose Antonio Chavarría'
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeUpload', 'main')
 
@@ -41,10 +38,7 @@ from . import (
     url_request
 )
 
-from .command import (
-    MigasFreeCommand,
-    __version__,
-)
+from .command import MigasFreeCommand
 
 
 def build_magic():
@@ -60,8 +54,6 @@ def build_magic():
 
 
 class MigasFreeUpload(MigasFreeCommand):
-    CMD = 'migasfree-upload'  # /usr/bin/migasfree-upload
-
     _file = None
     _directory = None
 
@@ -74,12 +66,12 @@ class MigasFreeUpload(MigasFreeCommand):
         print('\n' + _('Examples:'))
 
         print('  ' + _('Upload single package:'))
-        print('\t%s -f archive.pkg' % self.CMD)
-        print('\t%s --file=archive.pkg\n' % self.CMD)
+        print('\t%s upload -f archive.pkg' % self.CMD)
+        print('\t%s upload --file=archive.pkg\n' % self.CMD)
 
         print('  ' + _('Upload package set:'))
-        print('\t%s -r local_directory' % self.CMD)
-        print('\t%s --dir=local_directory\n' % self.CMD)
+        print('\t%s upload -r local_directory' % self.CMD)
+        print('\t%s upload --dir=local_directory\n' % self.CMD)
 
     def _show_running_options(self):
         MigasFreeCommand._show_running_options(self)
@@ -249,68 +241,8 @@ class MigasFreeUpload(MigasFreeCommand):
 
         return True
 
-    def _parse_args(self):
-        program = 'migasfree upload'
-        print(_('%(program)s version: %(version)s') % {
-            'program': program,
-            'version': __version__
-        })
-
-        parser = argparse.ArgumentParser(
-            prog=self.CMD,
-            description=program
-        )
-
-        parser.add_argument(
-            '-d', '--debug',
-            action='store_true',
-            help=_('Enable debug mode')
-        )
-
-        parser.add_argument(
-            '-u', '--user',
-            action='store',
-            help=_('Authorized user to upload at server')
-        )
-
-        parser.add_argument(
-            '-p', '--pwd',
-            action='store',
-            help=_('User password')
-        )
-
-        parser.add_argument(
-            '-j', '--project',
-            action='store',
-            help=_('Project to upload files')
-        )
-
-        parser.add_argument(
-            '-s', '--store',
-            action='store',
-            help=_('Store at server')
-        )
-
-        group = parser.add_mutually_exclusive_group(required=True)
-
-        group.add_argument(
-            '-f', '--file',
-            action='store',
-            help=_('File to upload at server')
-        )
-
-        group.add_argument(
-            '-r', '--dir',
-            action='store',
-            help=_('Directory with files to upload at server')
-        )
-
-        return parser.parse_args()
-
-    def run(self):
-        args = self._parse_args()
-
-        if args.debug:
+    def run(self, args=None):
+        if hasattr(args, 'debug') and args.debug:
             self._debug = True
             logger.setLevel(logging.DEBUG)
 
@@ -347,11 +279,3 @@ class MigasFreeUpload(MigasFreeCommand):
         utils.remove_file(self.LOCK_FILE)
 
         sys.exit(os.EX_OK)  # no error
-
-
-def main():
-    mfu = MigasFreeUpload()
-    mfu.run()
-
-if __name__ == "__main__":
-    main()

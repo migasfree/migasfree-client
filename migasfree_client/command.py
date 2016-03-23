@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2015 Jose Antonio Chavarría
+# Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__ = 'Jose Antonio Chavarría'
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeCommand')
 
@@ -75,7 +73,7 @@ class MigasFreeCommand(object):
     Interface class
     '''
 
-    CMD = 'migasfree-command'  # /usr/bin/migasfree-command
+    CMD = 'migasfree'  # /usr/bin/migasfree
     LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
     ERROR_FILE = os.path.join(settings.TMP_PATH, '%s.err' % CMD)
 
@@ -479,5 +477,5 @@ class MigasFreeCommand(object):
         if info:
             printcolor.fail(info)
 
-    def run(self):
+    def run(self, args=None):
         raise NotImplementedError

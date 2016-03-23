@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__ = 'Jose Antonio Chavarría'
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = ('MigasFreeClient', 'main')
 
@@ -62,7 +59,6 @@ from .devices import Printer
 
 class MigasFreeClient(MigasFreeCommand):
     APP_NAME = 'Migasfree'
-    CMD = 'migasfree'  # /usr/bin/migasfree
 
     _graphic_user = None
 
@@ -110,24 +106,19 @@ class MigasFreeClient(MigasFreeCommand):
         print('\n' + _('Examples:'))
 
         print('  ' + _('Register computer at server:'))
-        print('\t%s -r' % self.CMD)
-        print('\t%s --register\n' % self.CMD)
+        print('\t%s register\n' % self.CMD)
 
         print('  ' + _('Synchronize computer with server:'))
-        print('\t%s -y' % self.CMD)
-        print('\t%s --sync\n' % self.CMD)
+        print('\t%s sync\n' % self.CMD)
 
         print('  ' + _('Search package:'))
-        print('\t%s -s bluefish' % self.CMD)
-        print('\t%s --search=bluefish\n' % self.CMD)
+        print('\t%s search bluefish\n' % self.CMD)
 
         print('  ' + _('Install package:'))
-        print('\t%s -i bluefish' % self.CMD)
-        print('\t%s --install bluefish\n' % self.CMD)
+        print('\t%s install bluefish\n' % self.CMD)
 
         print('  ' + _('Purge package:'))
-        print('\t%s -p bluefish' % self.CMD)
-        print('\t%s --purge bluefish\n' % self.CMD)
+        print('\t%s purge bluefish\n' % self.CMD)
 
     def _write_error(self, msg, append=False):
         if append:
@@ -782,127 +773,35 @@ class MigasFreeClient(MigasFreeCommand):
 
         return removed_ids
 
-    def _parse_args(self):
-        program = 'migasfree client'
-        print(_('%(program)s version: %(version)s') % {
-            'program': program,
-            'version': __version__
-        })
+    def run(self, args=None):
+        self._show_running_options()
 
-        parser = argparse.ArgumentParser(
-            prog=self.CMD,
-            description=program
-        )
-
-        parser.add_argument(
-            '-d', '--debug',
-            action='store_true',
-            help=_('Enable debug mode')
-        )
-
-        register_group = parser.add_argument_group('register')
-        register_group.add_argument(
-            '-r', '--register',
-            action='store_true',
-            help=_('Register computer at server')
-        )
-
-        sync_group = parser.add_argument_group('sync')
-        sync_group.add_argument(
-            '-y', '--sync',
-            action='store_true',
-            help=_('Synchronize computer with server')
-        )
-
-        sync_group.add_argument(
-            '-f', '--force-upgrade',
-            action='store_true',
-            help=_('Force package upgrades')
-        )
-
-        search_group = parser.add_argument_group('search')
-        search_group.add_argument(
-            '-s', '--search',
-            action='store',
-            metavar='STRING',
-            help=_('Search package in repositories')
-        )
-
-        install_group = parser.add_argument_group('install')
-        install_group.add_argument(
-            '-i', '--install',
-            action='store',
-            metavar='PACKAGE',
-            help=_('Install package')
-        )
-
-        purge_group = parser.add_argument_group('purge')
-        install_group.add_argument(
-            '-p', '--purge',
-            action='store',
-            metavar='PACKAGE',
-            help=_('Purge package')
-        )
-
-        args = parser.parse_args()
-
-        # check restrictions
-        if args.register and \
-        (args.install or args.purge or args.sync or args.search):
+        if not args or not hasattr(args, 'cmd'):
             self._usage_examples()
-            parser.error(_('Register option is exclusive!!!'))
-        if args.sync and \
-        (args.install or args.purge or args.search):
-            self._usage_examples()
-            parser.error(_('Sync option is exclusive!!!'))
-        if args.search and (args.install or args.purge):
-            self._usage_examples()
-            parser.error(_('Search option is exclusive!!!'))
-        if args.install and args.purge:
-            parser.print_help()
-            self._usage_examples()
-            parser.error(_('Install and purge are exclusive!!!'))
+            sys.exit(os.EX_OK)
 
-        return args
-
-    def run(self):
-        args = self._parse_args()
-
-        if args.force_upgrade:
-            self.migas_auto_update_packages = True
-
-        if args.debug:
+        if hasattr(args, 'debug') and args.debug:
             self._debug = True
             logger.setLevel(logging.DEBUG)
 
-        self._show_running_options()
+        if args.cmd == 'sync':
+            if args.force_upgrade:
+                self.migas_auto_update_packages = True
 
-        # actions dispatcher
-        if args.sync:
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self.synchronize()
             utils.remove_file(self.LOCK_FILE)
-        elif args.register:
+        elif args.cmd == 'register':
             self._register_computer()
-        elif args.search:
-            self._search(args.search)
-        elif args.install:
+        elif args.cmd == 'search':
+            self._search(args.pattern)
+        elif args.cmd == 'install':
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self._install_package(args.install)
+            self._install_package(' '.join(args.pkg_install))
             utils.remove_file(self.LOCK_FILE)
-        elif args.purge:
+        elif args.cmd == 'purge':
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self._remove_package(args.purge)
+            self._remove_package(' '.join(args.pkg_purge))
             utils.remove_file(self.LOCK_FILE)
-        else:
-            self._usage_examples()
 
         sys.exit(os.EX_OK)
-
-
-def main():
-    mfc = MigasFreeClient()
-    mfc.run()
-
-if __name__ == "__main__":
-    main()
