@@ -1,3 +1,4 @@
+../migasfree_client/__main__.py
 ../migasfree_client/client.py
 ../migasfree_client/command.py
 ../migasfree_client/tags.py
