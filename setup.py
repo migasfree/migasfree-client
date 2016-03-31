@@ -38,7 +38,7 @@ if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):
 
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
-README = open(os.path.join(PATH, 'README')).read()
+README = open(os.path.join(PATH, 'README.md')).read()
 VERSION = open(os.path.join(PATH, 'VERSION')).read().splitlines()[0]
 
 REQUIRES = filter(lambda s: len(s) > 0,
@@ -135,7 +135,7 @@ setup(
             'INSTALL',
             'LICENSE',
             'MANIFEST.in',
-            'README',
+            'README.md',
             'VERSION',
             'migasfree-client.doap',
             'conf/migasfree.conf'
