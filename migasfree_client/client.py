@@ -791,6 +791,9 @@ class MigasFreeClient(MigasFreeCommand):
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self.synchronize()
             utils.remove_file(self.LOCK_FILE)
+
+            if not self._pms_status_ok:
+                sys.exit(errno.EPROTO)
         elif args.cmd == 'register':
             self._register_computer()
         elif args.cmd == 'search':

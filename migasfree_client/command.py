@@ -267,6 +267,10 @@ class MigasFreeCommand(object):
         )
         logger.debug('Response _save_sign_keys: %s', response)
 
+        if type(response) == dict and 'error' in response:
+            if response['error']['code'] == errno.ECONNREFUSED:
+                sys.exit(errno.ECONNREFUSED)
+
         self._check_keys_path()
 
         for _file, content in list(response.items()):
