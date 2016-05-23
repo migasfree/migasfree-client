@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2014 Jose Antonio Chavarría
+# Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -265,10 +263,13 @@ class MigasFreeCommand(object):
             _msg = _response['errmfs']['info']
             self.operation_failed(_msg)
             logging.error(_msg)
+
+            if _response['errmfs']['code'] == errno.ECONNREFUSED:
+                sys.exit(errno.ECONNREFUSED)
+
             return False
 
         for _file, _content in list(_response.items()):
-
             if _file == "migasfree-server.pub":
                 _file = self.PUBLIC_KEY
             if _file == "migasfree-client.pri":
