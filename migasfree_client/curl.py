@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 '''
 Based in http://stackoverflow.com/questions/472179/how-to-read-the-header-with-pycurl
@@ -39,7 +37,6 @@ SSL info:
 '''
 
 __author__ = 'Jose Antonio Chavarría'
-__file__ = 'curl.py'
 
 import os
 try:
@@ -77,6 +74,7 @@ class Curl(object):
         self.accept_lang = accept_lang
 
         self.error = None
+        self.errno = 0
         self.http_code = 0
 
         self.body = Storage()
@@ -127,5 +125,6 @@ class Curl(object):
             self.error = None
         except:
             self.error = self.curl.errstr()
+            self.errno = self.curl.getinfo(pycurl.OS_ERRNO)
         finally:
             self.curl.close()
