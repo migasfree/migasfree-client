@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2014 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -64,6 +62,8 @@ class MigasFreeClient(MigasFreeCommand):
     _notify = None
 
     _error_file_descriptor = None
+
+    _pms_status_ok = True  # indicates the status of transactions with PMS
 
     def __init__(self):
         self._user_is_not_root()
@@ -370,6 +370,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error creating repositories: %s') % repos
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -396,6 +397,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error uninstalling packages: %s') % _error
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -407,6 +409,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error installing packages: %s') % _error
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -418,6 +421,7 @@ class MigasFreeClient(MigasFreeCommand):
         if _ret:
             self.operation_ok()
         else:
+            self._pms_status_ok = False
             _msg = _('Error updating packages: %s') % _error
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -752,6 +756,9 @@ class MigasFreeClient(MigasFreeCommand):
             self._usage_examples()
 
         utils.remove_file(self.LOCK_FILE)
+
+        if not self._pms_status_ok:
+            sys.exit(errno.EPROTO)
 
         sys.exit(os.EX_OK)
 
