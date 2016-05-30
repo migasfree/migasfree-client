@@ -150,7 +150,7 @@ class Apt(Pms):
             ' '.join(package_set)
         )
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
+        _ret, _, _error = execute(
             self._cmd,
             interactive=False,
             verbose=True
