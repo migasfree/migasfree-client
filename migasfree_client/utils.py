@@ -34,7 +34,6 @@ import unicodedata
 import fcntl
 import select
 import uuid
-import datetime
 import signal
 
 import gettext
@@ -407,7 +406,7 @@ def get_current_user():
     returns a string in format 'name~fullname'
     '''
 
-    _graphic_pid, _graphic_process = get_graphic_pid()
+    _graphic_pid, _ = get_graphic_pid()
     if not _graphic_pid:
         _graphic_user = os.environ.get('USER')
     else:
