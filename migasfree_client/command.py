@@ -100,7 +100,7 @@ class MigasFreeCommand(object):
 
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
-        if type(_config_client) is not dict:
+        if not isinstance(_config_client, dict):
             _config_client = {}
 
         self.migas_project = os.environ.get(
@@ -148,7 +148,7 @@ class MigasFreeCommand(object):
             logger.setLevel(logging.DEBUG)
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
-        if type(_config_packager) is not dict:
+        if not isinstance(_config_packager, dict):
             _config_packager = {}
 
         self.packager_user = os.environ.get(
@@ -267,7 +267,7 @@ class MigasFreeCommand(object):
         )
         logger.debug('Response _save_sign_keys: %s', response)
 
-        if type(response) == dict and 'error' in response:
+        if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == errno.ECONNREFUSED:
                 sys.exit(errno.ECONNREFUSED)
 
@@ -388,7 +388,7 @@ class MigasFreeCommand(object):
         )
         logger.debug('Response get_computer_id: %s', response)
 
-        if type(response) == dict and 'error' in response:
+        if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
                 response = self._save_computer()
             else:
