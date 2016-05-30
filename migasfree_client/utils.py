@@ -556,7 +556,7 @@ def execute_as_user(args):
     process = subprocess.Popen(
         args, preexec_fn=demote(user_uid, user_gid), cwd=user_home_dir, env=env
     )
-    result = process.wait()
+    process.wait()
 
 
 def demote(user_uid, user_gid):
