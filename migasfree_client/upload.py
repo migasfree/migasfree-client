@@ -31,7 +31,7 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-from . import settings, utils
+from . import utils
 
 from .command import MigasFreeCommand
 
