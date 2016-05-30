@@ -50,9 +50,12 @@ class UrlRequest(object):
         debug=False,
         proxy='',
         url_base='',
-        info_keys={},
+        info_keys=None,
         cert=None
     ):
+        if info_keys is None:
+            info_keys = {}
+
         self._debug = debug
         self._proxy = proxy
         self._url_base = url_base
