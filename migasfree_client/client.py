@@ -459,7 +459,7 @@ class MigasFreeClient(MigasFreeCommand):
         )
         logger.debug('Response _hardware_capture_is_required: %s', response)
 
-        if type(response) == dict and 'error' in response:
+        if isinstance(response, dict) and 'error' in response:
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
