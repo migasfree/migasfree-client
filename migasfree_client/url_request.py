@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -61,9 +59,12 @@ class UrlRequest(object):
         debug=False,
         proxy='',
         project='',
-        keys={},
+        keys=None,
         cert=None
     ):
+        if keys is None:
+            keys = {}
+
         self._debug = debug
         self._proxy = proxy
         self._project = project
@@ -95,8 +96,11 @@ class UrlRequest(object):
         safe=True,
         exit_on_error=True,
         debug=False,
-        keys={}
+        keys=None
     ):
+        if keys is None:
+            keys = {}
+
         self._debug = debug
         if self._debug:
             logger.setLevel(logging.DEBUG)
