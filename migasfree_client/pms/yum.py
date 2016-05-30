@@ -100,7 +100,7 @@ class Yum(Pms):
         (bool, string) install_silent(list package_set)
         '''
 
-        if not type(package_set) is list:
+        if not isinstance(package_set, list):
             return (False, 'package_set is not a list: %s' % package_set)
 
         for pkg in package_set[:]:
@@ -128,7 +128,7 @@ class Yum(Pms):
         (bool, string) remove_silent(list package_set)
         '''
 
-        if not type(package_set) is list:
+        if not isinstance(package_set, list):
             return (False, 'package_set is not a list: %s' % package_set)
 
         for pkg in package_set[:]:
