@@ -17,7 +17,7 @@
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = ('MigasFreeLabel', 'main')
+__all__ = ('MigasFreeLabel')
 
 import os
 import sys
