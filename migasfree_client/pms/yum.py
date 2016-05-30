@@ -181,7 +181,7 @@ class Yum(Pms):
 
         self._cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive=False)
+        _ret, _output, _ = execute(self._cmd, interactive=False)
         if _ret != 0:
             return []
 
