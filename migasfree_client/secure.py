@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2016 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,13 +15,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
-# Author: Alberto Gacías <agacias@ono.com>
 
 __author__ = "Jose Antonio Chavarría"
-__file__ = "secure.py"
-__date__ = '2013-02-02'
+__license__ = 'GPLv3'
 
 # TODO common code between server & client
 
@@ -60,14 +57,6 @@ def verify(filename, public_key):
             filename
         )) == 0)
 
-'''
-def genKeysRSA(filename):
-    # Private Key
-    os.system("openssl genrsa -out %s.pri 2048" % filename)
-    # Public Key
-    os.system("openssl rsa -in %s.pri -pubout > %s.pub" % (filename, filename))
-'''
-
 
 def wrap(filename, data, key=None):
     '''
@@ -79,7 +68,7 @@ def wrap(filename, data, key=None):
     with open(filename, 'wb') as _fp:
         json.dump(data, _fp)
 
-    #os.system('less %s; read' % filename)  # DEBUG
+    # os.system('less %s; read' % filename)  # DEBUG
 
     if key:
         sign(filename, key)

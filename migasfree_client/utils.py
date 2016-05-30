@@ -106,29 +106,6 @@ def execute(cmd, verbose=False, interactive=True):
                         print(chunk)
                     _output_buffer = '%s%s' % (_output_buffer, chunk)
 
-        '''
-        # simple progress indicator
-        # does not work with some commands (lshw, getting repositories...)
-        if progress:
-            while True:
-                _output = _process.stdout.readline()
-                sys.stdout.write('.')
-                sys.stdout.flush()
-
-                if not _output:
-                    break
-        '''
-
-        '''
-        while True:
-            _out = _process.stdout.read(1)
-            if _out == '' and _process.poll() != None:
-                break
-            if _out != '':
-                sys.stdout.write(_out)
-                sys.stdout.flush()
-        '''
-
     _output, _error = _process.communicate()
 
     if not interactive and _output_buffer:

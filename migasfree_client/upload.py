@@ -28,14 +28,6 @@ import getpass
 import errno
 
 # package imports
-"""
-from . import (
-    settings,
-    utils,
-    server_errors,
-    url_request
-)
-"""
 import utils
 import server_errors
 
