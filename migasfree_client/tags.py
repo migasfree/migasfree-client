@@ -21,7 +21,6 @@ __all__ = ('MigasFreeTags', 'main')
 
 import os
 import sys
-import argparse
 import errno
 
 import gettext
@@ -32,11 +31,7 @@ logger = logging.getLogger(__name__)
 
 from datetime import datetime
 
-from . import (
-    settings,
-    utils,
-    url_request
-)
+from . import settings, utils
 
 from .client import MigasFreeClient
 from .command import MigasFreeCommand
@@ -241,7 +236,7 @@ class MigasFreeTags(MigasFreeCommand):
         # Update metadata
         mfc.synchronize()
 
-        start_date = datetime.now().isoformat()
+        # start_date = datetime.now().isoformat()  # FIXME
 
         mfc._uninstall_packages(rules["remove"])
         mfc._install_mandatory_packages(rules["preinstall"])
