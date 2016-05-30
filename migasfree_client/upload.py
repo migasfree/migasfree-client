@@ -21,7 +21,6 @@ __all__ = ('MigasFreeUpload', 'main')
 
 import os
 import sys
-import argparse
 import getpass
 import errno
 import magic
@@ -32,11 +31,7 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-from . import (
-    settings,
-    utils,
-    url_request
-)
+from . import settings, utils
 
 from .command import MigasFreeCommand
 
@@ -46,7 +41,7 @@ def build_magic():
     try:
         my_magic = magic.open(magic.MAGIC_MIME_TYPE)
         my_magic.load()
-    except AttributeError, e:
+    except AttributeError:
         my_magic = magic.Magic(mime=True)
         my_magic.file = my_magic.from_file
 
@@ -165,7 +160,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
         self._check_sign_keys()
 
-        for _root, _subfolders, _files in os.walk(self._directory):
+        for _root, _, _files in os.walk(self._directory):
             for _file in _files:
                 _filename = os.path.join(_root, _file)
 
