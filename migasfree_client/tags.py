@@ -33,7 +33,6 @@ from . import (
     settings,
     utils,
     server_errors,
-    url_request
 )
 
 from .client import MigasFreeClient

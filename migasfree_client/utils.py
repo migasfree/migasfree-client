@@ -33,7 +33,6 @@ import re
 import fcntl
 import select
 import uuid
-import datetime
 import signal
 
 import gettext
