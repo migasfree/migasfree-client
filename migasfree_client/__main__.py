@@ -100,7 +100,7 @@ def parse_args(argv):
         help=_('Package to purge')
     )
 
-    subparser_label = subparsers.add_parser(
+    subparsers.add_parser(
         'label',
         help=_('Computer identification')
     )
