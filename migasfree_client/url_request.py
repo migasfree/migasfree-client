@@ -60,7 +60,7 @@ class UrlRequest(object):
 
         logging.info('SSL certificate: %s', self._cert)
 
-        if type(info_keys) is dict:
+        if isinstance(info_keys, dict):
             self._path_keys = info_keys.get('path')
             self._private_key = info_keys.get('private')
             self._public_key = info_keys.get('public')
@@ -199,7 +199,7 @@ class UrlRequest(object):
         else:
             print(_response)
 
-        if not type(_ret) is dict or not ('%s.return' % cmd) in _ret:
+        if not isinstance(_ret, dict) or not ('%s.return' % cmd) in _ret:
             if 'errmfs' in _ret:
                 _msg = server_errors.error_info(_ret['errmfs']['code'])
                 logging.error(_msg)
@@ -213,7 +213,7 @@ class UrlRequest(object):
             sys.exit(errno.EACCES)
 
         _ret = _ret['%s.return' % cmd]  # unwrapping cmd response
-        if type(_ret) is dict and 'errmfs' in _ret:
+        if isinstance(_ret, dict) and 'errmfs' in _ret:
             if _ret['errmfs']['code'] != server_errors.ALL_OK:
                 _error = server_errors.error_info(_ret['errmfs']['code'])
                 if self._debug:

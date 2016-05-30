@@ -440,7 +440,7 @@ def get_mfc_version():
     from . import settings
 
     _config = get_config(settings.CONF_FILE, 'client')
-    if type(_config) is dict and 'version' in _config:
+    if isinstance(_config, dict) and 'version' in _config:
         return _config.get('version')
 
     return '-'.join(platform.linux_distribution()[0:2])  # if not set
@@ -450,7 +450,7 @@ def get_mfc_computer_name():
     from . import settings
 
     _config = get_config(settings.CONF_FILE, 'client')
-    if type(_config) is dict and 'computer_name' in _config:
+    if isinstance(_config, dict) and 'computer_name' in _config:
         return _config.get('computer_name')
 
     return get_hostname()  # if not set

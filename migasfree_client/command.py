@@ -91,7 +91,7 @@ class MigasFreeCommand(object):
         _log_level = logging.INFO
 
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
-        if type(_config_client) is not dict:
+        if not isinstance(_config_client, dict):
             _config_client = {}
 
         self.migas_version = os.environ.get(
@@ -147,7 +147,7 @@ class MigasFreeCommand(object):
             _log_level = logging.DEBUG
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
-        if type(_config_packager) is not dict:
+        if not isinstance(_config_packager, dict):
             _config_packager = {}
 
         self.packager_user = os.environ.get(
