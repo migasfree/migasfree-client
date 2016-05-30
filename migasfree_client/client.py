@@ -23,11 +23,9 @@ import os
 
 import sys
 import errno
-import argparse
 import json
 import time
 import tempfile
-import platform
 import requests
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
