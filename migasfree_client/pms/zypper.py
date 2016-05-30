@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -187,7 +185,7 @@ class Zypper(Pms):
 
         self._cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive=False)
+        _ret, _output, _ = execute(self._cmd, interactive=False)
         if _ret != 0:
             return []
 
@@ -232,6 +230,6 @@ metadata_expire=1
         self._cmd = '%s -q --qf "%{arch}" -f /etc/lsb-release' % self._pm
         logging.debug(self._cmd)
 
-        _ret, _arch, _error = execute(self._cmd, interactive=False)
+        _ret, _arch, _ = execute(self._cmd, interactive=False)
 
         return _arch.strip() if _ret == 0 else ''
