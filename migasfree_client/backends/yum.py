@@ -82,7 +82,7 @@ class Yum(Pms):
 
         self._cmd = '%s --assumeyes update' % self._pms
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
+        _ret, _, _error = execute(
             self._cmd,
             interactive=False,
             verbose=True
@@ -175,7 +175,7 @@ class Yum(Pms):
 
         self._cmd = '%s -qa' % self._pm
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive=False)
+        _ret, _output, _ = execute(self._cmd, interactive=False)
         if _ret != 0:
             return []
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2013 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -169,7 +167,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
         self._check_sign_keys()
 
-        for _root, _subfolders, _files in os.walk(self._directory):
+        for _root, _, _files in os.walk(self._directory):
             for _file in _files:
                 _filename = os.path.join(_root, _file)
 
@@ -277,7 +275,7 @@ class MigasFreeUpload(MigasFreeCommand):
         parser.add_option("--no-create-repo", "-c", action="store_true",
             help=_('No create repository after upload file at server'))
 
-        options, arguments = parser.parse_args()
+        options, _ = parser.parse_args()
 
         # check restrictions
         if not options.file and not options.dir:

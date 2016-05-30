@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2014 Jose Antonio Chavarría
+# Copyright (c) 2014-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -127,7 +125,7 @@ class Printer(object):
                 'description': _description
             }
 
-        _ret, _output, _error = execute(_cmd)
+        _ret, _, _error = execute(_cmd)
         if _ret != 0:
             return (False, _error)
 
@@ -163,7 +161,7 @@ class Printer(object):
         # depends cups-client
         # searching in field description
         _cmd = "for p in `lpstat -a| awk '{print $1}'`; do lpstat -l -p $p|grep %s >/dev/null; if [ $? = 0 ] ;then echo $p;fi ; done" % pattern
-        _ret, _output, _error = execute(_cmd, interactive=False)
+        _ret, _output, _ = execute(_cmd, interactive=False)
         if _ret != 0:
             return ''
 

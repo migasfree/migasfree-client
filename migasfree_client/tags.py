@@ -132,7 +132,7 @@ class MigasFreeTags(MigasFreeCommand):
                     _cmd += " '%s' '%s' %s" % (_item, _key, _tag_active)
 
         logging.debug('Change tags command: %s' % _cmd)
-        _ret, _out, _err = utils.execute(_cmd, interactive=False)
+        _ret, _out, _ = utils.execute(_cmd, interactive=False)
         if _ret == 0:
             _selected_tags = filter(None, _out.split("\n"))
             logging.debug('Selected tags: %s' % _selected_tags)

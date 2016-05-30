@@ -708,7 +708,7 @@ class MigasFreeClient(MigasFreeCommand):
         parser.add_option("--force-upgrade", "-a", action="store_true",
             help=_('Force package upgrades'))
 
-        options, arguments = parser.parse_args()
+        options, _ = parser.parse_args()
 
         # check restrictions
         if options.register and \
