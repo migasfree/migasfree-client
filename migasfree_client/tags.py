@@ -29,7 +29,7 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-from datetime import datetime
+# from datetime import datetime  # FIXME
 
 from . import settings, utils
 
