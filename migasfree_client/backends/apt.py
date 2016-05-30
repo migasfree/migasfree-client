@@ -146,7 +146,7 @@ class Apt(Pms):
             ' '.join(package_set)
         )
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
+        _ret, _, _error = execute(
             self._cmd,
             interactive=False,
             verbose=True
@@ -186,7 +186,7 @@ class Apt(Pms):
         ordered list query_all(void)
         '''
 
-        _ret, _packages, _ = execute(
+        _, _packages, _ = execute(
             '%s --list' % self._pm,
             interactive=False
         )
