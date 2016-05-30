@@ -451,7 +451,7 @@ class MigasFreeCommand(object):
 
         for item in pms_list:
             cmd = 'which %s' % item
-            ret, output, error = utils.execute(cmd, interactive=False)
+            ret, _, _ = utils.execute(cmd, interactive=False)
             if ret == 0:
                 return pms_list[item]
 
