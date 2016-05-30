@@ -21,7 +21,6 @@ __all__ = ('MigasFreeLabel', 'main')
 
 import os
 import sys
-import argparse
 import errno
 
 import gettext
@@ -30,11 +29,7 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-from . import (
-    settings,
-    utils,
-    url_request
-)
+from . import settings, utils
 
 from .command import MigasFreeCommand
 
