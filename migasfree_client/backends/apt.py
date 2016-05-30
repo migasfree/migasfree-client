@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2014 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -103,7 +101,7 @@ class Apt(Pms):
         (bool, string) install_silent(list package_set)
         '''
 
-        if not type(package_set) is list:
+        if not isinstance(package_set, list):
             return (False, 'package_set is not a list: %s' % package_set)
 
         for pkg in package_set[:]:
@@ -132,7 +130,7 @@ class Apt(Pms):
         (bool, string) remove_silent(list package_set)
         '''
 
-        if not type(package_set) is list:
+        if not isinstance(package_set, list):
             return (False, 'package_set is not a list: %s' % package_set)
 
         for pkg in package_set[:]:
