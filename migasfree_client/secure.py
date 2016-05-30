@@ -20,7 +20,7 @@ __license__ = 'GPLv3'
 
 from Crypto.PublicKey import RSA
 
-from .utils import read_file, write_file
+from .utils import read_file
 from . import settings
 
 import logging
