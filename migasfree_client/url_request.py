@@ -72,7 +72,7 @@ class UrlRequest(object):
 
         logger.info('SSL certificate: %s', self._cert)
 
-        if type(keys) is dict:
+        if isinstance(keys, dict):
             self._private_key = keys.get('private')
             self._public_key = keys.get('public')
 
