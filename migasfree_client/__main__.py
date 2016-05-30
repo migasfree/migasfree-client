@@ -49,7 +49,7 @@ def parse_args(argv):
 
     subparsers = parser.add_subparsers(dest='cmd')
 
-    subparser_register = subparsers.add_parser(
+    subparsers.add_parser(
         'register',
         help=_('Register computer at server')
     )
