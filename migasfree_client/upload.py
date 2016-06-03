@@ -267,7 +267,7 @@ class MigasFreeUpload(MigasFreeCommand):
         parser.add_option("--no-create-repo", "-c", action="store_true",
             help=_('No create repository after upload file at server'))
 
-        options, _ = parser.parse_args()
+        options, arguments = parser.parse_args()
 
         # check restrictions
         if not options.file and not options.dir:
