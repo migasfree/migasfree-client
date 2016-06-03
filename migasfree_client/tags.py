@@ -80,7 +80,7 @@ class MigasFreeTags(MigasFreeCommand):
             for item in tag_list[:]:
                 item = item.replace('"', '')
                 try:
-                    _, _ = item.split('-', 1)
+                    prefix, value = item.split('-', 1)
                 except:
                     msg = _('Tags must be in "prefix-value" format')
                     self.operation_failed(msg)
@@ -134,7 +134,7 @@ class MigasFreeTags(MigasFreeCommand):
                     _cmd += " '%s' '%s' %s" % (_item, _key, _tag_active)
 
         logger.debug('Change tags command: %s' % cmd)
-        ret, out, _ = utils.execute(cmd, interactive=False)
+        ret, out, error = utils.execute(cmd, interactive=False)
         if ret == 0:
             selected_tags = filter(None, out.split("\n"))
             logger.debug('Selected tags: %s' % selected_tags)
