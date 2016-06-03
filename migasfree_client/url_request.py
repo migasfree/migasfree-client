@@ -83,7 +83,7 @@ class UrlRequest(object):
         if not os.path.exists(settings.TMP_PATH):
             try:
                 os.makedirs(settings.TMP_PATH, 0777)
-            except:
+            except OSError:
                 return False
 
         return True

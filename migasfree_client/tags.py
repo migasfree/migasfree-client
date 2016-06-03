@@ -81,7 +81,7 @@ class MigasFreeTags(MigasFreeCommand):
                 item = item.replace('"', '')
                 try:
                     prefix, value = item.split('-', 1)
-                except:
+                except ValueError:
                     msg = _('Tags must be in "prefix-value" format')
                     self.operation_failed(msg)
                     sys.exit(errno.ENODATA)
