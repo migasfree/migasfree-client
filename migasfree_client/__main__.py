@@ -26,14 +26,14 @@ import argparse
 import gettext
 _ = gettext.gettext
 
-from .command import __version__
+from .utils import get_mfc_release
 
 
 def parse_args(argv):
     program = 'migasfree'
     print(_('%(program)s version: %(version)s') % {
         'program': program,
-        'version': __version__
+        'version': get_mfc_release()
     })
 
     parser = argparse.ArgumentParser(
