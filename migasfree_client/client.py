@@ -47,10 +47,7 @@ from . import (
     network,
 )
 
-from .command import (
-    MigasFreeCommand,
-    __version__,
-)
+from .command import MigasFreeCommand
 from .devices import Printer
 
 
@@ -415,6 +412,8 @@ class MigasFreeClient(MigasFreeCommand):
             logging.error(_msg)
             self._write_error(_msg)
 
+        return _ret
+
     def _update_packages(self):
         self._send_message(_('Updating packages...'))
         _ret, _error = self.pms.update_silent()
@@ -426,6 +425,8 @@ class MigasFreeClient(MigasFreeCommand):
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
+
+        return _ret
 
     def _update_hardware_inventory(self):
         self._send_message(_('Capturing hardware information...'))
@@ -603,7 +604,8 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _install_printer(self, device):
         if 'packages' in device and device['packages']:
-            self._install_mandatory_packages(device['packages'])
+            if not self._install_mandatory_packages(device['packages']):
+                return False
 
         self._remove_printer(device['id'])
 
@@ -614,7 +616,7 @@ class MigasFreeClient(MigasFreeCommand):
             self.operation_ok()
             logging.debug('Device installed: %s', device['model'])
         else:
-            _ret = 0
+            _ret = False
             _msg = _('Error installing device: %s') % _output
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -677,13 +679,13 @@ class MigasFreeClient(MigasFreeCommand):
         parser = optparse.OptionParser(
             description=_program,
             prog=self.CMD,
-            version=__version__,
+            version=self.release,
             usage='%prog options'
         )
 
         print(_('%(program)s version: %(version)s') % {
             'program': _program,
-            'version': __version__
+            'version': self.release
         })
 
         parser.add_option("--register", "-g", action="store_true",
