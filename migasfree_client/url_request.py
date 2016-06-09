@@ -122,7 +122,12 @@ class UrlRequest(object):
         if self._public_key:
             logger.info('Public key: %s', self._public_key)
 
-        headers = None
+        headers = {
+            'user-agent': 'migasfree-client/%s %s' % (
+                utils.get_mfc_release(),
+                requests.utils.default_user_agent()
+            )
+        }
         if safe:
             data = json.dumps({
                 'msg': secure.wrap(
@@ -132,7 +137,7 @@ class UrlRequest(object):
                 ),
                 'project': self._project
             })
-            headers = {'content-type': 'application/json'}
+            headers['content-type'] = 'application/json'
 
         files = None
         if upload_files:
@@ -142,7 +147,7 @@ class UrlRequest(object):
                 files.append(
                     ('file', (_file, open(_file, 'rb'), mime))
                 )
-            #headers = {'content-type': 'multipart/form-data'}
+            # headers['content-type'] = 'multipart/form-data'
             logger.debug('URL upload files: %s', files)
             # http://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request
             if safe:
@@ -153,7 +158,7 @@ class UrlRequest(object):
             data = MultipartEncoder(
                 fields=fields
             )
-            headers = {'content-type': data.content_type}
+            headers['content-type'] = data.content_type
 
         proxies = None
         if self._proxy:
