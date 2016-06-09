@@ -37,8 +37,6 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-# sys.path.append(os.path.dirname(__file__))  # DEBUG
-
 from datetime import datetime
 
 from . import (
@@ -48,10 +46,7 @@ from . import (
     network,
 )
 
-from .command import (
-    MigasFreeCommand,
-    __version__,
-)
+from .command import MigasFreeCommand
 from .devices import Printer
 
 
@@ -433,6 +428,8 @@ class MigasFreeClient(MigasFreeCommand):
             logger.error(msg)
             self._write_error(msg)
 
+        return ret
+
     def _update_packages(self):
         self._show_message(_('Updating packages...'))
         ret, error = self.pms.update_silent()
@@ -444,6 +441,8 @@ class MigasFreeClient(MigasFreeCommand):
             self.operation_failed(msg)
             logger.error(msg)
             self._write_error(msg)
+
+        return ret
 
     def hardware_capture_is_required(self):
         if not self._computer_id:
@@ -613,7 +612,7 @@ class MigasFreeClient(MigasFreeCommand):
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
-                'consumer': '%s %s' % (consumer, __version__),
+                'consumer': '%s %s' % (consumer, utils.get_mfc_release()),
                 'pms_status_ok': self._pms_status_ok
             },
             debug=self._debug
@@ -706,7 +705,8 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _install_printer(self, device):
         if 'packages' in device and device['packages']:
-            self._install_mandatory_packages(device['packages'])
+            if not self._install_mandatory_packages(device['packages']):
+                return False
 
         self._remove_printer(device['id'])
 
@@ -717,7 +717,7 @@ class MigasFreeClient(MigasFreeCommand):
             self.operation_ok()
             logger.debug('Device installed: %s', device['model'])
         else:
-            ret = 0
+            ret = False
             msg = _('Error installing device: %s') % output
             self.operation_failed(msg)
             logger.error(msg)
