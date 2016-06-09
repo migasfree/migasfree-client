@@ -21,24 +21,6 @@ __license__ = 'GPLv3'
 __all__ = ('MigasFreeCommand')
 
 import os
-
-from . import (
-    settings,
-    utils,
-    url_request,
-    printcolor,
-    curl
-)
-
-version_file = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    'VERSION'
-)
-if not os.path.exists(version_file):
-    version_file = os.path.join(settings.DOC_PATH, 'VERSION')
-
-__version__ = open(version_file).read().splitlines()[0]
-
 import sys
 import logging
 import errno
@@ -47,6 +29,14 @@ import platform
 
 import gettext
 _ = gettext.gettext
+
+from . import (
+    settings,
+    utils,
+    url_request,
+    printcolor,
+    curl
+)
 
 from .backends import Pms
 
@@ -64,6 +54,8 @@ class MigasFreeCommand(object):
     '''
     Interface class
     '''
+
+    release = utils.get_mfc_release()
 
     CMD = 'migasfree-command'  # /usr/bin/migasfree-command
     LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
