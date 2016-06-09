@@ -36,10 +36,7 @@ from . import (
 )
 
 from .client import MigasFreeClient
-from .command import (
-    MigasFreeCommand,
-    __version__,
-)
+from .command import MigasFreeCommand
 
 
 class MigasFreeTags(MigasFreeCommand):
@@ -206,7 +203,7 @@ class MigasFreeTags(MigasFreeCommand):
         parser = optparse.OptionParser(
             description=_program,
             prog=self.CMD,
-            version=__version__,
+            version=self.release,
             usage='%prog [options] [tag]...'
         )
 
@@ -256,7 +253,7 @@ class MigasFreeTags(MigasFreeCommand):
 
             print(_('%(program)s version: %(version)s') % {
                 'program': _program,
-                'version': __version__
+                'version': self.release
             })
             self._show_running_options()
 
