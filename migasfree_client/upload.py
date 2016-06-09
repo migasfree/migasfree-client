@@ -34,10 +34,7 @@ import server_errors
 import gettext
 _ = gettext.gettext
 
-from .command import (
-    MigasFreeCommand,
-    __version__,
-)
+from .command import MigasFreeCommand
 
 
 class MigasFreeUpload(MigasFreeCommand):
@@ -234,13 +231,13 @@ class MigasFreeUpload(MigasFreeCommand):
         parser = optparse.OptionParser(
             description=_program,
             prog=self.CMD,
-            version=__version__,
+            version=self.release,
             usage='%prog options'
         )
 
         print(_('%(program)s version: %(version)s') % {
             'program': _program,
-            'version': __version__
+            'version': self.release
         })
 
         # migasfree-upload {-f file [--regular-file] | -d dir [-n name]}
