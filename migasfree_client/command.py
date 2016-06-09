@@ -21,6 +21,15 @@ __license__ = 'GPLv3'
 __all__ = ('MigasFreeCommand')
 
 import os
+import sys
+import errno
+import getpass
+import platform
+import requests
+import logging
+
+import gettext
+_ = gettext.gettext
 
 from . import (
     settings,
@@ -29,34 +38,14 @@ from . import (
     url_request,
     printcolor
 )
+from .pms import Pms
 
-version_file = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    'VERSION'
-)
-if not os.path.exists(version_file):
-    version_file = os.path.join(settings.DOC_PATH, 'VERSION')
-
-__version__ = open(version_file).read().splitlines()[0]
-
-import sys
-import errno
-import getpass
-import platform
-import requests
-
-import gettext
-_ = gettext.gettext
-
-import logging
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
     level=logging.INFO,
     filename=settings.LOG_FILE
 )
 logger = logging.getLogger(__name__)
-
-from .pms import Pms
 
 # implicit print flush
 buf_arg = 0
