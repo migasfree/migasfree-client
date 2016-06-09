@@ -108,7 +108,7 @@ class UrlRequest(object):
         if not os.path.exists(TMP_PATH):
             try:
                 os.makedirs(TMP_PATH, 0777)
-            except:
+            except OSError:
                 _msg = 'Error creating %s directory' % TMP_PATH
                 logging.exception(_msg)
                 return {

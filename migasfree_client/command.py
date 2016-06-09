@@ -245,7 +245,7 @@ class MigasFreeCommand(object):
         if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
             try:
                 os.makedirs(os.path.abspath(settings.KEYS_PATH))
-            except:
+            except OSError:
                 _msg = _('Error creating %s directory') % settings.KEYS_PATH
                 self.operation_failed(_msg)
                 logging.error(_msg)
