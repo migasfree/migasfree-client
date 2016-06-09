@@ -524,6 +524,17 @@ def is_zenity():
     return (_ret == 0)
 
 
+def get_mfc_release():
+    version_file = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        'VERSION'
+    )
+    if not os.path.exists(version_file):
+        version_file = os.path.join(settings.DOC_PATH, 'VERSION')
+
+    return open(version_file).read().splitlines()[0]
+
+
 def slugify(value):
     """
     From https://docs.djangoproject.com/en/1.7/_modules/django/utils/text/
