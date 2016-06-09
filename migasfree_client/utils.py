@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
@@ -38,7 +37,7 @@ import signal
 import gettext
 _ = gettext.gettext
 
-from . import network
+from . import network, settings
 
 # TODO http://docs.python.org/library/unittest.html
 
@@ -521,3 +520,14 @@ def is_xsession():
 def is_zenity():
     _ret, _, _ = execute('which zenity', interactive=False)
     return (_ret == 0)
+
+
+def get_mfc_release():
+    version_file = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        'VERSION'
+    )
+    if not os.path.exists(version_file):
+        version_file = os.path.join(settings.DOC_PATH, 'VERSION')
+
+    return open(version_file).read().splitlines()[0]
