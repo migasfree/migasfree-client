@@ -44,6 +44,8 @@ try:
 except ImportError:
     raise SystemExit('migasfree client requires PycURL 7.19 or later.')
 
+from . import utils
+
 
 class Storage(object):
     def __init__(self):
@@ -77,6 +79,9 @@ class Curl(object):
         self.errno = 0
         self.http_code = 0
 
+        # http://tools.ietf.org/html/rfc7231#section-5.5.3
+        self.user_agent = 'migasfree-client/%s' % utils.get_mfc_release()
+
         self.body = Storage()
         self.header = Storage()
 
@@ -107,7 +112,7 @@ class Curl(object):
     def run(self):
         self.curl.setopt(pycurl.HTTPHEADER, [
             'Accept-Language: %s' % self.accept_lang,
-            'User-Agent: migasfree-client',
+            'User-Agent: %s' % self.user_agent,
             'Expect:',
         ])
         self.curl.setopt(pycurl.URL, self.url)
