@@ -39,7 +39,7 @@ if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 README = open(os.path.join(PATH, 'README.md')).read()
-VERSION = open(os.path.join(PATH, 'VERSION')).read().splitlines()[0]
+VERSION = open(os.path.join(PATH, 'VERSION')).read().strip()
 
 REQUIRES = filter(lambda s: len(s) > 0,
     open(os.path.join(PATH, 'requirements.txt')).read().split('\n'))
@@ -102,7 +102,7 @@ class InstallData(install_data):
 setup(
     name=APP_NAME,
     version=VERSION,
-    description='migasfree-client is a Python app to manage systems management',
+    description='Synchronizes a computer from a migasfree server',
     long_description=README,
     license='GPLv3',
     keywords='migasfree systems management devops',
@@ -123,14 +123,14 @@ setup(
     },
     data_files=[
         (
-            '/usr/share/icons/hicolor/scalable/actions',
+            'share/icons/hicolor/scalable/actions',
             ['icons/scalable/migasfree-ok.svg']
         ),
         (
-            '/usr/share/icons/hicolor/scalable/apps',
+            'share/icons/hicolor/scalable/apps',
             ['icons/scalable/migasfree.svg']
         ),
-        ('/usr/share/doc/migasfree-client', [
+        ('share/doc/migasfree-client', [
             'AUTHORS',
             'INSTALL',
             'LICENSE',
