@@ -128,19 +128,19 @@ class MigasFreeClient(MigasFreeCommand):
         )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
-    def _show_message(self, msg):
+    @staticmethod
+    def _show_message(msg):
         print('')
         printcolor.info(str(' ' + msg + ' ').center(76, '*'))
 
-    def _eval_code(self, lang, code):
-        # clean code...
-        code = code.replace('\r', '').strip()
+    @staticmethod
+    def _eval_code(lang, code):
+        code = code.replace('\r', '').strip()  # clean code
         logger.debug('Language code: %s', lang)
         logger.debug('Code: %s', code)
 
         filename = tempfile.mkstemp()[1]
-        with open(filename, 'wb') as code_file:
-            code_file.write(code)
+        utils.write_file(filename, code)
 
         allowed_languages = [
             'bash',
@@ -195,7 +195,7 @@ class MigasFreeClient(MigasFreeCommand):
             else:
                 self.operation_failed(info)
                 self._write_error(
-                    'Error: property %s without value\n' % item['prefix']
+                    _('Error: property %s without value') % item['prefix']
                 )
 
         return response
@@ -313,7 +313,35 @@ class MigasFreeClient(MigasFreeCommand):
 
         return response
 
-    def _software_history(self, software):
+    def get_devices(self):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        self._show_message(_('Getting mandatory packages...'))
+        response = self._url_request.run(
+            url=self._url_base + 'safe/computers/devices/',
+            data={
+                'id': self._computer_id
+            },
+            exit_on_error=False,
+            debug=self._debug
+        )
+        logger.debug('Response get_devices: %s', response)
+
+        if 'error' in response:
+            if response['error']['code'] == requests.codes.not_found:
+                self.operation_ok()
+                return None
+            else:
+                self.operation_failed(response['error']['info'])
+                sys.exit(errno.ENODATA)
+
+        self.operation_ok()
+
+        return response
+
+    @staticmethod
+    def _software_history(software):
         history = ''
 
         # if have been installed packages manually
@@ -649,26 +677,7 @@ class MigasFreeClient(MigasFreeCommand):
         if self.hardware_capture_is_required():
             self._update_hardware_inventory()
 
-        """
-        # TODO
-        # remove and install devices (new in server 4.2) (issue #31)
-        if 'devices' in _request:
-            _installed = []
-            _removed = []
-            if 'remove' in _request['devices'] \
-            and len(_request['devices']['remove']):
-                _removed = self._remove_devices(_request['devices']['remove'])
-
-            if 'install' in _request['devices'] \
-            and len(_request['devices']['install']):
-                _installed = self._install_devices(_request['devices']['install'])
-
-            self._url_request.run(
-                url=self._url_base + 'upload_devices_changes',
-                data={'installed': _installed, 'removed': _removed},
-                debug=self._debug
-            )
-        """
+        # self.upload_devices_changes()  # TODO
 
         self._upload_execution_errors()
         self.end_synchronization(start_date)
@@ -701,6 +710,40 @@ class MigasFreeClient(MigasFreeCommand):
         self.end_of_transmission()
 
         return ret
+
+    def upload_devices_changes(self):
+        changes = self._devices_management()
+        logger.debug('Changes to send: %s', changes)
+
+        self._show_message(_('Uploading devices changes...'))
+        response = self._url_request.run(
+            url=self._url_base + 'safe/computers/devices/changes/',
+            data=data,
+            debug=self._debug
+        )
+        self.operation_ok()
+        logger.debug('Response upload_devices_changes: %s', response)
+
+        return response
+
+    def _devices_management(self):
+        response = self.get_devices()
+        if not response:
+            return
+
+        installed = []
+        removed = []
+        if 'remove' in response and len(response['remove']):
+            removed = self._remove_devices(response['remove'])
+
+        if 'install' in response and len(response['install']):
+            installed = self._install_devices(response['install'])
+
+        return {
+            'id': self._computer_id,
+            'installed': installed,
+            'removed': removed
+        }
 
     def _install_printer(self, device):
         if 'packages' in device and device['packages']:
