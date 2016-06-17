@@ -45,9 +45,9 @@ from . import settings, network
 
 
 def get_config(ini_file, section):
-    '''
+    """
     int/dict get_config(string ini_file, string section)
-    '''
+    """
 
     if not os.path.isfile(ini_file):
         return errno.ENOENT  # FILE_NOT_FOUND
@@ -62,13 +62,14 @@ def get_config(ini_file, section):
 
 
 def execute(cmd, verbose=False, interactive=True):
-    '''
+    """
     (int, string, string) execute(
         string cmd,
         bool verbose=False,
         bool interactive=True
     )
-    '''
+    """
+    _output_buffer = ''
 
     if verbose:
         print(cmd)
@@ -88,7 +89,6 @@ def execute(cmd, verbose=False, interactive=True):
             stdout=subprocess.PIPE
         )
 
-        _output_buffer = ''
         if verbose:
             fcntl.fcntl(
                 _process.stdout.fileno(),
@@ -112,7 +112,7 @@ def execute(cmd, verbose=False, interactive=True):
     if not interactive and _output_buffer:
         _output = _output_buffer
 
-    return (_process.returncode, _output, _error)
+    return _process.returncode, _output, _error
 
 
 def timeout_execute(cmd, timeout=60):
@@ -135,27 +135,27 @@ def timeout_execute(cmd, timeout=60):
             if _seconds_elapsed > timeout:
                 os.kill(_process.pid, signal.SIGKILL)
                 os.waitpid(-1, os.WNOHANG)
-                return (1, '', _('"%s" command expired timeout') % cmd)
+                return 1, '', _('"%s" command expired timeout') % cmd
 
     _output, _error = _process.communicate()
 
-    return (_process.returncode, _output, _error)
+    return _process.returncode, _output, _error
 
 
 def get_hostname():
-    '''
+    """
     string get_hostname(void)
     Returns only hostname (without domain)
-    '''
+    """
 
     return platform.node().split('.')[0]
 
 
 def get_graphic_pid():
-    '''
+    """
     list get_graphic_pid(void)
     Detects Gnome, KDE, Xfce, Xfce4, LXDE, Unity
-    '''
+    """
 
     _graphic_environments = [
         'gnome-session-binary',  # Gnome & Unity
@@ -179,9 +179,9 @@ def get_graphic_pid():
 
 
 def get_graphic_user(pid):
-    '''
+    """
     string get_graphic_user(int pid)
-    '''
+    """
 
     _user = commands.getoutput('ps hp %s -o %s' % (str(pid), '"%U"'))
     if _user.isdigit():
@@ -196,25 +196,25 @@ def get_graphic_user(pid):
 
 
 def grep(string, list_strings):
-    '''
+    """
     http://casa.colorado.edu/~ginsbura/pygrep.htm
     py grep command
     sample command: grep("^x", dir())
     syntax: grep(regexp_string, list_of_strings_to_search)
-    '''
+    """
 
     expr = re.compile(string)
     return [elem for elem in list_strings if expr.match(elem)]
 
 
 def get_user_display_graphic(pid, timeout=10, interval=1):
-    '''
+    """
     string get_user_display_graphic(
         string pid,
         int timeout=10,
         int interval=1
     )
-    '''
+    """
 
     _display = []
     while not _display and timeout > 0:
@@ -237,27 +237,27 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
 
 
 def compare_lists(a, b):
-    '''
+    """
     list compare_lists(list a, list b)
     returns ordered diff list
-    '''
+    """
 
     _result = list(difflib.unified_diff(a, b, n=0))
     # clean lines... (only package lines are important)
     # http://docs.python.org/tutorial/controlflow.html#for-statements
     for _line in _result[:]:
         if _line.startswith('+++') or _line.startswith('---') \
-        or _line.startswith('@@'):
+                or _line.startswith('@@'):
             _result.remove(_line)
 
     return sorted(_result)
 
 
 def compare_files(a, b):
-    '''
+    """
     list compare_files(a, b)
     returns ordered diff list
-    '''
+    """
 
     if not os.path.isfile(a) or not os.path.isfile(b):
         return None
@@ -271,9 +271,9 @@ def compare_files(a, b):
 
 
 def get_user_info(user):
-    '''
+    """
     bool/list get_user_info(string user)
-    '''
+    """
 
     try:
         _info = pwd.getpwnam(user)
@@ -303,15 +303,15 @@ def read_file(filename):
 
 
 def write_file(filename, content):
-    '''
+    """
     bool write_file(string filename, string content)
-    '''
+    """
 
     _dir = os.path.dirname(filename)
     if not os.path.exists(_dir):
         try:
             os.makedirs(_dir, 0777)
-        except:
+        except OSError:
             return False
 
     _file = None
@@ -373,6 +373,7 @@ def query_yes_no(question, default="yes"):
 def check_lock_file(cmd, lock_file):
     if os.path.isfile(lock_file):
         _file = None
+        _pid = None
         try:
             _file = open(lock_file, 'r')
             _pid = _file.read()
@@ -401,10 +402,10 @@ def check_lock_file(cmd, lock_file):
 
 
 def get_current_user():
-    '''
+    """
     string get_current_user(void)
     returns a string in format 'name~fullname'
-    '''
+    """
 
     _graphic_pid, _ = get_graphic_pid()
     if not _graphic_pid:
@@ -443,7 +444,7 @@ def get_smbios_version():
         interactive=False
     )
     if _ret != 0 or _smbios == '' or _smbios is None:
-        return (0, 0)
+        return 0, 0
 
     _smbios = _smbios.split()[1]  # expected: "SMBIOS x.x present."
     return tuple(int(x) for x in _smbios.split('.'))
@@ -516,12 +517,12 @@ def cast_to_bool(value, default=False):
 
 
 def is_xsession():
-    return (os.environ.get('DISPLAY') is not None)
+    return os.environ.get('DISPLAY') is not None
 
 
 def is_zenity():
     _ret, _, _ = execute('which zenity', interactive=False)
-    return (_ret == 0)
+    return _ret == 0
 
 
 def get_mfc_release():
