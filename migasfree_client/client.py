@@ -317,7 +317,7 @@ class MigasFreeClient(MigasFreeCommand):
         if not self._computer_id:
             self.get_computer_id()
 
-        self._show_message(_('Getting mandatory packages...'))
+        self._show_message(_('Getting devices...'))
         response = self._url_request.run(
             url=self._url_base + 'safe/computers/devices/',
             data={
@@ -677,7 +677,7 @@ class MigasFreeClient(MigasFreeCommand):
         if self.hardware_capture_is_required():
             self._update_hardware_inventory()
 
-        # self.upload_devices_changes()  # TODO
+        self.upload_devices_changes()
 
         self._upload_execution_errors()
         self.end_synchronization(start_date)
@@ -718,7 +718,7 @@ class MigasFreeClient(MigasFreeCommand):
         self._show_message(_('Uploading devices changes...'))
         response = self._url_request.run(
             url=self._url_base + 'safe/computers/devices/changes/',
-            data=data,
+            data=changes,
             debug=self._debug
         )
         self.operation_ok()
