@@ -17,7 +17,7 @@
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = ('MigasFreeUpload')
+__all__ = 'MigasFreeUpload'
 
 import os
 import sys
@@ -160,7 +160,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
         self._check_sign_keys()
 
-        for _root, _, _files in os.walk(self._directory):
+        for _root, dirs, _files in os.walk(self._directory):
             for _file in _files:
                 _filename = os.path.join(_root, _file)
 
