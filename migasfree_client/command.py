@@ -18,7 +18,7 @@
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = ('MigasFreeCommand')
+__all__ = 'MigasFreeCommand'
 
 import os
 import sys
@@ -58,9 +58,9 @@ sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buf_arg)
 
 
 class MigasFreeCommand(object):
-    '''
+    """
     Interface class
-    '''
+    """
 
     CMD = 'migasfree'  # /usr/bin/migasfree
     LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
@@ -207,8 +207,8 @@ class MigasFreeCommand(object):
         )
 
         if os.path.isfile(private_key) and \
-            os.path.isfile(public_key) and \
-            os.path.isfile(repos_key):
+                os.path.isfile(public_key) and \
+                os.path.isfile(repos_key):
             if not self._computer_id:
                 self.get_computer_id()
 
@@ -236,7 +236,7 @@ class MigasFreeCommand(object):
         if self._save_sign_keys(
             self.auto_register_user, self.auto_register_password
         ):
-            return (self._save_computer() != 0)
+            return self._save_computer() != 0
 
     def _save_sign_keys(self, user, password):
         # API keys
@@ -415,10 +415,13 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         if self.migas_ssl_cert is not None and \
-        not os.path.exists(self.migas_ssl_cert):
-            print('\t\t%s: %s' % (_('Warning'),
-                _('Certificate does not exist and authentication is not guaranteed')
-            ))
+                not os.path.exists(self.migas_ssl_cert):
+            print(
+                '\t\t%s: %s' % (
+                    _('Warning'),
+                    _('Certificate does not exist and authentication is not guaranteed')
+                )
+            )
         print('\t%s: %s' % (
             _('Package Proxy Cache'),
             self.migas_package_proxy_cache
