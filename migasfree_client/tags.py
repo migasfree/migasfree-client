@@ -17,7 +17,7 @@
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = ('MigasFreeTags')
+__all__ = 'MigasFreeTags'
 
 import os
 import sys
@@ -113,7 +113,8 @@ class MigasFreeTags(MigasFreeCommand):
                 --print-column=2 \
                 --column=' ' \
                 --column='TAG' \
-                --column='TYPE'" % (
+                --column='TYPE'" % \
+                (
                     title,
                     text,
                     os.path.join(settings.ICON_PATH, self.ICON)
@@ -139,7 +140,7 @@ class MigasFreeTags(MigasFreeCommand):
             selected_tags = filter(None, out.split("\n"))
             logger.debug('Selected tags: %s' % selected_tags)
         else:
-            # no action chosed -> no change tags
+            # no action chose -> no change tags
             logger.debug('Return value command: %d' % ret)
             sys.exit(ret)
 
