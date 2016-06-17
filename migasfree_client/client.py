@@ -17,7 +17,7 @@
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = ('MigasFreeClient')
+__all__ = 'MigasFreeClient'
 
 import os
 
@@ -319,7 +319,7 @@ class MigasFreeClient(MigasFreeCommand):
         # if have been installed packages manually
         # information is uploaded to server
         if os.path.isfile(settings.SOFTWARE_FILE) \
-        and os.stat(settings.SOFTWARE_FILE).st_size:
+                and os.stat(settings.SOFTWARE_FILE).st_size:
             diff_software = utils.compare_lists(
                 open(
                     settings.SOFTWARE_FILE,
@@ -344,15 +344,14 @@ class MigasFreeClient(MigasFreeCommand):
         return history
 
     def _upload_old_errors(self):
-        '''
+        """
         if there are old errors, upload them to server
-        '''
+        """
         if os.path.isfile(self.ERROR_FILE) \
-        and os.stat(self.ERROR_FILE).st_size:
+                and os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Uploading old errors...'))
             response = self._url_request.run(
                 url=self._url_base + 'safe/computers/errors/',
-                #data=open(self.ERROR_FILE, 'rb').read()
                 data={
                     'id': self._computer_id,
                     'description': utils.read_file(self.ERROR_FILE)
@@ -390,9 +389,9 @@ class MigasFreeClient(MigasFreeCommand):
             self._write_error(msg)
 
     def _clean_pms_cache(self):
-        '''
+        """
         clean cache of Package Management System
-        '''
+        """
         self._show_message(_('Getting repositories metadata...'))
         ret = self.pms.clean_all()
 
