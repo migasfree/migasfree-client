@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 
@@ -28,10 +25,10 @@ import netifaces
 
 
 def get_iface_mask(iface):
-    '''
+    """
     string get_iface_mask(string)
     returns a dotted-quad string
-    '''
+    """
     _addresses = netifaces.ifaddresses(iface)
     if netifaces.AF_INET in _addresses:
         return _addresses[netifaces.AF_INET][0]['netmask']
@@ -40,10 +37,10 @@ def get_iface_mask(iface):
 
 
 def get_iface_address(iface):
-    '''
+    """
     string get_iface_address(string)
     returns a dotted-quad string
-    '''
+    """
     _addresses = netifaces.ifaddresses(iface)
     if netifaces.AF_INET in _addresses:
         return _addresses[netifaces.AF_INET][0]['addr']
@@ -52,10 +49,10 @@ def get_iface_address(iface):
 
 
 def get_iface_net(iface):
-    '''
+    """
     string get_iface_net(string)
     returns a dotted-quad string
-    '''
+    """
     iface_address = struct.unpack(
         '=L',
         socket.inet_aton(get_iface_address(iface))
@@ -69,10 +66,10 @@ def get_iface_net(iface):
 
 
 def get_iface_cidr(iface):
-    '''
+    """
     int get_iface_cidr(string)
     returns an integer number between 0 and 32
-    '''
+    """
     bin_str = bin(
         struct.unpack(
             '=L',
@@ -88,12 +85,12 @@ def get_iface_cidr(iface):
 
 
 def get_gateway():
-    '''
+    """
     string get_gateway(void)
     reads the default gateway directly from /proc
     from http://stackoverflow.com/questions/2761829/
         python-get-default-gateway-for-a-local-interface-ip-address-in-linux
-    '''
+    """
     with open('/proc/net/route') as fh:
         for line in fh:
             fields = line.strip().split()
@@ -104,9 +101,9 @@ def get_gateway():
 
 
 def get_ifname():
-    '''
+    """
     string get_ifname(void)
-    '''
+    """
     _ret = ''
     _interfaces = netifaces.interfaces()
     if 'lo' in _interfaces:
@@ -120,9 +117,9 @@ def get_ifname():
 
 
 def get_network_info():
-    '''
+    """
     dict get_network_info(void)
-    '''
+    """
     _ifname = get_ifname()
     if not _ifname:
         return {}
