@@ -35,9 +35,9 @@ import jose
 
 
 def sign(claims, priv_key):
-    '''
+    """
     string sign(dict claims, string priv_key)
-    '''
+    """
     rsa_key = RSA.importKey(read_file(priv_key))
     jwk = {'k': rsa_key.exportKey('PEM')}
 
@@ -48,9 +48,9 @@ def sign(claims, priv_key):
 
 
 def verify(jwt, pub_key):
-    '''
+    """
     dict verify(string jwt, string pub_key)
-    '''
+    """
     rsa_key = RSA.importKey(read_file(pub_key))
     jwk = {'k': rsa_key.exportKey('PEM')}
     try:
@@ -65,9 +65,9 @@ def verify(jwt, pub_key):
 
 
 def encrypt(claims, pub_key):
-    '''
+    """
     string encrypt(dict claims, string pub_key)
-    '''
+    """
     rsa_key = RSA.importKey(read_file(pub_key))
     pub_jwk = {'k': rsa_key.publickey().exportKey('PEM')}
 
@@ -78,9 +78,9 @@ def encrypt(claims, pub_key):
 
 
 def decrypt(jwt, priv_key):
-    '''
+    """
     string decrypt(string jwt, string priv_key)
-    '''
+    """
     rsa_key = RSA.importKey(read_file(priv_key))
     priv_jwk = {'k': rsa_key.exportKey('PEM')}
     try:
@@ -91,9 +91,9 @@ def decrypt(jwt, priv_key):
 
 
 def wrap(data, sign_key, encrypt_key):
-    '''
+    """
     string wrap(dict data, string sign_key, string encrypt_key)
-    '''
+    """
     claims = {
         'data': data,
         'sign': sign(data, sign_key)
@@ -102,9 +102,9 @@ def wrap(data, sign_key, encrypt_key):
 
 
 def unwrap(data, decrypt_key, verify_key):
-    '''
+    """
     dict unwrap(string data, string decrypt_key, string verify_key)
-    '''
+    """
     jwt = decrypt(data, decrypt_key)
     jws = verify(jwt.claims['sign'], verify_key)
     if jws:
