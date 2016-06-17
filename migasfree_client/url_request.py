@@ -139,7 +139,6 @@ class UrlRequest(object):
             })
             headers['content-type'] = 'application/json'
 
-        files = None
         if upload_files:
             files = []
             for _file in upload_files:
@@ -163,8 +162,8 @@ class UrlRequest(object):
         proxies = None
         if self._proxy:
             proxies = {
-              "http": self._proxy,
-              "https": self._proxy,
+                "http": self._proxy,
+                "https": self._proxy,
             }
 
         if not url.endswith('/'):
@@ -189,15 +188,15 @@ class UrlRequest(object):
 
         return self._evaluate_response(r.json(), safe)
 
-    def _evaluate_response(self, json, safe=True):
-        if safe and 'msg' in json:
+    def _evaluate_response(self, json_response, safe=True):
+        if safe and 'msg' in json_response:
             response = secure.unwrap(
-                json['msg'],
+                json_response['msg'],
                 decrypt_key=self._private_key,
                 verify_key=self._public_key
             )
         else:
-            response = json
+            response = json_response
 
         logger.debug('Response text: %s' % response)
 
