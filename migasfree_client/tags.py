@@ -124,15 +124,15 @@ class MigasFreeTags(MigasFreeCommand):
                     tag_active = item in assigned
                     cmd += " '%s' '%s' '%s'" % (tag_active, item, key)
         else:
-            _cmd = "dialog --backtitle '%s' \
+            cmd = "dialog --backtitle '%s' \
                 --separate-output \
                 --stdout \
                 --checklist '%s' \
                 0 0 8" % (_title, _text)
-            for _key, _value in available.items():
-                for _item in _value:
-                    _tag_active = 'on' if _item in tags["selected"] else 'off'
-                    _cmd += " '%s' '%s' %s" % (_item, _key, _tag_active)
+            for key, value in available.items():
+                for item in value:
+                    tag_active = 'on' if _item in tags["selected"] else 'off'
+                    cmd += " '%s' '%s' %s" % (item, key, tag_active)
 
         logger.debug('Change tags command: %s' % cmd)
         ret, out, error = utils.execute(cmd, interactive=False)
@@ -231,7 +231,8 @@ class MigasFreeTags(MigasFreeCommand):
 
         return response
 
-    def _apply_rules(self, rules):
+    @staticmethod
+    def _apply_rules(rules):
         mfc = MigasFreeClient()
 
         # Update metadata
