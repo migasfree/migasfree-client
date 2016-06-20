@@ -41,8 +41,10 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 README = open(os.path.join(PATH, 'README.md')).read()
 VERSION = open(os.path.join(PATH, 'VERSION')).read().strip()
 
-REQUIRES = filter(lambda s: len(s) > 0,
-    open(os.path.join(PATH, 'requirements.txt')).read().split('\n'))
+REQUIRES = filter(
+    lambda s: len(s) > 0,
+    open(os.path.join(PATH, 'requirements.txt')).read().split('\n')
+)
 
 import glob
 import subprocess
@@ -85,11 +87,8 @@ class BuildData(build):
 
 
 class InstallData(install_data):
-    def run(self):
-        self.data_files.extend(self._find_mo_files())
-        install_data.run(self)
-
-    def _find_mo_files(self):
+    @staticmethod
+    def _find_mo_files():
         data_files = []
 
         for mo in glob.glob(os.path.join(MO_DIR, '*', '%s.mo' % APP_NAME)):
@@ -98,6 +97,11 @@ class InstallData(install_data):
             data_files.append((dest, [mo]))
 
         return data_files
+
+    def run(self):
+        self.data_files.extend(self._find_mo_files())
+        install_data.run(self)
+
 
 setup(
     name=APP_NAME,
