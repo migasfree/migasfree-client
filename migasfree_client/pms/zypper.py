@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
@@ -27,9 +26,9 @@ from ..utils import execute, write_file
 
 @Pms.register('Zypper')
 class Zypper(Pms):
-    '''
+    """
     PMS for zypper based systems (openSUSE, SLED, SLES, ...)
-    '''
+    """
 
     def __init__(self):
         Pms.__init__(self)
@@ -44,9 +43,9 @@ class Zypper(Pms):
         ]
 
     def install(self, package):
-        '''
+        """
         bool install(string package)
-        '''
+        """
 
         self._cmd = '%s install --no-force-resolution %s' % (
             self._pms,
@@ -54,32 +53,32 @@ class Zypper(Pms):
         )
         logging.debug(self._cmd)
 
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
 
     def remove(self, package):
-        '''
+        """
         bool remove(string package)
-        '''
+        """
 
         self._cmd = '%s remove %s' % (self._pms, package.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
 
     def search(self, pattern):
-        '''
+        """
         bool search(string pattern)
-        '''
+        """
 
         self._cmd = '%s search %s' % (self._pms, pattern.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
 
     def update_silent(self):
-        '''
+        """
         (bool, string) update_silent(void)
-        '''
+        """
 
         self._cmd = '%s --non-interactive update --no-force-resolution "*"' % self._pms
         logging.debug(self._cmd)
@@ -89,7 +88,7 @@ class Zypper(Pms):
             verbose=True
         )
         if _ret != 0:
-            return (False, '%s\n%s\n%s' % (str(_ret), _output, _error))
+            return False, '%s\n%s\n%s' % (str(_ret), _output, _error)
 
         self._cmd = '%s lu -a' % self._pms
         logging.debug(self._cmd)
@@ -99,22 +98,22 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
+        return _ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error)
 
     def install_silent(self, package_set):
-        '''
+        """
         (bool, string) install_silent(list package_set)
-        '''
+        """
 
         if not isinstance(package_set, list):
-            return (False, 'package_set is not a list: %s' % package_set)
+            return False, 'package_set is not a list: %s' % package_set
 
         for pkg in package_set[:]:
             if self.is_installed(pkg):
                 package_set.remove(pkg)
 
         if not package_set:
-            return (True, None)
+            return True, None
 
         self._cmd = '%s --non-interactive install --no-force-resolution %s' \
             % (self._pms, ' '.join(package_set))
@@ -125,22 +124,22 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
+        return _ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error)
 
     def remove_silent(self, package_set):
-        '''
+        """
         (bool, string) remove_silent(list package_set)
-        '''
+        """
 
         if not isinstance(package_set, list):
-            return (False, 'package_set is not a list: %s' % package_set)
+            return False, 'package_set is not a list: %s' % package_set
 
         for pkg in package_set[:]:
             if not self.is_installed(pkg):
                 package_set.remove(pkg)
 
         if not package_set:
-            return (True, None)
+            return True, None
 
         self._cmd = '%s --non-interactive remove %s' \
             % (self._pms, ' '.join(package_set))
@@ -151,37 +150,37 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return (_ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error))
+        return _ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error)
 
     def is_installed(self, package):
-        '''
+        """
         bool is_installed(string package)
-        '''
+        """
 
         self._cmd = '%s -q %s' % (self._pm, package.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd, interactive=False)[0] == 0)
+        return execute(self._cmd, interactive=False)[0] == 0
 
     def clean_all(self):
-        '''
+        """
         bool clean_all(void)
-        '''
+        """
 
         self._cmd = '%s clean --all' % self._pms
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
             self._cmd = '%s --non-interactive refresh' % self._pms
             logging.debug(self._cmd)
-            return (execute(self._cmd)[0] == 0)
+            return execute(self._cmd)[0] == 0
 
         return False
 
     def query_all(self):
-        '''
+        """
         ordered list query_all(void)
         list format: name_version_architecture.extension
-        '''
+        """
 
         self._cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
         logging.debug(self._cmd)
@@ -192,9 +191,9 @@ class Zypper(Pms):
         return sorted(_output.split('\n'))
 
     def create_repos(self, server, project, repositories):
-        '''
+        """
         bool create_repos(string server, string project, list repositories)
-        '''
+        """
 
         template = \
 """[%(repo)s]
@@ -213,21 +212,21 @@ metadata_expire=1
         return write_file(self._repo, content)
 
     def import_server_key(self, file_key):
-        '''
+        """
         bool import_server_key(string file_key)
-        '''
+        """
 
         self._cmd = '%s --import %s > /dev/null' % (self._pm, file_key)
         logging.debug(self._cmd)
 
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
 
     def get_system_architecture(self):
-        '''
+        """
         string get_system_architecture(void)
-        '''
+        """
 
-        self._cmd = '%s -q --qf "%{arch}" -f /etc/lsb-release' % self._pm
+        self._cmd = '%s -q --qf "%%{arch}" -f /etc/lsb-release' % self._pm
         logging.debug(self._cmd)
 
         _ret, _arch, _ = execute(self._cmd, interactive=False)
