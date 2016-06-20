@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
@@ -185,7 +184,8 @@ class MigasFreeCommand(object):
             cert=self.migas_ssl_cert
         )
 
-    def _check_user_is_root(self):
+    @staticmethod
+    def _check_user_is_root():
         return utils.get_user_info(os.environ.get('USER'))['gid'] == 0
 
     def _user_is_not_root(self):
@@ -434,7 +434,8 @@ class MigasFreeCommand(object):
     def _usage_examples(self):
         raise NotImplementedError
 
-    def _search_pms(self):
+    @staticmethod
+    def _search_pms():
         pms_list = {
             'apt-get': 'Apt',
             'yum': 'Yum',
@@ -460,7 +461,8 @@ class MigasFreeCommand(object):
 
         self.pms = Pms.factory(pms_info)()
 
-    def operation_ok(self, info=''):
+    @staticmethod
+    def operation_ok(info=''):
         if info:
             msg = str(info)
         else:
@@ -468,7 +470,8 @@ class MigasFreeCommand(object):
 
         printcolor.ok(msg)
 
-    def operation_failed(self, info=''):
+    @staticmethod
+    def operation_failed(info=''):
         printcolor.fail(str(' ' + _('Failed')).rjust(38, '*'))
         if info:
             printcolor.fail(info)
