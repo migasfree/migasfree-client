@@ -79,7 +79,8 @@ class UrlRequest(object):
         if self._proxy:
             logger.info('Proxy selected: %s', self._proxy)
 
-    def _check_tmp_path(self):
+    @staticmethod
+    def _check_tmp_path():
         if not os.path.exists(settings.TMP_PATH):
             try:
                 os.makedirs(settings.TMP_PATH, 0777)
