@@ -195,7 +195,7 @@ class MigasFreeCommand(object):
             )
             sys.exit(errno.EACCES)
 
-    def _check_sign_keys(self):
+    def _check_sign_keys(self, get_computer_id=True):
         private_key = os.path.join(
             settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
         )
@@ -209,7 +209,7 @@ class MigasFreeCommand(object):
         if os.path.isfile(private_key) and \
                 os.path.isfile(public_key) and \
                 os.path.isfile(repos_key):
-            if not self._computer_id:
+            if get_computer_id and not self._computer_id:
                 self.get_computer_id()
 
             return True  # all OK
