@@ -23,7 +23,6 @@ import os
 import sys
 import getpass
 import errno
-import magic
 
 import gettext
 _ = gettext.gettext
@@ -31,21 +30,9 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-from . import utils
+from . import settings, utils
 
 from .command import MigasFreeCommand
-
-
-def build_magic():
-    # http://www.zak.co.il/tddpirate/2013/03/03/the-python-module-for-file-type-identification-called-magic-is-not-standardized/
-    try:
-        my_magic = magic.open(magic.MAGIC_MIME_TYPE)
-        my_magic.load()
-    except AttributeError:
-        my_magic = magic.Magic(mime=True)
-        my_magic.file = my_magic.from_file
-
-    return my_magic
 
 
 class MigasFreeUpload(MigasFreeCommand):
@@ -56,6 +43,13 @@ class MigasFreeUpload(MigasFreeCommand):
         MigasFreeCommand.__init__(self)
         self.PRIVATE_KEY = 'packager.pri'
         self._init_url_request()
+
+    def _auto_register(self):
+        print(_('Autoregistering computer...'))
+
+        return self._save_sign_keys(
+            self.auto_register_user, self.auto_register_password
+        )
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
@@ -119,11 +113,11 @@ class MigasFreeUpload(MigasFreeCommand):
             logger.error('File not found %s', self._file)
             sys.exit(errno.ENOENT)
 
-        self._check_sign_keys()
+        self._check_sign_keys(get_computer_id=False)
 
         logger.debug('Uploading file: %s', self._file)
 
-        my_magic = build_magic()
+        my_magic = utils.build_magic()
         is_package = my_magic.file(self._file) in self.pms._mimetype
 
         response = self._url_request.run(
@@ -136,8 +130,12 @@ class MigasFreeUpload(MigasFreeCommand):
             upload_files=[os.path.abspath(self._file)],
             debug=self._debug,
             keys={
-                'private': self.PACKAGER_PRIVATE_KEY,
-                'public': self.PUBLIC_KEY
+                'private': os.path.join(
+                    settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
+                ),
+                'public': os.path.join(
+                    settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
+                )
             }
         )
 
@@ -158,7 +156,7 @@ class MigasFreeUpload(MigasFreeCommand):
             logger.error('Directory not found %s', self._directory)
             sys.exit(errno.ENOENT)
 
-        self._check_sign_keys()
+        self._check_sign_keys(get_computer_id=False)
 
         for _root, dirs, _files in os.walk(self._directory):
             for _file in _files:
@@ -183,8 +181,16 @@ class MigasFreeUpload(MigasFreeCommand):
                         },
                         upload_files=[os.path.abspath(_filename)],
                         keys={
-                            'private': self.PACKAGER_PRIVATE_KEY,
-                            'public': self.PUBLIC_KEY
+                            'private': os.path.join(
+                                settings.KEYS_PATH,
+                                self.migas_server,
+                                self.PRIVATE_KEY
+                            ),
+                            'public': os.path.join(
+                                settings.KEYS_PATH,
+                                self.migas_server,
+                                self.PUBLIC_KEY
+                            )
                         },
                         debug=self._debug,
                     )
@@ -217,8 +223,12 @@ class MigasFreeUpload(MigasFreeCommand):
                 'packageset': packageset
             },
             keys={
-                'private': self.PACKAGER_PRIVATE_KEY,
-                'public': self.PUBLIC_KEY
+                'private': os.path.join(
+                    settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
+                ),
+                'public': os.path.join(
+                    settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
+                )
             },
             debug=self._debug
         )
@@ -255,7 +265,7 @@ class MigasFreeUpload(MigasFreeCommand):
         if args.file:
             self._file = args.file
         elif args.dir:
-            self._directory = args.dir.split('/')[-1]
+            self._directory = args.dir
         else:
             self._usage_examples()
 
