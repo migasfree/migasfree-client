@@ -23,7 +23,6 @@ import sys
 import errno
 import requests
 import json
-import magic
 
 import secure
 import utils
@@ -141,11 +140,19 @@ class UrlRequest(object):
             headers['content-type'] = 'application/json'
 
         if upload_files:
+            my_magic = utils.build_magic()
+
             files = []
             for _file in upload_files:
-                mime = magic.from_buffer(utils.read_file(_file), mime=True)
+                content = utils.read_file(_file)
+
+                tmp_file = os.path.join(settings.TMP_PATH, os.path.basename(_file))
+                utils.write_file(tmp_file, content[0:1023])  # only header
+                mime = my_magic.file(tmp_file)
+                os.remove(tmp_file)
+
                 files.append(
-                    ('file', (_file, open(_file, 'rb'), mime))
+                    ('file', (_file, content, mime))
                 )
             # headers['content-type'] = 'multipart/form-data'
             logger.debug('URL upload files: %s', files)
