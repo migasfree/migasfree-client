@@ -35,6 +35,7 @@ import fcntl
 import select
 import uuid
 import signal
+import magic
 
 import gettext
 _ = gettext.gettext
@@ -576,3 +577,15 @@ def demote(user_uid, user_gid):
         os.setuid(user_uid)
 
     return result
+
+
+def build_magic():
+    # http://www.zak.co.il/tddpirate/2013/03/03/the-python-module-for-file-type-identification-called-magic-is-not-standardized/
+    try:
+        my_magic = magic.open(magic.MAGIC_MIME_TYPE)
+        my_magic.load()
+    except AttributeError:
+        my_magic = magic.Magic(mime=True)
+        my_magic.file = my_magic.from_file
+
+    return my_magic
