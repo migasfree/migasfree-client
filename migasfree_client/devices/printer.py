@@ -42,6 +42,7 @@ class Printer(object):
         }
         """
 
+        _conn = ''
         _connect = ''
         _location = ''
 
@@ -164,7 +165,8 @@ class Printer(object):
         """
         # depends cups-client
         # searching in description field
-        _cmd = "for p in $(lpstat -a | awk '{print $1}'); do lpstat -l -p $p | grep %s > /dev/null; " \
+        _cmd = "for p in $(lpstat -a | awk '{print $1}'); " \
+               "do lpstat -l -p $p | grep %s > /dev/null; " \
                "if [ $? = 0 ]; then echo $p; fi; done" % pattern
         _ret, _output, _ = execute(_cmd, interactive=False)
         if _ret != 0:
