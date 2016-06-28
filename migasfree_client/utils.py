@@ -281,7 +281,7 @@ def get_user_info(user):
     except KeyError:
         try:
             _info = pwd.getpwuid(int(user))
-        except:
+        except KeyError:
             return False
 
     return {
