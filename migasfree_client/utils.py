@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
@@ -468,7 +467,7 @@ def get_hardware_uuid():
 
     try:
         _byte_array = uuid.UUID(_uuid).hex
-    except:
+    except ValueError:
         return get_uuid_from_mac()
 
     if get_smbios_version() >= (2, 6):
