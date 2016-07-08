@@ -70,6 +70,10 @@ HTML_TEMPLATE = """<!doctype html>
 
 
 class MigasFreeLabel(MigasFreeCommand):
+    URLS = {
+        'get_label': '/api/v1/safe/computers/label/',
+    }
+
     def __init__(self):
         self._user_is_not_root()
         MigasFreeCommand.__init__(self)
@@ -80,7 +84,7 @@ class MigasFreeLabel(MigasFreeCommand):
 
         logger.debug('Getting label')
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/label/',
+            url=self.api_endpoint(self.URLS['get_label']),
             data={
                 'id': self._computer_id
             },

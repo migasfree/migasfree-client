@@ -30,6 +30,11 @@ import logging
 import gettext
 _ = gettext.gettext
 
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
+
 from . import (
     settings,
     utils,
@@ -61,6 +66,14 @@ class MigasFreeCommand(object):
     Interface class
     """
 
+    URLS = {
+        'get_project_keys': '/api/v1/public/keys/project/',
+        'get_repositories_keys': '/api/v1/public/keys/repositories/',
+        'upload_computer': '/api/v1/safe/computers/',
+        'get_computer_id': '/api/v1/safe/computers/id/',
+        'upload_eot': '/api/v1/safe/eot/',
+    }
+
     CMD = 'migasfree'  # /usr/bin/migasfree
     LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
     ERROR_FILE = os.path.join(settings.TMP_PATH, '%s.err' % CMD)
@@ -81,8 +94,8 @@ class MigasFreeCommand(object):
 
     auto_register_user = ''
     auto_register_password = ''
-    auto_register_end_point = 'public/keys/project/'
-    get_key_repositories_end_point = 'public/keys/repositories/'
+    auto_register_end_point = URLS['get_project_keys']
+    get_key_repositories_end_point = URLS['get_repositories_keys']
 
     _computer_id = None
 
@@ -165,11 +178,11 @@ class MigasFreeCommand(object):
         self._init_url_request()
 
     def _init_url_base(self):
-        self._url_base = '%s/api/v1/' % str(self.migas_server)
+        scheme = 'http'
         if self.migas_ssl_cert:
-            self._url_base = '%s://%s' % ('https', self._url_base)
-        else:
-            self._url_base = '%s://%s' % ('http', self._url_base)
+            scheme = 'https'
+
+        self._url_base = '{}://{}'.format(scheme, self.migas_server)
 
     def _init_url_request(self):
         keys_path = os.path.join(settings.KEYS_PATH, self.migas_server)
@@ -183,6 +196,9 @@ class MigasFreeCommand(object):
             },
             cert=self.migas_ssl_cert
         )
+
+    def api_endpoint(self, path):
+        return urljoin(self._url_base, path)
 
     @staticmethod
     def _check_user_is_root():
@@ -241,7 +257,7 @@ class MigasFreeCommand(object):
     def _save_sign_keys(self, user, password):
         # API keys
         response = self._url_request.run(
-            url=self._url_base + self.auto_register_end_point,
+            url=self.api_endpoint(self.auto_register_end_point),
             data={
                 'username': user,
                 'password': password,
@@ -289,7 +305,7 @@ class MigasFreeCommand(object):
 
     def _save_repos_key(self):
         response = self._url_request.run(
-            url=self._url_base + self.get_key_repositories_end_point,
+            url=self.api_endpoint(self.URLS['get_repositories_keys']),
             safe=False,
             exit_on_error=False,
             debug=self._debug
@@ -349,7 +365,7 @@ class MigasFreeCommand(object):
 
     def _save_computer(self):
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/',
+            url=self.api_endpoint(self.URLS['upload_computer']),
             data={
                 'uuid': utils.get_hardware_uuid(),
                 'name': self.migas_computer_name,
@@ -367,7 +383,7 @@ class MigasFreeCommand(object):
             return self._computer_id
 
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/id/',
+            url=self.api_endpoint(self.URLS['get_computer_id']),
             data={
                 'uuid': utils.get_hardware_uuid(),
                 'name': self.migas_computer_name
@@ -392,7 +408,7 @@ class MigasFreeCommand(object):
             self.get_computer_id()
 
         response = self._url_request.run(
-            url=self._url_base + 'safe/eot/',
+            url=self.api_endpoint(self.URLS['upload_eot']),
             data={
                 'id': self._computer_id,
             },

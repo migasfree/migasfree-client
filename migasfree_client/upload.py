@@ -36,6 +36,13 @@ from .command import MigasFreeCommand
 
 
 class MigasFreeUpload(MigasFreeCommand):
+    URLS = {
+        'upload_package': '/api/v1/safe/packages/',
+        'upload_set': '/api/v1/safe/packages/set/',
+        'create_repository': '/api/v1/safe/packages/repos/',
+        'get_packager_keys': '/api/v1/public/keys/packager/',
+    }
+
     _file = None
     _directory = None
 
@@ -43,6 +50,13 @@ class MigasFreeUpload(MigasFreeCommand):
         MigasFreeCommand.__init__(self)
         self.PRIVATE_KEY = 'packager.pri'
         self._init_url_request()
+
+        self._private_key = os.path.join(
+            settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
+        )
+        self._public_key = os.path.join(
+            settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
+        )
 
     def _auto_register(self):
         print(_('Autoregistering computer...'))
@@ -121,7 +135,7 @@ class MigasFreeUpload(MigasFreeCommand):
         is_package = my_magic.file(self._file) in self.pms._mimetype
 
         response = self._url_request.run(
-            url=self._url_base + 'safe/packages/',
+            url=self.api_endpoint(self.URLS['upload_package']),
             data={
                 'project': self.packager_project,
                 'store': self.packager_store,
@@ -130,12 +144,8 @@ class MigasFreeUpload(MigasFreeCommand):
             upload_files=[os.path.abspath(self._file)],
             debug=self._debug,
             keys={
-                'private': os.path.join(
-                    settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
-                ),
-                'public': os.path.join(
-                    settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
-                )
+                'private': self._private_key,
+                'public': self._public_key
             }
         )
 
@@ -167,7 +177,7 @@ class MigasFreeUpload(MigasFreeCommand):
                     print('Uploading file: %s' % os.path.abspath(_filename))
 
                     response = self._url_request.run(
-                        url=self._url_base + 'safe/packages/set/',
+                        url=self.api_endpoint(self.URLS['upload_set']),
                         data={
                             'project': self.packager_project,
                             'store': self.packager_store,
@@ -181,16 +191,8 @@ class MigasFreeUpload(MigasFreeCommand):
                         },
                         upload_files=[os.path.abspath(_filename)],
                         keys={
-                            'private': os.path.join(
-                                settings.KEYS_PATH,
-                                self.migas_server,
-                                self.PRIVATE_KEY
-                            ),
-                            'public': os.path.join(
-                                settings.KEYS_PATH,
-                                self.migas_server,
-                                self.PUBLIC_KEY
-                            )
+                            'private': self._private_key,
+                            'public': self._public_key
                         },
                         debug=self._debug,
                     )
@@ -217,18 +219,14 @@ class MigasFreeUpload(MigasFreeCommand):
             packageset = self._directory
 
         response = self._url_request.run(
-            url=self._url_base + 'safe/packages/repos/',
+            url=self.api_endpoint(self.URLS['create_repository']),
             data={
                 'project': self.packager_project,
                 'packageset': packageset
             },
             keys={
-                'private': os.path.join(
-                    settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
-                ),
-                'public': os.path.join(
-                    settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
-                )
+                'private': self._private_key,
+                'public': self._public_key
             },
             debug=self._debug
         )
@@ -272,7 +270,7 @@ class MigasFreeUpload(MigasFreeCommand):
         self._left_parameters()
         self.auto_register_user = self.packager_user
         self.auto_register_password = self.packager_pwd
-        self.auto_register_end_point = 'public/keys/packager/'
+        self.auto_register_end_point = self.URLS['get_packager_keys']
 
         self._show_running_options()
 

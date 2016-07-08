@@ -38,6 +38,12 @@ from .command import MigasFreeCommand
 
 
 class MigasFreeTags(MigasFreeCommand):
+    URLS = {
+        'get_assigned_tags': '/api/v1/safe/computers/tags/assigned/',
+        'get_available_tags': '/api/v1/safe/computers/tags/available/',
+        'upload_tags': '/api/v1/safe/computers/tags/',
+    }
+
     _tags = None
 
     def __init__(self):
@@ -152,7 +158,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Getting assigned tags')
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/tags/assigned/',
+            url=self.api_endpoint(self.URLS['get_assigned_tags']),
             data={
                 'id': self._computer_id
             },
@@ -177,9 +183,9 @@ class MigasFreeTags(MigasFreeCommand):
         if not self._computer_id:
             self.get_computer_id()
 
-        logger.debug('Getting avaiable tags')
+        logger.debug('Getting available tags')
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/tags/available/',
+            url=self.api_endpoint(self.URLS['get_available_tags']),
             data={
                 'id': self._computer_id
             },
@@ -209,7 +215,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Setting tags: %s', self._tags)
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/tags/',
+            url=self.api_endpoint(self.URLS['upload_tags']),
             data={
                 'id': self._computer_id,
                 'tags': self._tags

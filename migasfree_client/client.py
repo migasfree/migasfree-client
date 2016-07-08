@@ -53,6 +53,22 @@ from .devices import Printer
 class MigasFreeClient(MigasFreeCommand):
     APP_NAME = 'Migasfree'
 
+    URLS = {
+        'get_properties': '/api/v1/safe/computers/properties/',
+        'get_fault_definitions': '/api/v1/safe/computers/faults/definitions/',
+        'get_repositories': '/api/v1/safe/computers/repositories/',
+        'get_mandatory_packages': '/api/v1/safe/computers/packages/mandatory/',
+        'get_devices': '/api/v1/safe/computers/devices/',
+        'upload_errors': '/api/v1/safe/computers/errors/',
+        'get_hardware_required': '/api/v1/safe/computers/hardware/required/',
+        'upload_hardware': '/api/v1/safe/computers/hardware/',
+        'upload_attributes': '/api/v1/safe/computers/attributes/',
+        'upload_faults': '/api/v1/safe/computers/faults/',
+        'upload_software': '/api/v1/safe/computers/software/',
+        'upload_sync': '/api/v1/safe/synchronizations/',
+        'upload_devices_changes': '/api/v1/safe/computers/devices/changes/',
+    }
+
     _graphic_user = None
 
     _error_file_descriptor = None
@@ -225,7 +241,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting properties...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/properties/',
+            url=self.api_endpoint(self.URLS['get_properties']),
             data={
                 'id': self._computer_id
             },
@@ -247,7 +263,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting fault definitions...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/faults/definitions/',
+            url=self.api_endpoint(self.URLS['get_fault_definitions']),
             data={
                 'id': self._computer_id
             },
@@ -269,7 +285,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting repositories...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/repositories/',
+            url=self.api_endpoint(self.URLS['get_repositories']),
             data={
                 'id': self._computer_id
             },
@@ -292,7 +308,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting mandatory packages...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/packages/mandatory/',
+            url=self.api_endpoint(self.URLS['get_mandatory_packages']),
             data={
                 'id': self._computer_id
             },
@@ -319,7 +335,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Getting devices...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/devices/',
+            url=self.api_endpoint(self.URLS['get_devices']),
             data={
                 'id': self._computer_id
             },
@@ -379,7 +395,7 @@ class MigasFreeClient(MigasFreeCommand):
                 and os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Uploading old errors...'))
             response = self._url_request.run(
-                url=self._url_base + 'safe/computers/errors/',
+                url=self.api_endpoint(self.URLS['upload_errors']),
                 data={
                     'id': self._computer_id,
                     'description': utils.read_file(self.ERROR_FILE)
@@ -476,7 +492,7 @@ class MigasFreeClient(MigasFreeCommand):
             self.get_computer_id()
 
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/hardware/required/',
+            url=self.api_endpoint(self.URLS['get_hardware_required']),
             data={
                 'id': self._computer_id,
             },
@@ -512,7 +528,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Sending hardware information...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/hardware/',
+            url=self.api_endpoint(self.URLS['upload_hardware']),
             data={
                 'id': self._computer_id,
                 'hardware': hardware
@@ -538,7 +554,7 @@ class MigasFreeClient(MigasFreeCommand):
         if os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Sending errors to server...'))
             self._url_request.run(
-                url=self._url_base + 'safe/computers/errors/',
+                url=self.api_endpoint(self.URLS['upload_errors']),
                 data={
                     'id': self._computer_id,
                     'description': utils.read_file(self.ERROR_FILE)
@@ -558,7 +574,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Uploading attributes...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/attributes/',
+            url=self.api_endpoint(self.URLS['upload_attributes']),
             data=attributes,
             debug=self._debug
         )
@@ -575,7 +591,7 @@ class MigasFreeClient(MigasFreeCommand):
 
             self._show_message(_('Uploading faults...'))
             response = self._url_request.run(
-                url=self._url_base + 'safe/computers/faults/',
+                url=self.api_endpoint(self.URLS['upload_faults']),
                 data=data,
                 debug=self._debug
             )
@@ -611,7 +627,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Uploading software...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/software/',
+            url=self.api_endpoint(self.URLS['upload_software']),
             data={
                 'id': self._computer_id,
                 'inventory': after,
@@ -635,7 +651,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Ending synchronization...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/synchronizations/',
+            url=self.api_endpoint(self.URLS['upload_sync']),
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
@@ -717,7 +733,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._show_message(_('Uploading devices changes...'))
         response = self._url_request.run(
-            url=self._url_base + 'safe/computers/devices/changes/',
+            url=self.api_endpoint(self.URLS['upload_devices_changes']),
             data=changes,
             debug=self._debug
         )
