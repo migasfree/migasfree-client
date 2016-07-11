@@ -36,13 +36,6 @@ from .command import MigasFreeCommand
 
 
 class MigasFreeUpload(MigasFreeCommand):
-    URLS = {
-        'upload_package': '/api/v1/safe/packages/',
-        'upload_set': '/api/v1/safe/packages/set/',
-        'create_repository': '/api/v1/safe/packages/repos/',
-        'get_packager_keys': '/api/v1/public/keys/packager/',
-    }
-
     _file = None
     _directory = None
 

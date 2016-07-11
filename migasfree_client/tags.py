@@ -29,8 +29,6 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-# from datetime import datetime  # FIXME
-
 from . import settings, utils
 
 from .client import MigasFreeClient
@@ -38,12 +36,6 @@ from .command import MigasFreeCommand
 
 
 class MigasFreeTags(MigasFreeCommand):
-    URLS = {
-        'get_assigned_tags': '/api/v1/safe/computers/tags/assigned/',
-        'get_available_tags': '/api/v1/safe/computers/tags/available/',
-        'upload_tags': '/api/v1/safe/computers/tags/',
-    }
-
     _tags = None
 
     def __init__(self):
@@ -243,8 +235,6 @@ class MigasFreeTags(MigasFreeCommand):
 
         # Update metadata
         mfc.synchronize()
-
-        # start_date = datetime.now().isoformat()  # FIXME
 
         mfc._uninstall_packages(rules["remove"])
         mfc._install_mandatory_packages(rules["preinstall"])

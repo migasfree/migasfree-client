@@ -67,16 +67,42 @@ class MigasFreeCommand(object):
     """
 
     URLS = {
+        # command API
         'get_project_keys': '/api/v1/public/keys/project/',
         'get_repositories_keys': '/api/v1/public/keys/repositories/',
-        'upload_computer': '/api/v1/safe/computers/',
         'get_computer_id': '/api/v1/safe/computers/id/',
+        'upload_computer': '/api/v1/safe/computers/',
         'upload_eot': '/api/v1/safe/eot/',
+        # sync API
+        'get_properties': '/api/v1/safe/computers/properties/',
+        'get_fault_definitions': '/api/v1/safe/computers/faults/definitions/',
+        'get_repositories': '/api/v1/safe/computers/repositories/',
+        'get_mandatory_packages': '/api/v1/safe/computers/packages/mandatory/',
+        'get_devices': '/api/v1/safe/computers/devices/',
+        'get_hardware_required': '/api/v1/safe/computers/hardware/required/',
+        'upload_errors': '/api/v1/safe/computers/errors/',
+        'upload_hardware': '/api/v1/safe/computers/hardware/',
+        'upload_attributes': '/api/v1/safe/computers/attributes/',
+        'upload_faults': '/api/v1/safe/computers/faults/',
+        'upload_software': '/api/v1/safe/computers/software/',
+        'upload_devices_changes': '/api/v1/safe/computers/devices/changes/',
+        'upload_sync': '/api/v1/safe/synchronizations/',
+        # label API
+        'get_label': '/api/v1/safe/computers/label/',
+        # tags API
+        'get_assigned_tags': '/api/v1/safe/computers/tags/assigned/',
+        'get_available_tags': '/api/v1/safe/computers/tags/available/',
+        'upload_tags': '/api/v1/safe/computers/tags/',
+        # upload API
+        'get_packager_keys': '/api/v1/public/keys/packager/',
+        'upload_package': '/api/v1/safe/packages/',
+        'upload_set': '/api/v1/safe/packages/set/',
+        'create_repository': '/api/v1/safe/packages/repos/',
     }
 
     CMD = 'migasfree'  # /usr/bin/migasfree
-    LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
-    ERROR_FILE = os.path.join(settings.TMP_PATH, '%s.err' % CMD)
+    LOCK_FILE = os.path.join(settings.TMP_PATH, '{}.pid'.format(CMD))
+    ERROR_FILE = os.path.join(settings.TMP_PATH, '{}.err'.format(CMD))
 
     PUBLIC_KEY = 'server.pub'
     PRIVATE_KEY = ''
@@ -108,7 +134,7 @@ class MigasFreeCommand(object):
             'MIGASFREE_CLIENT_PROJECT', utils.get_mfc_project()
         )
 
-        self.PRIVATE_KEY = '%s.pri' % self.migas_project
+        self.PRIVATE_KEY = '{}.pri'.format(self.migas_project)
 
         self.migas_computer_name = os.environ.get(
             'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
@@ -142,8 +168,7 @@ class MigasFreeCommand(object):
             os.environ.get(
                 'MIGASFREE_CLIENT_DEBUG',
                 _config_client.get('debug', False)
-            ),
-            default=False
+            )
         )
         if self._debug:
             logger.setLevel(logging.DEBUG)
@@ -310,7 +335,7 @@ class MigasFreeCommand(object):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response _save_repos_key: %s', response)
+        logger.debug('Response _save_repos_key: {}'.format(response))
 
         path = os.path.abspath(
             os.path.join(settings.KEYS_PATH, self.migas_server)
@@ -325,7 +350,7 @@ class MigasFreeCommand(object):
                 return False
 
         path_file = os.path.join(path, self.REPOS_KEY)
-        logger.debug('Trying writing file: %s', path_file)
+        logger.debug('Trying writing file: {}'.format(path_file))
 
         ret = utils.write_file(path_file, response)
         if ret:
@@ -373,7 +398,7 @@ class MigasFreeCommand(object):
             },
             debug=self._debug
         )
-        logger.debug('Response _save_computer: %s', response)
+        logger.debug('Response _save_computer: {}'.format(response))
 
         self._computer_id = response.get('id')
         return self._computer_id
@@ -391,7 +416,7 @@ class MigasFreeCommand(object):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response get_computer_id: %s', response)
+        logger.debug('Response get_computer_id: {}'.format(response))
 
         if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
@@ -414,7 +439,7 @@ class MigasFreeCommand(object):
             },
             debug=self._debug
         )
-        logger.debug('Response end_of_transmission: %s', response)
+        logger.debug('Response end_of_transmission: {}'.format(response))
 
     def _show_running_options(self):
         conf_file = ''
@@ -459,7 +484,7 @@ class MigasFreeCommand(object):
         }
 
         for item in pms_list:
-            cmd = 'which %s' % item
+            cmd = 'which {}'.format(item)
             ret, _, _ = utils.execute(cmd, interactive=False)
             if ret == 0:
                 return pms_list[item]
@@ -468,7 +493,7 @@ class MigasFreeCommand(object):
 
     def _pms_selection(self):
         pms_info = self._search_pms()
-        logger.debug('PMS info: %s', pms_info)
+        logger.debug('PMS info: {}'.format(pms_info))
         if not pms_info:
             msg = _('Any PMS was not found. Cannot continue.')
             self.operation_failed(msg)

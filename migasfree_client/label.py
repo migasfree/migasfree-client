@@ -70,10 +70,6 @@ HTML_TEMPLATE = """<!doctype html>
 
 
 class MigasFreeLabel(MigasFreeCommand):
-    URLS = {
-        'get_label': '/api/v1/safe/computers/label/',
-    }
-
     def __init__(self):
         self._user_is_not_root()
         MigasFreeCommand.__init__(self)
@@ -91,9 +87,9 @@ class MigasFreeLabel(MigasFreeCommand):
             debug=self._debug
         )
 
-        logger.debug('Response get_label: %s', response)
+        logger.debug('Response get_label: {}'.format(response))
         if self._debug:
-            print('Response: %s' % response)
+            print('Response: {}'.format(response))
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -106,12 +102,12 @@ class MigasFreeLabel(MigasFreeCommand):
 
         info = self.get_label()
 
-        image = 'file://%s' % os.path.join(settings.ICON_PATH, self.ICON)
+        image = 'file://{}'.format(os.path.join(settings.ICON_PATH, self.ICON))
 
         html = HTML_TEMPLATE % {
             'search': info.get('search'),
             'uuid': info.get('uuid'),
-            'server': '%s: %s' % (_('Server'), self.migas_server),
+            'server': '{}: {}'.format((_('Server'), self.migas_server)),
             'helpdesk': info.get('helpdesk'),
             'image': image
         }

@@ -53,22 +53,6 @@ from .devices import Printer
 class MigasFreeClient(MigasFreeCommand):
     APP_NAME = 'Migasfree'
 
-    URLS = {
-        'get_properties': '/api/v1/safe/computers/properties/',
-        'get_fault_definitions': '/api/v1/safe/computers/faults/definitions/',
-        'get_repositories': '/api/v1/safe/computers/repositories/',
-        'get_mandatory_packages': '/api/v1/safe/computers/packages/mandatory/',
-        'get_devices': '/api/v1/safe/computers/devices/',
-        'upload_errors': '/api/v1/safe/computers/errors/',
-        'get_hardware_required': '/api/v1/safe/computers/hardware/required/',
-        'upload_hardware': '/api/v1/safe/computers/hardware/',
-        'upload_attributes': '/api/v1/safe/computers/attributes/',
-        'upload_faults': '/api/v1/safe/computers/faults/',
-        'upload_software': '/api/v1/safe/computers/software/',
-        'upload_sync': '/api/v1/safe/synchronizations/',
-        'upload_devices_changes': '/api/v1/safe/computers/devices/changes/',
-    }
-
     _graphic_user = None
 
     _error_file_descriptor = None
