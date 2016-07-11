@@ -5,7 +5,7 @@ To install it, make sure you have these programs installed:
     * Python >= 2.6
     * PyCurl >= 7.19 (or python-curl or python-pycurl)
     * lshw >= 02.15
-    * hal
+    * dmidecode
     * python-netifaces
     * python-notify (or notify-python) (optional for graphical notifications)
     * python-gtk2 (or pygtk) (optional for graphical notifications)
@@ -24,9 +24,5 @@ And enjoy!
 If you want execute 'migasfree --update' with some user, you can add this line in sudoers config:
 
     ALL ALL=(root) NOPASSWD: /usr/bin/migasfree --update
-
-If you want execute 'migasfree --update' command at begin of graphic session, you can add a symbolic link in /etc/xdg/autostart/ path:
-
-    ln -s /usr/share/applications/migasfree-client.desktop /etc/xdg/autostart/migasfree-client.desktop
 
 If your migasfree server is configured over SSL, server certificate must be copied in client machine and destination path must be configured in /etc/migasfree.conf:SSL_Cert.
