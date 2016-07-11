@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,5 +49,5 @@ import sys
 if sys.getdefaultencoding() != 'utf-8':
     reload(sys)
     sys.setdefaultencoding('utf-8')
-    # now default enconding is 'utf-8' ;)
+    # now default encoding is 'utf-8' ;)
 # end unicode hack
