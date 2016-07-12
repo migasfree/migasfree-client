@@ -20,7 +20,6 @@ __license__ = 'GPLv3'
 __all__ = 'MigasFreeSync'
 
 import os
-
 import sys
 import errno
 import json
