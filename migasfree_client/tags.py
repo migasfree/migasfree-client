@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 from . import settings, utils
 
-from .client import MigasFreeClient
+from .sync import MigasFreeSync
 from .command import MigasFreeCommand
 
 
@@ -231,18 +231,18 @@ class MigasFreeTags(MigasFreeCommand):
 
     @staticmethod
     def _apply_rules(rules):
-        mfc = MigasFreeClient()
+        mfs = MigasFreeSync()
 
         # Update metadata
-        mfc.synchronize()
+        mfs.synchronize()
 
-        mfc._uninstall_packages(rules["remove"])
-        mfc._install_mandatory_packages(rules["preinstall"])
+        mfs._uninstall_packages(rules["remove"])
+        mfs._install_mandatory_packages(rules["preinstall"])
 
         # Update metadata
-        mfc._clean_pms_cache()
+        mfs._clean_pms_cache()
 
-        mfc._install_mandatory_packages(rules["install"])
+        mfs._install_mandatory_packages(rules["install"])
 
     def run(self, args=None):
         if not args or not hasattr(args, 'cmd'):

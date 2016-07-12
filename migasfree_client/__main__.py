@@ -183,8 +183,8 @@ def main(argv=None):
     args = parse_args(argv)
 
     if args.cmd in ['register', 'sync', 'install', 'purge']:
-        from .client import MigasFreeClient
-        MigasFreeClient().run(args)
+        from .sync import MigasFreeSync
+        MigasFreeSync().run(args)
     elif args.cmd == 'label':
         from .label import MigasFreeLabel
         MigasFreeLabel().run(args)

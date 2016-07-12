@@ -17,7 +17,7 @@
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = 'MigasFreeClient'
+__all__ = 'MigasFreeSync'
 
 import os
 
@@ -50,7 +50,7 @@ from .command import MigasFreeCommand
 from .devices import Printer
 
 
-class MigasFreeClient(MigasFreeCommand):
+class MigasFreeSync(MigasFreeCommand):
     APP_NAME = 'Migasfree'
 
     _graphic_user = None
