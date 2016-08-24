@@ -100,14 +100,20 @@ def get_gateway():
             return socket.inet_ntoa(struct.pack('<L', int(fields[2], 16)))
 
 
+def get_interfaces():
+    _interfaces = netifaces.interfaces()
+    if 'lo' in _interfaces:
+        _interfaces.remove('lo')  # loopback interface is not interesting
+
+    return _interfaces
+
+
 def get_ifname():
     """
     string get_ifname(void)
     """
     _ret = ''
-    _interfaces = netifaces.interfaces()
-    if 'lo' in _interfaces:
-        _interfaces.remove('lo')  # loopback interface is not interesting
+    _interfaces = get_interfaces()
     for _interface in _interfaces:
         if get_iface_address(_interface) != '':
             _ret = _interface
@@ -138,8 +144,9 @@ def get_mac(iface):
 
 
 def get_first_mac():
-    _interfaces = netifaces.interfaces()
-    if 'lo' in _interfaces:
-        _interfaces.remove('lo')  # loopback interface is not interesting
+    _interfaces = get_interfaces()
 
-    return get_mac(_interfaces[0]).replace(':', '').upper()
+    try:
+        return get_mac(_interfaces[0]).replace(':', '').upper()
+    except IndexError:
+        return ''
