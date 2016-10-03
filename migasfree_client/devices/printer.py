@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from migasfree_client.utils import execute
+
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-
-from migasfree_client.utils import execute
 
 
 class Printer(object):
@@ -130,7 +130,7 @@ class Printer(object):
                 'description': _description
             }
 
-        _ret, _, _error = execute(_cmd)
+        _ret, _, _error = execute(_cmd, interactive=False)
         if _ret != 0:
             return False, _error
 
@@ -142,7 +142,7 @@ class Printer(object):
         (bool, string) remove(string device_name)
         """
         _cmd = 'lpadmin -x %s' % device_name
-        _ret, _output, _error = execute(_cmd)
+        _ret, _output, _error = execute(_cmd, interactive=False)
         if _ret != 0:
             return False, _error
 
