@@ -26,6 +26,7 @@ import optparse
 import logging
 import errno
 import collections
+import json
 
 import gettext
 _ = gettext.gettext
@@ -49,6 +50,10 @@ class MigasFreeTags(MigasFreeCommand):
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
+
+        print('  ' + _('Get available tags in server:'))
+        print('\t%s -a' % self.CMD)
+        print('\t%s --available\n' % self.CMD)
 
         print('  ' + _('Get assigned tags in server:'))
         print('\t%s -g' % self.CMD)
@@ -227,6 +232,12 @@ class MigasFreeTags(MigasFreeCommand):
         )
 
         parser.add_option(
+            '--available', '-a',
+            action='store_true',
+            help=_('Get available tags in server (JSON format)')
+        )
+
+        parser.add_option(
             '--communicate', '-c',
             action='store_true',
             help=_('Communicate tags to server')
@@ -237,7 +248,8 @@ class MigasFreeTags(MigasFreeCommand):
         logging.info('Program arguments: %s' % arguments)
 
         # check restrictions
-        if not options.get and not options.set and not options.communicate:
+        if not options.get and not options.set and not options.communicate \
+                and not options.available:
             self._usage_examples()
             parser.error(_('Get or Set or Communicate options are mandatory!!!'))
         if options.get and options.set:
@@ -246,15 +258,27 @@ class MigasFreeTags(MigasFreeCommand):
         if options.get and options.communicate:
             self._usage_examples()
             parser.error(_('Get and Communicate options are exclusive!!!'))
+        if options.get and options.available:
+            self._usage_examples()
+            parser.error(_('Get assigned and Get available tags options are exclusive!!!'))
         if options.set and options.communicate:
             self._usage_examples()
             parser.error(_('Set and Communicate options are exclusive!!!'))
+        if options.available and options.communicate:
+            self._usage_examples()
+            parser.error(_('Get available tags and Communicate options are exclusive!!!'))
+        if options.available and options.set:
+            self._usage_examples()
+            parser.error(_('Get available tags and Set options are exclusive!!!'))
 
         # actions dispatcher
-        if options.get:
+        if options.get or options.available:
             _response = self._get_tags()
-            for _item in _response['selected']:
-                print('"' + _item + '"'),
+            if options.get:
+                for _item in _response['selected']:
+                    print('"' + _item + '"'),
+            if options.available:
+                print(json.dumps(_response['available'], ensure_ascii=False))
         elif options.set or options.communicate:
             self._tags = self._sanitize(arguments)
 
