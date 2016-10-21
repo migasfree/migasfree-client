@@ -1,5 +1,3 @@
-* Devices management (install/uninstall) (first in server)
-
 * More documentation (requirements, installation, configuration, user manual)
 
 * (un)zip in (un)wrap
@@ -7,7 +5,5 @@
 * Client as service
 
 * More translation languages
-
-* "packages_excluded" implementation in "upload_computer_info" (first in server)
 
 * Version of API used information
