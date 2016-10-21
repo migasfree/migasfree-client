@@ -25,6 +25,7 @@ import sys
 import optparse
 import logging
 import errno
+import collections
 
 import gettext
 _ = gettext.gettext
@@ -91,6 +92,10 @@ class MigasFreeTags(MigasFreeCommand):
             print(_('There is not available tags to select'))
             sys.exit(os.EX_OK)
 
+        _available_tags = collections.OrderedDict(
+            sorted(tags["available"].items())
+        )
+
         # Change tags with gui
         _title = _("Change tags")
         _text = _("Please, select tags for this computer")
@@ -112,7 +117,8 @@ class MigasFreeTags(MigasFreeCommand):
                     _text,
                     os.path.join(settings.ICON_PATH, self.ICON)
                 )
-            for _key, _value in tags["available"].items():
+            for _key, _value in _available_tags.items():
+                _value.sort()
                 for _item in _value:
                     _tag_active = _item in tags["selected"]
                     _cmd += " '%s' '%s' '%s'" % (_tag_active, _item, _key)
@@ -122,18 +128,19 @@ class MigasFreeTags(MigasFreeCommand):
                 --stdout \
                 --checklist '%s' \
                 0 0 8" % (_title, _text)
-            for _key, _value in tags["available"].items():
+            for _key, _value in _available_tags.items():
+                _value.sort()
                 for _item in _value:
                     _tag_active = 'on' if _item in tags["selected"] else 'off'
                     _cmd += " '%s' '%s' %s" % (_item, _key, _tag_active)
 
         logging.debug('Change tags command: %s' % _cmd)
-        _ret, _out, _ = utils.execute(_cmd, interactive=False)
+        _ret, _out, _err = utils.execute(_cmd, interactive=False)
         if _ret == 0:
             _selected_tags = filter(None, _out.split("\n"))
             logging.debug('Selected tags: %s' % _selected_tags)
         else:
-            # no action chosed -> no change tags
+            # no action chosen -> no change tags
             logging.debug('Return value command: %d' % _ret)
             sys.exit(_ret)
 
