@@ -22,6 +22,7 @@ __all__ = 'MigasFreeTags'
 import os
 import sys
 import errno
+import collections
 
 import gettext
 _ = gettext.gettext
@@ -95,6 +96,8 @@ class MigasFreeTags(MigasFreeCommand):
             print(_('There is not available tags to select'))
             sys.exit(os.EX_OK)
 
+        available_tags = collections.OrderedDict(sorted(available.items()))
+
         # Change tags with gui
         title = _("Change tags")
         text = _("Please, select tags for this computer")
@@ -117,7 +120,8 @@ class MigasFreeTags(MigasFreeCommand):
                     text,
                     os.path.join(settings.ICON_PATH, self.ICON)
                 )
-            for key, value in available.items():
+            for key, value in available_tags.items():
+                value.sort()
                 for item in value:
                     tag_active = item in assigned
                     cmd += " '%s' '%s' '%s'" % (tag_active, item, key)
@@ -127,7 +131,8 @@ class MigasFreeTags(MigasFreeCommand):
                 --stdout \
                 --checklist '%s' \
                 0 0 8" % (_title, _text)
-            for key, value in available.items():
+            for key, value in available_tags.items():
+                value.sort()
                 for item in value:
                     tag_active = 'on' if _item in tags["selected"] else 'off'
                     cmd += " '%s' '%s' %s" % (item, key, tag_active)
@@ -138,7 +143,7 @@ class MigasFreeTags(MigasFreeCommand):
             selected_tags = filter(None, out.split("\n"))
             logger.debug('Selected tags: %s' % selected_tags)
         else:
-            # no action chose -> no change tags
+            # no action chosen -> no change tags
             logger.debug('Return value command: %d' % ret)
             sys.exit(ret)
 
