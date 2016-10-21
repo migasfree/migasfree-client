@@ -1,8 +1,8 @@
 ../migasfree_client/__main__.py
-../migasfree_client/client.py
 ../migasfree_client/command.py
+../migasfree_client/label.py
+../migasfree_client/sync.py
 ../migasfree_client/tags.py
 ../migasfree_client/upload.py
-../migasfree_client/label.py
 ../migasfree_client/url_request.py
 ../migasfree_client/utils.py
