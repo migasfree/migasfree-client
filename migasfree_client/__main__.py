@@ -113,7 +113,7 @@ def parse_args(argv):
     group_tags.add_argument(
         '-g', '--get',
         action='store_true',
-        help=_('Get assigned tags in server')
+        help=_('Get tags in server (JSON format)')
     )
     group_tags.add_argument(
         '-s', '--set',

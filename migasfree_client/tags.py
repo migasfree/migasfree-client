@@ -23,6 +23,7 @@ import os
 import sys
 import errno
 import collections
+import json
 
 import gettext
 _ = gettext.gettext
@@ -46,7 +47,7 @@ class MigasFreeTags(MigasFreeCommand):
     def _usage_examples(self):
         print('\n' + _('Examples:'))
 
-        print('  ' + _('Get assigned tags in server:'))
+        print('  ' + _('Get tags in server (JSON format):'))
         print('\t%s tags -g' % self.CMD)
         print('\t%s tags --get\n' % self.CMD)
 
@@ -260,9 +261,11 @@ class MigasFreeTags(MigasFreeCommand):
 
         # actions dispatcher
         if args.get:
-            response = self._get_assigned_tags()
-            for item in response:
-                print('"' + item + '"'),
+            response = {
+                'assigned': self._get_assigned_tags(),
+                'available': self._get_available_tags()
+            }
+            print(json.dumps(response, ensure_ascii=False))
 
             self.end_of_transmission()
         elif args.set or args.communicate:
