@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-21 12:00+0200\n"
+"POT-Creation-Date: 2016-10-28 14:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -658,42 +658,50 @@ msgstr ""
 msgid "Another instance of %(cmd)s is running: %(pid)d"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:41
+#: ../migasfree_client/server_errors.py:40
 msgid "No errors"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:42
-msgid "User not authenticated"
+#: ../migasfree_client/server_errors.py:41
+msgid "User unauthenticated"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:43
+#: ../migasfree_client/server_errors.py:42
 msgid "User can not register computers"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:44
+#: ../migasfree_client/server_errors.py:43
 msgid "Method GET not allowed"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:45
+#: ../migasfree_client/server_errors.py:44
 msgid "Command not found"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:46
+#: ../migasfree_client/server_errors.py:45
 msgid "Signature is not valid"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:47
+#: ../migasfree_client/server_errors.py:46
 msgid "Computer not found"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:48
+#: ../migasfree_client/server_errors.py:47
 msgid "Device not found"
 msgstr ""
 
-#: ../migasfree_client/server_errors.py:49
+#: ../migasfree_client/server_errors.py:48
 msgid "Version not found"
 msgstr ""
 
+#: ../migasfree_client/server_errors.py:49
+msgid "User does not have permission"
+msgstr ""
+
 #: ../migasfree_client/server_errors.py:50
+msgid "Unsubscribed computer"
+msgstr ""
+
+#: ../migasfree_client/server_errors.py:51
 msgid "Generic error"
 msgstr ""

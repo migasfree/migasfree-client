@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 4.13\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-21 12:00+0200\n"
-"PO-Revision-Date: 2016-10-21 12:04+0200\n"
+"POT-Creation-Date: 2016-10-28 14:37+0200\n"
+"PO-Revision-Date: 2016-10-28 14:38+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
 "Language: es_ES\n"
@@ -452,7 +452,9 @@ msgstr "¡Las opciones Obtener y Comunicar son excluyentes!"
 
 #: ../migasfree_client/tags.py:263
 msgid "Get assigned and Get available tags options are exclusive!!!"
-msgstr "¡Las opciones Obtener etiquetas asignadas y Obtener etiquetas disponibles son excluyentes!"
+msgstr ""
+"¡Las opciones Obtener etiquetas asignadas y Obtener etiquetas disponibles "
+"son excluyentes!"
 
 #: ../migasfree_client/tags.py:266
 msgid "Set and Communicate options are exclusive!!!"
@@ -460,11 +462,13 @@ msgstr "¡Las opciones Establecer y Comunicar son excluyentes!"
 
 #: ../migasfree_client/tags.py:269
 msgid "Get available tags and Communicate options are exclusive!!!"
-msgstr "¡Las opciones Obtener etiquetas disponibles y Comunicar son excluyentes!"
+msgstr ""
+"¡Las opciones Obtener etiquetas disponibles y Comunicar son excluyentes!"
 
 #: ../migasfree_client/tags.py:272
 msgid "Get available tags and Set options are exclusive!!!"
-msgstr "¡Las opciones Obtener etiquetas disponibles y Establecer son excluyentes!"
+msgstr ""
+"¡Las opciones Obtener etiquetas disponibles y Establecer son excluyentes!"
 
 #: ../migasfree_client/upload.py:57
 msgid "Upload single package:"
@@ -659,43 +663,51 @@ msgstr "Por favor, responde 'sí' o 'no' (o 's' o 'n')."
 msgid "Another instance of %(cmd)s is running: %(pid)d"
 msgstr "Ya hay en ejecución otra instancia de %(cmd)s: %(pid)d"
 
-#: ../migasfree_client/server_errors.py:41
+#: ../migasfree_client/server_errors.py:40
 msgid "No errors"
 msgstr "Sin errores"
 
-#: ../migasfree_client/server_errors.py:42
-msgid "User not authenticated"
+#: ../migasfree_client/server_errors.py:41
+msgid "User unauthenticated"
 msgstr "Usuario no autentificado"
 
-#: ../migasfree_client/server_errors.py:43
+#: ../migasfree_client/server_errors.py:42
 msgid "User can not register computers"
 msgstr "El usuario no puede registrar ordenadores"
 
-#: ../migasfree_client/server_errors.py:44
+#: ../migasfree_client/server_errors.py:43
 msgid "Method GET not allowed"
 msgstr "El método GET no está permitido"
 
-#: ../migasfree_client/server_errors.py:45
+#: ../migasfree_client/server_errors.py:44
 msgid "Command not found"
 msgstr "Comando no encontrado"
 
-#: ../migasfree_client/server_errors.py:46
+#: ../migasfree_client/server_errors.py:45
 msgid "Signature is not valid"
 msgstr "Firma no válida"
 
-#: ../migasfree_client/server_errors.py:47
+#: ../migasfree_client/server_errors.py:46
 msgid "Computer not found"
 msgstr "Ordenador no encontrado"
 
-#: ../migasfree_client/server_errors.py:48
+#: ../migasfree_client/server_errors.py:47
 msgid "Device not found"
 msgstr "Dispositivo no encontrado"
 
-#: ../migasfree_client/server_errors.py:49
+#: ../migasfree_client/server_errors.py:48
 msgid "Version not found"
 msgstr "Versión no encontrada"
 
+#: ../migasfree_client/server_errors.py:49
+msgid "User does not have permission"
+msgstr "El usuario no tiene permisos"
+
 #: ../migasfree_client/server_errors.py:50
+msgid "Unsubscribed computer"
+msgstr "Ordenador dado de baja"
+
+#: ../migasfree_client/server_errors.py:51
 msgid "Generic error"
 msgstr "Error genérico"
 
