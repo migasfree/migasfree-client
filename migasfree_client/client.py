@@ -16,10 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-__all__ = ('MigasFreeClient', 'main')
-
 import os
 
 import sys
@@ -34,11 +30,6 @@ import platform
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
 
-import gettext
-_ = gettext.gettext
-
-# sys.path.append(os.path.dirname(__file__))  # DEBUG
-
 from . import (
     settings,
     utils,
@@ -49,6 +40,13 @@ from . import (
 
 from .command import MigasFreeCommand
 from .devices import Printer
+
+import gettext
+_ = gettext.gettext
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
+__all__ = ('MigasFreeClient', 'main')
 
 
 class MigasFreeClient(MigasFreeCommand):
@@ -171,10 +169,10 @@ class MigasFreeClient(MigasFreeCommand):
         )
         logging.debug('Message response: %s', _ret)
         if self._debug:
-            print(('Message response: %s' % _ret))
+            print('Message response: %s' % _ret)
 
         if 'errmfs' in _ret \
-        and _ret['errmfs']['code'] == server_errors.COMPUTER_NOT_FOUND:
+                and _ret['errmfs']['code'] == server_errors.COMPUTER_NOT_FOUND:
             logging.warning('Computer not found.')
             return self._auto_register()
 
@@ -184,9 +182,11 @@ class MigasFreeClient(MigasFreeCommand):
                 _ret['errmfs']['info']
             )
             self.operation_failed(_msg)
+            if _ret['errmfs']['code'] == server_errors.UNSUBSCRIBED_COMPUTER:
+                sys.exit(errno.EPERM)
             self._write_error(_msg, append=True)
 
-        return (_ret['errmfs']['code'] == server_errors.ALL_OK)
+        return _ret['errmfs']['code'] == server_errors.ALL_OK
 
     def _eval_code(self, lang, code):
         # clean code...
@@ -279,9 +279,9 @@ class MigasFreeClient(MigasFreeCommand):
         return _response
 
     def _get_attributes(self):
-        '''
+        """
         get properties and returns attributes to send
-        '''
+        """
         self._send_message(_('Getting properties...'))
         _request = self._url_request.run('get_properties')
         logging.debug('Update request: %s', _request)
@@ -305,7 +305,7 @@ class MigasFreeClient(MigasFreeCommand):
         # if have been installed packages manually
         # information is uploaded to server
         if os.path.isfile(settings.SOFTWARE_FILE) \
-        and os.stat(settings.SOFTWARE_FILE).st_size:
+                and os.stat(settings.SOFTWARE_FILE).st_size:
             _diff_software = utils.compare_lists(
                 open(
                     settings.SOFTWARE_FILE,
@@ -336,11 +336,11 @@ class MigasFreeClient(MigasFreeCommand):
         return _software_before
 
     def _upload_old_errors(self):
-        '''
+        """
         if there are old errors, upload them to server
-        '''
+        """
         if os.path.isfile(self.ERROR_FILE) \
-        and os.stat(self.ERROR_FILE).st_size:
+                and os.stat(self.ERROR_FILE).st_size:
             self._send_message(_('Uploading old errors...'))
             self._url_request.run(
                 'upload_computer_errors',
@@ -374,9 +374,9 @@ class MigasFreeClient(MigasFreeCommand):
             self._write_error(_msg)
 
     def _clean_pms_cache(self):
-        '''
+        """
         clean cache of Package Management System
-        '''
+        """
         self._send_message(_('Getting repositories metadata...'))
         _ret = self.pms.clean_all()
 
@@ -562,11 +562,11 @@ class MigasFreeClient(MigasFreeCommand):
             _installed = []
             _removed = []
             if 'remove' in _request['devices'] \
-            and len(_request['devices']['remove']):
+                    and len(_request['devices']['remove']):
                 _removed = self._remove_devices(_request['devices']['remove'])
 
             if 'install' in _request['devices'] \
-            and len(_request['devices']['install']):
+                    and len(_request['devices']['install']):
                 _installed = self._install_devices(_request['devices']['install'])
 
             self._url_request.run(
@@ -688,12 +688,18 @@ class MigasFreeClient(MigasFreeCommand):
             'version': self.release
         })
 
-        parser.add_option("--register", "-g", action="store_true",
-            help=_('Register computer at server'))
-        parser.add_option("--update", "-u", action="store_true",
-            help=_('Update system from repositories'))
-        parser.add_option("--search", "-s", action="store",
-            help=_('Search package in repositories'))
+        parser.add_option(
+            "--register", "-g", action="store_true",
+            help=_('Register computer at server')
+        )
+        parser.add_option(
+            "--update", "-u", action="store_true",
+            help=_('Update system from repositories')
+        )
+        parser.add_option(
+            "--search", "-s", action="store",
+            help=_('Search package in repositories')
+        )
         parser.add_option(
             "--install", "-i",
             action="store_true",
@@ -704,21 +710,25 @@ class MigasFreeClient(MigasFreeCommand):
             action="store_true",
             help=_('Remove package')
         )
-        parser.add_option("--package", "-p", action="store",
-            help=_('Package to install or remove'))
+        parser.add_option(
+            "--package", "-p", action="store",
+            help=_('Package to install or remove')
+        )
 
-        parser.add_option("--force-upgrade", "-a", action="store_true",
-            help=_('Force package upgrades'))
+        parser.add_option(
+            "--force-upgrade", "-a", action="store_true",
+            help=_('Force package upgrades')
+        )
 
         options, arguments = parser.parse_args()
 
         # check restrictions
         if options.register and \
-        (options.install or options.remove or options.update or options.search):
+                (options.install or options.remove or options.update or options.search):
             self._usage_examples()
             parser.error(_('Register option is exclusive!!!'))
         if options.update and \
-        (options.install or options.remove or options.search):
+                (options.install or options.remove or options.search):
             self._usage_examples()
             parser.error(_('Update option is exclusive!!!'))
         if options.search and (options.install or options.remove):
