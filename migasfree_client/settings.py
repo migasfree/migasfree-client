@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2014 Jose Antonio Chavarría
+# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,13 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
+
+import os
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-
-import os
 
 CONF_FILE = os.environ.get('MIGASFREE_CONF', '/etc/migasfree.conf')
 
@@ -29,6 +27,7 @@ LOG_FILE = '/var/tmp/migasfree.log'
 SOFTWARE_FILE = '/var/tmp/installed_software.txt'
 
 KEYS_PATH = '/var/migasfree-client/keys'
+DEVICES_PATH = "/var/migasfree-client/devices/"
 TMP_PATH = '/tmp/migasfree-client'
 LOCALE_PATH = '/usr/share/locale'
 ICON_PATH = '/usr/share/icons/hicolor/scalable'
