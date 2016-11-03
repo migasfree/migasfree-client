@@ -17,7 +17,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-
 import sys
 import errno
 import logging
@@ -26,6 +25,7 @@ import json
 import time
 import tempfile
 import platform
+import cups
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -39,7 +39,7 @@ from . import (
 )
 
 from .command import MigasFreeCommand
-from .devices import Printer
+from .devices import Printer, LogicalDevice
 
 import gettext
 _ = gettext.gettext
@@ -559,20 +559,29 @@ class MigasFreeClient(MigasFreeCommand):
 
         # remove and install devices (new in server 4.2) (issue #31)
         if 'devices' in _request:
-            _installed = []
-            _removed = []
-            if 'remove' in _request['devices'] \
-                    and len(_request['devices']['remove']):
-                _removed = self._remove_devices(_request['devices']['remove'])
+            if 'install' in _request['devices']:  # is a migasfree-server <= 4.12
+                _installed = []
+                _removed = []
+                if 'remove' in _request['devices'] \
+                        and len(_request['devices']['remove']):
+                    _removed = self._remove_devices(_request['devices']['remove'])
 
-            if 'install' in _request['devices'] \
-                    and len(_request['devices']['install']):
-                _installed = self._install_devices(_request['devices']['install'])
+                if 'install' in _request['devices'] \
+                        and len(_request['devices']['install']):
+                    _installed = self._install_devices(_request['devices']['install'])
 
-            self._url_request.run(
-                'upload_devices_changes',
-                data={'installed': _installed, 'removed': _removed}
-            )
+                self._url_request.run(
+                    'upload_devices_changes',
+                    data={'installed': _installed, 'removed': _removed}
+                )
+            elif 'logical' in _request['devices']:  # is a migasfree-server >= 4.13
+                # install packages
+                for device in _request['devices']['logical']:
+                    if 'packages' in device and device['packages']:
+                        if not self._install_mandatory_packages(device['packages']):
+                            return False
+
+                self._sync_logical_devices(_request['devices'])
 
         self._upload_execution_errors()
 
@@ -673,6 +682,74 @@ class MigasFreeClient(MigasFreeCommand):
                     _removed_ids.append(_id)
 
         return _removed_ids
+
+    def _sync_logical_devices(self, devices):
+        """
+        Synchronize logical devices (since migasfree-server >= 4.13)
+
+            devices: {
+                "logical": [{}, ...],
+                "default": int
+            }
+        """
+
+        logical_devices = {}  # key is id field
+        for device in devices['logical']:
+            if 'PRINTER' in device:
+                dev = LogicalDevice(device['PRINTER'])
+                logical_devices[int(dev.logical_id)] = dev
+
+        conn = cups.Connection()
+        if not conn:
+            return
+
+        printers = conn.getPrinters()
+        for printer in printers:
+            # check if printer is a migasfree printer (by format)
+            if len(printers[printer]['printer-info'].split('__')) == 5:
+                key = int(printers[printer]['printer-info'].split('__')[4])
+                if key in logical_devices:
+                    # relate real devices with logical ones by id
+                    logical_devices[key].printer_name = printer
+                    logical_devices[key].printer_data = printers[printer]
+                else:
+                    try:
+                        self._send_message(_('Removing device: %s') % printer)
+                        conn.deletePrinter(printer)
+                        self.operation_ok()
+                        logging.debug('Device removed: %s', printer)
+                    except cups.IPPError:
+                        _msg = _('Error removing device: %s') % printer
+                        self.operation_failed(_msg)
+                        logging.error(_msg)
+                        self._write_error(_msg)
+
+        for key in logical_devices:
+            if logical_devices[key].is_changed():
+                _printer_name = logical_devices[key].name
+                self._send_message(_('Installing device: %s') % _printer_name)
+                if logical_devices[key].install():
+                    self.operation_ok()
+                    logging.debug('Device installed: %s', _printer_name)
+                else:
+                    _msg = _('Error installing device: %s') % _printer_name
+                    self.operation_failed(_msg)
+                    logging.error(_msg)
+                    self._write_error(_msg)
+
+        # System default printer
+        if devices['default'] != 0 and devices['default'] in logical_devices:
+            _printer_name = logical_devices[devices['default']].name
+            if conn.getDefault() != _printer_name:
+                try:
+                    self._send_message(_('Setting default device: %s') % _printer_name)
+                    conn.setDefault(_printer_name)
+                    self.operation_ok()
+                except cups.IPPError:
+                    _msg = _('Error setting default device: %s') % _printer_name
+                    self.operation_failed(_msg)
+                    logging.error(_msg)
+                    self._write_error(_msg)
 
     def run(self):
         _program = 'migasfree client'
