@@ -30,6 +30,7 @@ import fcntl
 import select
 import uuid
 import signal
+import hashlib
 
 import gettext
 _ = gettext.gettext
@@ -535,3 +536,7 @@ def get_mfc_release():
         version_file = os.path.join(settings.DOC_PATH, 'VERSION')
 
     return open(version_file).read().splitlines()[0]
+
+
+def md5sum(file):
+    return hashlib.md5(file).hexdigest()
