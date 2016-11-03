@@ -52,6 +52,7 @@ Requirements
         + Python >= 2.6
             - pycurl >= 7.19
             - python-netifaces
+            - python-cups
             - python-notify (optional)
         + lshw >= B.02.15
         + dmidecode

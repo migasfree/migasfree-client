@@ -10,6 +10,7 @@ To install it, make sure you have these programs installed:
     * python-notify (or notify-python) (optional for graphical notifications)
     * python-gtk2 (or pygtk) (optional for graphical notifications)
     * python-stdeb (to create a DEB package)
+    * python-cups
 
 Then run these commands from the command prompt:
 
