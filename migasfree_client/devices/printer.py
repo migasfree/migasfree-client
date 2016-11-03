@@ -21,7 +21,7 @@ __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 
-class Printer(object):
+class Printer(object):  # for migasfree-server <= 4.12
     @staticmethod
     def install(device):
         """
