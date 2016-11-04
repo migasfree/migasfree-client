@@ -109,36 +109,41 @@ class LogicalDevice(object):
     def install(self):
         self.remove()
 
-        conn = cups.Connection()
-        if not conn:
-            return False
+        try:
+            conn = cups.Connection()
+        except RuntimeError:
+            conn = None
 
-        conn.addPrinter(
-            name=self.name,
-            filename=self.driver,
-            info=self.info,
-            location=self.location,
-            device=self.uri
-        )
+        if conn:  # cups is running
+            conn.addPrinter(
+                name=self.name,
+                filename=self.driver,
+                info=self.info,
+                location=self.location,
+                device=self.uri
+            )
 
-        conn.acceptJobs(self.name)
-        conn.enablePrinter(self.name)
+            conn.acceptJobs(self.name)
+            conn.enablePrinter(self.name)
 
-        write_file(self.md5_file(), md5sum(self.driver))
+            write_file(self.md5_file(), md5sum(self.driver))
 
-        return True
+            return True
+
+        return False
 
     def remove(self):
         if self.printer_name:
-            conn = cups.Connection()
-            if not conn:
-                return False
+            try:
+                conn = cups.Connection()
+            except RuntimeError:
+                conn = None
 
-            conn.deletePrinter(self.printer_name)
-            if os.path.exists(self.md5_file()):
-                os.remove(self.md5_file())
-
-            return True
+            if conn:  # cups is running
+                conn.deletePrinter(self.printer_name)
+                if os.path.exists(self.md5_file()):
+                    os.remove(self.md5_file())
+                return True
 
         return False
 
