@@ -280,7 +280,7 @@ def get_user_info(user):
     except KeyError:
         try:
             _info = pwd.getpwuid(int(user))
-        except:
+        except KeyError:
             return False
 
     return {
@@ -303,7 +303,7 @@ def write_file(filename, content):
     if not os.path.exists(_dir):
         try:
             os.makedirs(_dir, 0777)
-        except:
+        except OSError:
             return False
 
     _file = None
