@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess
 import os
 import sys
+import subprocess
 import ConfigParser
 import commands
 import time
@@ -69,6 +69,8 @@ def execute(cmd, verbose=False, interactive=True):
     )
     """
 
+    _output_buffer = ''
+
     if verbose:
         print(cmd)
 
@@ -87,7 +89,6 @@ def execute(cmd, verbose=False, interactive=True):
             stdout=subprocess.PIPE
         )
 
-        _output_buffer = ''
         if verbose:
             fcntl.fcntl(
                 _process.stdout.fileno(),
@@ -538,5 +539,5 @@ def get_mfc_release():
     return open(version_file).read().splitlines()[0]
 
 
-def md5sum(file):
-    return hashlib.md5(file).hexdigest()
+def md5sum(archive):
+    return hashlib.md5(archive).hexdigest()
