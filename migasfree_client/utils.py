@@ -154,7 +154,7 @@ def get_hostname():
 def get_graphic_pid():
     """
     list get_graphic_pid(void)
-    Detects Gnome, KDE, Xfce, Xfce4, LXDE, Unity
+    Detects Gnome, KDE, Xfce, Xfce4, LXDE, Unity, MATE
     """
 
     _graphic_environments = [
