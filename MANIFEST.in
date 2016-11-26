@@ -1,6 +1,6 @@
 # http://docs.python.org/distutils/sourcedist.html#the-manifest-in-template
 
-include AUTHORS INSTALL LICENSE README.md VERSION MANIFEST.in migasfree-client.doap
+include AUTHORS INSTALL LICENSE README.md VERSION MANIFEST.in migasfree-client.doap requirements.txt
 include conf/migasfree.conf
 recursive-include icons *.svg
 recursive-include migasfree_client *.py
