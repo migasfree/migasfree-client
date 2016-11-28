@@ -160,8 +160,9 @@ def get_active_user():
     _f = '/sys/class/tty/tty0/active'  # kernel >= 2.6.37
     if os.path.exists(_f):
         _tty = open(_f).read().split()[0]
-        _user = commands.getoutput('who | grep {}'.format(_tty)).split()[0]
-        return _user
+        _output = commands.getoutput('who | grep {}'.format(_tty)).split()
+        if _output:
+            return _output[0]  # user column
 
     return None
 
