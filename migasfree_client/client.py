@@ -577,8 +577,8 @@ class MigasFreeClient(MigasFreeCommand):
             elif 'logical' in _request['devices']:  # is a migasfree-server >= 4.13
                 # install packages
                 for device in _request['devices']['logical']:
-                    if 'packages' in device and device['packages']:
-                        if not self._install_mandatory_packages(device['packages']):
+                    if 'packages' in device['PRINTER'] and device['PRINTER']['packages']:
+                        if not self._install_mandatory_packages(device['PRINTER']['packages']):
                             return False
 
                 self._sync_logical_devices(_request['devices'])
