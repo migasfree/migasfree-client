@@ -570,4 +570,6 @@ def get_mfc_release():
 
 
 def md5sum(archive):
-    return hashlib.md5(archive).hexdigest()
+    with open(archive) as handle:
+        _md5 = handle.read()
+    return hashlib.md5(_md5).hexdigest()
