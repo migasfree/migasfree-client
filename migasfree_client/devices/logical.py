@@ -115,13 +115,17 @@ class LogicalDevice(object):
             conn = None
 
         if conn:  # cups is running
-            conn.addPrinter(
-                name=self.name,
-                filename=self.driver,
-                info=self.info,
-                location=self.location,
-                device=self.uri
-            )
+            try:
+                conn.addPrinter(
+                    name=self.name,
+                    filename=self.driver,
+                    info=self.info,
+                    location=self.location,
+                    device=self.uri
+                )
+            except cups.IPPError as (status, description):
+                print 'CUPS Error: %d (%s)' % (status, description)
+                return False
 
             conn.acceptJobs(self.name)
             conn.enablePrinter(self.name)
