@@ -328,6 +328,13 @@ class MigasFreeSync(MigasFreeCommand):
         )
         logger.debug('Response get_devices: %s', response)
 
+        """
+        response: {
+            "logical": [{}, ...],
+            "default": int
+        }
+        """
+
         if 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
@@ -677,7 +684,7 @@ class MigasFreeSync(MigasFreeCommand):
         if self.hardware_capture_is_required():
             self._update_hardware_inventory()
 
-        self.upload_devices_changes()
+        self._sync_logical_devices()
 
         self._upload_execution_errors()
         self.end_synchronization(start_date)
@@ -711,107 +718,73 @@ class MigasFreeSync(MigasFreeCommand):
 
         return ret
 
-    def upload_devices_changes(self):
-        changes = self._devices_management()
-        logger.debug('Changes to send: %s', changes)
-
-        self._show_message(_('Uploading devices changes...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['upload_devices_changes']),
-            data=changes,
-            debug=self._debug
-        )
-        self.operation_ok()
-        logger.debug('Response upload_devices_changes: %s', response)
-
-        return response
-
-    def _devices_management(self):
-        response = self.get_devices()
-        if not response:
+    def _sync_logical_devices(self):
+        devices = self.get_devices()
+        if not devices:
             return
 
-        installed = []
-        removed = []
-        if 'remove' in response and len(response['remove']):
-            removed = self._remove_devices(response['remove'])
+        for device in devices['logical']:
+            if 'packages' in device and device['packages']:
+                if not self._install_mandatory_packages(device['packages']):
+                    return False
 
-        if 'install' in response and len(response['install']):
-            installed = self._install_devices(response['install'])
-
-        return {
-            'id': self._computer_id,
-            'installed': installed,
-            'removed': removed
-        }
-
-    def _install_printer(self, device):
-        if 'packages' in device and device['packages']:
-            if not self._install_mandatory_packages(device['packages']):
-                return False
-
-        self._remove_printer(device['id'])
-
-        self._show_message(_('Installing device: %s') % device['model'])
-        installed, output = Printer.install(device)
-        if installed:
-            ret = output
-            self.operation_ok()
-            logger.debug('Device installed: %s', device['model'])
-        else:
-            ret = False
-            msg = _('Error installing device: %s') % output
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
-
-        return ret
-
-    def _install_devices(self, devices):
-        self._check_sign_keys()
-
-        installed_ids = []
-        for device in devices:
+        logical_devices = {}  # key is id field
+        for device in devices['logical']:
             if 'PRINTER' in device:
-                _id = self._install_printer(device['PRINTER'])
-                if _id:
-                    installed_ids.append(_id)
+                dev = LogicalDevice(device['PRINTER'])
+                logical_devices[int(dev.logical_id)] = dev
 
-        return installed_ids
+        conn = cups.Connection()
+        if not conn:
+            return
 
-    def _remove_printer(self, device_id):
-        # expected pattern: PRINTER.name__PRINTER.model__PRINTER.id (issue #31)
-        printer_name = Printer.search('__%d$' % device_id)
-        if printer_name == '':
-            return device_id  # not installed, removed for server
+        printers = conn.getPrinters()
+        for printer in printers:
+            # check if printer is a migasfree printer (by format)
+            if len(printers[printer]['printer-info'].split('__')) == 5:
+                key = int(printers[printer]['printer-info'].split('__')[4])
+                if key in logical_devices:
+                    # relate real devices with logical ones by id
+                    logical_devices[key].printer_name = printer
+                    logical_devices[key].printer_data = printers[printer]
+                else:
+                    try:
+                        self._send_message(_('Removing device: %s') % printer)
+                        conn.deletePrinter(printer)
+                        self.operation_ok()
+                        logging.debug('Device removed: %s', printer)
+                    except cups.IPPError:
+                        _msg = _('Error removing device: %s') % printer
+                        self.operation_failed(_msg)
+                        logging.error(_msg)
+                        self._write_error(_msg)
 
-        self._show_message(_('Removing device: %s') % printer_name)
+        for key in logical_devices:
+            if logical_devices[key].is_changed():
+                _printer_name = logical_devices[key].name
+                self._send_message(_('Installing device: %s') % _printer_name)
+                if logical_devices[key].install():
+                    self.operation_ok()
+                    logging.debug('Device installed: %s', _printer_name)
+                else:
+                    _msg = _('Error installing device: %s') % _printer_name
+                    self.operation_failed(_msg)
+                    logging.error(_msg)
+                    self._write_error(_msg)
 
-        removed, output = Printer.remove(printer_name)
-        if removed:
-            ret = device_id
-            self.operation_ok()
-            logger.debug('Device removed: %s', printer_name)
-        else:
-            ret = 0
-            msg = _('Error removing device: %s') % output
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
-
-        return ret
-
-    def _remove_devices(self, devices):
-        self._check_sign_keys()
-
-        removed_ids = []
-        for device in devices:
-            if 'PRINTER' in device:
-                _id = self._remove_printer(device['PRINTER'])
-                if _id:
-                    removed_ids.append(_id)
-
-        return removed_ids
+        # System default printer
+        if devices['default'] != 0 and devices['default'] in logical_devices:
+            _printer_name = logical_devices[devices['default']].name
+            if conn.getDefault() != _printer_name:
+                try:
+                    self._send_message(_('Setting default device: %s') % _printer_name)
+                    conn.setDefault(_printer_name)
+                    self.operation_ok()
+                except cups.IPPError:
+                    _msg = _('Error setting default device: %s') % _printer_name
+                    self.operation_failed(_msg)
+                    logging.error(_msg)
+                    self._write_error(_msg)
 
     def run(self, args=None):
         self._show_running_options()
