@@ -618,3 +618,10 @@ def build_magic():
         my_magic.file = my_magic.from_file
 
     return my_magic
+
+
+def md5sum(archive):
+    with open(archive) as handle:
+        _md5 = handle.read()
+
+    return hashlib.md5(_md5).hexdigest()
