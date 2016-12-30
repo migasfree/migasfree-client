@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 # Copyright (c) 2014-2016 Jose Antonio Chavarría <jachavar@gmail.com>
 #
@@ -15,82 +15,70 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from migasfree_client.utils import execute
+import os
+import cups
+
+from ..utils import write_file, md5sum
+from ..settings import DEVICES_PATH
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 
 class Printer(object):
-    @staticmethod
-    def install(device):
-        """
-        (bool, string/int) install(dict device)
+    conn = ''
+    port = ''
+    location = ''
+    uri = ''
+    info = ''
+    name = ''
+    logical_id = 0
+    driver = ''
+    printer_name = ''
+    printer_data = {}
 
-        {
-            'id': 135,
-            'name': '1000',
-            'model': 'IRC-5000',
-            'driver': '/usr/share/ppd/IRC-5000.ppd',
-            'feature': 'DEFAULT',
-            'packages': ['azl-printers'],
-            'TCP': {
-                'IP': '192.168.100.254',
-                'PORT': '9100',
-                'LOCATION': 'Entry',
-            }
-        }
-        """
-
-        _conn = ''
-        _connect = ''
-        _location = ''
-
+    def __init__(self, device):
         if 'TCP' in device:
-            _conn = device['TCP']
-
-            if 'PORT' in _conn and \
-                    not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):
-                _port = _conn['PORT']
+            self.conn = device['TCP']
+            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
+                self.port = self.conn['PORT']
             else:
-                _port = '9100'
-
-            if 'IP' in _conn and 'PORT' in _conn and 'LOCATION' in _conn:
-                _connect = '-v socket://%s:%s' % (_conn['IP'], _port)
-                if _conn['LOCATION'] != '':
-                    _location = '-L "%s"' % _conn['LOCATION']
-        elif 'LPT' in device:
-            _conn = device['LPT']
-            if 'PORT' in _conn and \
-                    not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):
-                _port = _conn['PORT']
-            else:
-                _port = '0'
-
-            _connect = '-v parallel:/dev/lp%s' % _port
-        elif 'USB' in device:
-            _conn = device['USB']
-            _connect = '-v parallel:/dev/usb/lp0'
-        elif 'SRL' in device:
-            _conn = device['SRL']
-            if 'PORT' in _conn and \
-                    not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):
-                _port = _conn['PORT']
-            else:
-                _port = '0'
-
-            _connect = '-v serial:/dev/ttyS%s' % _port
-        elif 'LPD' in device:
-            _conn = device['LPD']
-            if 'IP' in _conn and 'PORT' in _conn and 'LOCATION' in _conn:
-                _connect = '-v lpd://%s/%s' % (
-                    _conn['IP'],
-                    _conn['PORT']
+                self.port = "9100"
+            if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
+                self.uri = 'socket://%s:%s' % (
+                    self.conn['IP'],
+                    int(self.port)
                 )
-                if _conn['LOCATION'] != '':
-                    _location = '-L "%s"' % _conn['LOCATION']
+                if self.conn['LOCATION'] != '':
+                    self.location = self.conn['LOCATION']
+        elif 'LPT' in device:
+            self.conn = device['LPT']
+            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
+                self.port = self.conn['PORT']
+            else:
+                self.port = "0"
+            self.uri = '-v parallel:/dev/lp%s' % self.port
+        elif 'USB' in device:
+            self.conn = device['USB']
+            self.uri = 'parallel:/dev/usb/lp0'
+        elif 'SRL' in device:
+            self.conn = device['SRL']
+            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
+                self.port = self.conn['PORT']
+            else:
+                self.port = "0"
+            self.uri = 'serial:/dev/ttyS%s' % self.port
+        elif 'LPD' in device:
+            self.conn = device['LPD']
+            if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
+                self.uri = 'lpd://%s/%s' % (
+                    self.conn['IP'],
+                    self.conn['PORT']
+                )
+                if self.conn['LOCATION'] != '':
+                    self.location = self.conn['LOCATION']
 
-        _description = '%s__%s__%s__%s__%d' % (
+        self.info = '%s__%s__%s__%s__%d' % (
             device['manufacturer'],
             device['model'],
             device['feature'],
@@ -98,78 +86,90 @@ class Printer(object):
             int(device['id'])
         )
 
-        if 'NAME' in _conn and \
-                not (_conn['NAME'] == 'undefined' or _conn['NAME'] == ''):
-            _name = '%s__%s__%s' % (
-                _conn['NAME'],
+        if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
+            self.name = '%s__%s__%s' % (
+                self.conn['NAME'],
                 device['feature'],
                 device['name'],
             )
         else:
-            _name = '%s__%s__%s__%s' % (
+            self.name = '%s__%s__%s__%s' % (
                 device['manufacturer'],
                 device['model'],
                 device['feature'],
                 device['name'],
             )
 
-        # depends cups-client
-        if 'driver' in device and device['driver']:
-            _cmd = 'lpadmin -p %(name)s -P %(driver)s -D %(description)s %(conn)s %(location)s -E' % {
-                'name': _name,
-                'driver': device['driver'],
-                'conn': _connect,
-                'location': _location,
-                'description': _description
-            }
-        else:  # is RAW
-            _cmd = 'lpadmin -p %(name)s -D %(description)s %(conn)s %(location)s -E' % {
-                'name': _name,
-                'conn': _connect,
-                'location': _location,
-                'description': _description
-            }
+        self.logical_id = device['id']
+        self.driver = device['driver']
 
-        _ret, _, _error = execute(_cmd, interactive=False)
-        if _ret != 0:
-            return False, _error
+    def md5_file(self):
+        return os.path.join(DEVICES_PATH, '{}.md5'.format(self.logical_id))
 
-        return True, int(device['id'])
+    def install(self):
+        self.remove()
 
-    @staticmethod
-    def remove(device_name):
-        """
-        (bool, string) remove(string device_name)
-        """
-        _cmd = 'lpadmin -x %s' % device_name
-        _ret, _output, _error = execute(_cmd, interactive=False)
-        if _ret != 0:
-            return False, _error
+        try:
+            conn = cups.Connection()
+        except RuntimeError:
+            conn = None
 
-        return True, _output
+        if conn:  # cups is running
+            try:
+                conn.addPrinter(
+                    name=self.name,
+                    filename=self.driver,
+                    info=self.info,
+                    location=self.location,
+                    device=self.uri
+                )
+            except cups.IPPError as (status, description):
+                print('CUPS Error: %d (%s)' % (status, description))
+                return False
 
-    @staticmethod
-    def is_installed(device_name):
-        """
-        bool is_installed(string device_name)
-        """
-        _cmd = 'lpstat -a | grep %s' % device_name
-        _ret, _, _ = execute(_cmd, interactive=False)
+            conn.acceptJobs(self.name)
+            conn.enablePrinter(self.name)
 
-        return _ret == 0
+            write_file(self.md5_file(), md5sum(self.driver))
 
-    @staticmethod
-    def search(pattern):
-        """
-        string search(string pattern)
-        """
-        # depends cups-client
-        # searching in description field
-        _cmd = "for p in $(lpstat -a | awk '{print $1}'); " \
-               "do lpstat -l -p $p | grep %s > /dev/null; " \
-               "if [ $? = 0 ]; then echo $p; fi; done" % pattern
-        _ret, _output, _ = execute(_cmd, interactive=False)
-        if _ret != 0:
-            return ''
+            return True
 
-        return _output.split("\n")[0]
+        return False
+
+    def remove(self):
+        if self.printer_name:
+            try:
+                conn = cups.Connection()
+            except RuntimeError:
+                conn = None
+
+            if conn:  # cups is running
+                conn.deletePrinter(self.printer_name)
+                if os.path.exists(self.md5_file()):
+                    os.remove(self.md5_file())
+                return True
+
+        return False
+
+    def is_changed(self):
+        if (
+            len(self.printer_data) > 0 and
+            self.printer_name == self.name and
+            self.printer_data['printer-info'] == self.info and
+            self.printer_data['printer-location'] == self.location and
+            self.printer_data['device-uri'] == self.uri and
+            not self.is_driver_changed()
+        ):
+            return False
+        else:
+            return True
+
+    def is_driver_changed(self):
+        _md5file = self.md5_file()
+        if not os.path.exists(_md5file):
+            return True
+
+        with open(_md5file) as handle:
+            _md5 = handle.read()
+
+        return md5sum(self.driver) != _md5
