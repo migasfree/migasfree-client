@@ -151,6 +151,39 @@ def get_hostname():
     return platform.node().split('.')[0]
 
 
+def get_active_user():
+    """
+    string get_active_user(void)
+    :return: string or None
+    """
+
+    _f = '/sys/class/tty/tty0/active'  # kernel >= 2.6.37
+    if os.path.exists(_f):
+        _tty = open(_f).read().split()[0]
+        _output = commands.getoutput('who | grep {}'.format(_tty)).split()
+        if _output:
+           return _output[0]  # user column
+
+    return None
+
+
+def get_active_graphic_pid(pids):
+    """
+    int get_active_graphic_pid(list pids)
+    :param pids: list
+    :return: int
+    """
+    _active_user = get_active_user()
+    if _active_user:
+        for _pid in pids:
+            _user_pid = commands.getoutput('ps -p {} -o ruser='.format(_pid))
+            _user_name = get_user_info(_user_pid)['name']
+            if _user_name == _active_user:
+                return _pid
+
+    return pids.pop()  # otherwise, last pid of list (backwards compatibility)
+
+
 def get_graphic_pid():
     """
     list get_graphic_pid(void)
@@ -169,11 +202,8 @@ def get_graphic_pid():
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof %s' % _process)
         if _pid != '':
-            # sometimes the command pidof return multiples pids,
-            # then we use the last pid
-            _pid_list = _pid.split(' ')
-
-            return [_pid_list.pop(), _process]
+            # sometimes the command pidof returns multiple pids
+            return [get_active_graphic_pid(_pid.split()), _process]
 
     return [None, None]
 
