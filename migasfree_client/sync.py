@@ -15,10 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
-__license__ = 'GPLv3'
-__all__ = 'MigasFreeSync'
-
 import os
 import sys
 import errno
@@ -26,6 +22,7 @@ import json
 import time
 import tempfile
 import requests
+import cups
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -47,6 +44,10 @@ from . import (
 
 from .command import MigasFreeCommand
 from .devices import Printer
+
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
+__license__ = 'GPLv3'
+__all__ = 'MigasFreeSync'
 
 
 class MigasFreeSync(MigasFreeCommand):
@@ -681,7 +682,7 @@ class MigasFreeSync(MigasFreeCommand):
         self._upload_execution_errors()
         self.end_synchronization(start_date)
         self.end_of_transmission()
-        self._show_message(_('Operations completed'))
+        self._show_message(_('Completed operations'))
 
     def _search(self, pattern):
         return self.pms.search(pattern)
