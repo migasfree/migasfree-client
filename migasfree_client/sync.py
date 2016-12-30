@@ -731,7 +731,7 @@ class MigasFreeSync(MigasFreeCommand):
         logical_devices = {}  # key is id field
         for device in devices['logical']:
             if 'PRINTER' in device:
-                dev = LogicalDevice(device['PRINTER'])
+                dev = Printer(device['PRINTER'])
                 logical_devices[int(dev.logical_id)] = dev
 
         conn = cups.Connection()
