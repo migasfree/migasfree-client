@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,27 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-
 import os
 import sys
 import errno
 import requests
 import json
-
 import secure
 import utils
-
 import gettext
-_ = gettext.gettext
-
 import logging
-logger = logging.getLogger(__name__)
 
 from requests_toolbelt import MultipartEncoder
 
 from . import settings
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
+
+_ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class UrlRequest(object):
@@ -126,7 +124,8 @@ class UrlRequest(object):
             'user-agent': 'migasfree-client/%s %s' % (
                 utils.get_mfc_release(),
                 requests.utils.default_user_agent()
-            )
+            ),
+            'accept-language': os.getenv('LANGUAGE', os.getenv('LANG', 'en'))
         }
         if safe:
             data = json.dumps({
@@ -154,7 +153,7 @@ class UrlRequest(object):
                 files.append(
                     ('file', (_file, content, mime))
                 )
-            # headers['content-type'] = 'multipart/form-data'
+
             logger.debug('URL upload files: %s', files)
             # http://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request
             if safe:
