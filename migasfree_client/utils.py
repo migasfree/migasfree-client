@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-
-import subprocess
 import os
 import sys
+import subprocess
 import ConfigParser
 import commands
 import time
@@ -40,6 +37,9 @@ import gettext
 _ = gettext.gettext
 
 from . import settings, network
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
 
 # TODO http://docs.python.org/library/unittest.html
 
@@ -162,7 +162,7 @@ def get_active_user():
         _tty = open(_f).read().split()[0]
         _output = commands.getoutput('who | grep {}'.format(_tty)).split()
         if _output:
-           return _output[0]  # user column
+            return _output[0]  # user column
 
     return None
 
@@ -365,7 +365,6 @@ def remove_file(archive):
         os.remove(archive)
 
 
-# based in http://code.activestate.com/recipes/577058/
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
@@ -375,6 +374,8 @@ def query_yes_no(question, default="yes"):
         an answer is required of the user).
 
     The "answer" return value is one of "yes" or "no".
+
+    Based in http://code.activestate.com/recipes/577058/
     """
     valid = {
         _("yes"): "yes", _("y"): "yes",
@@ -405,7 +406,7 @@ def check_lock_file(cmd, lock_file):
         _file = None
         _pid = None
         try:
-            _file = open(lock_file, 'r')
+            _file = open(lock_file)
             _pid = _file.read()
         except IOError:
             pass
