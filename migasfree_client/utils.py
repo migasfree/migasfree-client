@@ -318,7 +318,8 @@ def get_user_info(user):
         'pwd': _info[1],  # if 'x', encrypted
         'uid': _info[2],
         'gid': _info[3],
-        'fullname': _info[4],
+        # http://en.wikipedia.org/wiki/Gecos_field
+        'fullname': _info[4].split(',', 1)[0],
         'home': _info[5],
         'shell': _info[6]
     }
