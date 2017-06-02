@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-
 # TODO common code between server & client
 
 import gettext
 _ = gettext.gettext
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
 
 ALL_OK = 0
 UNAUTHENTICATED = 1
@@ -31,7 +31,7 @@ COMMAND_NOT_FOUND = 4
 INVALID_SIGNATURE = 5
 COMPUTER_NOT_FOUND = 6
 DEVICE_NOT_FOUND = 7
-VERSION_NOT_FOUND = 8
+PROJECT_NOT_FOUND = 8
 USER_DOES_NOT_HAVE_PERMISSION = 9
 UNSUBSCRIBED_COMPUTER = 10
 GENERIC = 100
@@ -45,7 +45,7 @@ ERROR_INFO = {
     INVALID_SIGNATURE: _("Signature is not valid"),
     COMPUTER_NOT_FOUND: _("Computer not found"),
     DEVICE_NOT_FOUND: _("Device not found"),
-    VERSION_NOT_FOUND: _("Version not found"),
+    PROJECT_NOT_FOUND: _("Project not found"),
     USER_DOES_NOT_HAVE_PERMISSION: _("User does not have permission"),
     UNSUBSCRIBED_COMPUTER: _("Unsubscribed computer"),
     GENERIC: _("Generic error")
@@ -53,7 +53,7 @@ ERROR_INFO = {
 
 
 def error_info(number):
-    '''
+    """
     string error_info(int number)
-    '''
+    """
     return ERROR_INFO.get(number, '')
