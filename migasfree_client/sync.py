@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ class MigasFreeSync(MigasFreeCommand):
         ]
 
         if lang in allowed_languages:
-            cmd = '%s %s' % (lang, filename)
+            cmd = '{} {}'.format(lang, filename)
         else:
             cmd = ':'  # gracefully degradation
 
@@ -209,7 +209,7 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Executing faults...'))
         for item in fault_definitions:
             result = self._eval_code(item['language'], item['code'])
-            info = '%s: %s' % (item['name'], result)
+            info = '{}: {}'.format(item['name'], result)
             if result:
                 # only send faults with output!!!
                 response['faults'][item['name']] = result
@@ -349,9 +349,9 @@ class MigasFreeSync(MigasFreeCommand):
 
     @staticmethod
     def _software_history(software):
-        history = ''
+        history = {}
 
-        # if have been installed packages manually
+        # if have been managed packages manually
         # information is uploaded to server
         if os.path.isfile(settings.SOFTWARE_FILE) \
                 and os.stat(settings.SOFTWARE_FILE).st_size:
@@ -364,16 +364,10 @@ class MigasFreeSync(MigasFreeCommand):
             )
 
             if diff_software:
-                file_mtime = time.strftime(
-                    '%Y-%m-%d %H:%M:%S',
-                    time.localtime(os.path.getmtime(settings.SOFTWARE_FILE))
-                )
-                now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-                history = '# [%s, %s]\n%s' % (
-                    file_mtime,
-                    now,
-                    '\n'.join(diff_software)
-                )
+                history = {
+                    'installed': [x for x in diff_software if x.startswith('+')],
+                    'uninstalled': [x for x in diff_software if x.startswith('-')],
+                }
                 logger.debug('Software diff: %s', history)
 
         return history
@@ -406,7 +400,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         server = self.migas_server
         if self.migas_package_proxy_cache:
-            server = '%s/%s' % (self.migas_package_proxy_cache, server)
+            server = '{}/{}'.format(self.migas_package_proxy_cache, server)
 
         ret = self.pms.create_repos(
             server,
@@ -490,7 +484,7 @@ class MigasFreeSync(MigasFreeCommand):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response _hardware_capture_is_required: %s', response)
+        logger.debug('Response hardware_capture_is_required: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -527,7 +521,7 @@ class MigasFreeSync(MigasFreeCommand):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response _upload_software: %s', response)
+        logger.debug('Response upload_hardware: %s', response)
 
         if 'error' in response:
             msg = response['error']['info']
@@ -626,7 +620,7 @@ class MigasFreeSync(MigasFreeCommand):
             },
             debug=self._debug
         )
-        logger.debug('Response _upload_software: %s', response)
+        logger.debug('Response upload_software: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -646,13 +640,13 @@ class MigasFreeSync(MigasFreeCommand):
             data={
                 'id': self._computer_id,
                 'start_date': start_date,
-                'consumer': '%s %s' % (consumer, utils.get_mfc_release()),
+                'consumer': '{} {}'.format(consumer, utils.get_mfc_release()),
                 'pms_status_ok': self._pms_status_ok
             },
             debug=self._debug
         )
         self.operation_ok()
-        logger.debug('Response upload_accurate_connection: %s', response)
+        logger.debug('Response upload_sync: %s', response)
 
         return response
 
