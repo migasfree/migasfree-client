@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import time
 import tempfile
 import platform
 import cups
+import socket
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -207,7 +208,7 @@ class MigasFreeClient(MigasFreeCommand):
         ]
 
         if lang in _allowed_languages:
-            _cmd = '%s %s' % (lang, _filename)
+            _cmd = '{} {}'.format(lang, _filename)
         else:
             _cmd = ':'  # gracefully degradation
 
@@ -228,6 +229,7 @@ class MigasFreeClient(MigasFreeCommand):
         _response = {
             'computer': {
                 'hostname': self.migas_computer_name,
+                'fqdn': socket.getfqdn(),
                 'ip': network.get_network_info()['ip'],
                 'version': self.migas_version,
                 'platform': platform.system(),
@@ -268,7 +270,7 @@ class MigasFreeClient(MigasFreeCommand):
         self._send_message(_('Executing faults...'))
         for _item in faultsdef:
             _result = self._eval_code(_item['language'], _item['code'])
-            _info = '%s: %s' % (_item['name'], _result)
+            _info = '{}: {}'.format(_item['name'], _result)
             if _result:
                 # only send faults with output!!!
                 _response['faults'][_item['name']] = _result
@@ -356,7 +358,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         _server = self.migas_server
         if self.migas_package_proxy_cache:
-            _server = '%s/%s' % (self.migas_package_proxy_cache, _server)
+            _server = '{}/{}'.format(self.migas_package_proxy_cache, _server)
 
         _ret = self.pms.create_repos(
             _server,
