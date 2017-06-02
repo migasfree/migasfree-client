@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,21 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-
 import os
 import logging
 
 from .pms import Pms
 from migasfree_client.utils import execute
 
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
+
 
 @Pms.register('Yum')
 class Yum(Pms):
-    '''
+    """
     PMS for yum based systems (Fedora, Red Hat, CentOS, ...)
-    '''
+    """
 
     def __init__(self):
         Pms.__init__(self)
@@ -46,41 +45,41 @@ class Yum(Pms):
             self._repo = '/etc/yum/repos.d/migasfree.repo'
 
     def install(self, package):
-        '''
+        """
         bool install(string package)
-        '''
+        """
 
-        self._cmd = '%s install %s' % (self._pms, package.strip())
+        self._cmd = '{} install {}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
 
     def remove(self, package):
-        '''
+        """
         bool remove(string package)
-        '''
+        """
 
-        self._cmd = '%s remove %s' % (self._pms, package.strip())
+        self._cmd = '{} remove {}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
 
     def search(self, pattern):
-        '''
+        """
         bool search(string pattern)
-        '''
+        """
 
-        self._cmd = '%s search %s' % (self._pms, pattern.strip())
+        self._cmd = '{} search {}'.format(self._pms, pattern.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
 
     def update_silent(self):
-        '''
+        """
         (bool, string) update_silent(void)
-        '''
+        """
 
-        self._cmd = '%s --assumeyes update' % self._pms
+        self._cmd = '{} --assumeyes update'.format(self._pms)
         logging.debug(self._cmd)
         _ret, _, _error = execute(
             self._cmd,
@@ -88,24 +87,24 @@ class Yum(Pms):
             verbose=True
         )
 
-        return (_ret == 0, _error)
+        return _ret == 0, _error
 
     def install_silent(self, package_set):
-        '''
+        """
         (bool, string) install_silent(list package_set)
-        '''
+        """
 
         if not isinstance(package_set, list):
-            return (False, 'package_set is not a list: %s' % package_set)
+            return False, 'package_set is not a list: %s' % package_set
 
         for pkg in package_set[:]:
             if self.is_installed(pkg):
                 package_set.remove(pkg)
 
         if not package_set:
-            return (True, None)
+            return True, None
 
-        self._cmd = '%s --assumeyes install %s' % (
+        self._cmd = '{} --assumeyes install {}'.format(
             self._pms,
             ' '.join(package_set)
         )
@@ -116,25 +115,27 @@ class Yum(Pms):
             verbose=True
         )
 
-        return (_ret == 0, _error)
+        return _ret == 0, _error
 
     def remove_silent(self, package_set):
-        '''
+        """
         (bool, string) remove_silent(list package_set)
-        '''
+        """
 
         if not isinstance(package_set, list):
-            return (False, 'package_set is not a list: %s' % package_set)
+            return False, 'package_set is not a list: %s' % package_set
 
         for pkg in package_set[:]:
             if not self.is_installed(pkg):
                 package_set.remove(pkg)
 
         if not package_set:
-            return (True, None)
+            return True, None
 
-        self._cmd = '%s --assumeyes remove %s' \
-            % (self._pms, ' '.join(package_set))
+        self._cmd = '{} --assumeyes remove {}'.format(
+            self._pms,
+            ' '.join(package_set)
+        )
         logging.debug(self._cmd)
         _ret, _, _error = execute(
             self._cmd,
@@ -142,38 +143,38 @@ class Yum(Pms):
             verbose=True
         )
 
-        return (_ret == 0, _error)
+        return _ret == 0, _error
 
     def is_installed(self, package):
-        '''
+        """
         bool is_installed(string package)
-        '''
+        """
 
-        self._cmd = '%s -q %s' % (self._pm, package.strip())
+        self._cmd = '{} -q {}'.format(self._pm, package.strip())
         logging.debug(self._cmd)
 
-        return (execute(self._cmd, interactive=False)[0] == 0)
+        return execute(self._cmd, interactive=False)[0] == 0
 
     def clean_all(self):
-        '''
+        """
         bool clean_all(void)
-        '''
+        """
 
-        self._cmd = '%s clean all' % self._pms
+        self._cmd = '{} clean all'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            self._cmd = '%s --assumeyes check-update' % self._pms
+            self._cmd = '{} --assumeyes check-update'.format(self._pms)
             logging.debug(self._cmd)
-            return (execute(self._cmd)[0] == 0)
+            return execute(self._cmd)[0] == 0
 
         return False
 
     def query_all(self):
-        '''
+        """
         ordered list query_all(void)
-        '''
+        """
 
-        self._cmd = '%s -qa' % self._pm
+        self._cmd = '{} -qa'.format(self._pm)
         logging.debug(self._cmd)
         _ret, _output, _ = execute(self._cmd, interactive=False)
         if _ret != 0:
@@ -181,20 +182,20 @@ class Yum(Pms):
 
         return sorted(_output.split('\n'))
 
-    def create_repos(self, server, version, repositories):
-        '''
-        bool create_repos(string server, string version, list repositories)
-        '''
+    def create_repos(self, server, project, repositories):
+        """
+        bool create_repos(string server, string project, list repositories)
+        """
 
         _template = \
 """[%(repo)s]
 name=%(repo)s
-baseurl=http://%(server)s/repo/%(version)s/REPOSITORIES/%(repo)s
+baseurl=http://%(server)s/repo/%(project)s/REPOSITORIES/%(repo)s
 gpgcheck=0
 enabled=1
 http_caching=none
 metadata_expire=1
-""" % {'server': server, 'version': version, 'repo': '%(repo)s'}
+""" % {'server': server, 'project': project, 'repo': '%(repo)s'}
 
         _file = None
         try:
@@ -210,10 +211,10 @@ metadata_expire=1
                 _file.close()
 
     def import_server_key(self, file_key):
-        '''
-        bool import_server_key( file )
-        '''
+        """
+        bool import_server_key(string file_key)
+        """
 
-        self._cmd = "rpm --import %s > /dev/null" % file_key
+        self._cmd = 'rpm --import {} > /dev/null'.format(file_key)
         logging.debug(self._cmd)
-        return (execute(self._cmd)[0] == 0)
+        return execute(self._cmd)[0] == 0
