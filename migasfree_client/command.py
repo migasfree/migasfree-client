@@ -247,6 +247,7 @@ class MigasFreeCommand(object):
                 'username': user,
                 'password': password,
                 'project': self.migas_project,
+                'version': self.migas_project,  # backwards compatibility
                 'platform': platform.system(),
                 'pms': str(self.pms),
             },

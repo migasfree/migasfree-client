@@ -232,6 +232,7 @@ class MigasFreeClient(MigasFreeCommand):
                 'fqdn': socket.getfqdn(),
                 'ip': network.get_network_info()['ip'],
                 'project': self.migas_project,
+                'version': self.migas_project,  # backwards compatibility
                 'platform': platform.system(),
                 'pms': str(self.pms),
                 'user': self._graphic_user,

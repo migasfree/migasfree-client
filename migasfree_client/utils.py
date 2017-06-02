@@ -463,6 +463,11 @@ def get_mfc_project():
     return '-'.join(platform.linux_distribution()[0:2])  # if not set
 
 
+def get_mfc_version():
+    # backwards compatibility method
+    return get_mfc_project()
+
+
 def get_mfc_computer_name():
     from . import settings
 
