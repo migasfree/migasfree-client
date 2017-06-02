@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,19 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-__all__ = ('MigasFreeCommand')
-
 import os
 import sys
 import logging
 import errno
 import getpass
 import platform
-
-import gettext
-_ = gettext.gettext
 
 from . import (
     settings,
@@ -39,6 +32,13 @@ from . import (
 )
 
 from .backends import Pms
+
+import gettext
+_ = gettext.gettext
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
+__all__ = 'MigasFreeCommand'
 
 # implicit print flush
 buf_arg = 0
@@ -51,19 +51,19 @@ sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buf_arg)
 
 
 class MigasFreeCommand(object):
-    '''
+    """
     Interface class
-    '''
+    """
 
     release = utils.get_mfc_release()
 
     CMD = 'migasfree-command'  # /usr/bin/migasfree-command
-    LOCK_FILE = os.path.join(settings.TMP_PATH, '%s.pid' % CMD)
-    ERROR_FILE = os.path.join(settings.TMP_PATH, '%s.err' % CMD)
+    LOCK_FILE = os.path.join(settings.TMP_PATH, '{}.pid'.format(CMD))
+    ERROR_FILE = os.path.join(settings.TMP_PATH, '{}.err'.format(CMD))
 
     PUBLIC_KEY = 'server.pub'
     PRIVATE_KEY = ''
-    REPOS_KEY = "repositories.pub"
+    REPOS_KEY = 'repositories.pub'
 
     ICON = 'apps/migasfree.svg'
     ICON_COMPLETED = 'actions/migasfree-ok.svg'
@@ -132,8 +132,7 @@ class MigasFreeCommand(object):
             os.environ.get(
                 'MIGASFREE_CLIENT_DEBUG',
                 _config_client.get('debug', False)
-            ),
-            default=False
+            )
         )
         if self._debug:
             _log_level = logging.DEBUG
@@ -172,11 +171,11 @@ class MigasFreeCommand(object):
         self._init_url_request()
 
     def _init_url_request(self):
-        _url_base = '%s/api/' % str(self.migas_server)
+        _url_base = '{}/api/'.format(self.migas_server)
         if self.migas_ssl_cert:
-            _url_base = '%s://%s' % ('https', _url_base)
+            _url_base = '{}://{}'.format('https', _url_base)
         else:
-            _url_base = '%s://%s' % ('http', _url_base)
+            _url_base = '{}://{}'.format('http', _url_base)
         self._url_request = url_request.UrlRequest(
             debug=self._debug,
             url_base=_url_base,
@@ -210,8 +209,8 @@ class MigasFreeCommand(object):
             settings.KEYS_PATH, self.migas_server, self.REPOS_KEY
         )
         if os.path.isfile(_private_key) and \
-            os.path.isfile(_public_key) and \
-            os.path.isfile(_repos_key):
+                os.path.isfile(_public_key) and \
+                os.path.isfile(_repos_key):
             return True  # all OK
 
         logging.warning('Security keys are not present!!!')
@@ -287,8 +286,10 @@ class MigasFreeCommand(object):
 
     def _save_repos_key(self):
         _curl = curl.Curl(
-            '%s/%s' % (self.migas_server, self.get_key_repositories_command),
-            post=None,
+            '{}/{}'.format(
+                self.migas_server,
+                self.get_key_repositories_command
+            ),
             proxy=self.migas_proxy,
             cert=self.migas_ssl_cert,
         )
@@ -304,7 +305,7 @@ class MigasFreeCommand(object):
         if not os.path.isdir(_path):
             try:
                 os.makedirs(_path)
-            except:
+            except OSError:
                 _msg = _('Error creating %s directory') % _path
                 self.operation_failed(_msg)
                 logging.error(_msg)
@@ -314,7 +315,7 @@ class MigasFreeCommand(object):
         logging.debug('Trying writing file: %s', _path_file)
         _ret = utils.write_file(_path_file, _response)
         if _ret:
-            if  self.pms.import_server_key(_path_file):
+            if self.pms.import_server_key(_path_file):
                 print(_('Key %s created!') % _path_file)
             else:
                 print(_('ERROR: not import key: %s!') % _path_file)
@@ -357,7 +358,7 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         if self.migas_ssl_cert is not None and \
-        not os.path.exists(self.migas_ssl_cert):
+                not os.path.exists(self.migas_ssl_cert):
             print('\t\t%s: %s' % (_('Warning'), _('Certificate does not exist and authentication is not guaranteed')))
         print('\t%s: %s' % (
             _('Package Proxy Cache'),
@@ -380,7 +381,7 @@ class MigasFreeCommand(object):
         }
 
         for _item in _pms_list:
-            _cmd = 'which %s' % _item
+            _cmd = 'which {}'.format(_item)
             _ret, _, _ = utils.execute(_cmd, interactive=False)
             if _ret == 0:
                 return _pms_list[_item]
