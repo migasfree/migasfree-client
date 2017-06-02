@@ -86,11 +86,15 @@ class MigasFreeCommand(object):
         if not isinstance(_config_client, dict):
             _config_client = {}
 
-        self.migas_version = os.environ.get(
-            'MIGASFREE_CLIENT_VERSION', utils.get_mfc_version()
+        self.migas_project = os.environ.get(
+            'MIGASFREE_CLIENT_PROJECT',
+            os.environ.get(
+                'MIGASFREE_CLIENT_VERSION',  # backwards compatibility
+                utils.get_mfc_project()
+            )
         )
 
-        self.PRIVATE_KEY = '%s.pri' % self.migas_version
+        self.PRIVATE_KEY = '{}.pri'.format(self.migas_project)
 
         self.migas_computer_name = os.environ.get(
             'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
@@ -148,8 +152,18 @@ class MigasFreeCommand(object):
             'MIGASFREE_PACKAGER_PASSWORD',
             _config_packager.get('password', None)
         )
-        self.packager_version = os.environ.get(
-            'MIGASFREE_PACKAGER_VERSION', _config_packager.get('version', None)
+        self.packager_project = os.environ.get(
+            'MIGASFREE_PACKAGER_PROJECT',
+            os.environ.get(
+                'MIGASFREE_PACKAGER_VERSION',  # backwards compatibility
+                _config_packager.get(
+                    'project',
+                    _config_packager.get(
+                        'version',  # backwards compatibility
+                        None
+                    )
+                )
+            )
         )
         self.packager_store = os.environ.get(
             'MIGASFREE_PACKAGER_STORE', _config_packager.get('store', None)
@@ -232,7 +246,7 @@ class MigasFreeCommand(object):
             data={
                 'username': user,
                 'password': password,
-                'version': self.migas_version,
+                'project': self.migas_project,
                 'platform': platform.system(),
                 'pms': str(self.pms),
             },
@@ -352,7 +366,7 @@ class MigasFreeCommand(object):
     def _show_running_options(self):
         print('')
         print(_('Running options: %s') % settings.CONF_FILE)
-        print('\t%s: %s' % (_('Version'), self.migas_version))
+        print('\t%s: %s' % (_('Project'), self.migas_project))
         print('\t%s: %s' % (_('Server'), self.migas_server))
         print('\t%s: %s' % (_('Auto update packages'), self.migas_auto_update_packages))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))

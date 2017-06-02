@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,10 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-__all__ = ('MigasFreeUpload', 'main')
-
 import os
 import sys
 import optparse
@@ -31,10 +27,14 @@ import errno
 import utils
 import server_errors
 
+from .command import MigasFreeCommand
+
 import gettext
 _ = gettext.gettext
 
-from .command import MigasFreeCommand
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
+__all__ = ('MigasFreeUpload', 'main')
 
 
 class MigasFreeUpload(MigasFreeCommand):
@@ -77,10 +77,10 @@ class MigasFreeUpload(MigasFreeCommand):
     def _show_running_options(self):
         MigasFreeCommand._show_running_options(self)
 
-        print('\t%s: %s' % (_('Version'), self.packager_version))
+        print('\t%s: %s' % (_('Project'), self.packager_project))
         print('\t%s: %s' % (_('Store'), self.packager_store))
         print('\t%s: %s' % (_('User'), self.packager_user))
-        #print('\t%s: %s' % (_('Password'), self.packager_pwd))
+        # print('\t%s: %s' % (_('Password'), self.packager_pwd))
         if self._file:
             print('\t%s: %s' % (_('File'), self._file))
             print('\t%s: %s' % (_('Regular file'), self._is_regular_file))
@@ -101,11 +101,11 @@ class MigasFreeUpload(MigasFreeCommand):
         if not self.packager_pwd:
             self.packager_pwd = getpass.getpass('%s: ' % _('User password'))
 
-        if not self.packager_version:
-            self.packager_version = raw_input('%s: ' % _('Version to upload at server'))
-            if not self.packager_version:
-                print(_('Empty version. Exiting %s.') % self.CMD)
-                logging.info('Empty version in upload operation')
+        if not self.packager_project:
+            self.packager_project = raw_input('%s: ' % _('Project to upload at server'))
+            if not self.packager_project:
+                print(_('Empty project. Exiting %s.') % self.CMD)
+                logging.info('Empty project in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
@@ -128,7 +128,7 @@ class MigasFreeUpload(MigasFreeCommand):
         _ret = self._url_request.run(
             'upload_server_package',
             data={
-                'version': self.packager_version,
+                'project': self.packager_project,
                 'store': self.packager_store,
                 'source': self._is_regular_file
             },
@@ -150,7 +150,7 @@ class MigasFreeUpload(MigasFreeCommand):
     def _upload_set(self):
         logging.debug('Upload set operation...')
         if not os.path.isdir(self._directory):
-            print(_('Directory not found'))
+            print(gettext.gettext('Directory not found'))
             logging.error('Directory not found %s', self._directory)
             sys.exit(errno.ENOENT)
 
@@ -168,7 +168,7 @@ class MigasFreeUpload(MigasFreeCommand):
                     _ret = self._url_request.run(
                         'upload_server_set',
                         data={
-                            'version': self.packager_version,
+                            'project': self.packager_project,
                             'store': self.packager_store,
                             'packageset': self._server_directory,
                             'path': os.path.dirname(
@@ -209,7 +209,7 @@ class MigasFreeUpload(MigasFreeCommand):
         _ret = self._url_request.run(
             'create_repositories_of_packageset',
             data={
-                'version': self.packager_version,
+                'project': self.packager_project,
                 'packageset': _packageset
             }
         )
@@ -241,7 +241,7 @@ class MigasFreeUpload(MigasFreeCommand):
         })
 
         # migasfree-upload {-f file [--regular-file] | -d dir [-n name]}
-        #  [[-u user] [-p pwd] [--main-version version] [-s store] [--no-create-repo]]
+        #  [[-u user] [-p pwd] [--main-project project] [-s store] [--no-create-repo]]
 
         parser.add_option("--file", "-f", action="store",
             help=_('File to upload at server'))
@@ -257,10 +257,10 @@ class MigasFreeUpload(MigasFreeCommand):
             help=_('Authorized user to upload at server'))
         parser.add_option("--pwd", "-p", action="store",
             help=_('User password'))
-        parser.add_option("--main-version", "-m", action="store",
-            help=_('Version to upload files'))
+        parser.add_option("--main-project", "-m", action="store",
+            help=_('Project to upload files'))
         parser.add_option("--store", "-s", action="store",
-            help=_('Main version repository at server'))
+            help=_('Store to upload files at server'))
         parser.add_option("--no-create-repo", "-c", action="store_true",
             help=_('No create repository after upload file at server'))
 
@@ -287,8 +287,8 @@ class MigasFreeUpload(MigasFreeCommand):
             self.packager_user = options.user
         if options.pwd:
             self.packager_pwd = options.pwd
-        if options.main_version:
-            self.packager_version = options.main_version
+        if options.main_project:
+            self.packager_project = options.main_project
         if options.store:
             self.packager_store = options.store
 

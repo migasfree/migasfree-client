@@ -231,7 +231,7 @@ class MigasFreeClient(MigasFreeCommand):
                 'hostname': self.migas_computer_name,
                 'fqdn': socket.getfqdn(),
                 'ip': network.get_network_info()['ip'],
-                'version': self.migas_version,
+                'project': self.migas_project,
                 'platform': platform.system(),
                 'pms': str(self.pms),
                 'user': self._graphic_user,
@@ -362,7 +362,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         _ret = self.pms.create_repos(
             _server,
-            self.migas_version,
+            self.migas_project,
             repos
         )
 

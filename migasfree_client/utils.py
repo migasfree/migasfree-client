@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@ import uuid
 import signal
 import hashlib
 
+from . import network, settings
+
 import gettext
 _ = gettext.gettext
-
-from . import network, settings
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -251,7 +251,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
         # a data line ends in 0 byte, not newline
         _display = grep(
             'DISPLAY',
-            open("/proc/%s/environ" % pid).read().split('\0')
+            open("/proc/{}/environ".format(pid)).read().split('\0')
         )
         if _display:
             _display = _display[0].split('=').pop()
@@ -401,7 +401,7 @@ def check_lock_file(cmd, lock_file):
     if os.path.isfile(lock_file):
         _file = None
         try:
-            _file = open(lock_file, 'r')
+            _file = open(lock_file)
             _pid = _file.read()
         except IOError:
             pass
@@ -445,13 +445,18 @@ def get_current_user():
     else:
         _fullname = _info['fullname']
 
-    return '%s~%s' % (_graphic_user, _fullname)
+    return '{}~{}'.format(_graphic_user, _fullname)
 
 
-def get_mfc_version():
+def get_mfc_project():
     from . import settings
 
     _config = get_config(settings.CONF_FILE, 'client')
+
+    if isinstance(_config, dict) and 'project' in _config:
+        return _config.get('project')
+
+    # backwards compatibility
     if isinstance(_config, dict) and 'version' in _config:
         return _config.get('version')
 
@@ -482,7 +487,7 @@ def get_smbios_version():
 
 
 def get_uuid_from_mac():
-    return "00000000-0000-0000-0000-%s" % network.get_first_mac()
+    return "00000000-0000-0000-0000-{}".format(network.get_first_mac())
 
 
 def get_hardware_uuid():
