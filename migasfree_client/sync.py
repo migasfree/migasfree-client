@@ -23,6 +23,7 @@ import time
 import tempfile
 import requests
 import cups
+import socket
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -173,6 +174,7 @@ class MigasFreeSync(MigasFreeCommand):
             'id': self._computer_id,
             'uuid': utils.get_hardware_uuid(),
             'name': self.migas_computer_name,
+            'fqdn': socket.getfqdn(),
             'ip_address': network.get_network_info()['ip'],
             'sync_user': self._graphic_user,
             'sync_fullname': utils.get_user_info(
@@ -186,7 +188,7 @@ class MigasFreeSync(MigasFreeCommand):
         for item in properties:
             response['sync_attributes'][item['prefix']] = \
                 self._eval_code(item['language'], item['code'])
-            info = '%s: %s' % (
+            info = '{}: {}'.format(
                 item['prefix'],
                 response['sync_attributes'][item['prefix']]
             )
