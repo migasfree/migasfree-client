@@ -613,9 +613,15 @@ class MigasFreeSync(MigasFreeCommand):
             logger.debug('Software diff: %s', data)
 
             if data['installed']:
-                history['installed'].extend(data['installed'])
+                if 'installed' in history:
+                    history['installed'].extend(data['installed'])
+                else:
+                    history['installed'] = data['installed']
             if data['uninstalled']:
-                history['uninstalled'].extend(data['uninstalled'])
+                if 'uninstalled' in history:
+                    history['uninstalled'].extend(data['uninstalled'])
+                else:
+                    history['uninstalled'] = data['uninstalled']
 
             print(_('Software diff: %s') % history)
 
