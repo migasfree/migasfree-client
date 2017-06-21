@@ -606,10 +606,17 @@ class MigasFreeSync(MigasFreeCommand):
 
         diff_software = utils.compare_lists(before, after)
         if diff_software:
-            data = time.strftime('# %Y-%m-%d %H:%M:%S\n', time.localtime()) \
-                + '\n'.join(diff_software)
+            data = {
+                'installed': [x for x in diff_software if x.startswith('+')],
+                'uninstalled': [x for x in diff_software if x.startswith('-')],
+            }
             logger.debug('Software diff: %s', data)
-            history = data + history  # reverse chronological
+
+            if data['installed']:
+                history['installed'].extend(data['installed'])
+            if data['uninstalled']:
+                history['uninstalled'].extend(data['uninstalled'])
+
             print(_('Software diff: %s') % history)
 
         self._show_message(_('Uploading software...'))
