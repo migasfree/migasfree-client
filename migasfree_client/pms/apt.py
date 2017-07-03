@@ -216,9 +216,9 @@ class Apt(Pms):
         bool create_repos(string template, string server, string project, list repositories)
         """
 
-        repo_template = 'deb {} {repo} PKGS'.format(
+        repo_template = 'deb {} {repo} PKGS\n'.format(
             template.format(server, project),
-            '{repo}'
+            repo='{repo}'
         )
 
         content = ''
