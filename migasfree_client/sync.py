@@ -228,6 +228,7 @@ class MigasFreeSync(MigasFreeCommand):
             exit_on_error=False,
             debug=self._debug
         )
+        response = response.replace('"', '')  # remove extra quotes
         logger.debug('Response get_repositories_url_template: {}'.format(response))
 
         return response
