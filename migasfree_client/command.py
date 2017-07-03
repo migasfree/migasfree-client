@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,10 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
-__license__ = 'GPLv3'
-__all__ = 'MigasFreeCommand'
 
 import os
 import sys
@@ -43,6 +39,10 @@ from . import (
     printcolor
 )
 from .pms import Pms
+
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
+__license__ = 'GPLv3'
+__all__ = 'MigasFreeCommand'
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
@@ -70,6 +70,7 @@ class MigasFreeCommand(object):
         # command API
         'get_project_keys': '/api/v1/public/keys/project/',
         'get_repositories_keys': '/api/v1/public/keys/repositories/',
+        'get_repositories_url_template': '/api/v1/public/repository-url-template/',
         'get_computer_id': '/api/v1/safe/computers/id/',
         'upload_computer': '/api/v1/safe/computers/',
         'upload_eot': '/api/v1/safe/eot/',
