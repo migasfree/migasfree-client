@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-
 import re
 import logging
 
 from .pms import Pms
 from ..utils import execute, write_file
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
 
 
 @Pms.register('Apt')
@@ -207,22 +207,23 @@ class Apt(Pms):
         for _line in _packages:
             if _line.startswith('ii'):
                 _tmp = re.split(' +', _line)
-                _result.append('%s_%s_%s.deb' % (_tmp[1], _tmp[2], _tmp[3]))
+                _result.append('{}_{}_{}.deb'.format(_tmp[1], _tmp[2], _tmp[3]))
 
         return _result
 
-    def create_repos(self, server, project, repositories):
+    def create_repos(self, template, server, project, repositories):
         """
-        bool create_repos(string server, string project, list repositories)
+        bool create_repos(string template, string server, string project, list repositories)
         """
 
-        template = \
-"""deb http://%(server)s/pub/%(project)s/repos %(repo)s PKGS
-""" % {'server': server, 'project': project, 'repo': '%(repo)s'}
+        repo_template = 'deb {} {repo} PKGS'.format(
+            template.format(server, project),
+            '{repo}'
+        )
 
         content = ''
         for repo in repositories:
-            content += template % {'repo': repo}
+            content += repo_template.format(repo=repo)
 
         return write_file(self._repo, content)
 
@@ -231,7 +232,7 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        self._cmd = 'apt-key add %s > /dev/null' % file_key
+        self._cmd = 'apt-key add {} > /dev/null'.format(file_key)
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0

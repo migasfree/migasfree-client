@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2015 Jose Antonio Chavarría
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,19 +14,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-# Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 
 class Pms(object):
-    '''
+    """
     PMS: Package Management System
     Interface class
     Abstract methods
-    '''
+    """
 
     # http://stackoverflow.com/questions/3786762/dynamic-base-class-and-factories
     _entity_ = None
@@ -53,93 +51,93 @@ class Pms(object):
         self._mimetype = []  # Allowed mimetypes for packages
 
     def __str__(self):
-        '''
+        """
         string __str__(void)
-        '''
+        """
 
         return self._name
 
     def install(self, package):
-        '''
+        """
         bool install(string package)
-        '''
+        """
 
         raise NotImplementedError
 
     def remove(self, package):
-        '''
+        """
         bool remove(string package)
-        '''
+        """
 
         raise NotImplementedError
 
     def search(self, pattern):
-        '''
+        """
         bool search(string pattern)
-        '''
+        """
 
         raise NotImplementedError
 
     def update_silent(self):
-        '''
+        """
         (bool, string) update_silent(void)
-        '''
+        """
 
         raise NotImplementedError
 
     def install_silent(self, package_set):
-        '''
+        """
         (bool, string) install_silent(list package_set)
-        '''
+        """
 
         raise NotImplementedError
 
     def remove_silent(self, package_set):
-        '''
+        """
         (bool, string) remove_silent(list package_set)
-        '''
+        """
 
         raise NotImplementedError
 
     def is_installed(self, package):
-        '''
+        """
         bool is_installed(string package)
-        '''
+        """
 
         raise NotImplementedError
 
     def clean_all(self):
-        '''
+        """
         bool clean_all(void)
-        '''
+        """
 
         raise NotImplementedError
 
     def query_all(self):
-        '''
+        """
         ordered list query_all(void)
         list format: name_version_architecture.extension
-        '''
+        """
 
         raise NotImplementedError
 
-    def create_repos(self, server, project, repositories):
-        '''
-        bool create_repos(string server, string project, list repositories)
-        '''
+    def create_repos(self, template, server, project, repositories):
+        """
+        bool create_repos(string template, string server, string project, list repositories)
+        """
 
         raise NotImplementedError
 
     def import_server_key(self, file_key):
-        '''
+        """
         bool import_server_key(string file_key)
-        '''
+        """
 
         raise NotImplementedError
 
     def get_system_architecture(self):
-        '''
+        """
         string get_system_architecture(void)
-        '''
+        """
 
         raise NotImplementedError

@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-
 import logging
 
 from .pms import Pms
 from ..utils import execute, write_file
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
 
 
 @Pms.register('Zypper')
@@ -190,24 +190,24 @@ class Zypper(Pms):
 
         return sorted(_output.split('\n'))
 
-    def create_repos(self, server, project, repositories):
+    def create_repos(self, template, server, project, repositories):
         """
-        bool create_repos(string server, string project, list repositories)
+        bool create_repos(string template, string server, string project, list repositories)
         """
 
-        template = \
-"""[%(repo)s]
-name=%(repo)s
-baseurl=http://%(server)s/pub/%(project)s/repos/%(repo)s
+        repo_template = \
+"""[{repo}]
+name={repo}
+baseurl={url}/{repo}
 gpgcheck=0
 enabled=1
 http_caching=none
 metadata_expire=1
-""" % {'server': server, 'project': project, 'repo': '%(repo)s'}
+""".format(url=template.format(server, project), repo='{repo}')
 
         content = ''
         for repo in repositories:
-            content += template % {'repo': repo}
+            content += repo_template.format(repo=repo)
 
         return write_file(self._repo, content)
 
