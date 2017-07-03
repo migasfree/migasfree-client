@@ -203,20 +203,21 @@ class Apt(Pms):
 
         return _result
 
-    def create_repos(self, server, project, repositories):
+    def create_repos(self, template, server, project, repositories):
         """
-        bool create_repos(string server, string project, list repositories)
+        bool create_repos(string template, string server, string project, list repositories)
         """
 
-        _template = \
-"""deb http://%(server)s/repo/%(project)s/REPOSITORIES %(repo)s PKGS
-""" % {'server': server, 'project': project, 'repo': '%(repo)s'}
+        repo_template = 'deb {} {repo} PKGS\n'.format(
+            template.format(server=server, project=project),
+            repo='{repo}'
+        )
 
         _file = None
         try:
             _file = open(self._repo, 'wb')
             for _repo in repositories:
-                _file.write(_template % {'repo': _repo['name']})
+                _file.write(repo_template.format(repo=_repo['name']))
 
             return True
         except IOError:

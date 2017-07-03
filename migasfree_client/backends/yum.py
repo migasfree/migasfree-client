@@ -182,26 +182,26 @@ class Yum(Pms):
 
         return sorted(_output.split('\n'))
 
-    def create_repos(self, server, project, repositories):
+    def create_repos(self, template, server, project, repositories):
         """
-        bool create_repos(string server, string project, list repositories)
+        bool create_repos(string template, string server, string project, list repositories)
         """
 
-        _template = \
-"""[%(repo)s]
-name=%(repo)s
-baseurl=http://%(server)s/repo/%(project)s/REPOSITORIES/%(repo)s
+        repo_template = \
+"""[{repo}]
+name={repo}
+baseurl={url}/{repo}
 gpgcheck=0
 enabled=1
 http_caching=none
 metadata_expire=1
-""" % {'server': server, 'project': project, 'repo': '%(repo)s'}
+""".format(url=template.format(server, project), repo='{repo}')
 
         _file = None
         try:
             _file = open(self._repo, 'wb')
             for _repo in repositories:
-                _file.write(_template % {'repo': _repo['name']})
+                _file.write(repo_template.format(repo=_repo['name']))
 
             return True
         except IOError:
