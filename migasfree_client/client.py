@@ -37,6 +37,7 @@ from . import (
     server_errors,
     printcolor,
     network,
+    curl,
 )
 
 from .command import MigasFreeCommand
@@ -354,14 +355,39 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
+    def _get_repositories_url_template(self):
+        _curl = curl.Curl(
+            '{}/{}'.format(
+                self.migas_server,
+                'api/v1/public/repository-url-template/'
+            ),
+            proxy=self.migas_proxy,
+            cert=self.migas_ssl_cert,
+            post=[('post', 'post'), ]  # dummy data
+        )
+        _curl.run()
+
+        if _curl.http_code != 200:
+            # backwards compatibility code
+            return 'http://{server}/repo/{project}/REPOSITORIES'
+
+        _response = str(_curl.body).replace('"', '')  # remove extra quotes
+
+        logging.debug('Response _get_repositories_url_template: %s', _response)
+
+        return _response
+
     def _create_repositories(self, repos):
         self._send_message(_('Creating repositories...'))
+
+        _url_template = self._get_repositories_url_template()
 
         _server = self.migas_server
         if self.migas_package_proxy_cache:
             _server = '{}/{}'.format(self.migas_package_proxy_cache, _server)
 
         _ret = self.pms.create_repos(
+            _url_template,
             _server,
             self.migas_project,
             repos
