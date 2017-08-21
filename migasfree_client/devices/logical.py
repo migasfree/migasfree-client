@@ -101,7 +101,7 @@ class LogicalDevice(object):
             )
 
         self.logical_id = device['id']
-        self.driver = device['driver']
+        self.driver = device.get('driver', '')
 
     def md5_file(self):
         return os.path.join(DEVICES_PATH, '{}.md5'.format(self.logical_id))
