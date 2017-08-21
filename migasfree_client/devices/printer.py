@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2014-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2014-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ class Printer(object):
                 self.port = self.conn['PORT']
             else:
                 self.port = "0"
-            self.uri = '-v parallel:/dev/lp%s' % self.port
+            self.uri = 'parallel:/dev/lp%s' % self.port
         elif 'USB' in device:
             self.conn = device['USB']
             self.uri = 'parallel:/dev/usb/lp0'
