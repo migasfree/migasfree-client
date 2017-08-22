@@ -218,6 +218,8 @@ class MigasFreeClient(MigasFreeCommand):
         logging.debug('Output: %s', _output)
         if _ret != 0:
             logging.error('Error: %s', _error)
+            _msg = _('Code "%s" with error: %s') % (code, _error)
+            self._write_error(_msg)
 
         try:
             os.remove(_filename)
