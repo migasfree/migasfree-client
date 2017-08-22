@@ -101,7 +101,7 @@ class Printer(object):
             )
 
         self.logical_id = device['id']
-        self.driver = device.get('driver', '')
+        self.driver = device.get('driver', None)
 
     def md5_file(self):
         return os.path.join(DEVICES_PATH, '{}.md5'.format(self.logical_id))
@@ -116,13 +116,21 @@ class Printer(object):
 
         if conn:  # cups is running
             try:
-                conn.addPrinter(
-                    name=self.name,
-                    filename=self.driver,
-                    info=self.info,
-                    location=self.location,
-                    device=self.uri
-                )
+                if self.driver:
+                    conn.addPrinter(
+                        name=self.name,
+                        filename=self.driver,
+                        info=self.info,
+                        location=self.location,
+                        device=self.uri
+                    )
+                else:
+                    conn.addPrinter(
+                        name=self.name,
+                        info=self.info,
+                        location=self.location,
+                        device=self.uri
+                    )
             except cups.IPPError as (status, description):
                 print('CUPS Error: %d (%s)' % (status, description))
                 return False

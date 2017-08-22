@@ -783,8 +783,16 @@ class MigasFreeSync(MigasFreeCommand):
                         self._write_error(_msg)
 
         for key in logical_devices:
+            _printer_name = logical_devices[key].name
+
+            if logical_devices[key].driver is None:
+                _msg = _('Error: no driver defined for device %s') % _printer_name
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                self._write_error(_msg)
+                continue
+
             if logical_devices[key].is_changed():
-                _printer_name = logical_devices[key].name
                 self._send_message(_('Installing device: %s') % _printer_name)
                 if logical_devices[key].install():
                     self.operation_ok()

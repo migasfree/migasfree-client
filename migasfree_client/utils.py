@@ -622,6 +622,9 @@ def build_magic():
 
 
 def md5sum(archive):
+    if not archive:
+        return ''
+
     with open(archive) as handle:
         _md5 = handle.read()
 
