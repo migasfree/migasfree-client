@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-22 09:37+0200\n"
+"POT-Creation-Date: 2017-08-22 11:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -184,12 +184,12 @@ msgstr ""
 msgid "Removing package: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:652 ../migasfree_client/client.py:771
+#: ../migasfree_client/client.py:652 ../migasfree_client/client.py:777
 #, python-format
 msgid "Installing device: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:660 ../migasfree_client/client.py:776
+#: ../migasfree_client/client.py:660 ../migasfree_client/client.py:782
 #, python-format
 msgid "Error installing device: %s"
 msgstr ""
@@ -206,74 +206,76 @@ msgstr ""
 
 #: ../migasfree_client/client.py:764
 #, python-format
-msgid "Error: no driver defined for device %s"
+msgid ""
+"Error: no driver defined for device %s. Please, configure feature %s, in the "
+"model %s %s, and project %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:786
+#: ../migasfree_client/client.py:792
 #, python-format
 msgid "Setting default device: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:790
+#: ../migasfree_client/client.py:796
 #, python-format
 msgid "Error setting default device: %s"
 msgstr ""
 
-#: ../migasfree_client/client.py:804 ../migasfree_client/tags.py:285
+#: ../migasfree_client/client.py:810 ../migasfree_client/tags.py:285
 #: ../migasfree_client/upload.py:238
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr ""
 
-#: ../migasfree_client/client.py:811
+#: ../migasfree_client/client.py:817
 msgid "Register computer at server"
 msgstr ""
 
-#: ../migasfree_client/client.py:815
+#: ../migasfree_client/client.py:821
 msgid "Update system from repositories"
 msgstr ""
 
-#: ../migasfree_client/client.py:819
+#: ../migasfree_client/client.py:825
 msgid "Search package in repositories"
 msgstr ""
 
-#: ../migasfree_client/client.py:824
+#: ../migasfree_client/client.py:830
 msgid "Install package"
 msgstr ""
 
-#: ../migasfree_client/client.py:829
+#: ../migasfree_client/client.py:835
 msgid "Remove package"
 msgstr ""
 
-#: ../migasfree_client/client.py:833
+#: ../migasfree_client/client.py:839
 msgid "Package to install or remove"
 msgstr ""
 
-#: ../migasfree_client/client.py:838
+#: ../migasfree_client/client.py:844
 msgid "Force package upgrades"
 msgstr ""
 
-#: ../migasfree_client/client.py:847
+#: ../migasfree_client/client.py:853
 msgid "Register option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:851
+#: ../migasfree_client/client.py:857
 msgid "Update option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:854
+#: ../migasfree_client/client.py:860
 msgid "Search option is exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:858
+#: ../migasfree_client/client.py:864
 msgid "Install and remove are exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:861
+#: ../migasfree_client/client.py:867
 msgid "Install needs a package!!!"
 msgstr ""
 
-#: ../migasfree_client/client.py:864
+#: ../migasfree_client/client.py:870
 msgid "Remove needs a package!!!"
 msgstr ""
 
