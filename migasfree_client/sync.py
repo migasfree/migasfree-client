@@ -161,6 +161,8 @@ class MigasFreeSync(MigasFreeCommand):
         logger.debug('Output: %s', output)
         if ret != 0:
             logger.error('Error: %s', error)
+            msg = _('Code "%s" with error: %s') % (code, _error)
+            self._write_error(msg)
 
         try:
             os.remove(filename)
