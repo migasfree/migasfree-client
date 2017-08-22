@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 4.13\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-02 14:29+0200\n"
-"PO-Revision-Date: 2017-06-02 14:29+0200\n"
+"POT-Creation-Date: 2017-08-22 09:37+0200\n"
+"PO-Revision-Date: 2017-08-22 09:38+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
 "Language: es_ES\n"
@@ -18,253 +18,263 @@ msgstr ""
 "X-Generator: Poedit 1.8.7.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: ../migasfree_client/client.py:81
+#: ../migasfree_client/client.py:82
 msgid "No detected graphic process"
 msgstr "Sesión gráfica no detectada"
 
-#: ../migasfree_client/client.py:100
+#: ../migasfree_client/client.py:101
 #, python-format
 msgid "Killing %s before time!!!"
 msgstr "¡Saliendo de %s antes de tiempo!"
 
-#: ../migasfree_client/client.py:107
+#: ../migasfree_client/client.py:108
 msgid "Graphic user"
 msgstr "Usuario gráfico"
 
-#: ../migasfree_client/client.py:111 ../migasfree_client/tags.py:52
+#: ../migasfree_client/client.py:112 ../migasfree_client/tags.py:52
 #: ../migasfree_client/upload.py:55
 msgid "Examples:"
 msgstr "Ejemplos:"
 
-#: ../migasfree_client/client.py:113
+#: ../migasfree_client/client.py:114
 msgid "Register computer at server:"
 msgstr "Registrar ordenador en el servidor:"
 
-#: ../migasfree_client/client.py:117
+#: ../migasfree_client/client.py:118
 msgid "Update the system:"
 msgstr "Actualizar el sistema:"
 
-#: ../migasfree_client/client.py:121
+#: ../migasfree_client/client.py:122
 msgid "Search package:"
 msgstr "Buscar paquete:"
 
-#: ../migasfree_client/client.py:125
+#: ../migasfree_client/client.py:126
 msgid "Install package:"
 msgstr "Instalar paquete:"
 
-#: ../migasfree_client/client.py:129
+#: ../migasfree_client/client.py:130
 msgid "Remove package:"
 msgstr "Desinstalar paquete:"
 
-#: ../migasfree_client/client.py:247
+#: ../migasfree_client/client.py:221
+#, python-format
+msgid "Code \"%s\" with error: %s"
+msgstr "Código \"%s\" con error: %s"
+
+#: ../migasfree_client/client.py:250
 msgid "Evaluating attributes..."
 msgstr "Evaluando atributos..."
 
-#: ../migasfree_client/client.py:271
+#: ../migasfree_client/client.py:274
 msgid "Executing faults..."
 msgstr "Ejecutando fallas..."
 
-#: ../migasfree_client/client.py:288
+#: ../migasfree_client/client.py:291
 msgid "Getting properties..."
 msgstr "Obteniendo propiedades..."
 
-#: ../migasfree_client/client.py:293
+#: ../migasfree_client/client.py:296
 msgid "No data requested from server"
 msgstr "El servidor no ha devuelto una respuesta"
 
-#: ../migasfree_client/client.py:321
+#: ../migasfree_client/client.py:324
 msgid "Uploading manual software..."
 msgstr "Subiendo software actualizado manualmente..."
 
-#: ../migasfree_client/client.py:347
+#: ../migasfree_client/client.py:350
 msgid "Uploading old errors..."
 msgstr "Subiendo errores antiguos..."
 
-#: ../migasfree_client/client.py:358
+#: ../migasfree_client/client.py:383
 msgid "Creating repositories..."
 msgstr "Creando repositorios..."
 
-#: ../migasfree_client/client.py:374
+#: ../migasfree_client/client.py:402
 #, python-format
 msgid "Error creating repositories: %s"
 msgstr "Error creando repositorios: %s"
 
-#: ../migasfree_client/client.py:383
+#: ../migasfree_client/client.py:411
 msgid "Getting repositories metadata..."
 msgstr "Obteniendo los metadatos de los repositorios..."
 
-#: ../migasfree_client/client.py:389
+#: ../migasfree_client/client.py:417
 msgid "Error getting repositories metadata"
 msgstr "Error obteniendo los metadatos de los repositorios"
 
-#: ../migasfree_client/client.py:395
+#: ../migasfree_client/client.py:423
 msgid "Uninstalling packages..."
 msgstr "Desinstalando paquetes..."
 
-#: ../migasfree_client/client.py:401
+#: ../migasfree_client/client.py:429
 #, python-format
 msgid "Error uninstalling packages: %s"
 msgstr "Error desinstalando paquetes: %s"
 
-#: ../migasfree_client/client.py:407
+#: ../migasfree_client/client.py:435
 msgid "Installing mandatory packages..."
 msgstr "Instalando paquetes obligatorios..."
 
-#: ../migasfree_client/client.py:413
+#: ../migasfree_client/client.py:441
 #, python-format
 msgid "Error installing packages: %s"
 msgstr "Error instalando paquetes: %s"
 
-#: ../migasfree_client/client.py:421
+#: ../migasfree_client/client.py:449
 msgid "Updating packages..."
 msgstr "Actualizando paquetes..."
 
-#: ../migasfree_client/client.py:427
+#: ../migasfree_client/client.py:455
 #, python-format
 msgid "Error updating packages: %s"
 msgstr "Error actualizando paquetes: %s"
 
-#: ../migasfree_client/client.py:435
+#: ../migasfree_client/client.py:463
 msgid "Capturing hardware information..."
 msgstr "Capturando información sobre el hardware..."
 
-#: ../migasfree_client/client.py:441
+#: ../migasfree_client/client.py:469
 #, python-format
 msgid "lshw command failed: %s"
 msgstr "Comando lshw fallido: %s"
 
-#: ../migasfree_client/client.py:449
+#: ../migasfree_client/client.py:477
 msgid "Sending hardware information..."
 msgstr "Enviando información sobre el hardware..."
 
-#: ../migasfree_client/client.py:468
+#: ../migasfree_client/client.py:496
 msgid "Sending errors to server..."
 msgstr "Enviando errores al servidor..."
 
-#: ../migasfree_client/client.py:482
+#: ../migasfree_client/client.py:510
 msgid "Connecting to migasfree server..."
 msgstr "Conectando al servidor migasfree..."
 
-#: ../migasfree_client/client.py:491
+#: ../migasfree_client/client.py:519
 msgid "Uploading attributes..."
 msgstr "Subiendo atributos..."
 
-#: ../migasfree_client/client.py:503
+#: ../migasfree_client/client.py:531
 msgid "Uploading faults..."
 msgstr "Subiendo fallas..."
 
-#: ../migasfree_client/client.py:527
+#: ../migasfree_client/client.py:555
 msgid "Uploading software history..."
 msgstr "Subiendo el historial del software..."
 
-#: ../migasfree_client/client.py:531
+#: ../migasfree_client/client.py:559
 #, python-format
 msgid "Software diff: %s"
 msgstr "Diferencia en el software: %s"
 
-#: ../migasfree_client/client.py:538
+#: ../migasfree_client/client.py:566
 msgid "Uploading software inventory..."
 msgstr "Subiendo el inventario del software..."
 
-#: ../migasfree_client/client.py:591
+#: ../migasfree_client/client.py:619
 msgid "Operations completed"
 msgstr "Operaciones completadas"
 
-#: ../migasfree_client/client.py:602
+#: ../migasfree_client/client.py:630
 #, python-format
 msgid "Installing package: %s"
 msgstr "Instalando paquete: %s"
 
-#: ../migasfree_client/client.py:611
+#: ../migasfree_client/client.py:639
 #, python-format
 msgid "Removing package: %s"
 msgstr "Desinstalando paquete: %s"
 
-#: ../migasfree_client/client.py:624 ../migasfree_client/client.py:735
+#: ../migasfree_client/client.py:652 ../migasfree_client/client.py:771
 #, python-format
 msgid "Installing device: %s"
 msgstr "Instalando dispositivo: %s"
 
-#: ../migasfree_client/client.py:632 ../migasfree_client/client.py:740
+#: ../migasfree_client/client.py:660 ../migasfree_client/client.py:776
 #, python-format
 msgid "Error installing device: %s"
 msgstr "Error instalando dispositivo: %s"
 
-#: ../migasfree_client/client.py:659 ../migasfree_client/client.py:722
+#: ../migasfree_client/client.py:687 ../migasfree_client/client.py:750
 #, python-format
 msgid "Removing device: %s"
 msgstr "Quitando dispositivo: %s"
 
-#: ../migasfree_client/client.py:668 ../migasfree_client/client.py:727
+#: ../migasfree_client/client.py:696 ../migasfree_client/client.py:755
 #, python-format
 msgid "Error removing device: %s"
 msgstr "Error quitando dispositivo: %s"
 
-#: ../migasfree_client/client.py:750
+#: ../migasfree_client/client.py:764
+#, python-format
+msgid "Error: no driver defined for device %s"
+msgstr "Error: no hay controlador definido para el dispositivo %s"
+
+#: ../migasfree_client/client.py:786
 #, python-format
 msgid "Setting default device: %s"
 msgstr "Estableciendo dispositivo por defecto: %s"
 
-#: ../migasfree_client/client.py:754
+#: ../migasfree_client/client.py:790
 #, python-format
 msgid "Error setting default device: %s"
 msgstr "Error estableciendo dispositivo por defecto: %s"
 
-#: ../migasfree_client/client.py:768 ../migasfree_client/tags.py:285
+#: ../migasfree_client/client.py:804 ../migasfree_client/tags.py:285
 #: ../migasfree_client/upload.py:238
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr "Versión de %(program)s: %(version)s"
 
-#: ../migasfree_client/client.py:775
+#: ../migasfree_client/client.py:811
 msgid "Register computer at server"
 msgstr "Registrar ordenador en el servidor"
 
-#: ../migasfree_client/client.py:779
+#: ../migasfree_client/client.py:815
 msgid "Update system from repositories"
 msgstr "Actualizar el sistema desde los repositorios"
 
-#: ../migasfree_client/client.py:783
+#: ../migasfree_client/client.py:819
 msgid "Search package in repositories"
 msgstr "Buscar un paquete en los repositorios"
 
-#: ../migasfree_client/client.py:788
+#: ../migasfree_client/client.py:824
 msgid "Install package"
 msgstr "Instalar paquete"
 
-#: ../migasfree_client/client.py:793
+#: ../migasfree_client/client.py:829
 msgid "Remove package"
 msgstr "Desinstalar paquete"
 
-#: ../migasfree_client/client.py:797
+#: ../migasfree_client/client.py:833
 msgid "Package to install or remove"
 msgstr "Paquete para instalar o desinstalar"
 
-#: ../migasfree_client/client.py:802
+#: ../migasfree_client/client.py:838
 msgid "Force package upgrades"
 msgstr "Fuerza la actualización de software"
 
-#: ../migasfree_client/client.py:811
+#: ../migasfree_client/client.py:847
 msgid "Register option is exclusive!!!"
 msgstr "¡La opción de registro es exclusiva!"
 
-#: ../migasfree_client/client.py:815
+#: ../migasfree_client/client.py:851
 msgid "Update option is exclusive!!!"
 msgstr "¡La opción de actualización es exclusiva!"
 
-#: ../migasfree_client/client.py:818
+#: ../migasfree_client/client.py:854
 msgid "Search option is exclusive!!!"
 msgstr "¡La opción de búsqueda es exclusiva!"
 
-#: ../migasfree_client/client.py:822
+#: ../migasfree_client/client.py:858
 msgid "Install and remove are exclusive!!!"
 msgstr "¡Instalar y desinstalar son excluyentes!"
 
-#: ../migasfree_client/client.py:825
+#: ../migasfree_client/client.py:861
 msgid "Install needs a package!!!"
 msgstr "¡Instalar requiere un paquete!"
 
-#: ../migasfree_client/client.py:828
+#: ../migasfree_client/client.py:864
 msgid "Remove needs a package!!!"
 msgstr "¡Desinstalar requiere un paquete!"
 
