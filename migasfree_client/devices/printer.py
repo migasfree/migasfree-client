@@ -162,7 +162,6 @@ class Printer(object):
     def is_changed(self):
         if (
             len(self.printer_data) > 0 and
-            self.printer_name == self.name and
             self.printer_data['printer-info'] == self.info and
             self.printer_data['printer-location'] == self.location and
             self.printer_data['device-uri'] == self.uri and
