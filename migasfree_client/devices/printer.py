@@ -180,3 +180,18 @@ class Printer(object):
             _md5 = handle.read()
 
         return md5sum(self.driver) != _md5
+
+    @staticmethod
+    def get_printer_id(name):
+        try:
+            conn = cups.Connection()
+        except RuntimeError:
+            conn = None
+
+        if conn:  # cups is running
+            printers = conn.getPrinters()
+            if name in printers:
+                if len(printers[name]['printer-info'].split('__')) == 5:
+                    return int(printers[name]['printer-info'].split('__')[4])
+
+        return 0
