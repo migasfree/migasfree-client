@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,10 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
-__license__ = 'GPLv3'
-__all__ = 'MigasFreeTags'
 
 import os
 import sys
@@ -35,6 +31,10 @@ from . import settings, utils
 
 from .sync import MigasFreeSync
 from .command import MigasFreeCommand
+
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
+__license__ = 'GPLv3'
+__all__ = 'MigasFreeTags'
 
 
 class MigasFreeTags(MigasFreeCommand):
@@ -115,7 +115,7 @@ class MigasFreeTags(MigasFreeCommand):
                 --print-column=2 \
                 --column=' ' \
                 --column='TAG' \
-                --column='TYPE'" % \
+                --column='TYPE' 2> /dev/null" % \
                 (
                     title,
                     text,
