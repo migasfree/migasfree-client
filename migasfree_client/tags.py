@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ class MigasFreeTags(MigasFreeCommand):
                 --print-column=2 \
                 --column=' ' \
                 --column='TAG' \
-                --column='TYPE'" % (
+                --column='TYPE' 2> /dev/null" % (
                     _title,
                     _text,
                     os.path.join(settings.ICON_PATH, self.ICON)
