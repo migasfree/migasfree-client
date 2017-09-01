@@ -129,6 +129,7 @@ class MigasFreeUpload(MigasFreeCommand):
             'upload_server_package',
             data={
                 'project': self.packager_project,
+                'version': self.packager_project,  # backwards compatibility
                 'store': self.packager_store,
                 'source': self._is_regular_file
             },
@@ -169,6 +170,7 @@ class MigasFreeUpload(MigasFreeCommand):
                         'upload_server_set',
                         data={
                             'project': self.packager_project,
+                            'version': self.packager_project,  # backwards compatibility
                             'store': self.packager_store,
                             'packageset': self._server_directory,
                             'path': os.path.dirname(
@@ -210,6 +212,7 @@ class MigasFreeUpload(MigasFreeCommand):
             'create_repositories_of_packageset',
             data={
                 'project': self.packager_project,
+                'version': self.packager_project,  # backwards compatibility
                 'packageset': _packageset
             }
         )
