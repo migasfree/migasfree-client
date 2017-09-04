@@ -61,6 +61,17 @@ def get_config(ini_file, section):
         return errno.ENOMSG  # INVALID_DATA
 
 
+def remove_commented_lines(text):
+    ret = []
+
+    lines = text.split('\n')
+    for line in lines:
+        if not re.match(r'^([^#]*)#(.*)$', line):
+            ret.append(line)
+
+    return '\n'.join(ret)
+
+
 def execute(cmd, verbose=False, interactive=True):
     """
     (int, string, string) execute(
@@ -492,6 +503,7 @@ def get_hardware_uuid():
         'sudo dmidecode --string system-uuid',
         interactive=False
     )
+    _uuid = remove_commented_lines(_uuid)
     _uuid = _uuid.replace('\n', '')
     if _ret != 0 or _uuid == '' or _uuid is None:
         return get_uuid_from_mac()
