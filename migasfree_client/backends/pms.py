@@ -132,3 +132,10 @@ class Pms(object):
         """
 
         raise NotImplementedError
+
+    def available_packages(self):
+        """
+        list available_packages(void)
+        """
+
+        raise NotImplementedError

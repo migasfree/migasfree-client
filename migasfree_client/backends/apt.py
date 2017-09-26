@@ -194,7 +194,7 @@ class Apt(Pms):
         if not _packages:
             return []
 
-        _packages = _packages.splitlines()
+        _packages = _packages.strip().splitlines()
         _result = list()
         for _line in _packages:
             if _line.startswith('ii'):
@@ -234,3 +234,16 @@ class Apt(Pms):
         self._cmd = 'apt-key add {} >/dev/null'.format(file_key)
         logging.debug(self._cmd)
         return execute(self._cmd)[0] == 0
+
+    def available_packages(self):
+        """
+        list available_packages(void)
+        """
+
+        self._cmd = '{} pkgnames'.format(self._pms_search)
+        logging.debug(self._cmd)
+        _ret, _output, _error = execute(self.cmd)
+        if _ret == 0:
+            return sorted(_output.strip().splitlines())
+
+        return []

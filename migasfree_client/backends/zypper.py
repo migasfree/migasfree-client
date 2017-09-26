@@ -187,7 +187,7 @@ class Zypper(Pms):
         if _ret != 0:
             return []
 
-        return sorted(_output.split('\n'))
+        return sorted(_output.strip().splitlines())
 
     def create_repos(self, template, server, project, repositories):
         """
@@ -222,6 +222,19 @@ metadata_expire=1
         bool import_server_key(string file_key)
         """
 
-        self._cmd = 'rpm --import {} > /dev/null'.format(file_key)
+        self._cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
         logging.debug(self._cmd)
         return execute(self._cmd)[0] == 0
+
+    def available_packages(self):
+        """
+        list available_packages(void)
+        """
+
+        self._cmd = "{} pa | awk -F'|' '{print $3}'".format(self._pms)
+        logging.debug(self._cmd)
+        _ret, _output, _error = execute(self.cmd)
+        if _ret == 0:
+            return sorted(_output.strip().split('\n'))
+
+        return []
