@@ -256,7 +256,7 @@ class Apt(Pms):
 
         self._cmd = '{} pkgnames'.format(self._pms_search)
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd)
+        _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret == 0:
             return sorted(_output.strip().splitlines())
 
