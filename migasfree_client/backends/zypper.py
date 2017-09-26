@@ -235,6 +235,6 @@ metadata_expire=1
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self.cmd)
         if _ret == 0:
-            return sorted(_output.strip().split('\n'))
+            return sorted(_output.strip().splitlines())
 
         return []
