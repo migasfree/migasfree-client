@@ -233,7 +233,7 @@ metadata_expire=1
 
         self._cmd = "{} pa | awk -F'|' '{print $3}'".format(self._pms)
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd)
+        _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret == 0:
             return sorted(_output.strip().splitlines())
 
