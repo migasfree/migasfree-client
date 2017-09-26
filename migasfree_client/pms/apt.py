@@ -58,7 +58,7 @@ class Apt(Pms):
         bool install(string package)
         """
 
-        self._cmd = '%s install -o APT::Get::Purge=true %s' % (
+        self._cmd = '{} install -o APT::Get::Purge=true {}'.format(
             self._pms,
             package.strip()
         )
@@ -71,7 +71,7 @@ class Apt(Pms):
         bool remove(string package)
         """
 
-        self._cmd = '%s purge %s' % (self._pms, package.strip())
+        self._cmd = '{} purge {}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -81,7 +81,7 @@ class Apt(Pms):
         bool search(string pattern)
         """
 
-        self._cmd = '%s search %s' % (self._pms_search, pattern.strip())
+        self._cmd = '{} search {}'.format(self._pms_search, pattern.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -91,7 +91,7 @@ class Apt(Pms):
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '%s %s dist-upgrade' % (
+        self._cmd = '{} {} dist-upgrade'.format(
             self._pms,
             self._silent_options
         )
@@ -119,7 +119,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '%s %s install %s' % (
+        self._cmd = '{} {} install {}'.format(
             self._pms,
             self._silent_options,
             ' '.join(package_set)
@@ -148,7 +148,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '%s %s purge %s' % (
+        self._cmd = '{} {} purge {}'.format(
             self._pms,
             self._silent_options,
             ' '.join(package_set)
@@ -167,7 +167,7 @@ class Apt(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '%s --status %s | grep "Status: install ok installed"' % (
+        self._cmd = '{} --status {} | grep "Status: install ok installed"'.format(
             self._pm,
             package.strip()
         )
@@ -180,10 +180,10 @@ class Apt(Pms):
         bool clean_all(void)
         """
 
-        self._cmd = '%s clean' % self._pms
+        self._cmd = '{} clean'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            self._cmd = '%s -o Acquire::Languages=none --assume-yes update' % self._pms
+            self._cmd = '{} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
 
@@ -196,13 +196,13 @@ class Apt(Pms):
         """
 
         _, _packages, _ = execute(
-            '%s --list' % self._pm,
+            '{} --list'.format(self._pm),
             interactive=False
         )
         if not _packages:
             return []
 
-        _packages = _packages.splitlines()
+        _packages = _packages.strip().splitlines()
         _result = list()
         for _line in _packages:
             if _line.startswith('ii'):
@@ -248,3 +248,16 @@ class Apt(Pms):
         _ret, _arch, _ = execute(self._cmd, interactive=False)
 
         return _arch.strip() if _ret == 0 else ''
+
+    def available_packages(self):
+        """
+        list available_packages(void)
+        """
+
+        self._cmd = '{} pkgnames'.format(self._pms_search)
+        logging.debug(self._cmd)
+        _ret, _output, _error = execute(self.cmd)
+        if _ret == 0:
+            return sorted(_output.strip().splitlines())
+
+        return []

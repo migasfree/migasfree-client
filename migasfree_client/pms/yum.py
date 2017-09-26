@@ -55,7 +55,7 @@ class Yum(Pms):
         bool install(string package)
         """
 
-        self._cmd = '%s install %s' % (self._pms, package.strip())
+        self._cmd = '{} install {}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -65,7 +65,7 @@ class Yum(Pms):
         bool remove(string package)
         """
 
-        self._cmd = '%s remove %s' % (self._pms, package.strip())
+        self._cmd = '{} remove {}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -75,7 +75,7 @@ class Yum(Pms):
         bool search(string pattern)
         """
 
-        self._cmd = '%s search %s' % (self._pms, pattern.strip())
+        self._cmd = '{} search {}'.format(self._pms, pattern.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -85,7 +85,7 @@ class Yum(Pms):
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '%s --assumeyes update' % self._pms
+        self._cmd = '{} --assumeyes update'.format(self._pms)
         logging.debug(self._cmd)
         _ret, _, _error = execute(
             self._cmd,
@@ -110,7 +110,7 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '%s --assumeyes install %s' % (
+        self._cmd = '{} --assumeyes install {}'.format(
             self._pms,
             ' '.join(package_set)
         )
@@ -138,8 +138,10 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '%s --assumeyes remove %s' \
-            % (self._pms, ' '.join(package_set))
+        self._cmd = '{} --assumeyes remove {}'.format(
+            self._pms,
+            ' '.join(package_set)
+        )
         logging.debug(self._cmd)
         _ret, _, _error = execute(
             self._cmd,
@@ -154,7 +156,7 @@ class Yum(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '%s -q %s' % (self._pm, package.strip())
+        self._cmd = '{} -q {}'.format(self._pm, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd, interactive=False)[0] == 0
@@ -164,10 +166,10 @@ class Yum(Pms):
         bool clean_all(void)
         """
 
-        self._cmd = '%s clean all' % self._pms
+        self._cmd = '{} clean all'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            self._cmd = '%s --assumeyes check-update' % self._pms
+            self._cmd = '{} --assumeyes check-update'.format(self._pms)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
 
@@ -185,7 +187,7 @@ class Yum(Pms):
         if _ret != 0:
             return []
 
-        return sorted(_output.split('\n'))
+        return sorted(_output.strip().splitlines())
 
     def create_repos(self, template, server, project, repositories):
         """
@@ -213,7 +215,7 @@ metadata_expire=1
         bool import_server_key(string file_key)
         """
 
-        self._cmd = '%s --import %s > /dev/null' % (self._pm, file_key)
+        self._cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -229,3 +231,18 @@ metadata_expire=1
         _ret, _arch, _ = execute(self._cmd, interactive=False)
 
         return _arch.strip() if _ret == 0 else ''
+
+    def available_packages(self):
+        """
+        list available_packages(void)
+        """
+
+        self._cmd = "{} --quiet list available | awk -F. '{print $1}' | grep -v '^ ' | sed '1d'".format(
+            self._pms
+        )
+        logging.debug(self._cmd)
+        _ret, _output, _error = execute(self.cmd)
+        if _ret == 0:
+            return sorted(_output.strip().splitlines())
+
+        return []

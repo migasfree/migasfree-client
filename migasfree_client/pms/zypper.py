@@ -47,7 +47,7 @@ class Zypper(Pms):
         bool install(string package)
         """
 
-        self._cmd = '%s install --no-force-resolution %s' % (
+        self._cmd = '{} install --no-force-resolution {}'.format(
             self._pms,
             package.strip()
         )
@@ -60,7 +60,7 @@ class Zypper(Pms):
         bool remove(string package)
         """
 
-        self._cmd = '%s remove %s' % (self._pms, package.strip())
+        self._cmd = '{} remove {}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -70,7 +70,7 @@ class Zypper(Pms):
         bool search(string pattern)
         """
 
-        self._cmd = '%s search %s' % (self._pms, pattern.strip())
+        self._cmd = '{} search {}'.format(self._pms, pattern.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -80,7 +80,7 @@ class Zypper(Pms):
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '%s --non-interactive update --no-force-resolution "*"' % self._pms
+        self._cmd = '{} --non-interactive update --no-force-resolution "*"'.format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
@@ -88,9 +88,9 @@ class Zypper(Pms):
             verbose=True
         )
         if _ret != 0:
-            return False, '%s\n%s\n%s' % (str(_ret), _output, _error)
+            return False, '{}\n{}\n{}'.format(_ret, _output, _error)
 
-        self._cmd = '%s lu -a' % self._pms
+        self._cmd = '{} lu -a'.format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
@@ -98,7 +98,7 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return _ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error)
+        return _ret == 0, '{}\n{}\n{}'.format(_ret, _output, _error)
 
     def install_silent(self, package_set):
         """
@@ -115,8 +115,10 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '%s --non-interactive install --no-force-resolution %s' \
-            % (self._pms, ' '.join(package_set))
+        self._cmd = '{} --non-interactive install --no-force-resolution {}'.format(
+            self._pms,
+            ' '.join(package_set)
+        )
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
@@ -124,7 +126,7 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return _ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error)
+        return _ret == 0, '{}\n{}\n{}'.format(_ret, _output, _error)
 
     def remove_silent(self, package_set):
         """
@@ -141,8 +143,10 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '%s --non-interactive remove %s' \
-            % (self._pms, ' '.join(package_set))
+        self._cmd = '{} --non-interactive remove {}'.format(
+            self._pms,
+            ' '.join(package_set)
+        )
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
@@ -150,14 +154,14 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return _ret == 0, '%s\n%s\n%s' % (str(_ret), _output, _error)
+        return _ret == 0, '{}\n{}\n{}'.format(_ret, _output, _error)
 
     def is_installed(self, package):
         """
         bool is_installed(string package)
         """
 
-        self._cmd = '%s -q %s' % (self._pm, package.strip())
+        self._cmd = '{} -q {}'.format(self._pm, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd, interactive=False)[0] == 0
@@ -167,10 +171,10 @@ class Zypper(Pms):
         bool clean_all(void)
         """
 
-        self._cmd = '%s clean --all' % self._pms
+        self._cmd = '{} clean --all'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            self._cmd = '%s --non-interactive refresh' % self._pms
+            self._cmd = '{} --non-interactive refresh'.format(self._pms)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
 
@@ -188,7 +192,7 @@ class Zypper(Pms):
         if _ret != 0:
             return []
 
-        return sorted(_output.split('\n'))
+        return sorted(_output.strip().splitlines())
 
     def create_repos(self, template, server, project, repositories):
         """
@@ -216,7 +220,7 @@ metadata_expire=1
         bool import_server_key(string file_key)
         """
 
-        self._cmd = '%s --import %s > /dev/null' % (self._pm, file_key)
+        self._cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -232,3 +236,16 @@ metadata_expire=1
         _ret, _arch, _ = execute(self._cmd, interactive=False)
 
         return _arch.strip() if _ret == 0 else ''
+
+    def available_packages(self):
+        """
+        list available_packages(void)
+        """
+
+        self._cmd = "{} pa | awk -F'|' '{print $3}'".format(self._pms)
+        logging.debug(self._cmd)
+        _ret, _output, _error = execute(self.cmd)
+        if _ret == 0:
+            return sorted(_output.strip().splitlines())
+
+        return []
