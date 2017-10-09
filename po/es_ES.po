@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: migasfree-client 4.13\n"
+"Project-Id-Version: migasfree-client 4.14\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-09 11:32+0200\n"
-"PO-Revision-Date: 2017-08-22 11:38+0200\n"
+"PO-Revision-Date: 2017-10-09 11:35+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
 "Language: es_ES\n"
