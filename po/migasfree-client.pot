@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-22 11:37+0200\n"
+"POT-Creation-Date: 2017-10-09 11:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -222,7 +222,7 @@ msgid "Error setting default device: %s"
 msgstr ""
 
 #: ../migasfree_client/client.py:810 ../migasfree_client/tags.py:285
-#: ../migasfree_client/upload.py:238
+#: ../migasfree_client/upload.py:241
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr ""
@@ -539,7 +539,7 @@ msgstr ""
 msgid "User to upload at server"
 msgstr ""
 
-#: ../migasfree_client/upload.py:102 ../migasfree_client/upload.py:259
+#: ../migasfree_client/upload.py:102 ../migasfree_client/upload.py:262
 msgid "User password"
 msgstr ""
 
@@ -565,55 +565,55 @@ msgstr ""
 msgid "File not found"
 msgstr ""
 
-#: ../migasfree_client/upload.py:153
+#: ../migasfree_client/upload.py:154
 msgid "Directory not found"
 msgstr ""
 
-#: ../migasfree_client/upload.py:247
+#: ../migasfree_client/upload.py:250
 msgid "File to upload at server"
 msgstr ""
 
-#: ../migasfree_client/upload.py:249
+#: ../migasfree_client/upload.py:252
 msgid "File is not a software package"
 msgstr ""
 
-#: ../migasfree_client/upload.py:252
+#: ../migasfree_client/upload.py:255
 msgid "Directory with files to upload at server"
 msgstr ""
 
-#: ../migasfree_client/upload.py:254
+#: ../migasfree_client/upload.py:257
 msgid "Name of the directory at server"
 msgstr ""
 
-#: ../migasfree_client/upload.py:257
+#: ../migasfree_client/upload.py:260
 msgid "Authorized user to upload at server"
 msgstr ""
 
-#: ../migasfree_client/upload.py:261
+#: ../migasfree_client/upload.py:264
 msgid "Project to upload files"
 msgstr ""
 
-#: ../migasfree_client/upload.py:263
+#: ../migasfree_client/upload.py:266
 msgid "Store to upload files at server"
 msgstr ""
 
-#: ../migasfree_client/upload.py:265
+#: ../migasfree_client/upload.py:268
 msgid "No create repository after upload file at server"
 msgstr ""
 
-#: ../migasfree_client/upload.py:272
+#: ../migasfree_client/upload.py:275
 msgid "File or Dir options are mandatory!!!"
 msgstr ""
 
-#: ../migasfree_client/upload.py:275
+#: ../migasfree_client/upload.py:278
 msgid "File and Dir options are exclusive!!!"
 msgstr ""
 
-#: ../migasfree_client/upload.py:278
+#: ../migasfree_client/upload.py:281
 msgid "This option does not apply with Dir option!!!"
 msgstr ""
 
-#: ../migasfree_client/upload.py:281
+#: ../migasfree_client/upload.py:284
 msgid "This option does not apply with File option!!!"
 msgstr ""
 
@@ -638,44 +638,44 @@ msgstr ""
 msgid "Information: %s"
 msgstr ""
 
-#: ../migasfree_client/utils.py:138
+#: ../migasfree_client/utils.py:149
 #, python-format
 msgid "\"%s\" command expired timeout"
 msgstr ""
 
-#: ../migasfree_client/utils.py:375
+#: ../migasfree_client/utils.py:386
 msgid "yes"
 msgstr ""
 
-#: ../migasfree_client/utils.py:375
+#: ../migasfree_client/utils.py:386
 msgid "y"
 msgstr ""
 
-#: ../migasfree_client/utils.py:376
+#: ../migasfree_client/utils.py:387
 msgid "no"
 msgstr ""
 
-#: ../migasfree_client/utils.py:376
+#: ../migasfree_client/utils.py:387
 msgid "n"
 msgstr ""
 
-#: ../migasfree_client/utils.py:379
+#: ../migasfree_client/utils.py:390
 msgid "[y/n]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:381
+#: ../migasfree_client/utils.py:392
 msgid "[Y/n]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:383
+#: ../migasfree_client/utils.py:394
 msgid "[y/N]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:395
+#: ../migasfree_client/utils.py:406
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
 msgstr ""
 
-#: ../migasfree_client/utils.py:419
+#: ../migasfree_client/utils.py:430
 #, python-format
 msgid "Another instance of %(cmd)s is running: %(pid)d"
 msgstr ""

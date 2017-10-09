@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 4.13\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-22 11:37+0200\n"
+"POT-Creation-Date: 2017-10-09 11:32+0200\n"
 "PO-Revision-Date: 2017-08-22 11:38+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
@@ -225,7 +225,7 @@ msgid "Error setting default device: %s"
 msgstr "Error estableciendo dispositivo por defecto: %s"
 
 #: ../migasfree_client/client.py:810 ../migasfree_client/tags.py:285
-#: ../migasfree_client/upload.py:238
+#: ../migasfree_client/upload.py:241
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr "Versión de %(program)s: %(version)s"
@@ -546,7 +546,7 @@ msgstr "Crear repositorio"
 msgid "User to upload at server"
 msgstr "Usuario para subir ficheros al servidor"
 
-#: ../migasfree_client/upload.py:102 ../migasfree_client/upload.py:259
+#: ../migasfree_client/upload.py:102 ../migasfree_client/upload.py:262
 msgid "User password"
 msgstr "Contraseña del usuario"
 
@@ -572,55 +572,55 @@ msgstr "No se ha especificado la ubicación. Saliendo de %s."
 msgid "File not found"
 msgstr "Fichero no encontrado"
 
-#: ../migasfree_client/upload.py:153
+#: ../migasfree_client/upload.py:154
 msgid "Directory not found"
 msgstr "Directorio no encontrado"
 
-#: ../migasfree_client/upload.py:247
+#: ../migasfree_client/upload.py:250
 msgid "File to upload at server"
 msgstr "Fichero a subir al servidor"
 
-#: ../migasfree_client/upload.py:249
+#: ../migasfree_client/upload.py:252
 msgid "File is not a software package"
 msgstr "El fichero no es un paquete con software"
 
-#: ../migasfree_client/upload.py:252
+#: ../migasfree_client/upload.py:255
 msgid "Directory with files to upload at server"
 msgstr "Directorio con archivos para subir al servidor"
 
-#: ../migasfree_client/upload.py:254
+#: ../migasfree_client/upload.py:257
 msgid "Name of the directory at server"
 msgstr "Nombre del directorio en el servidor"
 
-#: ../migasfree_client/upload.py:257
+#: ../migasfree_client/upload.py:260
 msgid "Authorized user to upload at server"
 msgstr "Usuario autorizado para subir al servidor"
 
-#: ../migasfree_client/upload.py:261
+#: ../migasfree_client/upload.py:264
 msgid "Project to upload files"
 msgstr "Proyecto al que subir ficheros"
 
-#: ../migasfree_client/upload.py:263
+#: ../migasfree_client/upload.py:266
 msgid "Store to upload files at server"
 msgstr "Almacén al que subir los ficheros en el servidor"
 
-#: ../migasfree_client/upload.py:265
+#: ../migasfree_client/upload.py:268
 msgid "No create repository after upload file at server"
 msgstr "No crear repositorio tras subir el fichero al servidor"
 
-#: ../migasfree_client/upload.py:272
+#: ../migasfree_client/upload.py:275
 msgid "File or Dir options are mandatory!!!"
 msgstr "¡Fichero o Directorio son obligatorios!"
 
-#: ../migasfree_client/upload.py:275
+#: ../migasfree_client/upload.py:278
 msgid "File and Dir options are exclusive!!!"
 msgstr "¡Las opciones Fichero y Directorio son exclusivas!"
 
-#: ../migasfree_client/upload.py:278
+#: ../migasfree_client/upload.py:281
 msgid "This option does not apply with Dir option!!!"
 msgstr "¡Esta opción no se admite con la opción Directorio!"
 
-#: ../migasfree_client/upload.py:281
+#: ../migasfree_client/upload.py:284
 msgid "This option does not apply with File option!!!"
 msgstr "¡Esta opción no se admite con la opción Fichero!"
 
@@ -645,44 +645,44 @@ msgstr "Error: %s"
 msgid "Information: %s"
 msgstr "Información: %s"
 
-#: ../migasfree_client/utils.py:138
+#: ../migasfree_client/utils.py:149
 #, python-format
 msgid "\"%s\" command expired timeout"
 msgstr "El comando \"%s\" ha expirado su tiempo de ejecución"
 
-#: ../migasfree_client/utils.py:375
+#: ../migasfree_client/utils.py:386
 msgid "yes"
 msgstr "sí"
 
-#: ../migasfree_client/utils.py:375
+#: ../migasfree_client/utils.py:386
 msgid "y"
 msgstr "s"
 
-#: ../migasfree_client/utils.py:376
+#: ../migasfree_client/utils.py:387
 msgid "no"
 msgstr "no"
 
-#: ../migasfree_client/utils.py:376
+#: ../migasfree_client/utils.py:387
 msgid "n"
 msgstr "n"
 
-#: ../migasfree_client/utils.py:379
+#: ../migasfree_client/utils.py:390
 msgid "[y/n]"
 msgstr "[s/n]"
 
-#: ../migasfree_client/utils.py:381
+#: ../migasfree_client/utils.py:392
 msgid "[Y/n]"
 msgstr "[S/n]"
 
-#: ../migasfree_client/utils.py:383
+#: ../migasfree_client/utils.py:394
 msgid "[y/N]"
 msgstr "[s/N]"
 
-#: ../migasfree_client/utils.py:395
+#: ../migasfree_client/utils.py:406
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
 msgstr "Por favor, responde 'sí' o 'no' (o 's' o 'n')."
 
-#: ../migasfree_client/utils.py:419
+#: ../migasfree_client/utils.py:430
 #, python-format
 msgid "Another instance of %(cmd)s is running: %(pid)d"
 msgstr "Ya hay en ejecución otra instancia de %(cmd)s: %(pid)d"
