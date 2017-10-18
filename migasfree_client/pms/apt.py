@@ -217,7 +217,7 @@ class Apt(Pms):
         """
 
         repo_template = 'deb {} {repo} PKGS\n'.format(
-            template.format(server, project),
+            template.format(server=server, project=project),
             repo='{repo}'
         )
 

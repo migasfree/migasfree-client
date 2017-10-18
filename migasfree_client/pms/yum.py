@@ -202,7 +202,7 @@ gpgcheck=0
 enabled=1
 http_caching=none
 metadata_expire=1
-""".format(url=template.format(server, project), repo='{repo}')
+""".format(url=template.format(server=server, project=project), repo='{repo}')
 
         content = ''
         for repo in repositories:
