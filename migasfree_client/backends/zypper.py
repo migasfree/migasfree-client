@@ -111,7 +111,7 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{0} --non-interactive install --no-force-resolution {}'.format(
+        self._cmd = '{0} --non-interactive install --no-force-resolution {1}'.format(
             self._pms,
             ' '.join(package_set)
         )
