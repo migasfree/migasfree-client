@@ -4,4 +4,4 @@
 #
 
 #%update_mime_database
-gtk-update-icon-cache --quiet /usr/share/icons/hicolor/
+gtk-update-icon-cache --quiet /usr/share/icons/hicolor/ || :
