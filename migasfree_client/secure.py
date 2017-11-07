@@ -22,7 +22,7 @@ import json
 import utils
 import server_errors
 
-__author__ = "Jose Antonio Chavarría"
+__author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 # TODO common code between server & client
@@ -38,7 +38,7 @@ def sign(filename, private_key):
     os.system(
         "openssl dgst -sha1 -sign %s -out %s %s" % (
             private_key,
-            '{}.sign'.format(filename),
+            '{0}.sign'.format(filename),
             filename
         )
     )
@@ -53,7 +53,7 @@ def verify(filename, public_key):
     return (os.system(
         "openssl dgst -sha1 -verify %s -signature %s %s 1>/dev/null" % (
             public_key,
-            '{}.sign'.format(filename),
+            '{0}.sign'.format(filename),
             filename
         )) == 0)
 
@@ -73,8 +73,8 @@ def wrap(filename, data, key=None):
     if key:
         sign(filename, key)
         with open(filename, 'ab') as _fp:
-            _fp.write(open('{}.sign'.format(filename), 'rb').read())
-        os.remove('{}.sign'.format(filename))  # remove temp file (sign function)
+            _fp.write(open('{0}.sign'.format(filename), 'rb').read())
+        os.remove('{0}.sign'.format(filename))  # remove temp file (sign function)
 
 
 def unwrap(filename, key=None):
@@ -88,7 +88,7 @@ def unwrap(filename, key=None):
     if key:
         _content = open(filename, 'rb').read()
         _n = len(_content)
-        utils.write_file('{}.sign'.format(filename), _content[_n - 256:_n])
+        utils.write_file('{0}.sign'.format(filename), _content[_n - 256:_n])
         utils.write_file(filename, _content[0:_n - 256])
 
     try:
@@ -108,5 +108,5 @@ def unwrap(filename, key=None):
             }
         }
 
-    os.remove('{}.sign'.format(filename))  # remove temp file (verify function)
+    os.remove('{0}.sign'.format(filename))  # remove temp file (verify function)
     return _data
