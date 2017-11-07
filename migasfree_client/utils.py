@@ -460,8 +460,6 @@ def get_current_user():
 
 
 def get_mfc_project():
-    from . import settings
-
     _config = get_config(settings.CONF_FILE, 'client')
 
     if isinstance(_config, dict) and 'project' in _config:
@@ -480,8 +478,6 @@ def get_mfc_version():
 
 
 def get_mfc_computer_name():
-    from . import settings
-
     _config = get_config(settings.CONF_FILE, 'client')
     if isinstance(_config, dict) and 'computer_name' in _config:
         return _config.get('computer_name')
