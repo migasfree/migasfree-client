@@ -569,14 +569,9 @@ def is_zenity():
 
 
 def get_mfc_release():
-    version_file = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        'VERSION'
-    )
-    if not os.path.exists(version_file):
-        version_file = os.path.join(settings.DOC_PATH, 'VERSION')
+    from . import __version__
 
-    return open(version_file).read().splitlines()[0]
+    return __version__
 
 
 def slugify(value):
