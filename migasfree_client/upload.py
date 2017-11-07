@@ -23,7 +23,6 @@ import logging
 import getpass
 import errno
 
-# package imports
 import utils
 import server_errors
 
@@ -246,26 +245,44 @@ class MigasFreeUpload(MigasFreeCommand):
         # migasfree-upload {-f file [--regular-file] | -d dir [-n name]}
         #  [[-u user] [-p pwd] [--main-project project] [-s store] [--no-create-repo]]
 
-        parser.add_option("--file", "-f", action="store",
-            help=_('File to upload at server'))
-        parser.add_option("--regular-file", "-r", action="store_true",
-            help=_('File is not a software package'))
+        parser.add_option(
+            "--file", "-f", action="store",
+            help=_('File to upload at server')
+        )
+        parser.add_option(
+            "--regular-file", "-r", action="store_true",
+            help=_('File is not a software package')
+        )
 
-        parser.add_option("--dir", "-d", action="store",
-            help=_('Directory with files to upload at server'))
-        parser.add_option("--name", "-n", action="store",
-            help=_('Name of the directory at server'))
+        parser.add_option(
+            "--dir", "-d", action="store",
+            help=_('Directory with files to upload at server')
+        )
+        parser.add_option(
+            "--name", "-n", action="store",
+            help=_('Name of the directory at server')
+        )
 
-        parser.add_option("--user", "-u", action="store",
-            help=_('Authorized user to upload at server'))
-        parser.add_option("--pwd", "-p", action="store",
-            help=_('User password'))
-        parser.add_option("--main-project", "-m", action="store",
-            help=_('Project to upload files'))
-        parser.add_option("--store", "-s", action="store",
-            help=_('Store to upload files at server'))
-        parser.add_option("--no-create-repo", "-c", action="store_true",
-            help=_('No create repository after upload file at server'))
+        parser.add_option(
+            "--user", "-u", action="store",
+            help=_('Authorized user to upload at server')
+        )
+        parser.add_option(
+            "--pwd", "-p", action="store",
+            help=_('User password')
+        )
+        parser.add_option(
+            "--main-project", "-m", action="store",
+            help=_('Project to upload files')
+        )
+        parser.add_option(
+            "--store", "-s", action="store",
+            help=_('Store to upload files at server')
+        )
+        parser.add_option(
+            "--no-create-repo", "-c", action="store_true",
+            help=_('No create repository after upload file at server')
+        )
 
         options, arguments = parser.parse_args()
 
