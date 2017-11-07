@@ -58,8 +58,8 @@ class MigasFreeCommand(object):
     release = utils.get_mfc_release()
 
     CMD = 'migasfree-command'  # /usr/bin/migasfree-command
-    LOCK_FILE = os.path.join(settings.TMP_PATH, '{}.pid'.format(CMD))
-    ERROR_FILE = os.path.join(settings.TMP_PATH, '{}.err'.format(CMD))
+    LOCK_FILE = os.path.join(settings.TMP_PATH, '{0}.pid'.format(CMD))
+    ERROR_FILE = os.path.join(settings.TMP_PATH, '{0}.err'.format(CMD))
 
     PUBLIC_KEY = 'server.pub'
     PRIVATE_KEY = ''
@@ -94,7 +94,7 @@ class MigasFreeCommand(object):
             )
         )
 
-        self.PRIVATE_KEY = '{}.pri'.format(self.migas_project)
+        self.PRIVATE_KEY = '{0}.pri'.format(self.migas_project)
 
         self.migas_computer_name = os.environ.get(
             'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
@@ -185,11 +185,11 @@ class MigasFreeCommand(object):
         self._init_url_request()
 
     def _init_url_request(self):
-        _url_base = '{}/api/'.format(self.migas_server)
+        _url_base = '{0}/api/'.format(self.migas_server)
         if self.migas_ssl_cert:
-            _url_base = '{}://{}'.format('https', _url_base)
+            _url_base = '{0}://{1}'.format('https', _url_base)
         else:
-            _url_base = '{}://{}'.format('http', _url_base)
+            _url_base = '{0}://{1}'.format('http', _url_base)
         self._url_request = url_request.UrlRequest(
             debug=self._debug,
             url_base=_url_base,
@@ -301,7 +301,7 @@ class MigasFreeCommand(object):
 
     def _save_repos_key(self):
         _curl = curl.Curl(
-            '{}/{}'.format(
+            '{0}/{1}'.format(
                 self.migas_server,
                 self.get_key_repositories_command
             ),
@@ -396,7 +396,7 @@ class MigasFreeCommand(object):
         }
 
         for _item in _pms_list:
-            _cmd = 'which {}'.format(_item)
+            _cmd = 'which {0}'.format(_item)
             _ret, _, _ = utils.execute(_cmd, interactive=False)
             if _ret == 0:
                 return _pms_list[_item]

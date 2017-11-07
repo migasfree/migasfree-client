@@ -209,7 +209,7 @@ class MigasFreeClient(MigasFreeCommand):
         ]
 
         if lang in _allowed_languages:
-            _cmd = '{} {}'.format(lang, _filename)
+            _cmd = '{0} {1}'.format(lang, _filename)
         else:
             _cmd = ':'  # gracefully degradation
 
@@ -274,7 +274,7 @@ class MigasFreeClient(MigasFreeCommand):
         self._send_message(_('Executing faults...'))
         for _item in faultsdef:
             _result = self._eval_code(_item['language'], _item['code'])
-            _info = '{}: {}'.format(_item['name'], _result)
+            _info = '{0}: {1}'.format(_item['name'], _result)
             if _result:
                 # only send faults with output!!!
                 _response['faults'][_item['name']] = _result
@@ -359,7 +359,7 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _get_repositories_url_template(self):
         _curl = curl.Curl(
-            '{}/{}'.format(
+            '{0}/{1}'.format(
                 self.migas_server,
                 'api/v1/public/repository-url-template/'
             ),
@@ -386,7 +386,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         _server = self.migas_server
         if self.migas_package_proxy_cache:
-            _server = '{}/{}'.format(self.migas_package_proxy_cache, _server)
+            _server = '{0}/{1}'.format(self.migas_package_proxy_cache, _server)
 
         _ret = self.pms.create_repos(
             _url_template,

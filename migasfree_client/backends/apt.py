@@ -51,7 +51,7 @@ class Apt(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{} install -o APT::Get::Purge=true {}'.format(
+        self._cmd = '{0} install -o APT::Get::Purge=true {1}'.format(
             self._pms,
             package.strip()
         )
@@ -64,7 +64,7 @@ class Apt(Pms):
         bool remove(string package)
         """
 
-        self._cmd = '{} purge {}'.format(self._pms, package.strip())
+        self._cmd = '{0} purge {1}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -74,7 +74,7 @@ class Apt(Pms):
         bool search(string pattern)
         """
 
-        self._cmd = '{} search {}'.format(self._pms_search, pattern.strip())
+        self._cmd = '{0} search {1}'.format(self._pms_search, pattern.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -84,7 +84,7 @@ class Apt(Pms):
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{} {} dist-upgrade'.format(
+        self._cmd = '{0} {1} dist-upgrade'.format(
             self._pms,
             self._silent_options
         )
@@ -112,7 +112,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} {} install {}'.format(
+        self._cmd = '{0} {1} install {2}'.format(
             self._pms,
             self._silent_options,
             ' '.join(package_set)
@@ -141,7 +141,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} {} purge {}'.format(
+        self._cmd = '{0} {1} purge {2}'.format(
             self._pms,
             self._silent_options,
             ' '.join(package_set)
@@ -160,7 +160,7 @@ class Apt(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '{} --status {} | grep "Status: install ok installed"'.format(
+        self._cmd = '{0} --status {1} | grep "Status: install ok installed"'.format(
             self._pm,
             package.strip()
         )
@@ -173,10 +173,10 @@ class Apt(Pms):
         bool clean_all(void)
         """
 
-        self._cmd = '{} clean'.format(self._pms)
+        self._cmd = '{0} clean'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            self._cmd = '{} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
+            self._cmd = '{0} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
 
@@ -188,7 +188,7 @@ class Apt(Pms):
         """
 
         _, _packages, _ = execute(
-            '{} --list'.format(self._pm),
+            '{0} --list'.format(self._pm),
             interactive=False
         )
         if not _packages:
@@ -199,7 +199,7 @@ class Apt(Pms):
         for _line in _packages:
             if _line.startswith('ii'):
                 _tmp = re.split(' +', _line)
-                _result.append('{}-{}'.format(_tmp[1], _tmp[2]))
+                _result.append('{0}-{1}'.format(_tmp[1], _tmp[2]))
 
         return _result
 
@@ -208,7 +208,7 @@ class Apt(Pms):
         bool create_repos(string template, string server, string project, list repositories)
         """
 
-        repo_template = 'deb {} {repo} PKGS\n'.format(
+        repo_template = 'deb {0} {repo} PKGS\n'.format(
             template.format(server=server, project=project),
             repo='{repo}'
         )
@@ -231,7 +231,7 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        self._cmd = 'apt-key add {} >/dev/null'.format(file_key)
+        self._cmd = 'apt-key add {0} >/dev/null'.format(file_key)
         logging.debug(self._cmd)
         return execute(self._cmd)[0] == 0
 
@@ -240,7 +240,7 @@ class Apt(Pms):
         list available_packages(void)
         """
 
-        self._cmd = '{} pkgnames'.format(self._pms_search)
+        self._cmd = '{0} pkgnames'.format(self._pms_search)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret == 0:

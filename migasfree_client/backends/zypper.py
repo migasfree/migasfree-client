@@ -43,7 +43,7 @@ class Zypper(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{} install --no-force-resolution {}'.format(
+        self._cmd = '{0} install --no-force-resolution {1}'.format(
             self._pms,
             package.strip()
         )
@@ -56,7 +56,7 @@ class Zypper(Pms):
         bool remove(string package)
         """
 
-        self._cmd = '{} remove {}'.format(self._pms, package.strip())
+        self._cmd = '{0} remove {1}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -66,7 +66,7 @@ class Zypper(Pms):
         bool search(string pattern)
         """
 
-        self._cmd = '{} search {}'.format(self._pms, pattern.strip())
+        self._cmd = '{0} search {1}'.format(self._pms, pattern.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -76,7 +76,7 @@ class Zypper(Pms):
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{} --non-interactive update --no-force-resolution "*"'.format(self._pms)
+        self._cmd = '{0} --non-interactive update --no-force-resolution "*"'.format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
@@ -84,9 +84,9 @@ class Zypper(Pms):
             verbose=True
         )
         if _ret != 0:
-            return False, '{}\n{}\n{}'.format(str(_ret), _output, _error)
+            return False, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
-        self._cmd = '{} lu -a'.format(self._pms)
+        self._cmd = '{0} lu -a'.format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
@@ -94,7 +94,7 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return _ret == 0, '{}\n{}\n{}'.format(str(_ret), _output, _error)
+        return _ret == 0, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
     def install_silent(self, package_set):
         """
@@ -111,7 +111,7 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} --non-interactive install --no-force-resolution {}'.format(
+        self._cmd = '{0} --non-interactive install --no-force-resolution {}'.format(
             self._pms,
             ' '.join(package_set)
         )
@@ -122,7 +122,7 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return _ret == 0, '{}\n{}\n{}'.format(str(_ret), _output, _error)
+        return _ret == 0, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
     def remove_silent(self, package_set):
         """
@@ -139,7 +139,7 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} --non-interactive remove {}'.format(
+        self._cmd = '{0} --non-interactive remove {1}'.format(
             self._pms,
             ' '.join(package_set)
         )
@@ -150,14 +150,14 @@ class Zypper(Pms):
             verbose=True
         )
 
-        return _ret == 0, '{}\n{}\n{}'.format(str(_ret), _output, _error)
+        return _ret == 0, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
     def is_installed(self, package):
         """
         bool is_installed(string package)
         """
 
-        self._cmd = '{} -q {}'.format(self._pm, package.strip())
+        self._cmd = '{0} -q {1}'.format(self._pm, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd, interactive=False)[0] == 0
@@ -167,10 +167,10 @@ class Zypper(Pms):
         bool clean_all(void)
         """
 
-        self._cmd = '{} clean --all'.format(self._pms)
+        self._cmd = '{0} clean --all'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
-            self._cmd = '{} --non-interactive refresh'.format(self._pms)
+            self._cmd = '{0} --non-interactive refresh'.format(self._pms)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
 
@@ -181,7 +181,7 @@ class Zypper(Pms):
         ordered list query_all(void)
         """
 
-        self._cmd = '{} -qa'.format(self._pm)
+        self._cmd = '{0} -qa'.format(self._pm)
         logging.debug(self._cmd)
         _ret, _output, _ = execute(self._cmd, interactive=False)
         if _ret != 0:
@@ -222,7 +222,7 @@ metadata_expire=1
         bool import_server_key(string file_key)
         """
 
-        self._cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
+        self._cmd = '{0} --import {1} > /dev/null'.format(self._pm, file_key)
         logging.debug(self._cmd)
         return execute(self._cmd)[0] == 0
 
@@ -231,7 +231,7 @@ metadata_expire=1
         list available_packages(void)
         """
 
-        self._cmd = "{} pa | awk -F'|' '{print $3}'".format(self._pms)
+        self._cmd = "{0} pa | awk -F'|' '{{print $3}}'".format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret == 0:
