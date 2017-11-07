@@ -171,7 +171,7 @@ def get_active_user():
     _f = '/sys/class/tty/tty0/active'  # kernel >= 2.6.37
     if os.path.exists(_f):
         _tty = open(_f).read().split()[0]
-        _output = commands.getoutput('who | grep {}'.format(_tty)).split()
+        _output = commands.getoutput('who | grep {0}'.format(_tty)).split()
         if _output:
             return _output[0]  # user column
 
@@ -187,7 +187,7 @@ def get_active_graphic_pid(pids):
     _active_user = get_active_user()
     if _active_user:
         for _pid in pids:
-            _user_pid = commands.getoutput('ps -p {} -o ruser='.format(_pid))
+            _user_pid = commands.getoutput('ps -p {0} -o ruser='.format(_pid))
             _user_name = get_user_info(_user_pid)['name']
             if _user_name == _active_user:
                 return _pid
@@ -262,7 +262,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
         # a data line ends in 0 byte, not newline
         _display = grep(
             'DISPLAY',
-            open("/proc/{}/environ".format(pid)).read().split('\0')
+            open("/proc/{0}/environ".format(pid)).read().split('\0')
         )
         if _display:
             _display = _display[0].split('=').pop()
@@ -456,7 +456,7 @@ def get_current_user():
     else:
         _fullname = _info['fullname']
 
-    return '{}~{}'.format(_graphic_user, _fullname)
+    return '{0}~{1}'.format(_graphic_user, _fullname)
 
 
 def get_mfc_project():
@@ -503,7 +503,7 @@ def get_smbios_version():
 
 
 def get_uuid_from_mac():
-    return "00000000-0000-0000-0000-{}".format(network.get_first_mac())
+    return "00000000-0000-0000-0000-{0}".format(network.get_first_mac())
 
 
 def get_hardware_uuid():
@@ -582,14 +582,9 @@ def is_zenity():
 
 
 def get_mfc_release():
-    version_file = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        'VERSION'
-    )
-    if not os.path.exists(version_file):
-        version_file = os.path.join(settings.DOC_PATH, 'VERSION')
+    from . import __version__
 
-    return open(version_file).read().splitlines()[0]
+    return __version__
 
 
 def md5sum(archive):
