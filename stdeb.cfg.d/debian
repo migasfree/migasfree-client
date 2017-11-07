@@ -1,6 +1,6 @@
 # Config file used by stdeb when building a Debian source package.
 
-# http://pypi.python.org/pypi/stdeb/0.5.0#stdeb-cfg-configuration-file
+# http://pypi.python.org/pypi/stdeb/#stdeb-cfg-configuration-file
 
 [migasfree-client]
 Source = migasfree-client
