@@ -3,7 +3,7 @@ prefix=/usr
 
 [bdist_rpm]
 release = 1
-doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README TODO VERSION migasfree-client.doap
+doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README TODO migasfree-client.doap
 install-script = scripts/rpm-install.sh
 post-install = scripts/rpm-post-install.sh
 post-uninstall = scripts/rpm-post-uninstall.sh
@@ -14,3 +14,6 @@ requires = python >= 2.7
            python-cups
            python-magic
            dialog
+           openssl
+           which
+           procps-ng
