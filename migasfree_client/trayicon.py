@@ -75,7 +75,7 @@ class TrayIcon:
 
     def set_tooltip(self, tooltip):
         self._send_cmd('tooltip: %s\n' % tooltip)
-        #self._send_cmd('message: %s\n' % tooltip) # jact 2011-04-17
+        # self._send_cmd('message: %s\n' % tooltip)  # jact 2011-04-17
 
     def set_visible(self, visible):
         if visible:
