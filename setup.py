@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 README = open(os.path.join(PATH, 'README.md')).read()
-VERSION = open(os.path.join(PATH, 'VERSION')).read().strip()
+VERSION = __import__('migasfree_client').__version__
 
 REQUIRES = filter(
     lambda s: len(s) > 0,
@@ -140,7 +140,6 @@ setup(
             'LICENSE',
             'MANIFEST.in',
             'README.md',
-            'VERSION',
             'migasfree-client.doap',
             'conf/migasfree.conf'
         ]),
