@@ -22,7 +22,7 @@ __builtin__._ = gettext.gettext
 
 from settings import LOCALE_PATH
 
-__version__ = "4.14"
+__version__ = "4.15"
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __contact__ = "fun.with@migasfree.org"
