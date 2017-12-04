@@ -45,7 +45,7 @@ class Printer(object):
             else:
                 self.port = "9100"
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = 'socket://%s:%s' % (
+                self.uri = 'socket://{}:{}'.format(
                     self.conn['IP'],
                     int(self.port)
                 )
@@ -57,7 +57,7 @@ class Printer(object):
                 self.port = self.conn['PORT']
             else:
                 self.port = "0"
-            self.uri = 'parallel:/dev/lp%s' % self.port
+            self.uri = 'parallel:/dev/lp{}'.format(self.port)
         elif 'USB' in device:
             self.conn = device['USB']
             self.uri = 'parallel:/dev/usb/lp0'
@@ -67,18 +67,21 @@ class Printer(object):
                 self.port = self.conn['PORT']
             else:
                 self.port = "0"
-            self.uri = 'serial:/dev/ttyS%s' % self.port
+            self.uri = 'serial:/dev/ttyS{}'.format(self.port)
         elif 'LPD' in device:
             self.conn = device['LPD']
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = 'lpd://%s/%s' % (
+                self.uri = 'lpd://{}/{}'.format(
                     self.conn['IP'],
                     self.conn['PORT']
                 )
                 if self.conn['LOCATION'] != '':
                     self.location = self.conn['LOCATION']
 
-        self.info = '%s__%s__%s__%s__%d' % (
+        if 'CUPSWRAPPER' in self.conn and self.conn['CUPSWRAPPER']:
+            self.uri = '{}:{}'.format(self.conn['CUPSWRAPPER'], self.uri)
+
+        self.info = '{}__{}__{}__{}__{}'.format(
             device['manufacturer'],
             device['model'],
             device['feature'],
@@ -87,13 +90,13 @@ class Printer(object):
         )
 
         if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
-            self.name = '%s__%s__%s' % (
+            self.name = '{}__{}__{}'.format(
                 self.conn['NAME'],
                 device['feature'],
                 device['name'],
             )
         else:
-            self.name = '%s__%s__%s__%s' % (
+            self.name = '{}__{}__{}__{}'.format(
                 device['manufacturer'],
                 device['model'],
                 device['feature'],
