@@ -78,8 +78,8 @@ class LogicalDevice(object):
                 if self.conn['LOCATION'] != '':
                     self.location = self.conn['LOCATION']
 
-        if 'CUPSWRAPPER' in device:
-            self.uri = '{0}://{1}'.format(device['CUPSWRAPPER'], self.uri)
+        if 'CUPSWRAPPER' in self.conn and self.conn['CUPSWRAPPER']:
+            self.uri = '{0}:{1}'.format(self.conn['CUPSWRAPPER'], self.uri)
 
         self.info = u'{0}__{1}__{2}__{3}__{4}'.format(
             device['manufacturer'],
