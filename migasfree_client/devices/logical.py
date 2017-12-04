@@ -45,7 +45,7 @@ class LogicalDevice(object):
             else:
                 self.port = "9100"
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = 'socket://%s:%s' % (
+                self.uri = 'socket://{0}:{1}'.format(
                     self.conn['IP'],
                     int(self.port)
                 )
@@ -57,7 +57,7 @@ class LogicalDevice(object):
                 self.port = self.conn['PORT']
             else:
                 self.port = "0"
-            self.uri = 'parallel:/dev/lp%s' % self.port
+            self.uri = 'parallel:/dev/lp{0}'.format(self.port)
         elif 'USB' in device:
             self.conn = device['USB']
             self.uri = 'parallel:/dev/usb/lp0'
@@ -67,18 +67,21 @@ class LogicalDevice(object):
                 self.port = self.conn['PORT']
             else:
                 self.port = "0"
-            self.uri = 'serial:/dev/ttyS%s' % self.port
+            self.uri = 'serial:/dev/ttyS{0}'.format(self.port)
         elif 'LPD' in device:
             self.conn = device['LPD']
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = 'lpd://%s/%s' % (
+                self.uri = 'lpd://{0}/{1}'.format(
                     self.conn['IP'],
                     self.conn['PORT']
                 )
                 if self.conn['LOCATION'] != '':
                     self.location = self.conn['LOCATION']
 
-        self.info = '%s__%s__%s__%s__%d' % (
+        if 'CUPSWRAPPER' in device:
+            self.uri = '{0}://{1}'.format(device['CUPSWRAPPER'], self.uri)
+
+        self.info = u'{0}__{1}__{2}__{3}__{4}'.format(
             device['manufacturer'],
             device['model'],
             device['feature'],
@@ -87,13 +90,13 @@ class LogicalDevice(object):
         )
 
         if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
-            self.name = '%s__%s__%s' % (
+            self.name = u'{0}__{1}__{2}'.format(
                 self.conn['NAME'],
                 device['feature'],
                 device['name'],
             )
         else:
-            self.name = '%s__%s__%s__%s' % (
+            self.name = u'{0}__{1}__{2}__{3}'.format(
                 device['manufacturer'],
                 device['model'],
                 device['feature'],
@@ -104,7 +107,7 @@ class LogicalDevice(object):
         self.driver = device.get('driver', None)
 
     def md5_file(self):
-        return os.path.join(DEVICES_PATH, '{}.md5'.format(self.logical_id))
+        return os.path.join(DEVICES_PATH, '{0}.md5'.format(self.logical_id))
 
     def install(self):
         self.remove()
