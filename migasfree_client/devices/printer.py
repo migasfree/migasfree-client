@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2014-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2014-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,7 +67,11 @@ class Printer(object):  # for migasfree-server <= 4.12
             _connect = '-v parallel:/dev/lp%s' % _port
         elif 'USB' in device:
             _conn = device['USB']
-            _connect = '-v parallel:/dev/usb/lp0'
+            if 'PORT' in _conn and not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):
+                _port = _conn['PORT']
+            else:
+                _port = "0"
+            _connect = '-v parallel:/dev/usb/lp%s' % _port
         elif 'SRL' in device:
             _conn = device['SRL']
             if 'PORT' in _conn and not (_conn['PORT'] == 'undefined' or _conn['PORT'] == ''):

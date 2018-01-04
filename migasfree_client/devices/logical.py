@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,7 +60,11 @@ class LogicalDevice(object):
             self.uri = 'parallel:/dev/lp{0}'.format(self.port)
         elif 'USB' in device:
             self.conn = device['USB']
-            self.uri = 'parallel:/dev/usb/lp0'
+            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
+                self.port = self.conn['PORT']
+            else:
+                self.port = "0"
+            self.uri = 'parallel:/dev/usb/lp{0}'.format(self.port)
         elif 'SRL' in device:
             self.conn = device['SRL']
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
