@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -162,39 +162,6 @@ def get_hostname():
     return platform.node().split('.')[0]
 
 
-def get_active_user():
-    """
-    string get_active_user(void)
-    :return: string or None
-    """
-
-    _f = '/sys/class/tty/tty0/active'  # kernel >= 2.6.37
-    if os.path.exists(_f):
-        _tty = open(_f).read().split()[0]
-        _output = commands.getoutput('who | grep {0}'.format(_tty)).split()
-        if _output:
-            return _output[0]  # user column
-
-    return None
-
-
-def get_active_graphic_pid(pids):
-    """
-    int get_active_graphic_pid(list pids)
-    :param pids: list
-    :return: int
-    """
-    _active_user = get_active_user()
-    if _active_user:
-        for _pid in pids:
-            _user_pid = commands.getoutput('ps -p {0} -o ruser='.format(_pid))
-            _user_name = get_user_info(_user_pid)['name']
-            if _user_name == _active_user:
-                return _pid
-
-    return pids.pop()  # otherwise, last pid of list (backwards compatibility)
-
-
 def get_graphic_pid():
     """
     list get_graphic_pid(void)
@@ -211,10 +178,9 @@ def get_graphic_pid():
         'mate-session',          # MATE
     ]
     for _process in _graphic_environments:
-        _pid = commands.getoutput('pidof %s' % _process)
-        if _pid != '':
-            # sometimes pidof command returns multiple pids
-            return [get_active_graphic_pid(_pid.split()), _process]
+        _pid = commands.getoutput('pidof -s {0}'.format(_process))
+        if _pid:
+            return [_pid, _process]
 
     return [None, None]
 
@@ -224,7 +190,7 @@ def get_graphic_user(pid):
     string get_graphic_user(int pid)
     """
 
-    _user = commands.getoutput('ps hp %s -o %s' % (str(pid), '"%U"'))
+    _user = commands.getoutput('ps hp {0} -o "%U"'.format(pid))
     if _user.isdigit():
         # ps command not always show username (show uid if len(username) > 8)
         _user_info = get_user_info(_user)
@@ -517,7 +483,7 @@ def get_hardware_uuid():
 
     try:
         _byte_array = uuid.UUID(_uuid).hex
-    except:
+    except ValueError:
         return get_uuid_from_mac()
 
     # issue #33
