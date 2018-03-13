@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ __builtin__._ = gettext.gettext
 
 from settings import LOCALE_PATH
 
-__version__ = "4.15"
+__version__ = "4.16"
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __contact__ = "fun.with@migasfree.org"
@@ -49,5 +49,5 @@ import sys
 if sys.getdefaultencoding() != 'utf-8':
     reload(sys)
     sys.setdefaultencoding('utf-8')
-    # now default enconding is 'utf-8' ;)
+    # now default encoding is 'utf-8' ;)
 # end unicode hack
