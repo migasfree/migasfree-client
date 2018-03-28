@@ -152,6 +152,8 @@ class MigasFreeTags(MigasFreeCommand):
         return _selected_tags
 
     def _get_tags(self):
+        self._check_sign_keys()
+
         logging.debug('Getting tags')
         _ret = self._url_request.run('get_computer_tags')
 
@@ -303,6 +305,7 @@ class MigasFreeTags(MigasFreeCommand):
 def main():
     mft = MigasFreeTags()
     mft.run()
+
 
 if __name__ == "__main__":
     main()
