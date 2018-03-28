@@ -185,10 +185,15 @@ def get_graphic_pid():
     return [None, None]
 
 
-def get_graphic_user(pid):
+def get_graphic_user(pid=0):
     """
-    string get_graphic_user(int pid)
+    string get_graphic_user(int pid=0)
     """
+
+    if not pid:
+        pid = get_graphic_pid()[0]
+        if not pid:
+            return ''
 
     _user = commands.getoutput('ps hp {0} -o "%U"'.format(pid))
     if _user.isdigit():
