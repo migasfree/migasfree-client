@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -178,6 +178,8 @@ class MigasFreeTags(MigasFreeCommand):
         return response
 
     def _get_available_tags(self):
+        self._check_sign_keys()
+
         if not self._computer_id:
             self.get_computer_id()
 
