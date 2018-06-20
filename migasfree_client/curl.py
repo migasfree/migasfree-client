@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-'''
+"""
 Based in http://stackoverflow.com/questions/472179/how-to-read-the-header-with-pycurl
 
 SSL info:
@@ -34,7 +34,7 @@ SSL info:
 * http://realmike.org/blog/2011/01/02/ssl-certificate-error-with-gwibber-and-identi-ca-on-ubuntu/
 
 * http://gagravarr.org/writing/openssl-certs/others.shtml
-'''
+"""
 
 __author__ = 'Jose Antonio Chavarría'
 
@@ -128,8 +128,8 @@ class Curl(object):
             self.curl.perform()
             self.http_code = self.curl.getinfo(pycurl.HTTP_CODE)
             self.error = None
-        except:
+        except pycurl.error as e:
             self.error = self.curl.errstr()
-            self.errno = self.curl.getinfo(pycurl.OS_ERRNO)
+            self.errno = e[0]
         finally:
             self.curl.close()
