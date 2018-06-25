@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import logging
 import errno
 import getpass
 import platform
+import pwd
 
 from . import (
     settings,
@@ -203,7 +204,7 @@ class MigasFreeCommand(object):
         )
 
     def _check_user_is_root(self):
-        return utils.get_user_info(os.environ.get('USER'))['gid'] == 0
+        return pwd.getpwuid(os.getuid()).pw_gid == 0
 
     def _user_is_not_root(self):
         if not self._check_user_is_root():
