@@ -16,7 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import cups
+try:
+    import cups
+except ImportError:
+    pass
 
 from ..utils import write_file, md5sum
 from ..settings import DEVICES_PATH
