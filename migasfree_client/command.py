@@ -203,6 +203,32 @@ class MigasFreeCommand(object):
             cert=self.migas_ssl_cert
         )
 
+    def _check_path(self, path):
+        if not os.path.isdir(path):
+            try:
+                os.makedirs(path)
+            except OSError:
+                _msg = _('Error creating %s directory') % path
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                return False
+
+        return True
+
+    def _execute_path(self, path):
+        self._check_path(path)
+        files = os.listdir(path)
+        for file_ in sorted(files):
+            self._send_message(_('Running command %s...') % file_)
+            _ret, _output, _error = utils.execute(file_, interactive=False)
+            if _ret == 0:
+                self.operation_ok()
+            else:
+                _msg = _('Command %s failed: %s') % (file_, _error)
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                self._write_error(_msg)
+
     def _check_user_is_root(self):
         return pwd.getpwuid(os.getuid()).pw_gid == 0
 
@@ -257,14 +283,8 @@ class MigasFreeCommand(object):
         )
         logging.debug('Response _save_sign_keys: %s', _response)
 
-        if not os.path.isdir(os.path.abspath(settings.KEYS_PATH)):
-            try:
-                os.makedirs(os.path.abspath(settings.KEYS_PATH))
-            except OSError:
-                _msg = _('Error creating %s directory') % settings.KEYS_PATH
-                self.operation_failed(_msg)
-                logging.error(_msg)
-                return False
+        if not self._check_path(os.path.abspath(settings.KEYS_PATH)):
+            return False
 
         if 'errmfs' in _response:
             _msg = _response['errmfs']['info']
@@ -318,14 +338,8 @@ class MigasFreeCommand(object):
         _path = os.path.abspath(
             os.path.join(settings.KEYS_PATH, self.migas_server)
         )
-        if not os.path.isdir(_path):
-            try:
-                os.makedirs(_path)
-            except OSError:
-                _msg = _('Error creating %s directory') % _path
-                self.operation_failed(_msg)
-                logging.error(_msg)
-                return False
+        if not self._check_path(_path):
+            return False
 
         _path_file = os.path.join(_path, self.REPOS_KEY)
         logging.debug('Trying writing file: %s', _path_file)
