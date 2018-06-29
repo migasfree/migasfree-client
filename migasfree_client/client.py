@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -514,6 +514,8 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._upload_old_errors()
 
+        self._execute_path(settings.PRE_SYNC_PATH)
+
         _response = self._get_attributes()
 
         self._send_message(_('Uploading attributes...'))
@@ -614,9 +616,11 @@ class MigasFreeClient(MigasFreeCommand):
 
                 self._sync_logical_devices(_request['devices'])
 
+        self._execute_path(settings.POST_SYNC_PATH)
+
         self._upload_execution_errors()
 
-        self._send_message(_('Operations completed'), self.ICON_COMPLETED)
+        self._send_message(_('Completed operations'), self.ICON_COMPLETED)
 
         # clean computer messages in server
         self._send_message()
@@ -761,7 +765,8 @@ class MigasFreeClient(MigasFreeCommand):
                 _printer_name = logical_devices[key].name
 
                 if logical_devices[key].driver is None:
-                    _msg = _('Error: no driver defined for device %s. Please, configure feature %s, in the model %s %s, and project %s') % (
+                    _msg = _('Error: no driver defined for device %s.'
+                             ' Please, configure feature %s, in the model %s %s, and project %s') % (
                         _printer_name,
                         logical_devices[key].info.split('__')[2],  # feature
                         logical_devices[key].info.split('__')[0],  # manufacturer
@@ -902,6 +907,7 @@ class MigasFreeClient(MigasFreeCommand):
 def main():
     mfc = MigasFreeClient()
     mfc.run()
+
 
 if __name__ == "__main__":
     main()
