@@ -121,51 +121,47 @@ class LogicalDevice(object):
 
         try:
             conn = cups.Connection()
-        except RuntimeError:
-            conn = None
+        except (RuntimeError, NameError):
+            return False
 
-        if conn:  # cups is running
-            try:
-                if self.driver:
-                    conn.addPrinter(
-                        name=self.name,
-                        filename=self.driver,
-                        info=self.info,
-                        location=self.location,
-                        device=self.uri
-                    )
-                else:
-                    conn.addPrinter(
-                        name=self.name,
-                        info=self.info,
-                        location=self.location,
-                        device=self.uri
-                    )
-            except cups.IPPError as (status, description):
-                print('CUPS Error: %d (%s)' % (status, description))
-                return False
+        try:
+            if self.driver:
+                conn.addPrinter(
+                    name=self.name,
+                    filename=self.driver,
+                    info=self.info,
+                    location=self.location,
+                    device=self.uri
+                )
+            else:
+                conn.addPrinter(
+                    name=self.name,
+                    info=self.info,
+                    location=self.location,
+                    device=self.uri
+                )
+        except cups.IPPError as (status, description):
+            print('CUPS Error: %d (%s)' % (status, description))
+            return False
 
-            conn.acceptJobs(self.name)
-            conn.enablePrinter(self.name)
+        conn.acceptJobs(self.name)
+        conn.enablePrinter(self.name)
 
-            write_file(self.md5_file(), md5sum(self.driver))
+        write_file(self.md5_file(), md5sum(self.driver))
 
-            return True
-
-        return False
+        return True
 
     def remove(self):
         if self.printer_name:
             try:
                 conn = cups.Connection()
-            except RuntimeError:
-                conn = None
+            except (RuntimeError, NameError):
+                return False
 
-            if conn:  # cups is running
-                conn.deletePrinter(self.printer_name)
-                if os.path.exists(self.md5_file()):
-                    os.remove(self.md5_file())
-                return True
+            conn.deletePrinter(self.printer_name)
+            if os.path.exists(self.md5_file()):
+                os.remove(self.md5_file())
+            return True
 
         return False
 
@@ -195,13 +191,12 @@ class LogicalDevice(object):
     def get_device_id(name):
         try:
             conn = cups.Connection()
-        except RuntimeError:
-            conn = None
+        except (RuntimeError, NameError):
+            return 0
 
-        if conn:  # cups is running
-            printers = conn.getPrinters()
-            if name in printers:
-                if len(printers[name]['printer-info'].split('__')) == 5:
-                    return int(printers[name]['printer-info'].split('__')[4])
+        printers = conn.getPrinters()
+        if name in printers:
+            if len(printers[name]['printer-info'].split('__')) == 5:
+                return int(printers[name]['printer-info'].split('__')[4])
 
         return 0

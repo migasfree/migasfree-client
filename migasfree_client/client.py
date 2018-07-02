@@ -25,8 +25,12 @@ import json
 import time
 import tempfile
 import platform
-import cups
 import socket
+
+try:
+    import cups
+except ImportError:
+    pass
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -736,7 +740,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         try:
             conn = cups.Connection()
-        except RuntimeError:
+        except (RuntimeError, NameError):
             conn = None
 
         if conn:  # cups is running
