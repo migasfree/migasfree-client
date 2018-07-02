@@ -220,7 +220,10 @@ class MigasFreeCommand(object):
         files = os.listdir(path)
         for file_ in sorted(files):
             self._send_message(_('Running command %s...') % file_)
-            _ret, _output, _error = utils.execute(file_, interactive=False)
+            _ret, _output, _error = utils.execute(
+                os.path.join(path, file_),
+                interactive=False
+            )
             if _ret == 0:
                 self.operation_ok()
             else:
