@@ -741,71 +741,75 @@ class MigasFreeClient(MigasFreeCommand):
         try:
             conn = cups.Connection()
         except (RuntimeError, NameError):
-            conn = None
+            _msg = _('CUPS is not running!!!')
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            self._write_error(_msg)
 
-        if conn:  # cups is running
-            printers = conn.getPrinters()
-            for printer in printers:
-                # check if printer is a migasfree printer (by format)
-                if len(printers[printer]['printer-info'].split('__')) == 5:
-                    key = int(printers[printer]['printer-info'].split('__')[4])
-                    if key in logical_devices:
-                        # relate real devices with logical ones by id
-                        logical_devices[key].printer_name = printer
-                        logical_devices[key].printer_data = printers[printer]
-                    else:
-                        try:
-                            self._send_message(_('Removing device: %s') % printer)
-                            conn.deletePrinter(printer)
-                            self.operation_ok()
-                            logging.debug('Device removed: %s', printer)
-                        except cups.IPPError:
-                            _msg = _('Error removing device: %s') % printer
-                            self.operation_failed(_msg)
-                            logging.error(_msg)
-                            self._write_error(_msg)
+            return
 
-            for key in logical_devices:
-                _printer_name = logical_devices[key].name
+        printers = conn.getPrinters()
+        for printer in printers:
+            # check if printer is a migasfree printer (by format)
+            if len(printers[printer]['printer-info'].split('__')) == 5:
+                key = int(printers[printer]['printer-info'].split('__')[4])
+                if key in logical_devices:
+                    # relate real devices with logical ones by id
+                    logical_devices[key].printer_name = printer
+                    logical_devices[key].printer_data = printers[printer]
+                else:
+                    try:
+                        self._send_message(_('Removing device: %s') % printer)
+                        conn.deletePrinter(printer)
+                        self.operation_ok()
+                        logging.debug('Device removed: %s', printer)
+                    except cups.IPPError:
+                        _msg = _('Error removing device: %s') % printer
+                        self.operation_failed(_msg)
+                        logging.error(_msg)
+                        self._write_error(_msg)
 
-                if logical_devices[key].driver is None:
-                    _msg = _('Error: no driver defined for device %s.'
-                             ' Please, configure feature %s, in the model %s %s, and project %s') % (
-                        _printer_name,
-                        logical_devices[key].info.split('__')[2],  # feature
-                        logical_devices[key].info.split('__')[0],  # manufacturer
-                        logical_devices[key].info.split('__')[1],  # model
-                        self.migas_project
-                    )
+        for key in logical_devices:
+            _printer_name = logical_devices[key].name
+
+            if logical_devices[key].driver is None:
+                _msg = _('Error: no driver defined for device %s.'
+                         ' Please, configure feature %s, in the model %s %s, and project %s') % (
+                    _printer_name,
+                    logical_devices[key].info.split('__')[2],  # feature
+                    logical_devices[key].info.split('__')[0],  # manufacturer
+                    logical_devices[key].info.split('__')[1],  # model
+                    self.migas_project
+                )
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                self._write_error(_msg)
+                continue
+
+            if logical_devices[key].is_changed():
+                self._send_message(_('Installing device: %s') % _printer_name)
+                if logical_devices[key].install():
+                    self.operation_ok()
+                    logging.debug('Device installed: %s', _printer_name)
+                else:
+                    _msg = _('Error installing device: %s') % _printer_name
                     self.operation_failed(_msg)
                     logging.error(_msg)
                     self._write_error(_msg)
-                    continue
 
-                if logical_devices[key].is_changed():
-                    self._send_message(_('Installing device: %s') % _printer_name)
-                    if logical_devices[key].install():
-                        self.operation_ok()
-                        logging.debug('Device installed: %s', _printer_name)
-                    else:
-                        _msg = _('Error installing device: %s') % _printer_name
-                        self.operation_failed(_msg)
-                        logging.error(_msg)
-                        self._write_error(_msg)
-
-            # System default printer
-            if devices['default'] != 0 and devices['default'] in logical_devices:
-                _printer_name = logical_devices[devices['default']].name
-                if LogicalDevice.get_device_id(conn.getDefault()) != devices['default']:
-                    try:
-                        self._send_message(_('Setting default device: %s') % _printer_name)
-                        conn.setDefault(_printer_name)
-                        self.operation_ok()
-                    except cups.IPPError:
-                        _msg = _('Error setting default device: %s') % _printer_name
-                        self.operation_failed(_msg)
-                        logging.error(_msg)
-                        self._write_error(_msg)
+        # System default printer
+        if devices['default'] != 0 and devices['default'] in logical_devices:
+            _printer_name = logical_devices[devices['default']].name
+            if LogicalDevice.get_device_id(conn.getDefault()) != devices['default']:
+                try:
+                    self._send_message(_('Setting default device: %s') % _printer_name)
+                    conn.setDefault(_printer_name)
+                    self.operation_ok()
+                except cups.IPPError:
+                    _msg = _('Error setting default device: %s') % _printer_name
+                    self.operation_failed(_msg)
+                    logging.error(_msg)
+                    self._write_error(_msg)
 
     def run(self):
         _program = 'migasfree client'
