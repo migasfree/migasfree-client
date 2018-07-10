@@ -12,14 +12,14 @@ build-deb-32:
     - useradd -m $_USER
     - mkdir -p $_PATH
     - mv * $_PATH
-    - pushd $_PATH
-    - su -c "/usr/bin/debuild --no-tgz-check -us -uc" $_USER
+    - pushd $_PATH/bin
+    - su -c "./create-package" $_USER
     - popd
-    - mv /home/$_USER/*.deb .
+    - mv $_PATH/deb_dist/*.deb .
   artifacts:
     expire_in: 1 days
     paths:
-    - ./*.deb
+      - ./*.deb
   only:
     - tags
 
@@ -30,14 +30,14 @@ build-deb-64:
     - useradd -m $_USER
     - mkdir -p $_PATH
     - mv * $_PATH
-    - pushd $_PATH
-    - su -c "/usr/bin/debuild --no-tgz-check -us -uc" $_USER
+    - pushd $_PATH/bin
+    - su -c "./create-package" $_USER
     - popd
-    - mv /home/$_USER/*.deb .
+    - mv $_PATH/deb_dist/*.deb .
   artifacts:
     expire_in: 1 days
     paths:
-    - ./*.deb
+      - ./*.deb
   only:
     - tags
 
@@ -45,24 +45,13 @@ build-rpm-64:
   image: migasfree/rpm-ci:64
   stage: build
   script:
-    - _VERSION=`grep "^Version" rpm/$CI_PROJECT_NAME.spec | awk '{print $2}'`
-    - _ARCH=`grep "^BuildArchitectures" rpm/$CI_PROJECT_NAME.spec | awk '{print $2}'`
     - useradd -m $_USER
-    - mkdir -p $_PATH/SOURCES/$CI_PROJECT_NAME-$_VERSION
-    - mkdir -p $_PATH/SPECS
-    - mkdir -p $_PATH/BUILD
-    - mkdir -p $_PATH/RPMS
-    - mkdir -p $_PATH/SRPMS
-    - mkdir -p $_PATH/BUILDROOT
-    - chown -R $_USER:$_USER $_PATH
-    - mv * $_PATH/SOURCES/$CI_PROJECT_NAME-$_VERSION
-    - mv $_PATH/SOURCES/$CI_PROJECT_NAME-$_VERSION/rpm/* $_PATH/SPECS
-    - rm -rf $_PATH/SOURCES/rpm/
-    - pushd $_PATH/SOURCES
-    - tar -cvzf $CI_PROJECT_NAME-$_VERSION.tar.gz $CI_PROJECT_NAME-$_VERSION
-    - su -c "rpmbuild --define '_topdir $_PATH' -ba $_PATH/SPECS/$CI_PROJECT_NAME.spec" $_USER
+    - mkdir -p $_PATH
+    - mv * $_PATH
+    - pushd $_PATH/bin
+    - su -c "./create-package" $_USER
     - popd
-    - mv $_PATH/RPMS/$_ARCH/*.rpm .
+    - mv $_PATH/dist/*.rpm .
   artifacts:
     expire_in: 1 days
     paths:
