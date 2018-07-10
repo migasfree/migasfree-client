@@ -12,6 +12,7 @@ build-deb-32:
     - useradd -m $_USER
     - mkdir -p $_PATH
     - mv * $_PATH
+    - chown -R $_USER $_PATH
     - pushd $_PATH/bin
     - su -c "./create-package" $_USER
     - popd
@@ -30,6 +31,7 @@ build-deb-64:
     - useradd -m $_USER
     - mkdir -p $_PATH
     - mv * $_PATH
+    - chown -R $_USER $_PATH
     - pushd $_PATH/bin
     - su -c "./create-package" $_USER
     - popd
@@ -48,6 +50,7 @@ build-rpm-64:
     - useradd -m $_USER
     - mkdir -p $_PATH
     - mv * $_PATH
+    - chown -R $_USER $_PATH
     - pushd $_PATH/bin
     - su -c "./create-package" $_USER
     - popd
