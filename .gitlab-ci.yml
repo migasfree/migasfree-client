@@ -5,25 +5,6 @@ variables:
 stages:
   - build
 
-build-deb-32:
-  image: migasfree/deb-ci:32
-  stage: build
-  script:
-    - useradd -m $_USER
-    - mkdir -p $_PATH
-    - mv * $_PATH
-    - chown -R $_USER $_PATH
-    - pushd $_PATH/bin
-    - su -c "./create-package" $_USER
-    - popd
-    - mv $_PATH/deb_dist/*.deb .
-  artifacts:
-    expire_in: 1 days
-    paths:
-      - ./*.deb
-  only:
-    - tags
-
 build-deb-64:
   image: migasfree/deb-ci:64
   stage: build
