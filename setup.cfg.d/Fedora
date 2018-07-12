@@ -11,7 +11,6 @@ requires = python >= 2.7
            lshw >= B.02.15
            sudo
            dmidecode
-           python-cups
            python-magic
            dialog
            openssl
