@@ -768,6 +768,10 @@ class MigasFreeSync(MigasFreeCommand):
         try:
             conn = cups.Connection()
         except (RuntimeError, NameError):
+            _msg = _('CUPS is not running!!!')
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            self._write_error(_msg)
             return
 
         printers = conn.getPrinters()
