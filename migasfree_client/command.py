@@ -227,6 +227,32 @@ class MigasFreeCommand(object):
     def api_endpoint(self, path):
         return urljoin(self._url_base, path)
 
+    def _check_path(self, path):
+        if not os.path.isdir(path):
+            try:
+                os.makedirs(path)
+            except OSError:
+                _msg = _('Error creating %s directory') % path
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                return False
+
+        return True
+
+    def _execute_path(self, path):
+        self._check_path(path)
+        files = os.listdir(path)
+        for file_ in sorted(files):
+            self._send_message(_('Running command %s...') % file_)
+            _ret, _output, _error = utils.execute(file_, interactive=False)
+            if _ret == 0:
+                self.operation_ok()
+            else:
+                _msg = _('Command %s failed: %s') % (file_, _error)
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                self._write_error(_msg)
+
     @staticmethod
     def _check_user_is_root():
         return pwd.getpwuid(os.getuid()).pw_gid == 0
@@ -260,19 +286,6 @@ class MigasFreeCommand(object):
         logger.warning('Security keys are not present!!!')
         return self._auto_register()
 
-    def _check_keys_path(self):
-        path = os.path.abspath(
-            os.path.join(settings.KEYS_PATH, self.migas_server)
-        )
-        if not os.path.isdir(path):
-            try:
-                os.makedirs(path)
-            except OSError:
-                msg = _('Error creating %s directory') % path
-                self.operation_failed(msg)
-                logger.error(msg)
-                sys.exit(errno.ENOTDIR)
-
     def _auto_register(self):
         print(_('Autoregistering computer...'))
 
@@ -303,7 +316,11 @@ class MigasFreeCommand(object):
             if response['error']['code'] == errno.ECONNREFUSED:
                 sys.exit(errno.ECONNREFUSED)
 
-        self._check_keys_path()
+        if not self._check_path(os.path.join(
+                os.path.abspath(settings.KEYS_PATH),
+                self.migas_server
+        )):
+            sys.exit(errno.ENOTDIR)
 
         for _file, content in list(response.items()):
             if _file == 'migasfree-server.pub':
@@ -342,14 +359,8 @@ class MigasFreeCommand(object):
         path = os.path.abspath(
             os.path.join(settings.KEYS_PATH, self.migas_server)
         )
-        if not os.path.isdir(path):
-            try:
-                os.makedirs(path)
-            except OSError:
-                msg = _('Error creating %s directory') % path
-                self.operation_failed(msg)
-                logger.error(msg)
-                return False
+        if not self._check_path(_path):
+            return False
 
         path_file = os.path.join(path, self.REPOS_KEY)
         logger.debug('Trying writing file: {}'.format(path_file))
