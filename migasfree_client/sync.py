@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -690,6 +690,7 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Connecting to migasfree server...'))
 
         self._upload_old_errors()
+        self._execute_path(settings.PRE_SYNC_PATH)
         self.upload_attributes()
         self.upload_faults()
 
@@ -711,6 +712,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._sync_logical_devices()
 
+        self._execute_path(settings.POST_SYNC_PATH)
         self._upload_execution_errors()
         self.end_synchronization(start_date)
         self.end_of_transmission()
@@ -788,7 +790,8 @@ class MigasFreeSync(MigasFreeCommand):
             _printer_name = logical_devices[key].name
 
             if logical_devices[key].driver is None:
-                _msg = _('Error: no driver defined for device %s. Please, configure feature %s, in the model %s %s, and project %s') % (
+                _msg = _('Error: no driver defined for device %s. '
+                         'Please, configure feature %s, in the model %s %s, and project %s') % (
                     _printer_name,
                     logical_devices[key].info.split('__')[2],  # feature
                     logical_devices[key].info.split('__')[0],  # manufacturer
