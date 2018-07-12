@@ -22,8 +22,12 @@ import json
 import time
 import tempfile
 import requests
-import cups
 import socket
+
+try:
+    import cups
+except ImportError:
+    pass
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -761,8 +765,9 @@ class MigasFreeSync(MigasFreeCommand):
                 dev = Printer(device['PRINTER'])
                 logical_devices[int(dev.logical_id)] = dev
 
-        conn = cups.Connection()
-        if not conn:
+        try:
+            conn = cups.Connection()
+        except (RuntimeError, NameError):
             return
 
         printers = conn.getPrinters()
