@@ -227,6 +227,11 @@ class MigasFreeCommand(object):
     def api_endpoint(self, path):
         return urljoin(self._url_base, path)
 
+    @staticmethod
+    def _show_message(msg):
+        print('')
+        printcolor.info(str(' ' + msg + ' ').center(76, '*'))
+
     def _check_path(self, path):
         if not os.path.isdir(path):
             try:
@@ -243,7 +248,7 @@ class MigasFreeCommand(object):
         self._check_path(path)
         files = os.listdir(path)
         for file_ in sorted(files):
-            self._send_message(_('Running command %s...') % file_)
+            self._show_message(_('Running command %s...') % file_)
             _ret, _output, _error = utils.execute(
                 os.path.join(path, file_),
                 interactive=False
