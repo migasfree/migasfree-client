@@ -134,11 +134,6 @@ class MigasFreeSync(MigasFreeCommand):
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
     @staticmethod
-    def _show_message(msg):
-        print('')
-        printcolor.info(str(' ' + msg + ' ').center(76, '*'))
-
-    @staticmethod
     def _eval_code(lang, code):
         code = code.replace('\r', '').strip()  # clean code
         logger.debug('Language code: %s', lang)
@@ -785,7 +780,7 @@ class MigasFreeSync(MigasFreeCommand):
                     logical_devices[key].printer_data = printers[printer]
                 else:
                     try:
-                        self._send_message(_('Removing device: %s') % printer)
+                        self._show_message(_('Removing device: %s') % printer)
                         conn.deletePrinter(printer)
                         self.operation_ok()
                         logging.debug('Device removed: %s', printer)
@@ -813,7 +808,7 @@ class MigasFreeSync(MigasFreeCommand):
                 continue
 
             if logical_devices[key].is_changed():
-                self._send_message(_('Installing device: %s') % _printer_name)
+                self._show_message(_('Installing device: %s') % _printer_name)
                 if logical_devices[key].install():
                     self.operation_ok()
                     logging.debug('Device installed: %s', _printer_name)
@@ -828,7 +823,7 @@ class MigasFreeSync(MigasFreeCommand):
             _printer_name = logical_devices[devices['default']].name
             if Printer.get_printer_id(conn.getDefault()) != devices['default']:
                 try:
-                    self._send_message(_('Setting default device: %s') % _printer_name)
+                    self._show_message(_('Setting default device: %s') % _printer_name)
                     conn.setDefault(_printer_name)
                     self.operation_ok()
                 except cups.IPPError:
