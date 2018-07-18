@@ -117,6 +117,7 @@ class MigasFreeCommand(object):
     _url_request = None
 
     _debug = False
+    _quiet = False
 
     pms = None
 
