@@ -253,6 +253,9 @@ class MigasFreeTags(MigasFreeCommand):
         mfs._install_mandatory_packages(rules["install"])
 
     def run(self, args=None):
+        if hasattr(args, 'quiet') and args.quiet:
+            self._quiet = True
+
         if not args or not hasattr(args, 'cmd'):
             self._usage_examples()
             sys.exit(os.EX_OK)
@@ -276,7 +279,8 @@ class MigasFreeTags(MigasFreeCommand):
             elif args.communicate != [] and args.communicate != [None]:
                 self._tags = self._sanitize(args.communicate)
 
-            self._show_running_options()
+            if not self._quiet:
+                self._show_running_options()
 
             rules = self._set_tags()
             if args.set != []:

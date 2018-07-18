@@ -833,7 +833,10 @@ class MigasFreeSync(MigasFreeCommand):
                     self._write_error(_msg)
 
     def run(self, args=None):
-        self._show_running_options()
+        if hasattr(args, 'quiet') and args.quiet:
+            self._quiet = True
+        else:
+            self._show_running_options()
 
         if not args or not hasattr(args, 'cmd'):
             self._usage_examples()

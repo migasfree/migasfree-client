@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -238,6 +238,9 @@ class MigasFreeUpload(MigasFreeCommand):
         return True
 
     def run(self, args=None):
+        if hasattr(args, 'quiet') and args.quiet:
+            self._quiet = True
+
         if hasattr(args, 'debug') and args.debug:
             self._debug = True
             logger.setLevel(logging.DEBUG)
@@ -265,7 +268,8 @@ class MigasFreeUpload(MigasFreeCommand):
         self.auto_register_password = self.packager_pwd
         self.auto_register_end_point = self.URLS['get_packager_keys']
 
-        self._show_running_options()
+        if not self._quiet:
+            self._show_running_options()
 
         utils.check_lock_file(self.CMD, self.LOCK_FILE)
         if self._file:

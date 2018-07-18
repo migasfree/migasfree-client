@@ -122,6 +122,9 @@ class MigasFreeLabel(MigasFreeCommand):
             self._debug = True
             logger.setLevel(logging.DEBUG)
 
+        if hasattr(args, 'quiet') and args.quiet:
+            self._quiet = True
+
         self._show_label()
         self.end_of_transmission()
 
