@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,16 +28,12 @@ _ = gettext.gettext
 
 from .utils import get_mfc_release
 
+PROGRAM = 'migasfree'
+
 
 def parse_args(argv):
-    program = 'migasfree'
-    print(_('%(program)s version: %(version)s') % {
-        'program': program,
-        'version': get_mfc_release()
-    })
-
     parser = argparse.ArgumentParser(
-        prog=program,
+        prog=PROGRAM,
         description=_('GNU/Linux Management System (client side)'),
     )
 
@@ -45,6 +41,12 @@ def parse_args(argv):
         '-d', '--debug',
         action='store_true',
         help=_('Enable debug mode')
+    )
+
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help=_('Enable silent mode (no verbose)')
     )
 
     subparsers = parser.add_subparsers(dest='cmd')
@@ -169,6 +171,18 @@ def parse_args(argv):
         help=_('Directory with files to upload at server')
     )
 
+    subparser_info = subparsers.add_parser(
+        'info',
+        help=_('Retrieve computer info at server')
+    )
+
+    subparser_info.add_argument(
+        'key',
+        nargs='?',
+        choices=('id', 'uuid', 'name', 'search'),
+        help=_('Get individual value')
+    )
+
     if len(argv) < 1:
         parser.print_help()
         sys.exit(os.EX_OK)
@@ -182,6 +196,12 @@ def main(argv=None):
 
     args = parse_args(argv)
 
+    if hasattr(args, 'quiet') and not args.quiet:
+        print(_('%(program)s version: %(version)s') % {
+            'program': PROGRAM,
+            'version': get_mfc_release()
+        })
+
     if args.cmd in ['register', 'sync', 'install', 'purge']:
         from .sync import MigasFreeSync
         MigasFreeSync().run(args)
@@ -194,8 +214,12 @@ def main(argv=None):
     elif args.cmd == 'upload':
         from .upload import MigasFreeUpload
         MigasFreeUpload().run(args)
+    elif args.cmd == 'info':
+        from .info import MigasFreeInfo
+        MigasFreeInfo().run(args)
 
     return os.EX_OK
+
 
 if __name__ == '__main__':
     sys.exit(main() or os.EX_OK)
