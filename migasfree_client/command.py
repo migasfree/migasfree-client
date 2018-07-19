@@ -368,7 +368,7 @@ class MigasFreeCommand(object):
         path = os.path.abspath(
             os.path.join(settings.KEYS_PATH, self.migas_server)
         )
-        if not self._check_path(_path):
+        if not self._check_path(path):
             return False
 
         path_file = os.path.join(path, self.REPOS_KEY)
