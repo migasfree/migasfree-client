@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,20 +18,26 @@
 __author__ = "Jose Antonio Chavarría"
 __license__ = 'GPLv3'
 
+import sys
+import errno
+import jose
+
 from Crypto.PublicKey import RSA
 
 from .utils import read_file
 from . import settings
 
 import logging
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
-    level=logging.ERROR,
-    filename=settings.LOG_FILE
-)
+try:
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
+        level=logging.ERROR,
+        filename=settings.LOG_FILE
+    )
+except IOError:
+    print('User has insufficient privileges to execute this command')
+    sys.exit(errno.EACCES)
 logger = logging.getLogger(__name__)
-
-import jose
 
 
 def sign(claims, priv_key):
