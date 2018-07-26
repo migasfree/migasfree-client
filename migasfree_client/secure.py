@@ -20,9 +20,10 @@ __license__ = 'GPLv3'
 
 import sys
 import errno
-import jose
+import json
 
-from Crypto.PublicKey import RSA
+from jwcrypto import jwk, jwe, jws
+from jwcrypto.common import json_encode
 
 from .utils import read_file
 from . import settings
@@ -44,41 +45,51 @@ def sign(claims, priv_key):
     """
     string sign(dict claims, string priv_key)
     """
-    rsa_key = RSA.importKey(read_file(priv_key))
-    jwk = {'k': rsa_key.exportKey('PEM')}
+    priv_jwk = jwk.JWK.from_pem(read_file(priv_key))
 
-    jws = jose.sign(claims, jwk, alg='RS256')  # Asymmetric!!!
-    jwt = jose.serialize_compact(jws)
+    if isinstance(claims, dict):
+        claims = json.dumps(claims)
 
-    return jwt
+    jws_token = jws.JWS(str(claims))
+    jws_token.add_signature(
+        priv_jwk,
+        header=json_encode({'alg': 'RS256', "kid": priv_jwk.thumbprint()})
+    )
+
+    return jws_token.serialize()
 
 
 def verify(jwt, pub_key):
     """
     dict verify(string jwt, string pub_key)
     """
-    rsa_key = RSA.importKey(read_file(pub_key))
-    jwk = {'k': rsa_key.exportKey('PEM')}
-    try:
-        jwe = jose.deserialize_compact(jwt)
-        # FIXME validate_claims=True!!!
-        return jose.verify(jwe, jwk, alg='RS256', validate_claims=False)
-    except:
-        # DEBUG
-        # import sys, traceback
-        # traceback.print_exc(file=sys.stdout)
-        return None
+    pub_jwk = jwk.JWK.from_pem(read_file(pub_key))
+
+    jws_token = jws.JWS()
+    jws_token.deserialize(jwt)
+    jws_token.verify(pub_jwk)
+
+    return jws_token.payload
 
 
 def encrypt(claims, pub_key):
     """
     string encrypt(dict claims, string pub_key)
     """
-    rsa_key = RSA.importKey(read_file(pub_key))
-    pub_jwk = {'k': rsa_key.publickey().exportKey('PEM')}
+    pub_jwk = jwk.JWK.from_pem(read_file(pub_key))
 
-    jwe = jose.encrypt(claims, pub_jwk)
-    jwt = jose.serialize_compact(jwe)
+    protected_header = {
+        "alg": "RSA-OAEP-256",
+        "enc": "A256CBC-HS512",
+        "typ": "JWE",
+        "kid": pub_jwk.thumbprint(),
+    }
+    jwe_token = jwe.JWE(
+        json.dumps(claims),
+        recipient=pub_jwk,
+        protected=protected_header
+    )
+    jwt = jwe_token.serialize()
 
     return jwt
 
@@ -87,13 +98,12 @@ def decrypt(jwt, priv_key):
     """
     string decrypt(string jwt, string priv_key)
     """
-    rsa_key = RSA.importKey(read_file(priv_key))
-    priv_jwk = {'k': rsa_key.exportKey('PEM')}
-    try:
-        jwe = jose.deserialize_compact(jwt)
-        return jose.decrypt(jwe, priv_jwk)
-    except:
-        return None
+    priv_jwk = jwk.JWK.from_pem(read_file(priv_key))
+
+    jwe_token = jwe.JWE()
+    jwe_token.deserialize(jwt, key=priv_jwk)
+
+    return jwe_token.payload
 
 
 def wrap(data, sign_key, encrypt_key):
@@ -111,9 +121,9 @@ def unwrap(data, decrypt_key, verify_key):
     """
     dict unwrap(string data, string decrypt_key, string verify_key)
     """
-    jwt = decrypt(data, decrypt_key)
-    jws = verify(jwt.claims['sign'], verify_key)
+    jwt = json.loads(decrypt(data, decrypt_key))
+    jws = verify(jwt['sign'], verify_key)
     if jws:
-        return jwt.claims['data']
+        return jwt['data']
 
     return None

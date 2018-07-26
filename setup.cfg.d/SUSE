@@ -12,7 +12,6 @@ requires = python >= 2.7
            pmtools
            python-netifaces
            python-magic
-           python-pycryptodome
            python-jwcrypto
            python-requests
            python-requests-toolbelt
