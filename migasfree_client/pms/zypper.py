@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ class Zypper(Pms):
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{} --non-interactive update --no-force-resolution "*"'.format(self._pms)
+        self._cmd = '{} --non-interactive update --no-force-resolution'.format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(
             self._cmd,
