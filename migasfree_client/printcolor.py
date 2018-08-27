@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,24 +29,24 @@ END_COLOR = '\033[0m'
 
 
 def header(text):
-    print HEADER + str(text) + END_COLOR
+    print(HEADER + str(text) + END_COLOR)
 
 
 def warning(text):
-    print WARNING + str(text) + END_COLOR
+    print(WARNING + str(text) + END_COLOR)
 
 
 def info(text):
-    print INFO + str(text) + END_COLOR
+    print(INFO + str(text) + END_COLOR)
 
 
 def fail(text):
-    print FAIL + str(text) + END_COLOR
+    print(FAIL + str(text) + END_COLOR)
 
 
 def ok(text):
-    print OK_GREEN + str(text) + END_COLOR
+    print(OK_GREEN + str(text) + END_COLOR)
 
 
 def ok_blue(text):
-    print OK_BLUE + str(text) + END_COLOR
+    print(OK_BLUE + str(text) + END_COLOR)
