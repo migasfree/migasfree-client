@@ -43,7 +43,6 @@ from datetime import datetime
 from . import (
     settings,
     utils,
-    printcolor,
     network,
 )
 
@@ -133,8 +132,7 @@ class MigasFreeSync(MigasFreeCommand):
         )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
-    @staticmethod
-    def _eval_code(lang, code):
+    def _eval_code(self, lang, code):
         code = code.replace('\r', '').strip()  # clean code
         logger.debug('Language code: %s', lang)
         logger.debug('Code: %s', code)
@@ -160,7 +158,7 @@ class MigasFreeSync(MigasFreeCommand):
         logger.debug('Output: %s', output)
         if ret != 0:
             logger.error('Error: %s', error)
-            msg = _('Code "%s" with error: %s') % (code, _error)
+            msg = _('Code "%s" with error: %s') % (code, error)
             self._write_error(msg)
 
         try:
@@ -434,7 +432,7 @@ class MigasFreeSync(MigasFreeCommand):
             logger.error(msg)
             self._write_error(msg)
 
-    def _clean_pms_cache(self):
+    def clean_pms_cache(self):
         """
         clean cache of Package Management System
         """
@@ -449,7 +447,7 @@ class MigasFreeSync(MigasFreeCommand):
             logger.error(msg)
             self._write_error(msg)
 
-    def _uninstall_packages(self, packages):
+    def uninstall_packages(self, packages):
         self._show_message(_('Uninstalling packages...'))
         ret, error = self.pms.remove_silent(packages)
         if ret:
@@ -461,7 +459,7 @@ class MigasFreeSync(MigasFreeCommand):
             logger.error(msg)
             self._write_error(msg)
 
-    def _install_mandatory_packages(self, packages):
+    def install_mandatory_packages(self, packages):
         self._show_message(_('Installing mandatory packages...'))
         ret, error = self.pms.install_silent(packages)
         if ret:
