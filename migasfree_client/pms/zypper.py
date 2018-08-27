@@ -199,8 +199,7 @@ class Zypper(Pms):
         bool create_repos(string template, string server, string project, list repositories)
         """
 
-        repo_template = \
-"""[{repo}]
+        repo_template = """[{repo}]
 name={repo}
 baseurl={url}/{repo}
 gpgcheck=0
@@ -242,7 +241,7 @@ metadata_expire=1
         list available_packages(void)
         """
 
-        self._cmd = "{} pa | awk -F'|' '{print $3}'".format(self._pms)
+        self._cmd = "{} pa | awk -F'|' '{{print $3}}'".format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret == 0:
