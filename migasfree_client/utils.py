@@ -32,6 +32,7 @@ import select
 import uuid
 import signal
 import magic
+import hashlib
 
 import gettext
 _ = gettext.gettext
@@ -322,7 +323,7 @@ def write_file(filename, content):
     _dir = os.path.dirname(filename)
     if not os.path.exists(_dir):
         try:
-            os.makedirs(_dir, 0777)
+            os.makedirs(_dir, 0o0777)
         except OSError:
             return False
 
