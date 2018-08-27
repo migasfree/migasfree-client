@@ -131,11 +131,11 @@ class MigasFreeTags(MigasFreeCommand):
                 --separate-output \
                 --stdout \
                 --checklist '%s' \
-                0 0 8" % (_title, _text)
+                0 0 8" % (title, text)
             for key, value in available_tags.items():
                 value.sort()
                 for item in value:
-                    tag_active = 'on' if _item in tags["selected"] else 'off'
+                    tag_active = 'on' if item in assigned else 'off'
                     cmd += " '%s' '%s' %s" % (item, key, tag_active)
 
         logger.debug('Change tags command: %s' % cmd)
@@ -244,13 +244,13 @@ class MigasFreeTags(MigasFreeCommand):
         # Update metadata
         mfs.synchronize()
 
-        mfs._uninstall_packages(rules["remove"])
-        mfs._install_mandatory_packages(rules["preinstall"])
+        mfs.uninstall_packages(rules["remove"])
+        mfs.install_mandatory_packages(rules["preinstall"])
 
         # Update metadata
-        mfs._clean_pms_cache()
+        mfs.clean_pms_cache()
 
-        mfs._install_mandatory_packages(rules["install"])
+        mfs.install_mandatory_packages(rules["install"])
 
     def run(self, args=None):
         if hasattr(args, 'quiet') and args.quiet:
