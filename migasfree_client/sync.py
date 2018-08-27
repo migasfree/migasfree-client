@@ -606,9 +606,9 @@ class MigasFreeSync(MigasFreeCommand):
             return
 
         if 'remove' in response:
-            self._uninstall_packages(response['remove'])
+            self.uninstall_packages(response['remove'])
         if 'install' in response:
-            self._install_mandatory_packages(response['install'])
+            self.install_mandatory_packages(response['install'])
 
     def _upload_software(self, before, history):
         if not self._computer_id:
@@ -697,7 +697,7 @@ class MigasFreeSync(MigasFreeCommand):
         software_history = self._software_history(software_before)
 
         self._create_repositories()
-        self._clean_pms_cache()
+        self.clean_pms_cache()
         self._mandatory_pkgs()
         if self.migas_auto_update_packages is True:
             self._update_packages()
@@ -749,7 +749,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         for device in devices['logical']:
             if 'packages' in device and device['packages']:
-                if not self._install_mandatory_packages(device['packages']):
+                if not self.install_mandatory_packages(device['packages']):
                     return False
 
         logical_devices = {}  # key is id field
