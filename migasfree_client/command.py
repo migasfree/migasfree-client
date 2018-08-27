@@ -405,9 +405,9 @@ class MigasFreeCommand(object):
                 logger.info('Empty user in register computer option')
                 sys.exit(errno.EAGAIN)
 
-            pwd = getpass.getpass('%s: ' % _('Password'))
+            password = getpass.getpass('%s: ' % _('Password'))
 
-            self._save_sign_keys(user, pwd)
+            self._save_sign_keys(user, password)
             self.operation_ok(_('Computer registered at server'))
 
     def _save_computer(self):
