@@ -122,8 +122,8 @@ def unwrap(data, decrypt_key, verify_key):
     dict unwrap(string data, string decrypt_key, string verify_key)
     """
     jwt = json.loads(decrypt(data, decrypt_key))
-    jws = verify(jwt['sign'], verify_key)
-    if jws:
+    jws_token = verify(jwt['sign'], verify_key)
+    if jws_token:
         return jwt['data']
 
     return None
