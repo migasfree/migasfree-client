@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ class Yum(Pms):
     def __init__(self):
         Pms.__init__(self)
 
-        self._name = 'yum'          # Package Management System name
-        self._pm = '/bin/rpm'       # Package Manager command
+        self._name = 'yum'  # Package Management System name
+        self._pm = '/bin/rpm'  # Package Manager command
         self._pms = '/usr/bin/yum'  # Package Management System command
 
         # Repositories file
@@ -194,8 +194,7 @@ class Yum(Pms):
         bool create_repos(string template, string server, string project, list repositories)
         """
 
-        repo_template = \
-"""[{repo}]
+        repo_template = """[{repo}]
 name={repo}
 baseurl={url}/{repo}
 gpgcheck=0
@@ -237,7 +236,7 @@ metadata_expire=1
         list available_packages(void)
         """
 
-        self._cmd = "{} --quiet list available | awk -F. '{print $1}' | grep -v '^ ' | sed '1d'".format(
+        self._cmd = "{} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'".format(
             self._pms
         )
         logging.debug(self._cmd)
