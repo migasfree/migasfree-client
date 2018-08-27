@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ class UrlRequest(object):
     def _check_tmp_path():
         if not os.path.exists(settings.TMP_PATH):
             try:
-                os.makedirs(settings.TMP_PATH, 0777)
+                os.makedirs(settings.TMP_PATH, 0o0777)
             except OSError:
                 return False
 
@@ -228,7 +228,7 @@ class UrlRequest(object):
 
             if not self._check_tmp_path():
                 msg = _('Error creating %s directory') % settings.TMP_PATH
-                logger.exception(_msg)
+                logger.exception(msg)
                 print(msg)
                 if self._exit_on_error:
                     sys.exit(errno.EPERM)
