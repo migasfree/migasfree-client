@@ -19,7 +19,6 @@ import os
 import sys
 import errno
 import json
-import time
 import tempfile
 import requests
 import socket
@@ -116,21 +115,6 @@ class MigasFreeSync(MigasFreeCommand):
 
         print('  ' + _('Purge package:'))
         print('\t%s purge bluefish\n' % self.CMD)
-
-    def _write_error(self, msg, append=False):
-        if append:
-            _mode = 'a'
-        else:
-            _mode = 'wb'
-
-        if not self._error_file_descriptor:
-            self._error_file_descriptor = open(self.ERROR_FILE, _mode)
-
-        self._error_file_descriptor.write('%s\n' % ('-' * 20))
-        self._error_file_descriptor.write(
-            '%s\n' % time.strftime("%Y-%m-%d %H:%M:%S")
-        )
-        self._error_file_descriptor.write('%s\n\n' % str(msg))
 
     def _eval_code(self, lang, code):
         code = code.replace('\r', '').strip()  # clean code

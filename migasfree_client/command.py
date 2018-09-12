@@ -23,6 +23,7 @@ import platform
 import pwd
 import requests
 import logging
+import time
 
 import gettext
 _ = gettext.gettext
@@ -493,6 +494,21 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
         print('\t%s: %s' % (_('PMS'), self.pms))
         print('')
+
+    def _write_error(self, msg, append=False):
+        if append:
+            _mode = 'a'
+        else:
+            _mode = 'wb'
+
+        if not self._error_file_descriptor:
+            self._error_file_descriptor = open(self.ERROR_FILE, _mode)
+
+        self._error_file_descriptor.write('%s\n' % ('-' * 20))
+        self._error_file_descriptor.write(
+            '%s\n' % time.strftime("%Y-%m-%d %H:%M:%S")
+        )
+        self._error_file_descriptor.write('%s\n\n' % str(msg))
 
     def _usage_examples(self):
         raise NotImplementedError
