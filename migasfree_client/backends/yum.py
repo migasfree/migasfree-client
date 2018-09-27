@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -165,7 +165,8 @@ class Yum(Pms):
         if execute(self._cmd)[0] == 0:
             self._cmd = '{0} --assumeyes check-update'.format(self._pms)
             logging.debug(self._cmd)
-            return execute(self._cmd)[0] == 0
+            ret, _, _ = execute(self._cmd)
+            return ret == 0 or ret == 100
 
         return False
 
