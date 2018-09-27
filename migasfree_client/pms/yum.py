@@ -171,7 +171,8 @@ class Yum(Pms):
         if execute(self._cmd)[0] == 0:
             self._cmd = '{} --assumeyes check-update'.format(self._pms)
             logging.debug(self._cmd)
-            return execute(self._cmd)[0] == 0
+            ret, _, _ = execute(self._cmd)
+            return ret == 0 or ret == 100
 
         return False
 
