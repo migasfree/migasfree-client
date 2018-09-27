@@ -9,7 +9,7 @@ post-install = scripts/rpm-post-install.sh
 post-uninstall = scripts/rpm-post-uninstall.sh
 requires = python >= 2.7
            sudo
-           pmtools
+           dmidecode
            python-netifaces
            python-magic
            python-jwcrypto
@@ -18,4 +18,3 @@ requires = python >= 2.7
            dialog
            openssl
            util-linux
-
