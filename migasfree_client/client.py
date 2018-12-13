@@ -612,13 +612,19 @@ class MigasFreeClient(MigasFreeCommand):
                     data={'installed': _installed, 'removed': _removed}
                 )
             elif 'logical' in _request['devices']:  # is a migasfree-server >= 4.13
-                # install packages
-                for device in _request['devices']['logical']:
-                    if 'packages' in device['PRINTER'] and device['PRINTER']['packages']:
-                        if not self._install_mandatory_packages(device['PRINTER']['packages']):
-                            return False
+                if self.migas_manage_devices:
+                    # install packages
+                    for device in _request['devices']['logical']:
+                        if 'packages' in device['PRINTER'] and device['PRINTER']['packages']:
+                            if not self._install_mandatory_packages(device['PRINTER']['packages']):
+                                return False
 
-                self._sync_logical_devices(_request['devices'])
+                    self._sync_logical_devices(_request['devices'])
+                else:
+                    if len(_request['devices']['logical']):
+                        _msg = _('Assigned device(s) but client does not manage devices')
+                        logging.error(_msg)
+                        self._write_error(_msg)
 
         self._execute_path(settings.POST_SYNC_PATH)
 
