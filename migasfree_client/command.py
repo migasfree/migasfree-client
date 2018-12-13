@@ -157,6 +157,14 @@ class MigasFreeCommand(object):
             default=True
         )
 
+        self.migas_manage_devices = utils.cast_to_bool(
+            os.environ.get(
+                'MIGASFREE_CLIENT_MANAGE_DEVICES',
+                _config_client.get('manage_devices', True)
+            ),
+            default=True
+        )
+
         self.migas_proxy = os.environ.get(
             'MIGASFREE_CLIENT_PROXY', _config_client.get('proxy', None)
         )
@@ -476,6 +484,7 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (
             _('Auto update packages'), self.migas_auto_update_packages
         ))
+        print('\t%s: %s' % (_('Manage devices'), self.migas_manage_devices))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         if self.migas_ssl_cert is not None and \
