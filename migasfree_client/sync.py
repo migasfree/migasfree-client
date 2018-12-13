@@ -731,6 +731,11 @@ class MigasFreeSync(MigasFreeCommand):
         if not devices:
             return
 
+        if not self.migas_manage_devices:
+            _msg = _('Assigned device(s) but client does not manage devices')
+            logging.error(_msg)
+            self._write_error(_msg)
+
         for device in devices['logical']:
             if 'packages' in device and device['packages']:
                 if not self.install_mandatory_packages(device['packages']):
