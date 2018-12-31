@@ -18,6 +18,7 @@
 import logging
 
 from .pms import Pms
+from migasfree_client import settings
 from migasfree_client.utils import execute
 
 __author__ = 'Jose Antonio Chavarría'
@@ -189,13 +190,13 @@ class Zypper(Pms):
 
         return sorted(_output.strip().splitlines())
 
-    def create_repos(self, template, server, project, repositories):
+    def create_repos_old(self, template, server, project, repositories): # backwards compatibility (migasfree-server<=4.16)
         """
-        bool create_repos(string template, string server, string project, list repositories)
+        bool create_repos_old(string template, string server, string project, list repositories)
         """
 
         repo_template = \
-"""[{repo}]
+            """[{repo}]
 name={repo}
 baseurl={url}/{repo}
 gpgcheck=0
@@ -209,6 +210,69 @@ metadata_expire=1
             _file = open(self._repo, 'wb')
             for _repo in repositories:
                 _file.write(repo_template.format(repo=_repo['name']))
+
+            return True
+        except IOError:
+            return False
+        finally:
+            if _file is not None:
+                _file.close()
+
+    def create_repos(self, server, project, repositories):
+        """
+        bool create_repos(string server, string project, list repositories)
+        """
+
+        _templateDeployment = \
+            """[%(type)s-%(name)s]
+name=%(type)s-%(name)s
+baseurl=http://%(server)s%(media)s%(project)s/%(type)s/%(name)s/
+repo_gpgcheck=1
+gpgcheck=0
+gpgkey=file://%(keys_path)s/%(server)s/repositories.pub
+
+"""
+
+        _templateComponents = \
+            """[%(type)s-%(name)s-%(component)s]
+name=%(type)s-%(name)s-%(component)s
+baseurl=http://%(server)s%(media)s%(project)s/%(type)s/%(name)s/%(suite)s/%(component)s/$basearch/
+%(options)s
+
+"""
+        _templateWithoutComponents = \
+            """[%(type)s-%(name)s]
+name=%(type)s-%(name)s
+baseurl=http://%(server)s%(media)s%(project)s/%(type)s/%(name)s/%(suite)s/$basearch/
+%(options)s
+
+"""
+
+        _file = None
+        try:
+            _file = open(self._repo, 'wb')
+            for _repo in repositories:
+               ctx = {  'server': server,
+                        'media': _repo['media'],
+                        'project': project,
+                        'type': _repo['type'],
+                        'name':  _repo['name'],
+                        'suite': _repo['suite'],
+                        'options': _repo['options'].replace(' ', '\n'),
+                        'component': "",
+                        'keys_path': settings.KEYS_PATH
+                     }
+
+               if _repo['type']=='REPOSITORIES':
+                   _file.write(_templateDeployment % ctx)
+               else:
+                   if _repo['components']:
+                       for component in _repo['components'].split(' '):
+                           ctx['component'] = component
+                           _file.write(_templateComponents % ctx)
+                   else:
+                       _file.write(_templateWithoutComponents % ctx)
+
 
             return True
         except IOError:

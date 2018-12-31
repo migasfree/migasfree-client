@@ -119,9 +119,16 @@ class Pms(object):
 
         raise NotImplementedError
 
-    def create_repos(self, template, server, project, repositories):
+    def create_repos_old(self, template, server, project, repositories): # backwards compatibility (migasfree-server<=4.16)
         """
         bool create_repos(string template, string server, string project, list repositories)
+        """
+
+        raise NotImplementedError
+
+    def create_repos(self, server, project, repositories):
+        """
+        bool create_repos(string server, string project, list repositories)
         """
 
         raise NotImplementedError

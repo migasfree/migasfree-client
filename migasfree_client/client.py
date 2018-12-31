@@ -361,7 +361,30 @@ class MigasFreeClient(MigasFreeCommand):
 
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
-    def _get_repositories_url_template(self):
+    def _get_server_version(self):
+        _curl = curl.Curl(
+            '{0}/{1}'.format(
+                self.migas_server,
+                'api/v1/public/server/info/'
+            ),
+            proxy=self.migas_proxy,
+            cert=self.migas_ssl_cert,
+            post=[('post', 'post'), ]  # dummy data
+        )
+
+        _curl.run()
+
+        if _curl.http_code != 200:
+            # backwards compatibility code
+            return float(-1)
+
+        logging.debug('Response _get_server_version: %s', _curl.body)
+
+        _response = json.loads(str(_curl.body))
+
+        return float(_response['version'])
+
+    def _get_repositories_url_template(self): # backwards compatibility (migasfree-server<=4.16)
         _curl = curl.Curl(
             '{0}/{1}'.format(
                 self.migas_server,
@@ -386,18 +409,23 @@ class MigasFreeClient(MigasFreeCommand):
     def _create_repositories(self, repos):
         self._send_message(_('Creating repositories...'))
 
-        _url_template = self._get_repositories_url_template()
-
         _server = self.migas_server
         if self.migas_package_proxy_cache:
             _server = '{0}/{1}'.format(self.migas_package_proxy_cache, _server)
 
-        _ret = self.pms.create_repos(
-            _url_template,
-            _server,
-            self.migas_project,
-            repos
-        )
+        if self.server_version >= 4.17:
+            _ret = self.pms.create_repos(
+                _server,
+                self.migas_project,
+                repos
+            )
+        else:  # backwards compatibility (migasfree-server<=4.16)
+            _ret = self.pms.create_repos_old(
+                self._get_repositories_url_template(),
+                _server,
+                self.migas_project,
+                repos
+            )
 
         if _ret:
             self.operation_ok()
@@ -830,6 +858,12 @@ class MigasFreeClient(MigasFreeCommand):
         print(_('%(program)s version: %(version)s') % {
             'program': _program,
             'version': self.release
+        })
+
+        self.server_version = self._get_server_version()
+        print(_('%(program)s version: %(version)s') % {
+            'program': 'migasfree server',
+            'version': '?' if self.server_version == -1 else self.server_version
         })
 
         parser.add_option(
