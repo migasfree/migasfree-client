@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -119,16 +119,9 @@ class Pms(object):
 
         raise NotImplementedError
 
-    def create_repos_old(self, template, server, project, repositories): # backwards compatibility (migasfree-server<=4.16)
+    def create_repos(self, protocol, server, project, repositories, template=''):
         """
-        bool create_repos(string template, string server, string project, list repositories)
-        """
-
-        raise NotImplementedError
-
-    def create_repos(self, server, project, repositories):
-        """
-        bool create_repos(string server, string project, list repositories)
+        bool create_repos(string protocol, string server, string project, list repositories, string template='')
         """
 
         raise NotImplementedError
