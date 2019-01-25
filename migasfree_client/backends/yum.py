@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import os
 import logging
 
 from .pms import Pms
-from migasfree_client.utils import execute
 from migasfree_client import settings
+from migasfree_client.utils import execute, write_file
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -184,96 +184,31 @@ class Yum(Pms):
 
         return sorted(_output.strip().splitlines())
 
-    def create_repos_old(self, template, server, project, repositories): # backwards compatibility (migasfree-server<=4.16)
+    def create_repos(self, protocol, server, project, repositories, template=''):
         """
-        bool create_repos_old(string template, string server, string project, list repositories)
+        bool create_repos(string protocol, string server, string project, list repositories, string template='')
         """
 
-        repo_template = \
-            """[{repo}]
+        content = ''
+        for repo in repositories:
+            if 'source_template' in repo:
+                content += repo['source_template'].format(
+                    server=server,
+                    project=project,
+                    protocol=protocol,
+                    keys_path=settings.KEYS_PATH
+                )
+            else:
+                content += """[{repo}]
 name={repo}
 baseurl={url}/{repo}
 gpgcheck=0
 enabled=1
 http_caching=none
 metadata_expire=1
-""".format(url=template.format(server=server, project=project), repo='{repo}')
+""".format(url=template.format(server=server, project=project), repo=repo['name'])
 
-        _file = None
-        try:
-            _file = open(self._repo, 'wb')
-            for _repo in repositories:
-                _file.write(repo_template.format(repo=_repo['name']))
-
-            return True
-        except IOError:
-            return False
-        finally:
-            if _file is not None:
-                _file.close()
-
-    def create_repos(self, server, project, repositories):
-        """
-        bool create_repos(string server, string project, list repositories)
-        """
-
-        _templateDeployment = \
-            """[%(type)s-%(name)s]
-name=%(type)s-%(name)s
-baseurl=http://%(server)s%(media)s%(project)s/%(type)s/%(name)s/
-repo_gpgcheck=1
-gpgcheck=0
-gpgkey=file://%(keys_path)s/%(server)s/repositories.pub
-
-"""
-
-        _templateComponents = \
-            """[%(type)s-%(name)s-%(component)s]
-name=%(type)s-%(name)s-%(component)s
-baseurl=http://%(server)s%(media)s%(project)s/%(type)s/%(name)s/%(suite)s/%(component)s/$basearch/
-%(options)s
-
-"""
-        _templateWithoutComponents = \
-            """[%(type)s-%(name)s]
-name=%(type)s-%(name)s
-baseurl=http://%(server)s%(media)s%(project)s/%(type)s/%(name)s/%(suite)s/$basearch/
-%(options)s
-
-"""
-
-        _file = None
-        try:
-            _file = open(self._repo, 'wb')
-            for _repo in repositories:
-               ctx = {  'server': server,
-                        'media': _repo['media'],
-                        'project': project,
-                        'type': _repo['type'],
-                        'name':  _repo['name'],
-                        'suite': _repo['suite'],
-                        'options': _repo['options'].replace(' ', '\n'),
-                        'component': "",
-                        'keys_path': settings.KEYS_PATH
-                     }
-
-               if _repo['type']=='REPOSITORIES':
-                   _file.write(_templateDeployment % ctx)
-               else:
-                   if _repo['components']:
-                       for component in _repo['components'].split(' '):
-                           ctx['component'] = component
-                           _file.write(_templateComponents % ctx)
-                   else:
-                       _file.write(_templateWithoutComponents % ctx)
-
-
-            return True
-        except IOError:
-            return False
-        finally:
-            if _file is not None:
-                _file.close()
+        return write_file(self._repo, content)
 
     def import_server_key(self, file_key):
         """
