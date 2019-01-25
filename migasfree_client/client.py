@@ -376,15 +376,18 @@ class MigasFreeClient(MigasFreeCommand):
 
         if _curl.http_code != 200:
             # backwards compatibility code
-            return float(-1)
+            return ''
 
         logging.debug('Response _get_server_version: %s', _curl.body)
 
         _response = json.loads(str(_curl.body))
 
-        return float(_response['version'])
+        return _response['version']
 
-    def _get_repositories_url_template(self): # backwards compatibility (migasfree-server<=4.16)
+    def _get_repositories_url_template(self):
+        """
+        backwards compatibility (migasfree-server <= 4.16)
+        """
         _curl = curl.Curl(
             '{0}/{1}'.format(
                 self.migas_server,
@@ -413,19 +416,13 @@ class MigasFreeClient(MigasFreeCommand):
         if self.migas_package_proxy_cache:
             _server = '{0}/{1}'.format(self.migas_package_proxy_cache, _server)
 
-        if self.server_version >= 4.17:
-            _ret = self.pms.create_repos(
-                _server,
-                self.migas_project,
-                repos
-            )
-        else:  # backwards compatibility (migasfree-server<=4.16)
-            _ret = self.pms.create_repos_old(
-                self._get_repositories_url_template(),
-                _server,
-                self.migas_project,
-                repos
-            )
+        _ret = self.pms.create_repos(
+            'https' if self.migas_ssl_cert else 'http',
+            _server,
+            self.migas_project,
+            repos,
+            self._get_repositories_url_template()
+        )
 
         if _ret:
             self.operation_ok()
@@ -860,10 +857,10 @@ class MigasFreeClient(MigasFreeCommand):
             'version': self.release
         })
 
-        self.server_version = self._get_server_version()
+        server_version = self._get_server_version()
         print(_('%(program)s version: %(version)s') % {
             'program': 'migasfree server',
-            'version': '?' if self.server_version == -1 else self.server_version
+            'version': '?' if not server_version else server_version
         })
 
         parser.add_option(
