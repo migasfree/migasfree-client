@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import re
 import logging
 
 from .pms import Pms
-from migasfree_client.utils import execute
+from migasfree_client.utils import execute, write_file
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -203,68 +203,26 @@ class Apt(Pms):
 
         return _result
 
-    def create_repos_old(self, template, server, project, repositories): # backwards compatibility (migasfree-server<=4.16)
+    def create_repos(self, protocol, server, project, repositories, template=''):
         """
-        bool create_repos(string template, string server, string project, list repositories)
-        """
-
-        repo_template = 'deb {0} {repo} PKGS\n'.format(
-            template.format(server=server, project=project),
-            repo='{repo}'
-        )
-
-        _file = None
-        try:
-            _file = open(self._repo, 'wb')
-            for _repo in repositories:
-                _file.write(repo_template.format(repo=_repo['name']))
-
-            return True
-        except IOError:
-            return False
-        finally:
-            if _file is not None:
-                _file.close()
-
-    def create_repos(self, server, project, repositories):
-        """
-        bool create_repos(string server, string project, list repositories)
+        bool create_repos(string protocol, string server, string project, list repositories, string template='')
         """
 
-        # https://manpages.debian.org/stretch/apt/sources.list.5.en.html
+        content = ''
+        for repo in repositories:
+            if 'source_template' in repo:
+                content += repo['source_template'].format(
+                    server=server,
+                    project=project,
+                    protocol=protocol
+                )
+            else:
+                content += 'deb {0} {repo} PKGS\n'.format(
+                    template.format(server=server, project=project),
+                    repo=repo['name']
+                )
 
-        _templateDeployment = \
-            "deb http://%(server)s%(media)s%(project)s/%(type)s %(name)s %(components)s\n"
-
-        _templateSource = \
-            "deb %(options)s http://%(server)s%(media)s%(project)s/%(type)s/%(name)s %(suite)s %(components)s\n"
-
-        _file = None
-        try:
-            _file = open(self._repo, 'wb')
-            for _repo in repositories:
-                ctx = {
-                        'server': server,
-                        'project': project,
-                        'media': _repo['media'],
-                        'type': _repo['type'],
-                        'name': _repo['name'],
-                        'components': _repo['components'],
-                        'suite': _repo['suite'],
-                        'options': _repo['options']
-                     }
-
-                if _repo['type'] == 'REPOSITORIES':
-                    _file.write(_templateDeployment % ctx)
-                else:
-                    _file.write(_templateSource % ctx)
-
-            return True
-        except IOError:
-            return False
-        finally:
-            if _file is not None:
-                _file.close()
+        return write_file(self._repo, content)
 
     def import_server_key(self, file_key):
         """
