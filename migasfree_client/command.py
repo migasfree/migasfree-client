@@ -368,7 +368,7 @@ class MigasFreeCommand(object):
 
         return True
 
-    def _register_computer(self):
+    def _register_computer(self, user=None):
         _continue = utils.query_yes_no(
             _('Have you check config options in this machine (%s)?')
             % settings.CONF_FILE
@@ -378,17 +378,20 @@ class MigasFreeCommand(object):
             self.operation_failed(_msg)
             sys.exit(errno.EAGAIN)
 
-        if not self._auto_register():
-            _user = raw_input('%s: ' % _('User to register computer at server'))
-            if not _user:
-                self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
-                logging.info('Empty user in register computer option')
-                sys.exit(errno.EAGAIN)
+        if user:
+            _user = user
+        else:
+            if not self._auto_register():
+                _user = raw_input('%s: ' % _('User to register computer at server'))
+                if not _user:
+                    self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
+                    logging.info('Empty user in register computer option')
+                    sys.exit(errno.EAGAIN)
 
-            _pass = getpass.getpass('%s: ' % _('Password'))
+        _pass = getpass.getpass('%s: ' % _('Password'))
 
-            self._save_sign_keys(_user, _pass)
-            self.operation_ok(_('Computer registered at server'))
+        self._save_sign_keys(_user, _pass)
+        self.operation_ok(_('Computer registered at server'))
 
     def _show_running_options(self):
         print('')
