@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -756,7 +756,16 @@ class MigasFreeSync(MigasFreeCommand):
             self._write_error(_msg)
             return
 
-        printers = conn.getPrinters()
+        try:
+            printers = conn.getPrinters()
+        except cups.IPPError:
+            _msg = _('Error getting printers information')
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            self._write_error(_msg)
+
+            return
+
         for printer in printers:
             # check if printer is a migasfree printer (by format)
             if len(printers[printer]['printer-info'].split('__')) == 5:
@@ -845,7 +854,7 @@ class MigasFreeSync(MigasFreeCommand):
             if not self._pms_status_ok:
                 sys.exit(errno.EPROTO)
         elif args.cmd == 'register':
-            self._register_computer()
+            self._register_computer(args.user)
         elif args.cmd == 'search':
             self._search(args.pattern)
         elif args.cmd == 'install':

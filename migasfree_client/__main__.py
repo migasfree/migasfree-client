@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,9 +51,14 @@ def parse_args(argv):
 
     subparsers = parser.add_subparsers(dest='cmd')
 
-    subparsers.add_parser(
+    subparser_register = subparsers.add_parser(
         'register',
         help=_('Register computer at server')
+    )
+    subparser_register.add_argument(
+        '-u', '--user',
+        action='store',
+        help=_('User to register computer at server')
     )
 
     subparser_search = subparsers.add_parser(

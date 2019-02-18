@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -397,7 +397,7 @@ class MigasFreeCommand(object):
 
         return True
 
-    def _register_computer(self):
+    def _register_computer(self, user=None):
         carry_on = utils.query_yes_no(
             _('Have you check config options in this machine (%s)?')
             % settings.CONF_FILE
@@ -407,17 +407,17 @@ class MigasFreeCommand(object):
             self.operation_failed(msg)
             sys.exit(errno.EAGAIN)
 
-        if not self._auto_register():
+        if not self._auto_register() and not user:
             user = raw_input('%s: ' % _('User to register computer at server'))
             if not user:
                 self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
                 logger.info('Empty user in register computer option')
                 sys.exit(errno.EAGAIN)
 
-            password = getpass.getpass('%s: ' % _('Password'))
+        password = getpass.getpass('%s: ' % _('Password'))
 
-            self._save_sign_keys(user, password)
-            self.operation_ok(_('Computer registered at server'))
+        self._save_sign_keys(user, password)
+        self.operation_ok(_('Computer registered at server'))
 
     def _save_computer(self):
         response = self._url_request.run(
