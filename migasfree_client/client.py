@@ -779,7 +779,16 @@ class MigasFreeClient(MigasFreeCommand):
 
             return
 
-        printers = conn.getPrinters()
+        try:
+            printers = conn.getPrinters()
+        except cups.IPPError:
+            _msg = _('Error getting printers information')
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            self._write_error(_msg)
+
+            return
+
         for printer in printers:
             # check if printer is a migasfree printer (by format)
             if len(printers[printer]['printer-info'].split('__')) == 5:
@@ -868,6 +877,10 @@ class MigasFreeClient(MigasFreeCommand):
             help=_('Register computer at server')
         )
         parser.add_option(
+            "--user", "-e", action="store",
+            help=_('User to register computer at server')
+        )
+        parser.add_option(
             "--update", "-u", action="store_true",
             help=_('Update system from repositories')
         )
@@ -931,7 +944,7 @@ class MigasFreeClient(MigasFreeCommand):
         if options.update:
             self._update_system()
         elif options.register:
-            self._register_computer()
+            self._register_computer(options.user)
         elif options.search:
             self._search(options.search)
         elif options.install and options.package:
