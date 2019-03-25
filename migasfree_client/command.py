@@ -72,7 +72,6 @@ class MigasFreeCommand(object):
         # command API
         'get_project_keys': '/api/v1/public/keys/project/',
         'get_repositories_keys': '/api/v1/public/keys/repositories/',
-        'get_repositories_url_template': '/api/v1/public/repository-url-template/',
         'get_computer_id': '/api/v1/safe/computers/id/',
         'upload_computer': '/api/v1/safe/computers/',
         'upload_eot': '/api/v1/safe/eot/',
@@ -215,11 +214,7 @@ class MigasFreeCommand(object):
         self._init_url_request()
 
     def _init_url_base(self):
-        scheme = 'http'
-        if self.migas_ssl_cert:
-            scheme = 'https'
-
-        self._url_base = '{}://{}'.format(scheme, self.migas_server)
+        self._url_base = '{}://{}'.format(self.api_protocol(), self.migas_server)
 
     def _init_url_request(self):
         keys_path = os.path.join(settings.KEYS_PATH, self.migas_server)
@@ -233,6 +228,9 @@ class MigasFreeCommand(object):
             },
             cert=self.migas_ssl_cert
         )
+
+    def api_protocol(self):
+        return 'https' if self.migas_ssl_cert else 'http'
 
     def api_endpoint(self, path):
         return urljoin(self._url_base, path)
