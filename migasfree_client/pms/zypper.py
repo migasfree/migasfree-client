@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -194,23 +194,14 @@ class Zypper(Pms):
 
         return sorted(_output.strip().splitlines())
 
-    def create_repos(self, template, server, project, repositories):
+    def create_repos(self, protocol, server, repositories):
         """
-        bool create_repos(string template, string server, string project, list repositories)
+        bool create_repos(string protocol, string server, list repositories)
         """
-
-        repo_template = """[{repo}]
-name={repo}
-baseurl={url}/{repo}
-gpgcheck=0
-enabled=1
-http_caching=none
-metadata_expire=1
-""".format(url=template.format(server=server, project=project), repo='{repo}')
 
         content = ''
         for repo in repositories:
-            content += repo_template.format(repo=repo)
+            content += repo.get('source_template').format(protocol=protocol, server=server)
 
         return write_file(self._repo, content)
 
