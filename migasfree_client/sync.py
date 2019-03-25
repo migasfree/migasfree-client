@@ -204,18 +204,6 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response
 
-    def get_repositories_url_template(self):
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_repositories_url_template']),
-            safe=False,
-            exit_on_error=False,
-            debug=self._debug
-        )
-        response = response.replace('"', '')  # remove extra quotes
-        logger.debug('Response get_repositories_url_template: {}'.format(response))
-
-        return response
-
     def get_properties(self):
         if not self._computer_id:
             self.get_computer_id()
@@ -391,7 +379,6 @@ class MigasFreeSync(MigasFreeCommand):
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
     def _create_repositories(self):
-        url_template = self.get_repositories_url_template()
         repos = self.get_repositories()
 
         self._show_message(_('Creating repositories...'))
@@ -401,9 +388,8 @@ class MigasFreeSync(MigasFreeCommand):
             server = '{}/{}'.format(self.migas_package_proxy_cache, server)
 
         ret = self.pms.create_repos(
-            url_template,
+            self.api_protocol(),
             server,
-            utils.slugify(unicode(self.migas_project)),
             repos
         )
 
