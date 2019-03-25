@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -121,9 +121,9 @@ class Pms(object):
 
         raise NotImplementedError
 
-    def create_repos(self, template, server, project, repositories):
+    def create_repos(self, protocol, server, repositories):
         """
-        bool create_repos(string template, string server, string project, list repositories)
+        bool create_repos(string protocol, string server, list repositories)
         """
 
         raise NotImplementedError
