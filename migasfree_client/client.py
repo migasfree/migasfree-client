@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -150,23 +150,26 @@ class MigasFreeClient(MigasFreeCommand):
         )
         self._error_file_descriptor.write('%s\n\n' % str(msg))
 
+    def _show_message(self, msg, icon=None):
+        print('')
+        printcolor.info(str(' ' + msg + ' ').center(76, '*'))
+
+        if self.migas_gui_verbose:
+            if not icon:
+                icon = os.path.join(settings.ICON_PATH, self.ICON)
+
+            if self._notify:
+                icon = 'file://%s' % os.path.join(settings.ICON_PATH, icon)
+
+                try:
+                    self._notify.update(self.APP_NAME, msg, icon)
+                    self._notify.show()
+                except:
+                    pass
+
     def _send_message(self, msg='', icon=None):
         if msg:
-            print('')
-            printcolor.info(str(' ' + msg + ' ').center(76, '*'))
-
-            if self.migas_gui_verbose:
-                if not icon:
-                    icon = os.path.join(settings.ICON_PATH, self.ICON)
-
-                if self._notify:
-                    icon = 'file://%s' % os.path.join(settings.ICON_PATH, icon)
-
-                    try:
-                        self._notify.update(self.APP_NAME, msg, icon)
-                        self._notify.show()
-                    except:
-                        pass
+            self._show_message(msg, icon)
 
         _ret = self._url_request.run(
             'upload_computer_message',
@@ -489,6 +492,8 @@ class MigasFreeClient(MigasFreeCommand):
         return _ret
 
     def _update_hardware_inventory(self):
+        _hardware = json.loads('{}')  # default value
+
         self._send_message(_('Capturing hardware information...'))
         _cmd = 'LC_ALL=C lshw -json'
         _ret, _output, _error = utils.execute(_cmd, interactive=False)
@@ -500,7 +505,16 @@ class MigasFreeClient(MigasFreeCommand):
             logging.error(_msg)
             self._write_error(_msg)
 
-        _hardware = json.loads(_output)
+        try:
+            _hardware = json.loads(_output)
+        except ValueError as e:
+            self._show_message(_('Parsing hardware information...'))
+            self.operation_failed()
+            _msg = '{0}: {1}'.format(_('Hardware information'), e.message)
+            logging.error(_msg)
+            self._write_error(_msg)
+            return
+
         logging.debug('Hardware inventory: %s', _hardware)
 
         self._send_message(_('Sending hardware information...'))
@@ -772,6 +786,7 @@ class MigasFreeClient(MigasFreeCommand):
         try:
             conn = cups.Connection()
         except (RuntimeError, NameError):
+            self._show_message(_('Synchronizing logical devices...'))
             _msg = _('CUPS is not running!!!')
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -782,6 +797,7 @@ class MigasFreeClient(MigasFreeCommand):
         try:
             printers = conn.getPrinters()
         except cups.IPPError:
+            self._show_message(_('Synchronizing logical devices...'))
             _msg = _('Error getting printers information')
             self.operation_failed(_msg)
             logging.error(_msg)
