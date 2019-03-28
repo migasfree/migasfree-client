@@ -478,6 +478,8 @@ class MigasFreeSync(MigasFreeCommand):
         return response.get('capture', False)
 
     def _update_hardware_inventory(self):
+        hardware = json.loads('{}')  # default value
+
         if not self._computer_id:
             self.get_computer_id()
 
@@ -493,7 +495,16 @@ class MigasFreeSync(MigasFreeCommand):
             self._write_error(msg)
             return
 
-        hardware = json.loads(output)
+        try:
+            hardware = json.loads(output)
+        except ValueError as e:
+            self._show_message(_('Parsing hardware information...'))
+            msg = '{}: {}'.format(_('Hardware information'), e.message)
+            self.operation_failed(msg)
+            logger.error(msg)
+            self._write_error(msg)
+            return
+
         logger.debug('Hardware inventory: %s', hardware)
 
         self._show_message(_('Sending hardware information...'))
@@ -736,6 +747,7 @@ class MigasFreeSync(MigasFreeCommand):
         try:
             conn = cups.Connection()
         except (RuntimeError, NameError):
+            self._show_message(_('Synchronizing logical devices...'))
             _msg = _('CUPS is not running!!!')
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -745,6 +757,7 @@ class MigasFreeSync(MigasFreeCommand):
         try:
             printers = conn.getPrinters()
         except cups.IPPError:
+            self._show_message(_('Synchronizing logical devices...'))
             _msg = _('Error getting printers information')
             self.operation_failed(_msg)
             logging.error(_msg)
