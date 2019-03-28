@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,6 +43,26 @@ __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 # TODO http://docs.python.org/library/unittest.html
+
+
+def slugify(s):
+    """
+    https://blog.dolphm.com/slugify-a-string-in-python/
+    Simplifies ugly strings into something URL-friendly.
+    """
+
+    s = s.lower()
+
+    for c in [' ', '-', '.', '/']:
+        s = s.replace(c, '_')
+
+    s = re.sub('\W', '', s)
+    s = s.replace('_', ' ')
+    s = re.sub('\s+', ' ', s)
+    s = s.strip()
+    s = s.replace(' ', '-')
+
+    return s
 
 
 def get_config(ini_file, section):
@@ -441,7 +461,7 @@ def get_mfc_project():
     if isinstance(_config, dict) and 'project' in _config:
         return _config.get('project')
 
-    return '-'.join(platform.linux_distribution()[0:2])  # if not set
+    return slugify('-'.join(platform.linux_distribution()[0:2]))  # if not set
 
 
 def get_mfc_computer_name():
