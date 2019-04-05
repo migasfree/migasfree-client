@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -351,6 +350,7 @@ class MigasFreeUpload(MigasFreeCommand):
 def main():
     mfu = MigasFreeUpload()
     mfu.run()
+
 
 if __name__ == "__main__":
     main()
