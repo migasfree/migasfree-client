@@ -7,6 +7,6 @@ Source = migasfree-client
 Package = migasfree-client
 Maintainer = Jose Antonio Chavarría <jachavar@gmail.com>
 Debian-Version = 1
-Build-Depends = python (>=2.7), python-stdeb
+Build-Depends = python (>=2.7), python-stdeb, python-netifaces
 Depends = lshw (>=02.15), sudo, dmidecode, python-magic, dialog, python-jwcrypto, python-requests, python-requests-toolbelt
 Suggests = zenity, python-cups
