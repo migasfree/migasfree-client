@@ -589,19 +589,6 @@ def get_mfc_release():
     return __version__
 
 
-def slugify(value):
-    """
-    From https://docs.djangoproject.com/en/1.7/_modules/django/utils/text/
-    Converts to ASCII. Converts spaces to hyphens. Removes characters that
-    aren't alphanumerics, underscores, or hyphens. Converts to lowercase.
-    Also strips leading and trailing whitespace.
-    """
-    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-    value = re.sub('[^\w\s-]', '', value).strip().lower()
-
-    return re.sub('[-\s]+', '-', value)
-
-
 def execute_as_user(args):
     # http://stackoverflow.com/questions/1770209/run-child-processes-as-different-user-from-a-long-running-process
     user_name, _ = get_current_user().split('~')
