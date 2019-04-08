@@ -127,6 +127,7 @@ class MigasFreeCommand(object):
     get_key_repositories_end_point = URLS['get_repositories_keys']
 
     _computer_id = None
+    _error_file_descriptor = None
 
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
