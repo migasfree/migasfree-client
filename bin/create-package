@@ -12,7 +12,7 @@ function create_package
 
 function get_distro
 {
-    local _DISTRO=$(python -c "import platform; print platform.linux_distribution()[0].strip().split()[0]")
+    local _DISTRO=$(python -c "from migasfree_client import utils; print(utils.get_distro_name())")
 
     if [ -f "setup.cfg.d/$_DISTRO" ]
     then
