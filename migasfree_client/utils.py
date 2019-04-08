@@ -26,7 +26,6 @@ import pwd
 import platform
 import errno
 import re
-import unicodedata
 import fcntl
 import select
 import uuid
