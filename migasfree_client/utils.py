@@ -450,6 +450,28 @@ def get_current_user():
     return '{0}~{1}'.format(_graphic_user, _fullname)
 
 
+def get_distro_project():
+    try:
+        import distro
+
+        project = '{0}-{1}'.format(distro.name(), distro.version())
+    except ImportError:
+        project = '-'.join(platform.linux_distribution()[0:2])
+
+    return slugify(project)
+
+
+def get_distro_name():
+    try:
+        import distro
+
+        name = distro.name()
+    except ImportError:
+        name = platform.linux_distribution()[0]
+
+    return name.strip().split()[0]
+
+
 def get_mfc_project():
     _config = get_config(settings.CONF_FILE, 'client')
 
@@ -460,7 +482,8 @@ def get_mfc_project():
     if isinstance(_config, dict) and 'version' in _config:
         return _config.get('version')
 
-    return slugify('-'.join(platform.linux_distribution()[0:2]))  # if not set
+    # if not set
+    return get_distro_project()
 
 
 def get_mfc_version():
