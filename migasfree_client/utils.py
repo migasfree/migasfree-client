@@ -469,7 +469,7 @@ def get_distro_name():
     except ImportError:
         name = platform.linux_distribution()[0]
 
-    return name.strip().split()[0]
+    return slugify(name.strip().split()[0])
 
 
 def get_mfc_project():
