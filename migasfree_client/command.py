@@ -406,16 +406,18 @@ class MigasFreeCommand(object):
             self.operation_failed(msg)
             sys.exit(errno.EAGAIN)
 
-        if not self._auto_register() and not user:
-            user = raw_input('%s: ' % _('User to register computer at server'))
+        if not self._auto_register():
             if not user:
-                self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
-                logger.info('Empty user in register computer option')
-                sys.exit(errno.EAGAIN)
+                sys.stdin = open('/dev/tty')
+                user = raw_input('%s: ' % _('User to register computer at server'))
+                if not user:
+                    self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
+                    logger.info('Empty user in register computer option')
+                    sys.exit(errno.EAGAIN)
 
-        password = getpass.getpass('%s: ' % _('Password'))
+            password = getpass.getpass('%s: ' % _('Password'))
+            self._save_sign_keys(user, password)
 
-        self._save_sign_keys(user, password)
         self.operation_ok(_('Computer registered at server'))
 
     def _save_computer(self):
