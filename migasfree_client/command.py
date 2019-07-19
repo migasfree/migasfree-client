@@ -229,6 +229,7 @@ class MigasFreeCommand(object):
             self._send_message(_('Running command %s...') % file_)
             _ret, _output, _error = utils.execute(
                 os.path.join(path, file_),
+                verbose=True,
                 interactive=False
             )
             if _ret == 0:
