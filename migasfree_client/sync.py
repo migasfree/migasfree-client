@@ -116,8 +116,9 @@ class MigasFreeSync(MigasFreeCommand):
         print('  ' + _('Purge package:'))
         print('\t%s purge bluefish\n' % self.CMD)
 
-    def _eval_code(self, lang, code):
+    def _eval_code(self, name, lang, code):
         code = code.replace('\r', '').strip()  # clean code
+        logger.debug('Name: %s', name)
         logger.debug('Language code: %s', lang)
         logger.debug('Code: %s', code)
 
@@ -142,7 +143,8 @@ class MigasFreeSync(MigasFreeCommand):
         logger.debug('Output: %s', output)
         if ret != 0:
             logger.error('Error: %s', error)
-            msg = _('Code "%s" with error: %s') % (code, error)
+            msg = _('Name: "%s"\n') % name
+            msg += _('Code "%s" with error: %s') % (code, error)
             self._write_error(msg)
 
         try:
@@ -150,7 +152,7 @@ class MigasFreeSync(MigasFreeCommand):
         except IOError:
             pass
 
-        return output
+        return ret, output, error
 
     def _eval_attributes(self, properties):
         response = {
@@ -169,15 +171,17 @@ class MigasFreeSync(MigasFreeCommand):
         # properties converted in attributes
         self._show_message(_('Evaluating attributes...'))
         for item in properties:
-            response['sync_attributes'][item['prefix']] = \
-                self._eval_code(item['language'], item['code'])
+            ret, response['sync_attributes'][item['prefix']], error = \
+                self._eval_code(item['prefix'], item['language'], item['code'])
             info = '{}: {}'.format(
                 item['prefix'],
                 response['sync_attributes'][item['prefix']]
             )
-            if response['sync_attributes'][item['prefix']].strip() != '':
+            if ret == 0 and response['sync_attributes'][item['prefix']].strip() != '':
                 self.operation_ok(info)
             else:
+                if error:
+                    info = '{}: {}'.format(item['prefix'], error)
                 self.operation_failed(info)
                 self._write_error(
                     _('Error: property %s without value') % item['prefix']
@@ -193,14 +197,17 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._show_message(_('Executing faults...'))
         for item in fault_definitions:
-            result = self._eval_code(item['language'], item['code'])
+            ret, result, error = self._eval_code(item['name'], item['language'], item['code'])
             info = '{}: {}'.format(item['name'], result)
-            if result:
-                # only send faults with output!!!
-                response['faults'][item['name']] = result
-                self.operation_failed(info)
+            if ret == 0:
+                if result:
+                    # only send faults with output!!!
+                    response['faults'][item['name']] = result
+                    self.operation_failed(info)
+                else:
+                    self.operation_ok(info)
             else:
-                self.operation_ok(info)
+                self.operation_failed('{}: {}'.format(item['name'], error))
 
         return response
 
