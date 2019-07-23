@@ -196,9 +196,10 @@ class MigasFreeClient(MigasFreeCommand):
 
         return _ret['errmfs']['code'] == server_errors.ALL_OK
 
-    def _eval_code(self, lang, code):
+    def _eval_code(self, name, lang, code):
         # clean code...
         code = code.replace('\r', '').strip()
+        logging.debug('Name: %s', name)
         logging.debug('Language code: %s', lang)
         logging.debug('Code: %s', code)
 
@@ -224,7 +225,8 @@ class MigasFreeClient(MigasFreeCommand):
         logging.debug('Output: %s', _output)
         if _ret != 0:
             logging.error('Error: %s', _error)
-            _msg = _('Code "%s" with error: %s') % (code, _error)
+            _msg = _('Name "%s"\n') % name
+            _msg += _('Code "%s" with error: %s') % (code, _error)
             self._write_error(_msg)
 
         try:
@@ -232,7 +234,7 @@ class MigasFreeClient(MigasFreeCommand):
         except IOError:
             pass
 
-        return _output
+        return _ret, _output, _error
 
     def _eval_attributes(self, properties):
         _response = {
@@ -255,15 +257,17 @@ class MigasFreeClient(MigasFreeCommand):
         # properties converted in attributes
         self._send_message(_('Evaluating attributes...'))
         for _item in properties:
-            _response['attributes'][_item['name']] = \
-                self._eval_code(_item['language'], _item['code'])
-            _info = '%s: %s' % (
+            _ret, _response['attributes'][_item['name']], _error = \
+                self._eval_code(_item['name'], _item['language'], _item['code'])
+            _info = '{0}: {1}'.format(
                 _item['name'],
                 _response['attributes'][_item['name']]
             )
-            if _response['attributes'][_item['name']].strip() != '':
+            if _ret == 0 and _response['attributes'][_item['name']].strip() != '':
                 self.operation_ok(_info)
             else:
+                if _error:
+                    _info = '{0}: {1}'.format(_item['name'], _error)
                 self.operation_failed(_info)
                 self._write_error(
                     'Error: property %s without value\n' % _item['name']
@@ -271,22 +275,25 @@ class MigasFreeClient(MigasFreeCommand):
 
         return _response
 
-    def _eval_faults(self, faultsdef):
+    def _eval_faults(self, fault_definitions):
         _response = {
             'faults': {}
         }
 
         # evaluate faults
         self._send_message(_('Executing faults...'))
-        for _item in faultsdef:
-            _result = self._eval_code(_item['language'], _item['code'])
+        for _item in fault_definitions:
+            _ret, _result, _error = self._eval_code(_item['name'], _item['language'], _item['code'])
             _info = '{0}: {1}'.format(_item['name'], _result)
-            if _result:
-                # only send faults with output!!!
-                _response['faults'][_item['name']] = _result
-                self.operation_failed(_info)
+            if _ret == 0:
+                if _result:
+                    # only send faults with output!!!
+                    _response['faults'][_item['name']] = _result
+                    self.operation_failed(_info)
+                else:
+                    self.operation_ok(_info)
             else:
-                self.operation_ok(_info)
+                self.operation_failed('{0}: {1}'.format(_item['name'], _error))
 
         return _response
 
