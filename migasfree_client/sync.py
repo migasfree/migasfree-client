@@ -753,12 +753,20 @@ class MigasFreeSync(MigasFreeCommand):
 
         try:
             conn = cups.Connection()
-        except (RuntimeError, NameError):
+        except RuntimeError:
             self._show_message(_('Synchronizing logical devices...'))
             _msg = _('CUPS is not running!!!')
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
+            return
+        except NameError:
+            self._show_message(_('Synchronizing logical devices...'))
+            _msg = _('Python CUPS is required. If not, configure Manage_Devices parameter to False.')
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            self._write_error(_msg)
+
             return
 
         try:
