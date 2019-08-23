@@ -205,6 +205,7 @@ def main(argv=None):
             'program': PROGRAM,
             'version': get_mfc_release()
         })
+        sys.stdout.flush()
 
     if args.cmd in ['register', 'sync', 'install', 'purge']:
         from .sync import MigasFreeSync
