@@ -869,8 +869,8 @@ class MigasFreeClient(MigasFreeCommand):
 
         # System default printer
         if devices['default'] != 0 and devices['default'] in logical_devices:
-            _printer_name = logical_devices[devices['default']].printer_name \
-                            or logical_devices[devices['default']].name
+            _printer_name = logical_devices[devices['default']].name \
+                            or logical_devices[devices['default']].printer_name
             if LogicalDevice.get_device_id(conn.getDefault()) != devices['default']:
                 try:
                     self._send_message(_('Setting default device: %s') % _printer_name)
