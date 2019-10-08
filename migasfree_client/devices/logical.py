@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ class LogicalDevice(object):
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
                 self.uri = 'socket://{0}:{1}'.format(
                     self.conn['IP'],
-                    int(self.port)
+                    self.port
                 )
                 if self.conn['LOCATION'] != '':
                     self.location = self.conn['LOCATION']
