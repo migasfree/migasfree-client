@@ -54,7 +54,7 @@ class Printer(object):  # for migasfree-server <= 4.12
             if 'IP' in _conn and 'PORT' in _conn and 'LOCATION' in _conn:
                 _connect = '-v socket://%s:%s' % (
                     _conn['IP'],
-                    int(_port)
+                    _port
                 )
                 if _conn['LOCATION'] != '':
                     _location = '-L "%s"' % _conn['LOCATION']
