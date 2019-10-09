@@ -194,11 +194,11 @@ class MigasFreeCommand(object):
     def _ssl_cert(self):
         address = self.migas_server.split(':')
         host = address[0]
-        port = address[1] if len(address) == 2 else 80
+        port = int(address[1]) if len(address) == 2 else 80
 
         self.migas_ssl_cert = None
         try:
-            cert = ssl.get_server_certificate((host, port))
+            cert = ssl.get_server_certificate((host, port), ssl.PROTOCOL_SSLv23)
             if utils.write_file(settings.CERT_FILE, cert):
                 self.migas_ssl_cert = settings.CERT_FILE
         except:
