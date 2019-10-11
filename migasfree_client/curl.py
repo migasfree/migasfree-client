@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -93,14 +93,20 @@ class Curl(object):
         self.curl.setopt(pycurl.HTTPGET, 1)
 
         if self.url.startswith('https://'):  # server over SSL
-            self.curl.setopt(pycurl.SSL_VERIFYPEER, False)  # do not check the server's cert
-            self.curl.setopt(pycurl.SSL_VERIFYHOST, False)
+            self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)  # do not check the server's cert
+            self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)
 
             # Set certificate path and verifications
             if cert is not None and os.path.exists(cert):
-                self.curl.setopt(pycurl.SSLCERT, cert)
-                self.curl.setopt(pycurl.SSL_VERIFYPEER, True)
-                self.curl.setopt(pycurl.SSL_VERIFYHOST, True)
+                self.curl.setopt(pycurl.CAINFO, cert)
+                try:
+                    import certifi
+
+                    self.curl.setopt(pycurl.CAINFO, certifi.where())
+                    self.curl.setopt(pycurl.SSL_VERIFYPEER, 1)
+                    self.curl.setopt(pycurl.SSL_VERIFYHOST, 2)
+                except ImportError:
+                    pass
 
         if self.DEBUG:
             self.curl.setopt(pycurl.VERBOSE, 1)
