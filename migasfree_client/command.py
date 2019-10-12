@@ -24,6 +24,7 @@ import pwd
 import requests
 import logging
 import time
+import ssl
 
 import gettext
 _ = gettext.gettext
@@ -168,9 +169,6 @@ class MigasFreeCommand(object):
         self.migas_proxy = os.environ.get(
             'MIGASFREE_CLIENT_PROXY', _config_client.get('proxy', None)
         )
-        self.migas_ssl_cert = os.environ.get(
-            'MIGASFREE_CLIENT_SSL_CERT', _config_client.get('ssl_cert', None)
-        )
         self.migas_package_proxy_cache = os.environ.get(
             'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE',
             _config_client.get('package_proxy_cache', None)
@@ -210,9 +208,24 @@ class MigasFreeCommand(object):
         logger.debug('Config client: %s', _config_client)
         logger.debug('Config packager: %s', _config_packager)
 
+        self._ssl_cert()
         self._pms_selection()
         self._init_url_base()
         self._init_url_request()
+
+    def _ssl_cert(self):
+        address = self.migas_server.split(':')
+        host = address[0]
+        port = int(address[1]) if len(address) == 2 else 80
+
+        self.migas_ssl_cert = False
+        try:
+            os.remove(settings.CERT_FILE)
+            cert = ssl.get_server_certificate((host, port), ssl.PROTOCOL_SSLv23)
+            if utils.write_file(settings.CERT_FILE, cert):
+                self.migas_ssl_cert = settings.CERT_FILE
+        except:
+            pass
 
     def _init_url_base(self):
         self._url_base = '{}://{}'.format(self.api_protocol(), self.migas_server)
