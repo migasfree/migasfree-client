@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class UrlRequest(object):
     _exit_on_error = True
 
     _proxy = ''
-    _cert = None
+    _cert = False
 
     _ok_codes = [
         requests.codes.ok, requests.codes.created,
@@ -57,7 +57,7 @@ class UrlRequest(object):
         proxy='',
         project='',
         keys=None,
-        cert=None
+        cert=False
     ):
         if keys is None:
             keys = {}
@@ -179,7 +179,7 @@ class UrlRequest(object):
         try:
             r = requests.post(
                 url, data=data, headers=headers,
-                proxies=proxies, cert=self._cert
+                proxies=proxies, verify=self._cert
             )
         except requests.exceptions.ConnectionError as e:
             logger.error(str(e))
