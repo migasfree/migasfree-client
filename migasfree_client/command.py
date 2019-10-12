@@ -198,6 +198,7 @@ class MigasFreeCommand(object):
 
         self.migas_ssl_cert = None
         try:
+            os.remove(settings.CERT_FILE)
             cert = ssl.get_server_certificate((host, port), ssl.PROTOCOL_SSLv23)
             if utils.write_file(settings.CERT_FILE, cert):
                 self.migas_ssl_cert = settings.CERT_FILE
