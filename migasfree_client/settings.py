@@ -34,3 +34,5 @@ DOC_PATH = '/usr/share/doc/migasfree-client'
 APP_DATA_PATH = '/usr/share/migasfree-client'
 PRE_SYNC_PATH = os.path.join(APP_DATA_PATH, 'pre-sync.d')
 POST_SYNC_PATH = os.path.join(APP_DATA_PATH, 'post-sync.d')
+
+CERT_FILE = os.path.join(TMP_PATH, 'cert.pem')
