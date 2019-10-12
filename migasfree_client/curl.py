@@ -99,14 +99,8 @@ class Curl(object):
             # Set certificate path and verifications
             if cert is not None and os.path.exists(cert):
                 self.curl.setopt(pycurl.CAINFO, cert)
-                try:
-                    import certifi
-
-                    self.curl.setopt(pycurl.CAINFO, certifi.where())
-                    self.curl.setopt(pycurl.SSL_VERIFYPEER, 1)
-                    self.curl.setopt(pycurl.SSL_VERIFYHOST, 2)
-                except ImportError:
-                    pass
+                self.curl.setopt(pycurl.SSL_VERIFYPEER, 1)
+                self.curl.setopt(pycurl.SSL_VERIFYHOST, 2)
 
         if self.DEBUG:
             self.curl.setopt(pycurl.VERBOSE, 1)
