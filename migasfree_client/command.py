@@ -218,9 +218,11 @@ class MigasFreeCommand(object):
         host = address[0]
         port = int(address[1]) if len(address) == 2 else 80
 
+        if os.path.isfile(settings.CERT_FILE):
+            os.remove(settings.CERT_FILE)
+
         self.migas_ssl_cert = False
         try:
-            os.remove(settings.CERT_FILE)
             cert = ssl.get_server_certificate((host, port), ssl.PROTOCOL_SSLv23)
             if utils.write_file(settings.CERT_FILE, cert):
                 self.migas_ssl_cert = settings.CERT_FILE
