@@ -229,7 +229,7 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        self._cmd = 'apt-key add {0} >/dev/null'.format(file_key)
+        self._cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {0} >/dev/null'.format(file_key)
         logging.debug(self._cmd)
         return execute(self._cmd)[0] == 0
 
