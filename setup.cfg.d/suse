@@ -11,11 +11,12 @@ fix-python = /usr/bin/python2
 requires = python >= 2.7
            sudo
            dmidecode
-           python-netifaces
            python-magic
            python-jwcrypto
            python-requests
            python-requests-toolbelt
+           python-cryptography >= 1.7
+           python-netifaces
            dialog
            openssl
            util-linux
