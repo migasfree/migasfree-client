@@ -16,6 +16,8 @@ requires = python >= 2.7
            python-jwcrypto
            python-requests
            python-requests-toolbelt
+           python-cryptography >= 1.7
+           python-netifaces
            dialog
            openssl
            which
