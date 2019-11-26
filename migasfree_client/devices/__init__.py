@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2014 Jose Antonio Chavarría
+# Copyright (c) 2014-2019 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,4 +20,4 @@
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
-from printer import Printer
+from .printer import Printer
