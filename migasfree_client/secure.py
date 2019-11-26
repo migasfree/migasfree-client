@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,6 +103,10 @@ def decrypt(jwt, priv_key):
     jwe_token = jwe.JWE()
     jwe_token.deserialize(jwt, key=priv_jwk)
 
+    if isinstance(jwe_token.payload, bytes) \
+            and not isinstance(jwe_token.payload, str):
+        return str(jwe_token.payload, encoding='utf8')
+    
     return jwe_token.payload
 
 
