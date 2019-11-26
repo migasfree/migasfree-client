@@ -504,8 +504,9 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (_('Manage devices'), self.migas_manage_devices))
         print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
-        if self.migas_ssl_cert is not None and \
-                not os.path.exists(self.migas_ssl_cert):
+        if self.migas_ssl_cert is not None \
+                and not isinstance(self.migas_ssl_cert, bool) \
+                and not os.path.exists(self.migas_ssl_cert):
             print(
                 '\t\t%s: %s' % (
                     _('Warning'),
