@@ -20,14 +20,12 @@ import sys
 import errno
 import requests
 import json
-import secure
-import utils
 import gettext
 import logging
 
 from requests_toolbelt import MultipartEncoder
 
-from . import settings
+from . import settings, secure, utils
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
