@@ -185,6 +185,11 @@ def timeout_execute(cmd, timeout=60):
 
     _output, _error = _process.communicate()
 
+    if isinstance(_output, bytes) and not isinstance(_output, str):
+        _output = str(_output, encoding='utf8')
+    if isinstance(_error, bytes) and not isinstance(_error, str):
+        _error = str(_error, encoding='utf8')
+
     return _process.returncode, _output, _error
 
 
