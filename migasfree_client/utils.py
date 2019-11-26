@@ -18,8 +18,6 @@
 import os
 import sys
 import subprocess
-import ConfigParser
-import commands
 import time
 import difflib
 import pwd
@@ -36,6 +34,16 @@ import hashlib
 import gettext
 _ = gettext.gettext
 
+if sys.version_info.major <= 2:
+    import commands
+else:
+    import subprocess as commands
+
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+    
 from . import settings, network
 
 __author__ = 'Jose Antonio Chavarría'
@@ -134,6 +142,8 @@ def execute(cmd, verbose=False, interactive=True):
                 readx = select.select([_process.stdout.fileno()], [], [])[0]
                 if readx:
                     chunk = _process.stdout.read()
+                    if isinstance(chunk, bytes) and not isinstance(chunk, str):
+                        chunk = str(chunk, encoding='utf8')
                     if chunk and chunk != '\n':
                         print(chunk)
                     _output_buffer = '%s%s' % (_output_buffer, chunk)
@@ -142,6 +152,11 @@ def execute(cmd, verbose=False, interactive=True):
 
     if not interactive and _output_buffer:
         _output = _output_buffer
+
+    if isinstance(_output, bytes) and not isinstance(_output, str):
+        _output = str(_output, encoding='utf8')
+    if isinstance(_error, bytes) and not isinstance(_error, str):
+        _error = str(_error, encoding='utf8')
 
     return _process.returncode, _output, _error
 
@@ -348,7 +363,10 @@ def write_file(filename, content):
 
     _file = None
     try:
-        _file = open(filename, 'wb')
+        if sys.version_info.major < 3:
+            _file = open(filename, 'wb')
+        else:
+            _file = open(filename, 'w', encoding='utf8')
         _file.write(content)
         _file.flush()
         os.fsync(_file.fileno())
