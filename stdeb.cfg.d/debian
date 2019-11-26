@@ -5,8 +5,12 @@
 [migasfree-client]
 Source = migasfree-client
 Package = migasfree-client
+Package3 = migasfree-client
 Maintainer = Jose Antonio Chavarría <jachavar@gmail.com>
 Debian-Version = 1
 Build-Depends = python (>=2.7), python-stdeb
-Depends = lshw (>=02.15), sudo, dmidecode, python-magic, dialog, python-jwcrypto, python-requests, python-requests-toolbelt
+Build-Depends3 = python (>=3.3), python3-stdeb
+Depends = lshw (>=02.15), sudo, dmidecode, python-magic, dialog, python-jwcrypto, python-requests, python-requests-toolbelt, python-cryptography (>=1.7), python-netifaces
+Depends3 = lshw (>=02.15), sudo, dmidecode, python3-magic, dialog, python3-jwcrypto, python3-requests, python3-requests-toolbelt, python3-cryptography (>=1.7), python3-netifaces
 Suggests = zenity, python-cups
+Suggests3 = zenity, python3-cups
