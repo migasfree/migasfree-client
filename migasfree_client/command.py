@@ -71,6 +71,7 @@ class MigasFreeCommand(object):
 
     URLS = {
         # command API
+        'get_server_info': '/api/v1/public/server/info/',
         'get_project_keys': '/api/v1/public/keys/project/',
         'get_repositories_keys': '/api/v1/public/keys/repositories/',
         'get_computer_id': '/api/v1/safe/computers/id/',
@@ -201,6 +202,8 @@ class MigasFreeCommand(object):
             'MIGASFREE_PACKAGER_STORE', _config_packager.get('store', None)
         )
 
+        self._server_info = {}
+
         # http://www.lightbird.net/py-by-example/logging.html
         logger.info('*' * 20)
         logger.info('%s in execution', self.CMD)
@@ -212,6 +215,7 @@ class MigasFreeCommand(object):
         self._pms_selection()
         self._init_url_base()
         self._init_url_request()
+        self.get_server_info()
 
     def _ssl_cert(self):
         address = self.migas_server.split(':')
@@ -451,6 +455,18 @@ class MigasFreeCommand(object):
         self._computer_id = response.get('id')
         return self._computer_id
 
+    def get_server_info(self):
+        response = self._url_request.run(
+            url=self.api_endpoint(self.URLS['get_server_info']),
+            safe=False,
+            exit_on_error=False,
+            debug=self._debug
+        )
+        logger.debug('Response get_server_info: {}'.format(response))
+
+        if isinstance(response, dict):
+            self._server_info = response
+    
     def get_computer_id(self):
         if self._computer_id:
             return self._computer_id
@@ -498,6 +514,9 @@ class MigasFreeCommand(object):
         print(_('Running options: %s') % conf_file)
         print('\t%s: %s' % (_('Project'), self.migas_project))
         print('\t%s: %s' % (_('Server'), self.migas_server))
+        print('\t%s: %s' % (
+            _('migasfree server version'), self._server_info.get('version', _('None')))
+        )
         print('\t%s: %s' % (
             _('Auto update packages'), self.migas_auto_update_packages
         ))
