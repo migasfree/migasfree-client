@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import locale
 import gettext
-import __builtin__
-__builtin__._ = gettext.gettext
+try:
+    import __builtin__ as builtins
+except ImportError:
+    import builtins
+builtins._ = gettext.gettext
 
-from settings import LOCALE_PATH
+from .settings import LOCALE_PATH
 
 __version__ = "5.0"
 __author__ = 'Jose Antonio Chavarría'
@@ -30,7 +34,10 @@ __homepage__ = "https://github.com/migasfree/migasfree-client/"
 
 # i18n
 domain = 'migasfree-client'
-gettext.install(domain, LOCALE_PATH, unicode=1)
+if sys.version_info.major <= 2:
+    gettext.install(domain, LOCALE_PATH, unicode=1)
+else:
+    gettext.install(domain, LOCALE_PATH)
 
 gettext.bindtextdomain(domain, LOCALE_PATH)
 if hasattr(gettext, 'bind_textdomain_codeset'):
