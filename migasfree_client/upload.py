@@ -22,8 +22,7 @@ import logging
 import getpass
 import errno
 
-import utils
-import server_errors
+from . import utils, server_errors
 
 from .command import MigasFreeCommand
 
