@@ -140,7 +140,8 @@ class LogicalDevice(object):
                     location=self.location,
                     device=self.uri
                 )
-        except cups.IPPError as (status, description):
+        except cups.IPPError as e:
+            (status, description) = e.args
             print('CUPS Error: %d (%s)' % (status, description))
             return False
 
