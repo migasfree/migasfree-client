@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2017 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2011-2017 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2019 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,7 @@
 import os
 import json
 
-import utils
-import server_errors
+from . import utils, server_errors
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
