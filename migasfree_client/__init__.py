@@ -17,12 +17,10 @@
 
 import locale
 import gettext
-import __builtin__
-__builtin__._ = gettext.gettext
 
-from settings import LOCALE_PATH
+from .settings import LOCALE_PATH
 
-__version__ = "4.18"
+__version__ = "4.19"
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __contact__ = "fun.with@migasfree.org"
