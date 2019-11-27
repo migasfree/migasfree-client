@@ -142,6 +142,8 @@ def execute(cmd, verbose=False, interactive=True):
                 readx = select.select([_process.stdout.fileno()], [], [])[0]
                 if readx:
                     chunk = _process.stdout.read()
+                    if isinstance(chunk, bytes) and not isinstance(chunk, str):
+                        chunk = str(chunk, encoding='utf8')
                     if chunk and chunk != '\n':
                         print(chunk)
                     _output_buffer = '%s%s' % (_output_buffer, chunk)
@@ -150,6 +152,11 @@ def execute(cmd, verbose=False, interactive=True):
 
     if not interactive and _output_buffer:
         _output = _output_buffer
+
+    if isinstance(_output, bytes) and not isinstance(_output, str):
+        _output = str(_output, encoding='utf8')
+    if isinstance(_error, bytes) and not isinstance(_error, str):
+        _error = str(_error, encoding='utf8')
 
     return _process.returncode, _output, _error
 
@@ -178,6 +185,11 @@ def timeout_execute(cmd, timeout=60):
 
     _output, _error = _process.communicate()
 
+    if isinstance(_output, bytes) and not isinstance(_output, str):
+        _output = str(_output, encoding='utf8')
+    if isinstance(_error, bytes) and not isinstance(_error, str):
+        _error = str(_error, encoding='utf8')
+        
     return _process.returncode, _output, _error
 
 
