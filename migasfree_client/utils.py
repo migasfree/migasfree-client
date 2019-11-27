@@ -18,8 +18,6 @@
 import os
 import sys
 import subprocess
-import ConfigParser
-import commands
 import time
 import difflib
 import pwd
@@ -32,6 +30,16 @@ import uuid
 import signal
 import hashlib
 
+if sys.version_info.major <= 2:
+    import commands
+else:
+    import subprocess as commands
+
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+    
 from . import network, settings
 
 import gettext
@@ -335,7 +343,7 @@ def write_file(filename, content):
     _dir = os.path.dirname(filename)
     if not os.path.exists(_dir):
         try:
-            os.makedirs(_dir, 0777)
+            os.makedirs(_dir, 0o777)
         except OSError:
             return False
 
