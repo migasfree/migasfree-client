@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import json
 
 from . import utils, server_errors
@@ -64,8 +65,12 @@ def wrap(filename, data, key=None):
     If key, signs JSON file
     """
 
+    data = json.dumps(data)
+    if sys.version_info.major > 2:
+        data = data.encode()
+
     with open(filename, 'wb') as _fp:
-        json.dump(data, _fp)
+        _fp.write(data)
 
     # os.system('less %s; read' % filename)  # DEBUG
 
@@ -91,9 +96,13 @@ def unwrap(filename, key=None):
         utils.write_file(filename, _content[0:_n - 256])
 
     try:
-        _data = json.loads(open(filename, 'rb').read())
+        _content = open(filename, 'rb').read()
+        if sys.version_info.major < 3:
+            _data = json.loads(_content)
+        else:
+            _data = json.loads(str(_content, encoding='utf8'))
     except ValueError:
-        print(filename)
+        print(_('No response'), filename)
         return {}  # no response in JSON format
 
     if not key:
