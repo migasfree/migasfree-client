@@ -205,7 +205,10 @@ class MigasFreeClient(MigasFreeCommand):
 
         _filename = tempfile.mkstemp()[1]
         with open(_filename, 'wb') as _code_file:
-            _code_file.write(code)
+            if sys.version_info.major <= 2:
+                _code_file.write(code)
+            else:
+                _code_file.write(bytes(code, encoding='utf8'))
 
         _allowed_languages = [
             'bash',
@@ -389,7 +392,10 @@ class MigasFreeClient(MigasFreeCommand):
 
         logging.debug('Response _get_server_version: %s', _curl.body)
 
-        _response = json.loads(str(_curl.body))
+        if sys.version_info.major < 3:
+            _response = json.loads(str(_curl.body))
+        else:
+            _response = json.loads(_curl.body.__str__())
 
         return _response['version']
 
