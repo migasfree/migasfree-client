@@ -39,6 +39,7 @@ SSL info:
 __author__ = 'Jose Antonio Chavarría'
 
 import os
+import sys
 try:
     import pycurl
 except ImportError:
@@ -49,12 +50,21 @@ from . import utils
 
 class Storage(object):
     def __init__(self):
-        self.contents = ''
+        if sys.version_info.major > 2:
+            self.contents = b''
+        else:
+            self.contents = ''
 
     def store(self, data):
         self.contents += data
 
     def __str__(self):
+        if sys.version_info.major > 2:
+            return str(self.contents, encoding='utf8')
+
+        return self.contents
+
+    def __bytes__(self):
         return self.contents
 
 
@@ -130,6 +140,6 @@ class Curl(object):
             self.error = None
         except pycurl.error as e:
             self.error = self.curl.errstr()
-            self.errno = e[0]
+            self.errno = e.args[0]
         finally:
             self.curl.close()
