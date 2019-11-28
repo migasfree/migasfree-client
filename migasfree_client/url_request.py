@@ -185,7 +185,11 @@ class UrlRequest(object):
 
         # evaluate response
         _response = '%s.return' % _filename
-        utils.write_file(_response, str(_curl.body))
+        if sys.version_info.major < 3:
+            utils.write_file(_response, str(_curl.body))
+        else:
+            utils.write_file(_response, _curl.body)
+
         if sign:
             _ret = secure.unwrap(
                 _response,
