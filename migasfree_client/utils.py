@@ -362,7 +362,13 @@ def write_file(filename, content):
     _file = None
     try:
         _file = open(filename, 'wb')
-        _file.write(content)
+        if sys.version_info.major < 2:
+            _file.write(content)
+        else:
+            try:
+                _file.write(bytes(content))
+            except TypeError:
+                _file.write(bytes(content, encoding='utf8'))
         _file.flush()
         os.fsync(_file.fileno())
         _file.close()
