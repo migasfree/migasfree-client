@@ -89,7 +89,10 @@ class MigasFreeUpload(MigasFreeCommand):
 
     def _left_parameters(self):
         if not self.packager_user:
-            self.packager_user = raw_input('%s: ' % _('User to upload at server'))
+            if sys.version_info.major < 3:
+                self.packager_user = raw_input('%s: ' % _('User to upload at server'))
+            else:
+                self.packager_user = input('%s: ' % _('User to upload at server'))
             if not self.packager_user:
                 print(_('Empty user. Exiting %s.') % self.CMD)
                 logging.info('Empty user in upload operation')
@@ -99,14 +102,20 @@ class MigasFreeUpload(MigasFreeCommand):
             self.packager_pwd = getpass.getpass('%s: ' % _('User password'))
 
         if not self.packager_project:
-            self.packager_project = raw_input('%s: ' % _('Project to upload at server'))
+            if sys.version_info.major < 3:
+                self.packager_project = raw_input('%s: ' % _('Project to upload at server'))
+            else:
+                self.packager_project = input('%s: ' % _('Project to upload at server'))
             if not self.packager_project:
                 print(_('Empty project. Exiting %s.') % self.CMD)
                 logging.info('Empty project in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
-            self.packager_store = raw_input('%s: ' % _('Store to upload at server'))
+            if sys.version_info.major < 3:
+                self.packager_store = raw_input('%s: ' % _('Store to upload at server'))
+            else:
+                self.packager_store = input('%s: ' % _('Store to upload at server'))
             if not self.packager_store:
                 print(_('Empty store. Exiting %s.') % self.CMD)
                 logging.info('Empty store in upload operation')
