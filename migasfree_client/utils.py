@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -347,8 +347,8 @@ def get_user_info(user):
     }
 
 
-def read_file(filename):
-    with open(filename, 'rb') as fp:
+def read_file(filename, mode='rb'):
+    with open(filename, mode) as fp:
         ret = fp.read()
 
     return ret
