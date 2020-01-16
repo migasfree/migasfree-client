@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -143,11 +143,15 @@ class MigasFreeClient(MigasFreeCommand):
         if not self._error_file_descriptor:
             self._error_file_descriptor = open(self.ERROR_FILE, _mode)
 
-        self._error_file_descriptor.write('%s\n' % ('-' * 20))
-        self._error_file_descriptor.write(
-            '%s\n' % time.strftime("%Y-%m-%d %H:%M:%S")
+        _text = '{}\n{}\n{}\n\n'.format(
+            '-' * 20, 
+            time.strftime("%Y-%m-%d %H:%M:%S"), 
+            str(msg)
         )
-        self._error_file_descriptor.write('%s\n\n' % str(msg))
+        if sys.version_info.major > 2:
+            _text = bytes(_text, encoding='utf8')
+
+        self._error_file_descriptor.write(_text)
 
     def _show_message(self, msg, icon=None):
         print('')
@@ -364,9 +368,10 @@ class MigasFreeClient(MigasFreeCommand):
         if os.path.isfile(self.ERROR_FILE) \
                 and os.stat(self.ERROR_FILE).st_size:
             self._send_message(_('Uploading old errors...'))
+            _mode = 'rb' if sys.version_info.major <= 2 else 'r'
             self._url_request.run(
                 'upload_computer_errors',
-                data=open(self.ERROR_FILE, 'rb').read()
+                data=open(self.ERROR_FILE, _mode).read()
             )
             self.operation_ok()
             os.remove(self.ERROR_FILE)
@@ -522,7 +527,7 @@ class MigasFreeClient(MigasFreeCommand):
         except ValueError as e:
             self._show_message(_('Parsing hardware information...'))
             self.operation_failed()
-            _msg = '{0}: {1}'.format(_('Hardware information'), e.message)
+            _msg = '{0}: {1}'.format(_('Hardware information'), str(e))
             logging.error(_msg)
             self._write_error(_msg)
             return
@@ -549,9 +554,10 @@ class MigasFreeClient(MigasFreeCommand):
 
         if os.stat(self.ERROR_FILE).st_size:
             self._send_message(_('Sending errors to server...'))
+            _mode = 'rb' if sys.version_info.major <= 2 else 'r'
             self._url_request.run(
                 'upload_computer_errors',
-                data=open(self.ERROR_FILE, 'rb').read()
+                data=open(self.ERROR_FILE, _mode).read()
             )
             self.operation_ok()
 
