@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -370,12 +370,13 @@ class MigasFreeSync(MigasFreeCommand):
         """
         if os.path.isfile(self.ERROR_FILE) \
                 and os.stat(self.ERROR_FILE).st_size:
+            mode = 'rb' if sys.version_info.major < 3 else 'r'
             self._show_message(_('Uploading old errors...'))
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['upload_errors']),
                 data={
                     'id': self._computer_id,
-                    'description': utils.read_file(self.ERROR_FILE)
+                    'description': utils.read_file(self.ERROR_FILE, mode)
                 },
                 debug=self._debug
             )
@@ -506,7 +507,7 @@ class MigasFreeSync(MigasFreeCommand):
             hardware = json.loads(output)
         except ValueError as e:
             self._show_message(_('Parsing hardware information...'))
-            msg = '{}: {}'.format(_('Hardware information'), e.message)
+            msg = '{}: {}'.format(_('Hardware information'), str(e))
             self.operation_failed(msg)
             logger.error(msg)
             self._write_error(msg)
@@ -540,12 +541,13 @@ class MigasFreeSync(MigasFreeCommand):
         self._error_file_descriptor = None
 
         if os.stat(self.ERROR_FILE).st_size:
+            mode = 'rb' if sys.version_info.major < 3 else 'r'
             self._show_message(_('Sending errors to server...'))
             self._url_request.run(
                 url=self.api_endpoint(self.URLS['upload_errors']),
                 data={
                     'id': self._computer_id,
-                    'description': utils.read_file(self.ERROR_FILE)
+                    'description': utils.read_file(self.ERROR_FILE, mode)
                 },
                 debug=self._debug
             )
