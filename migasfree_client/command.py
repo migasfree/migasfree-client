@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -550,11 +550,15 @@ class MigasFreeCommand(object):
         if not self._error_file_descriptor:
             self._error_file_descriptor = open(self.ERROR_FILE, _mode)
 
-        self._error_file_descriptor.write('%s\n' % ('-' * 20))
-        self._error_file_descriptor.write(
-            '%s\n' % time.strftime("%Y-%m-%d %H:%M:%S")
+        _text = '{}\n{}\n{}\n\n'.format(
+            '-' * 20, 
+            time.strftime("%Y-%m-%d %H:%M:%S"), 
+            str(msg)
         )
-        self._error_file_descriptor.write('%s\n\n' % str(msg))
+        if sys.version_info.major > 2:
+            _text = bytes(_text, encoding='utf8')
+
+        self._error_file_descriptor.write(_text)
 
     def _usage_examples(self):
         raise NotImplementedError
