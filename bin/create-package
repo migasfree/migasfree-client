@@ -4,9 +4,9 @@ function create_package
 {
     if [ -f stdeb.cfg ]
     then
-        python3 setup.py --command-packages=stdeb.command bdist_deb
+        python setup.py --command-packages=stdeb.command bdist_deb
     else
-        python3 setup.py bdist_rpm
+        python setup.py bdist_rpm
     fi
 }
 
