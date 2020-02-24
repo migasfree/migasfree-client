@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
@@ -93,6 +92,7 @@ class InstallData(install_data):
             data_files.append((dest, [mo]))
 
         return data_files
+
 
 setup(
     name='migasfree-client',
