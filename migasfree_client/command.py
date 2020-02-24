@@ -398,7 +398,10 @@ class MigasFreeCommand(object):
         if not self._auto_register():
             if not user:
                 sys.stdin = open('/dev/tty')
-                _user = raw_input('%s: ' % _('User to register computer at server'))
+                if sys.version_info.major < 3:
+                    _user = raw_input('%s: ' % _('User to register computer at server'))
+                else:
+                    _user = input('%s: ' % _('User to register computer at server'))
                 if not _user:
                     self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
                     logging.info('Empty user in register computer option')
