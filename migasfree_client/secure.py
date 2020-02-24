@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2011-2019 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,9 @@ import sys
 import json
 
 from . import utils, server_errors
+
+import gettext
+_ = gettext.gettext
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
