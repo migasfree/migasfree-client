@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
-    
+
 from . import network, settings
 
 import gettext
@@ -189,7 +189,7 @@ def timeout_execute(cmd, timeout=60):
         _output = str(_output, encoding='utf8')
     if isinstance(_error, bytes) and not isinstance(_error, str):
         _error = str(_error, encoding='utf8')
-        
+
     return _process.returncode, _output, _error
 
 
@@ -414,7 +414,10 @@ def query_yes_no(question, default="yes"):
 
     while 1:
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        if sys.version_info.major < 3:
+            choice = raw_input().lower()
+        else:
+            choice = input().lower()
         if default is not None and choice == '':
             return default
         elif choice in valid.keys():
