@@ -43,7 +43,7 @@ try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
-    
+
 from . import settings, network
 
 __author__ = 'Jose Antonio Chavarría'
@@ -417,7 +417,10 @@ def query_yes_no(question, default="yes"):
 
     while 1:
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        if sys.version_info.major < 3:
+            choice = raw_input().lower()
+        else:
+            choice = input().lower()
         if default is not None and choice == '':
             return default
         elif choice in valid.keys():
