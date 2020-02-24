@@ -429,7 +429,10 @@ class MigasFreeCommand(object):
         if not self._auto_register():
             if not user:
                 sys.stdin = open('/dev/tty')
-                user = raw_input('%s: ' % _('User to register computer at server'))
+                if sys.version_info.major < 3:
+                    user = raw_input('%s: ' % _('User to register computer at server'))
+                else:
+                    user = input('%s: ' % _('User to register computer at server'))
                 if not user:
                     self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
                     logger.info('Empty user in register computer option')
@@ -466,7 +469,7 @@ class MigasFreeCommand(object):
 
         if isinstance(response, dict):
             self._server_info = response
-    
+
     def get_computer_id(self):
         if self._computer_id:
             return self._computer_id
@@ -551,8 +554,8 @@ class MigasFreeCommand(object):
             self._error_file_descriptor = open(self.ERROR_FILE, _mode)
 
         _text = '{}\n{}\n{}\n\n'.format(
-            '-' * 20, 
-            time.strftime("%Y-%m-%d %H:%M:%S"), 
+            '-' * 20,
+            time.strftime("%Y-%m-%d %H:%M:%S"),
             str(msg)
         )
         if sys.version_info.major > 2:
