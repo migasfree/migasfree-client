@@ -69,7 +69,7 @@ def wrap(filename, data, key=None):
     """
 
     data = json.dumps(data)
-    if sys.version_info.major > 2:
+    if sys.version_info[0] > 2:
         data = data.encode()
 
     with open(filename, 'wb') as _fp:
@@ -100,7 +100,7 @@ def unwrap(filename, key=None):
 
     try:
         _content = open(filename, 'rb').read()
-        if sys.version_info.major < 3:
+        if sys.version_info[0] < 3:
             _data = json.loads(_content)
         else:
             _data = json.loads(str(_content, encoding='utf8'))
