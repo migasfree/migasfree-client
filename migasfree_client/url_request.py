@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -185,7 +185,7 @@ class UrlRequest(object):
 
         # evaluate response
         _response = '%s.return' % _filename
-        if sys.version_info.major < 3:
+        if sys.version_info[0] < 3:
             utils.write_file(_response, str(_curl.body))
         else:
             utils.write_file(_response, _curl.body)
