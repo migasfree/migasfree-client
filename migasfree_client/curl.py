@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ from . import utils
 
 class Storage(object):
     def __init__(self):
-        if sys.version_info.major > 2:
+        if sys.version_info[0] > 2:
             self.contents = b''
         else:
             self.contents = ''
@@ -59,7 +59,7 @@ class Storage(object):
         self.contents += data
 
     def __str__(self):
-        if sys.version_info.major > 2:
+        if sys.version_info[0] > 2:
             return str(self.contents, encoding='utf8')
 
         return self.contents
