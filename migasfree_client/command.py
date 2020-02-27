@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -398,7 +398,7 @@ class MigasFreeCommand(object):
         if not self._auto_register():
             if not user:
                 sys.stdin = open('/dev/tty')
-                if sys.version_info.major < 3:
+                if sys.version_info[0] < 3:
                     _user = raw_input('%s: ' % _('User to register computer at server'))
                 else:
                     _user = input('%s: ' % _('User to register computer at server'))
