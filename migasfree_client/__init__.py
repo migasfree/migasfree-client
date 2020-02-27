@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ __homepage__ = "https://github.com/migasfree/migasfree-client/"
 
 # i18n
 domain = 'migasfree-client'
-if sys.version_info.major <= 2:
+if sys.version_info[0] <= 2:
     gettext.install(domain, LOCALE_PATH, unicode=1)
 else:
     gettext.install(domain, LOCALE_PATH)
