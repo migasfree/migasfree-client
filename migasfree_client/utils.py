@@ -30,7 +30,7 @@ import uuid
 import signal
 import hashlib
 
-if sys.version_info.major <= 2:
+if sys.version_info[0] <= 2:
     import commands
 else:
     import subprocess as commands
@@ -362,7 +362,7 @@ def write_file(filename, content):
     _file = None
     try:
         _file = open(filename, 'wb')
-        if sys.version_info.major < 2:
+        if sys.version_info[0] < 2:
             _file.write(content)
         else:
             try:
@@ -414,7 +414,7 @@ def query_yes_no(question, default="yes"):
 
     while 1:
         sys.stdout.write(question + prompt)
-        if sys.version_info.major < 3:
+        if sys.version_info[0] < 3:
             choice = raw_input().lower()
         else:
             choice = input().lower()
@@ -499,6 +499,17 @@ def get_distro_name():
         name = platform.linux_distribution()[0]
 
     return slugify(name.strip().split()[0])
+
+
+def get_distro_major_version():
+    try:
+        import distro
+
+        major_version = distro.version()
+    except ImportError:
+        major_version = platform.linux_distribution()[1]
+
+    return major_version.strip().split('.')[0]
 
 
 def get_mfc_project():
