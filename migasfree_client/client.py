@@ -143,12 +143,12 @@ class MigasFreeClient(MigasFreeCommand):
         if not self._error_file_descriptor:
             self._error_file_descriptor = open(self.ERROR_FILE, _mode)
 
-        _text = '{}\n{}\n{}\n\n'.format(
-            '-' * 20, 
-            time.strftime("%Y-%m-%d %H:%M:%S"), 
+        _text = '{0}\n{1}\n{2}\n\n'.format(
+            '-' * 20,
+            time.strftime("%Y-%m-%d %H:%M:%S"),
             str(msg)
         )
-        if sys.version_info.major > 2:
+        if sys.version_info[0] > 2:
             _text = bytes(_text, encoding='utf8')
 
         self._error_file_descriptor.write(_text)
@@ -209,7 +209,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         _filename = tempfile.mkstemp()[1]
         with open(_filename, 'wb') as _code_file:
-            if sys.version_info.major <= 2:
+            if sys.version_info[0] <= 2:
                 _code_file.write(code)
             else:
                 _code_file.write(bytes(code, encoding='utf8'))
@@ -368,7 +368,7 @@ class MigasFreeClient(MigasFreeCommand):
         if os.path.isfile(self.ERROR_FILE) \
                 and os.stat(self.ERROR_FILE).st_size:
             self._send_message(_('Uploading old errors...'))
-            _mode = 'rb' if sys.version_info.major <= 2 else 'r'
+            _mode = 'rb' if sys.version_info[0] <= 2 else 'r'
             self._url_request.run(
                 'upload_computer_errors',
                 data=open(self.ERROR_FILE, _mode).read()
@@ -397,7 +397,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         logging.debug('Response _get_server_version: %s', _curl.body)
 
-        if sys.version_info.major < 3:
+        if sys.version_info[0] < 3:
             _response = json.loads(str(_curl.body))
         else:
             _response = json.loads(_curl.body.__str__())
@@ -554,7 +554,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         if os.stat(self.ERROR_FILE).st_size:
             self._send_message(_('Sending errors to server...'))
-            _mode = 'rb' if sys.version_info.major <= 2 else 'r'
+            _mode = 'rb' if sys.version_info[0] <= 2 else 'r'
             self._url_request.run(
                 'upload_computer_errors',
                 data=open(self.ERROR_FILE, _mode).read()
