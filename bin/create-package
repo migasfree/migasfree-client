@@ -1,27 +1,31 @@
 #!/bin/bash
 
-python3 -c "import stdeb3" 2> /dev/null
-if [ $? -eq 0 ]
-then
-    _STDEB="stdeb3.command"
-    _PYTHON=$(which python3)
-else
-    _STDEB="stdeb.command"
-    _PYTHON=$(which python2)
-fi
+function get_python
+{
+    local _FILE=$1
+
+    echo $(grep -q -c -m 1 python3 $_FILE && which python3 || which python2)
+}
 
 function create_package
 {
+    local _PYTHON_BUILD
+    local _STDEB
+
     if [ -f stdeb.cfg ]
     then
-        $_PYTHON setup.py --command-packages=stdeb.command bdist_deb
+        _PYTHON_BUILD=$(get_python stdeb.cfg)
+        _STDEB=$(grep -q 3 <<< "$_PYTHON_BUILD" && echo "stdeb3.command" || echo "stdeb.command")
+        $_PYTHON_BUILD setup.py --command-packages=${_STDEB} bdist_deb
     else
-        $_PYTHON setup.py bdist_rpm
+        _PYTHON_BUILD=$(get_python setup.cfg)
+        $_PYTHON_BUILD setup.py bdist_rpm
     fi
 }
 
 function get_distro
 {
+    local _PYTHON=$(which python2 || which python3)
     local _DISTRO=$($_PYTHON -c "from migasfree_client import utils; print(utils.get_distro_name())")
     local _MAJOR_VERSION=$($_PYTHON -c "from migasfree_client import utils; print(utils.get_distro_major_version())")
     local _FILE=${_DISTRO}
