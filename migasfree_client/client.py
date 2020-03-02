@@ -223,6 +223,8 @@ class MigasFreeClient(MigasFreeCommand):
         ]
 
         if lang in _allowed_languages:
+            if lang == 'python':
+                lang = self._search_python()
             _cmd = '{0} {1}'.format(lang, _filename)
         else:
             _cmd = ':'  # gracefully degradation
