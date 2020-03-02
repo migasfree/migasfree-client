@@ -437,6 +437,12 @@ class MigasFreeCommand(object):
     def _usage_examples(self):
         raise NotImplementedError
 
+    def _search_python(self):
+        _cmd = 'which python2 || which python3'
+        _ret, _output, _ = utils.execute(_cmd, interactive=False)
+
+        return _output.strip() if _ret == 0 else 'python'
+
     def _search_pms(self):
         _pms_list = {
             'apt-get': 'Apt',
