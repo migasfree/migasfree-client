@@ -438,7 +438,15 @@ class MigasFreeCommand(object):
         raise NotImplementedError
 
     def _search_python(self):
-        _cmd = 'which python2 || which python3'
+        _cmd = """
+_PYTHON=$(which python3)
+python3 -c "import migasfree_client" 2&> /dev/null
+if [ $? -ne 0 ]
+then
+    _PYTHON=$(which python2)
+fi
+echo $_PYTHON
+"""
         _ret, _output, _ = utils.execute(_cmd, interactive=False)
 
         return _output.strip() if _ret == 0 else 'python'
