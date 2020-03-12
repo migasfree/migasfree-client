@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ class UrlRequest(object):
             logger.info('Public key: %s', self._public_key)
 
         headers = {
-            'user-agent': 'migasfree-client/%s %s' % (
+            'user-agent': 'migasfree-client/{} {}'.format(
                 utils.get_mfc_release(),
                 requests.utils.default_user_agent()
             ),
@@ -167,8 +167,8 @@ class UrlRequest(object):
         proxies = None
         if self._proxy:
             proxies = {
-                "http": self._proxy,
-                "https": self._proxy,
+                'http': self._proxy,
+                'https': self._proxy,
             }
 
         if not url.endswith('/'):
@@ -241,7 +241,7 @@ class UrlRequest(object):
             extension = 'txt' if 'json' in request.headers['content-type'] else 'html'
             _file = os.path.join(
                 settings.TMP_PATH,
-                'response.%s.%s.%s' % (
+                'response.{}.{}.{}'.format(
                     request.status_code,
                     url.replace('/', '.').replace(':', '.').rstrip('.'),
                     extension
