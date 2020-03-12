@@ -7,17 +7,17 @@ doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README TODO migasfree-client.doa
 install-script = scripts/rpm-install.sh
 post-install = scripts/rpm-post-install.sh
 post-uninstall = scripts/rpm-post-uninstall.sh
-fix-python = /usr/bin/python2
-requires = python >= 2.7
+fix-python = /usr/bin/python3
+requires = python3 >= 3.3
            lshw >= B.02.15
            sudo
            dmidecode
-           python-magic
-           python-jwcrypto
-           python-requests
-           python-requests-toolbelt
-           python-cryptography >= 1.7
-           python-netifaces
+           python3-magic
+           python3-jwcrypto
+           python3-requests
+           python3-requests-toolbelt
+           python3-cryptography >= 1.7
+           python3-netifaces
            dialog
            openssl
            which
