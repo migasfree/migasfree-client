@@ -1,20 +1,18 @@
 #!/bin/bash
 
-_PYTHON=$(which python2 || which python3)
-
 function create_package
 {
     if [ -f stdeb.cfg ]
     then
-        $_PYTHON setup.py --command-packages=stdeb.command bdist_deb
+        python3 setup.py --command-packages=stdeb.command bdist_deb
     else
-        $_PYTHON setup.py bdist_rpm
+        python3 setup.py bdist_rpm
     fi
 }
 
 function get_distro
 {
-    local _DISTRO=$($_PYTHON -c "from migasfree_client import utils; print(utils.get_distro_name())")
+    local _DISTRO=$(python3 -c "from migasfree_client import utils; print(utils.get_distro_name())")
 
     if [ -f "setup.cfg.d/$_DISTRO" ]
     then
