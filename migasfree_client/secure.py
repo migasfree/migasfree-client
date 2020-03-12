@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ def decrypt(jwt, priv_key):
     if isinstance(jwe_token.payload, bytes) \
             and not isinstance(jwe_token.payload, str):
         return str(jwe_token.payload, encoding='utf8')
-    
+
     return jwe_token.payload
 
 
@@ -118,6 +118,7 @@ def wrap(data, sign_key, encrypt_key):
         'data': data,
         'sign': sign(data, sign_key)
     }
+
     return encrypt(claims, encrypt_key)
 
 
