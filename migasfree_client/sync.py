@@ -134,6 +134,8 @@ class MigasFreeSync(MigasFreeCommand):
         ]
 
         if lang in allowed_languages:
+            if lang == 'python':
+                lang = 'python3'
             cmd = '{} {}'.format(lang, filename)
         else:
             cmd = ':'  # gracefully degradation
@@ -370,13 +372,12 @@ class MigasFreeSync(MigasFreeCommand):
         """
         if os.path.isfile(self.ERROR_FILE) \
                 and os.stat(self.ERROR_FILE).st_size:
-            mode = 'rb' if sys.version_info.major < 3 else 'r'
             self._show_message(_('Uploading old errors...'))
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['upload_errors']),
                 data={
                     'id': self._computer_id,
-                    'description': utils.read_file(self.ERROR_FILE, mode)
+                    'description': utils.read_file(self.ERROR_FILE, 'r')
                 },
                 debug=self._debug
             )
@@ -541,13 +542,12 @@ class MigasFreeSync(MigasFreeCommand):
         self._error_file_descriptor = None
 
         if os.stat(self.ERROR_FILE).st_size:
-            mode = 'rb' if sys.version_info.major < 3 else 'r'
             self._show_message(_('Sending errors to server...'))
             self._url_request.run(
                 url=self.api_endpoint(self.URLS['upload_errors']),
                 data={
                     'id': self._computer_id,
-                    'description': utils.read_file(self.ERROR_FILE, mode)
+                    'description': utils.read_file(self.ERROR_FILE, 'r')
                 },
                 debug=self._debug
             )
