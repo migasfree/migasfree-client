@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2018 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -283,7 +283,7 @@ class MigasFreeTags(MigasFreeCommand):
                 self._show_running_options()
 
             rules = self._set_tags()
-            if args.set != []:
+            if args.set:
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
                 self._apply_rules(rules)
                 utils.remove_file(self.LOCK_FILE)
