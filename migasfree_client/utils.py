@@ -30,19 +30,11 @@ import uuid
 import signal
 import magic
 import hashlib
+import configparser
+import distro
 
 import gettext
 _ = gettext.gettext
-
-if sys.version_info.major <= 2:
-    import commands
-else:
-    import subprocess as commands
-
-try:
-    import ConfigParser
-except ImportError:
-    import configparser as ConfigParser
 
 from . import settings, network
 
@@ -81,7 +73,7 @@ def get_config(ini_file, section):
         return errno.ENOENT  # FILE_NOT_FOUND
 
     try:
-        config = ConfigParser.RawConfigParser()
+        config = configparser.RawConfigParser()
         config.read(ini_file)
 
         return dict(config.items(section))
@@ -146,7 +138,7 @@ def execute(cmd, verbose=False, interactive=True):
                         chunk = str(chunk, encoding='utf8')
                     if chunk and chunk != '\n':
                         print(chunk)
-                    _output_buffer = '%s%s' % (_output_buffer, chunk)
+                    _output_buffer = '{}{}'.format(_output_buffer, chunk)
 
     _output, _error = _process.communicate()
 
@@ -218,7 +210,7 @@ def get_graphic_pid():
         'mate-session',          # MATE
     ]
     for _process in _graphic_environments:
-        _pid = commands.getoutput('pidof -s {}'.format(_process))
+        _pid = subprocess.getoutput('pidof -s {}'.format(_process))
         if _pid:
             return [_pid, _process]
 
@@ -235,7 +227,7 @@ def get_graphic_user(pid=0):
         if not pid:
             return ''
 
-    _user = commands.getoutput('ps hp {} -o "%U"'.format(pid))
+    _user = subprocess.getoutput('ps hp {} -o "%U"'.format(pid))
     if _user.isdigit():
         # ps command not always show username (show uid if len(username) > 8)
         _user_info = get_user_info(_user)
@@ -273,7 +265,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
         # a data line ends in 0 byte, not newline
         _display = grep(
             'DISPLAY',
-            open("/proc/%s/environ" % pid).read().split('\0')
+            open('/proc/{}/environ'.format(pid)).read().split('\0')
         )
         if _display:
             _display = _display[0].split('=').pop()
@@ -368,10 +360,7 @@ def write_file(filename, content):
 
     _file = None
     try:
-        if sys.version_info.major < 3:
-            _file = open(filename, 'wb')
-        else:
-            _file = open(filename, 'w', encoding='utf8')
+        _file = open(filename, 'w', encoding='utf8')
         _file.write(content)
         _file.flush()
         os.fsync(_file.fileno())
@@ -417,10 +406,7 @@ def query_yes_no(question, default="yes"):
 
     while 1:
         sys.stdout.write(question + prompt)
-        if sys.version_info.major < 3:
-            choice = raw_input().lower()
-        else:
-            choice = input().lower()
+        choice = input().lower()
         if default is not None and choice == '':
             return default
         elif choice in valid.keys():
@@ -478,29 +464,15 @@ def get_current_user():
     else:
         _fullname = _info['fullname']
 
-    return u'{}~{}'.format(_graphic_user, _fullname)
+    return '{}~{}'.format(_graphic_user, _fullname)
 
 
 def get_distro_project():
-    try:
-        import distro
-
-        project = '{}-{}'.format(distro.name(), distro.version())
-    except ImportError:
-        project = '-'.join(platform.linux_distribution()[0:2])
-
-    return slugify(project)
+    return slugify('{}-{}'.format(distro.name(), distro.version()))
 
 
 def get_distro_name():
-    try:
-        import distro
-
-        name = distro.name()
-    except ImportError:
-        name = platform.linux_distribution()[0]
-
-    return slugify(name.strip().split()[0])
+    return slugify(distro.name().strip().split()[0])
 
 
 def get_mfc_project():
@@ -508,8 +480,7 @@ def get_mfc_project():
     if isinstance(_config, dict) and 'project' in _config:
         return _config.get('project')
 
-    # if not set
-    return get_distro_project()
+    return get_distro_project()  # if not set
 
 
 def get_mfc_computer_name():
@@ -533,7 +504,7 @@ def get_smbios_version():
 
 
 def get_uuid_from_mac():
-    return "00000000-0000-0000-0000-%s" % network.get_first_mac()
+    return '00000000-0000-0000-0000-{}'.format(network.get_first_mac())
 
 
 def get_hardware_uuid():
@@ -605,6 +576,7 @@ def is_xsession():
 
 def is_zenity():
     _ret, _, _ = execute('which zenity', interactive=False)
+
     return _ret == 0
 
 
