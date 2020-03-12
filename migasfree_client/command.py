@@ -29,10 +29,7 @@ import ssl
 import gettext
 _ = gettext.gettext
 
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
+from urllib.parse import urljoin
 
 from . import (
     settings,
@@ -55,13 +52,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # implicit print flush
-buf_arg = 0
-if sys.version_info[0] == 3:
-    os.environ['PYTHONUNBUFFERED'] = '1'
-    buf_arg = 1
+os.environ['PYTHONUNBUFFERED'] = '1'
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buf_arg)
-sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buf_arg)
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 1)
 
 
 class MigasFreeCommand(object):
@@ -429,10 +423,7 @@ class MigasFreeCommand(object):
         if not self._auto_register():
             if not user:
                 sys.stdin = open('/dev/tty')
-                if sys.version_info.major < 3:
-                    user = raw_input('%s: ' % _('User to register computer at server'))
-                else:
-                    user = input('%s: ' % _('User to register computer at server'))
+                user = input('%s: ' % _('User to register computer at server'))
                 if not user:
                     self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
                     logger.info('Empty user in register computer option')
@@ -558,8 +549,7 @@ class MigasFreeCommand(object):
             time.strftime("%Y-%m-%d %H:%M:%S"),
             str(msg)
         )
-        if sys.version_info.major > 2:
-            _text = bytes(_text, encoding='utf8')
+        _text = bytes(_text, encoding='utf8')
 
         self._error_file_descriptor.write(_text)
 
