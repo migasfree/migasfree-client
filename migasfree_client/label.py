@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,7 +98,8 @@ class MigasFreeLabel(MigasFreeCommand):
         return response
 
     def _show_label(self):
-        self._check_sign_keys()
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
 
         info = self.get_label()
 
