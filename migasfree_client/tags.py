@@ -178,7 +178,8 @@ class MigasFreeTags(MigasFreeCommand):
         return response
 
     def _get_available_tags(self):
-        self._check_sign_keys()
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
 
         if not self._computer_id:
             self.get_computer_id()
@@ -205,7 +206,8 @@ class MigasFreeTags(MigasFreeCommand):
         return response
 
     def _set_tags(self):
-        self._check_sign_keys()
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
 
         if not self._tags:
             self._tags = self._select_tags(
@@ -237,12 +239,20 @@ class MigasFreeTags(MigasFreeCommand):
 
         return response
 
-    @staticmethod
-    def _apply_rules(rules):
+    def _apply_rules(self, rules):
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
+
         mfs = MigasFreeSync()
 
         # Update metadata
-        mfs.synchronize()
+        mfs.upload_attributes()
+        mfs.upload_faults()
+        mfs.create_repositories()
+        mfs.clean_pms_cache()
+
+        software_before = self.pms.query_all()
+        software_history = mfs.software_history(software_before)
 
         mfs.uninstall_packages(rules["remove"])
         mfs.install_mandatory_packages(rules["preinstall"])
@@ -251,6 +261,8 @@ class MigasFreeTags(MigasFreeCommand):
         mfs.clean_pms_cache()
 
         mfs.install_mandatory_packages(rules["install"])
+
+        mfs.upload_software(software_before, software_history)
 
     def run(self, args=None):
         if hasattr(args, 'quiet') and args.quiet:
