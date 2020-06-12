@@ -342,7 +342,7 @@ class MigasFreeSync(MigasFreeCommand):
         return response
 
     @staticmethod
-    def _software_history(software):
+    def software_history(software):
         history = {}
 
         # if have been managed packages manually
@@ -366,7 +366,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         return history
 
-    def _upload_old_errors(self):
+    def upload_old_errors(self):
         """
         if there are old errors, upload them to server
         """
@@ -381,13 +381,13 @@ class MigasFreeSync(MigasFreeCommand):
                 },
                 debug=self._debug
             )
-            logger.debug('Response _upload_old_errors: %s', response)
+            logger.debug('Response upload_old_errors: %s', response)
             self.operation_ok()
             os.remove(self.ERROR_FILE)
 
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
-    def _create_repositories(self):
+    def create_repositories(self):
         repos = self.get_repositories()
 
         self._show_message(_('Creating repositories...'))
@@ -486,7 +486,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response.get('capture', False)
 
-    def _update_hardware_inventory(self):
+    def update_hardware_inventory(self):
         hardware = json.loads('{}')  # default value
 
         if not self._computer_id:
@@ -537,7 +537,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         self.operation_ok()
 
-    def _upload_execution_errors(self):
+    def upload_execution_errors(self):
         self._error_file_descriptor.close()
         self._error_file_descriptor = None
 
@@ -590,7 +590,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response
 
-    def _mandatory_pkgs(self):
+    def mandatory_pkgs(self):
         response = self.get_mandatory_packages()
         if not response:
             return
@@ -600,7 +600,7 @@ class MigasFreeSync(MigasFreeCommand):
         if 'install' in response:
             self.install_mandatory_packages(response['install'])
 
-    def _upload_software(self, before, history):
+    def upload_software(self, before, history):
         if not self._computer_id:
             self.get_computer_id()
 
@@ -669,14 +669,13 @@ class MigasFreeSync(MigasFreeCommand):
         return response
 
     def synchronize(self):
-        start_date = datetime.now().isoformat()
-
         if not self._check_sign_keys():
             sys.exit(errno.EPERM)
 
+        start_date = datetime.now().isoformat()
         self._show_message(_('Connecting to migasfree server...'))
 
-        self._upload_old_errors()
+        self.upload_old_errors()
         self._execute_path(settings.PRE_SYNC_PATH)
         self.upload_attributes()
         self.upload_faults()
@@ -684,23 +683,23 @@ class MigasFreeSync(MigasFreeCommand):
         software_before = self.pms.query_all()
         logger.debug('Actual software: %s', software_before)
 
-        software_history = self._software_history(software_before)
+        software_history = self.software_history(software_before)
 
-        self._create_repositories()
+        self.create_repositories()
         self.clean_pms_cache()
-        self._mandatory_pkgs()
+        self.mandatory_pkgs()
         if self.migas_auto_update_packages is True:
             self._update_packages()
 
-        self._upload_software(software_before, software_history)
+        self.upload_software(software_before, software_history)
 
         if self.hardware_capture_is_required():
-            self._update_hardware_inventory()
+            self.update_hardware_inventory()
 
-        self._sync_logical_devices()
+        self.sync_logical_devices()
 
         self._execute_path(settings.POST_SYNC_PATH)
-        self._upload_execution_errors()
+        self.upload_execution_errors()
         self.end_synchronization(start_date)
         self.end_of_transmission()
         self._show_message(_('Completed operations'))
@@ -710,29 +709,29 @@ class MigasFreeSync(MigasFreeCommand):
 
     def _install_package(self, pkg):
         software_before = self.pms.query_all()
-        software_history = self._software_history(software_before)
+        software_history = self.software_history(software_before)
 
         self._show_message(_('Installing package: %s') % pkg)
         ret = self.pms.install(pkg)
 
-        self._upload_software(software_before, software_history)
+        self.upload_software(software_before, software_history)
         self.end_of_transmission()
 
         return ret
 
     def _remove_package(self, pkg):
         software_before = self.pms.query_all()
-        software_history = self._software_history(software_before)
+        software_history = self.software_history(software_before)
 
         self._show_message(_('Removing package: %s') % pkg)
         ret = self.pms.remove(pkg)
 
-        self._upload_software(software_before, software_history)
+        self.upload_software(software_before, software_history)
         self.end_of_transmission()
 
         return ret
 
-    def _sync_logical_devices(self):
+    def sync_logical_devices(self):
         devices = self.get_devices()
         if not devices:
             return
