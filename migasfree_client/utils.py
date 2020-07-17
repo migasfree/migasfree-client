@@ -362,7 +362,7 @@ def write_file(filename, content):
     _file = None
     try:
         _file = open(filename, 'wb')
-        if sys.version_info[0] < 2:
+        if sys.version_info[0] < 3:
             _file.write(content)
         else:
             try:
@@ -643,4 +643,7 @@ def md5sum(archive):
 
     with open(archive) as handle:
         _md5 = handle.read()
+        if sys.version_info[0] > 2:
+            _md5 = _md5.encode()
+
     return hashlib.md5(_md5).hexdigest()
