@@ -632,6 +632,6 @@ def md5sum(archive):
         return ''
 
     with open(archive) as handle:
-        _md5 = handle.read()
+        _md5 = handle.read().encode()
 
     return hashlib.md5(_md5).hexdigest()
