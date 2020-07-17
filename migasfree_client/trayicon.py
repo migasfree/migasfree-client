@@ -62,8 +62,8 @@ class TrayIcon:
         if not self.proc:
             return
 
-        if isinstance(cmd, unicode):
-            cmd = cmd.encode('utf-8')
+        if isinstance(cmd, bytes) and not isinstance(cmd, str):  # jact 2020-07-17
+            cmd = cmd.encode()  # jact 2020-07-17
         try:
             self.proc.stdin.write(cmd)
             self.proc.stdin.flush()
