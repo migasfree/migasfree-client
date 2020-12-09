@@ -360,8 +360,13 @@ def write_file(filename, content):
 
     _file = None
     try:
-        _file = open(filename, 'w', encoding='utf8')
-        _file.write(content)
+        _file = open(filename, 'wb')
+
+        try:
+            _file.write(bytes(content))
+        except TypeError:
+            _file.write(bytes(content, encoding='utf8'))
+
         _file.flush()
         os.fsync(_file.fileno())
         _file.close()
