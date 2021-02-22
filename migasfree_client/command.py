@@ -148,6 +148,16 @@ class MigasFreeCommand(object):
             _config_client.get('server', 'localhost')
         )
 
+        self.migas_port = os.environ.get(
+            'MIGASFREE_CLIENT_PORT',
+            _config_client.get('port', '')
+        )
+
+        self.migas_protocol = os.environ.get(
+            'MIGASFREE_CLIENT_PROTOCOL',
+            _config_client.get('protocol', 'http')
+        )
+
         self.migas_auto_update_packages = utils.cast_to_bool(
             os.environ.get(
                 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES',
@@ -215,23 +225,29 @@ class MigasFreeCommand(object):
         self.get_server_info()
 
     def _ssl_cert(self):
-        address = self.migas_server.split(':')
-        host = address[0]
-        port = int(address[1]) if len(address) == 2 else 80
-
-        if os.path.isfile(settings.CERT_FILE):
-            os.remove(settings.CERT_FILE)
-
         self.migas_ssl_cert = False
-        try:
-            cert = ssl.get_server_certificate((host, port), ssl.PROTOCOL_SSLv23)
-            if utils.write_file(settings.CERT_FILE, cert):
-                self.migas_ssl_cert = settings.CERT_FILE
-        except:
-            pass
+        if self.migas_protocol == "https":
+            port = self.migas_port if self.migas_port else 443
+
+            if os.path.isfile(settings.CERT_FILE):
+                os.remove(settings.CERT_FILE)
+
+            try:
+                cert = ssl.get_server_certificate(
+                    (self.migas_server, port),
+                    ssl.PROTOCOL_SSLv23
+                )
+                if utils.write_file(settings.CERT_FILE, cert):
+                    self.migas_ssl_cert = settings.CERT_FILE
+            except:
+                pass
 
     def _init_url_base(self):
-        self._url_base = '{}://{}'.format(self.api_protocol(), self.migas_server)
+        self._url_base = '{}://{}{}'.format(
+            self.migas_protocol,
+            self.migas_server,
+            ':{}'.format(self.migas_port) if self.migas_port else ''
+        )
 
     def _init_url_request(self):
         keys_path = os.path.join(settings.KEYS_PATH, self.migas_server)
@@ -245,9 +261,6 @@ class MigasFreeCommand(object):
             },
             cert=self.migas_ssl_cert
         )
-
-    def api_protocol(self):
-        return 'https' if self.migas_ssl_cert else 'http'
 
     def api_endpoint(self, path):
         return urljoin(self._url_base, path)
@@ -510,6 +523,9 @@ class MigasFreeCommand(object):
         print(_('Running options: %s') % conf_file)
         print('\t%s: %s' % (_('Project'), self.migas_project))
         print('\t%s: %s' % (_('Server'), self.migas_server))
+        print('\t%s: %s' % (_('Protocol'), self.migas_protocol))
+        if self.migas_port:
+            print('\t%s: %s' % (_('Port'), self.migas_port))
         print('\t%s: %s' % (
             _('migasfree server version'), self._server_info.get('version', _('None')))
         )
