@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ __license__ = 'GPLv3'
 
 import sys
 
-if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):
-    raise SystemExit('migasfree-client requires Python 2.7 or later.')
+if not hasattr(sys, 'version_info') or sys.version_info < (3, 6, 0, 'final'):
+    raise SystemExit('migasfree-client requires Python 3.6 or later.')
 
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
