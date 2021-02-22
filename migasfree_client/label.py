@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ HTML_TEMPLATE = """<!doctype html>
             height: 10em;
             border: 1px solid #000;
             padding: .5em 1em;
+            font-family: sans-serif;
         }
         h1 {
             margin: 0 .5em;
@@ -79,17 +80,18 @@ class MigasFreeLabel(MigasFreeCommand):
             self.get_computer_id()
 
         logger.debug('Getting label')
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_label']),
-            data={
-                'id': self._computer_id
-            },
-            debug=self._debug
-        )
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_label']),
+                data={
+                    'id': self._computer_id
+                },
+                debug=self._debug
+            )
 
         logger.debug('Response get_label: {}'.format(response))
         if self._debug:
-            print('Response: {}'.format(response))
+            self.console.log('Response: {}'.format(response))
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
