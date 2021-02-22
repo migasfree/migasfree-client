@@ -254,7 +254,6 @@ class MigasFreeCommand(object):
 
     def _show_message(self, msg):
         print('')
-        # printcolor.info(str(' ' + msg + ' ').center(76, '*'))
         self.console.rule(msg)
 
     def _check_path(self, path):
@@ -590,17 +589,13 @@ class MigasFreeCommand(object):
         if info:
             msg = str(info)
         else:
-            # msg = str(' ' + _('Ok')).rjust(38, '*')
             msg = _('Ok')
 
-        # printcolor.ok(msg)
         self.console.log(msg, style='green')
 
     def operation_failed(self, info=''):
-        # printcolor.fail(str(' ' + _('Failed')).rjust(38, '*'))
         self.console.rule(_('Failed'), style='red')
         if info:
-            # printcolor.fail(info)
             self.console.log(info, style='red')
 
     def run(self, args=None):
