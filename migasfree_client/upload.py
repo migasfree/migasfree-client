@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class MigasFreeUpload(MigasFreeCommand):
         )
 
     def _auto_register(self):
-        print(_('Autoregistering computer...'))
+        self._show_message(_('Autoregistering computer...'))
 
         return self._save_sign_keys(
             self.auto_register_user, self.auto_register_password
@@ -127,24 +127,25 @@ class MigasFreeUpload(MigasFreeCommand):
         my_magic = utils.build_magic()
         is_package = my_magic.file(self._file) in self.pms._mimetype
 
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['upload_package']),
-            data={
-                'project': self.packager_project,
-                'store': self.packager_store,
-                'is_package': is_package
-            },
-            upload_files=[os.path.abspath(self._file)],
-            debug=self._debug,
-            keys={
-                'private': self._private_key,
-                'public': self._public_key
-            }
-        )
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['upload_package']),
+                data={
+                    'project': self.packager_project,
+                    'store': self.packager_store,
+                    'is_package': is_package
+                },
+                upload_files=[os.path.abspath(self._file)],
+                debug=self._debug,
+                keys={
+                    'private': self._private_key,
+                    'public': self._public_key
+                }
+            )
 
         logger.debug('Uploading response: %s', response)
         if self._debug:
-            print('Response: %s' % response)
+            self.console.log('Response: %s' % response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -169,30 +170,31 @@ class MigasFreeUpload(MigasFreeCommand):
                     logger.debug('Uploading server set: %s', _filename)
                     print('Uploading file: %s' % os.path.abspath(_filename))
 
-                    response = self._url_request.run(
-                        url=self.api_endpoint(self.URLS['upload_set']),
-                        data={
-                            'project': self.packager_project,
-                            'store': self.packager_store,
-                            'packageset': self._directory,
-                            'path': os.path.dirname(
-                                os.path.join(
-                                    _root,
-                                    _file
-                                )[len(self._directory) + 1:]
-                            )
-                        },
-                        upload_files=[os.path.abspath(_filename)],
-                        keys={
-                            'private': self._private_key,
-                            'public': self._public_key
-                        },
-                        debug=self._debug,
-                    )
+                    with self.console.status(''):
+                        response = self._url_request.run(
+                            url=self.api_endpoint(self.URLS['upload_set']),
+                            data={
+                                'project': self.packager_project,
+                                'store': self.packager_store,
+                                'packageset': self._directory,
+                                'path': os.path.dirname(
+                                    os.path.join(
+                                        _root,
+                                        _file
+                                    )[len(self._directory) + 1:]
+                                )
+                            },
+                            upload_files=[os.path.abspath(_filename)],
+                            keys={
+                                'private': self._private_key,
+                                'public': self._public_key
+                            },
+                            debug=self._debug,
+                        )
 
                     logger.debug('Uploading set response: %s', response)
                     if self._debug:
-                        print('Response: %s' % response)
+                        self.console.log('Response: %s' % response)
 
                     if 'error' in response:
                         self.operation_failed(response['error']['info'])
@@ -204,29 +206,30 @@ class MigasFreeUpload(MigasFreeCommand):
         return self._create_repository()
 
     def _create_repository(self):
-        print(_('Creating repository operation...'))
+        self._show_message(_('Creating repository operation...'))
 
         if self._file:
             packageset = self._file
         else:
             packageset = self._directory
 
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['create_repository']),
-            data={
-                'project': self.packager_project,
-                'packageset': packageset
-            },
-            keys={
-                'private': self._private_key,
-                'public': self._public_key
-            },
-            debug=self._debug
-        )
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['create_repository']),
+                data={
+                    'project': self.packager_project,
+                    'packageset': packageset
+                },
+                keys={
+                    'private': self._private_key,
+                    'public': self._public_key
+                },
+                debug=self._debug
+            )
 
         logger.debug('Creating repository response: %s', response)
         if self._debug:
-            print('Response: %s' % response)
+            self.console.log('Response: %s' % response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
