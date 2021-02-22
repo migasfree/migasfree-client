@@ -25,7 +25,7 @@ Requirements
 ============
 
 * a Linux distribution (Fedora, openSUSE, Ubuntu, ...)
-* Python >= 3.3 (see requirements.txt file)
+* Python >= 3.6 (see requirements.txt file)
 * lshw >= B.02.15
 * dmidecode
 
