@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -165,7 +165,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Response _get_assigned_tags: %s', response)
         if self._debug:
-            print('Response: %s' % response)
+            self.console.log('Response: %s' % response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -201,7 +201,7 @@ class MigasFreeTags(MigasFreeCommand):
             sys.exit(errno.ENODATA)
 
         if self._debug:
-            print('Response: %s' % response)
+            self.console.log('Response: %s' % response)
 
         return response
 
@@ -232,7 +232,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Setting tags response: %s', response)
         if self._debug:
-            print('Response: %s' % response)
+            self.console.log('Response: %s' % response)
 
         print('')
         self.operation_ok(_('Tags setted: %s') % self._tags)
