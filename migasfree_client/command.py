@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ import ssl
 import gettext
 _ = gettext.gettext
 
+from rich import print
+from rich.console import Console
 from urllib.parse import urljoin
 
 from . import (
@@ -36,7 +38,6 @@ from . import (
     utils,
     network,
     url_request,
-    printcolor
 )
 from .pms import Pms
 
@@ -116,6 +117,8 @@ class MigasFreeCommand(object):
     _quiet = False
 
     pms = None
+
+    console = Console(stderr=True, log_path=False)
 
     auto_register_user = ''
     auto_register_password = ''
@@ -249,10 +252,10 @@ class MigasFreeCommand(object):
     def api_endpoint(self, path):
         return urljoin(self._url_base, path)
 
-    @staticmethod
-    def _show_message(msg):
+    def _show_message(self, msg):
         print('')
-        printcolor.info(str(' ' + msg + ' ').center(76, '*'))
+        # printcolor.info(str(' ' + msg + ' ').center(76, '*'))
+        self.console.rule(msg)
 
     def _check_path(self, path):
         if not os.path.isdir(path):
@@ -583,20 +586,22 @@ class MigasFreeCommand(object):
 
         self.pms = Pms.factory(pms_info)()
 
-    @staticmethod
-    def operation_ok(info=''):
+    def operation_ok(self, info=''):
         if info:
             msg = str(info)
         else:
-            msg = str(' ' + _('Ok')).rjust(38, '*')
+            # msg = str(' ' + _('Ok')).rjust(38, '*')
+            msg = _('Ok')
 
-        printcolor.ok(msg)
+        # printcolor.ok(msg)
+        self.console.log(msg, style='green')
 
-    @staticmethod
-    def operation_failed(info=''):
-        printcolor.fail(str(' ' + _('Failed')).rjust(38, '*'))
+    def operation_failed(self, info=''):
+        # printcolor.fail(str(' ' + _('Failed')).rjust(38, '*'))
+        self.console.rule(_('Failed'), style='red')
         if info:
-            printcolor.fail(info)
+            # printcolor.fail(info)
+            self.console.log(info, style='red')
 
     def run(self, args=None):
         raise NotImplementedError
