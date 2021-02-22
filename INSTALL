@@ -2,7 +2,7 @@ Thanks for downloading migasfree client.
 
 To install it, make sure you have these programs installed:
 
-    * Python >= 3.3
+    * Python >= 3.6
     * python3-requests & python3-requests-toolbelt
     * python3-jose
     * python3-crypto
@@ -11,6 +11,7 @@ To install it, make sure you have these programs installed:
     * python3-netifaces
     * python3-stdeb (to create a DEB package)
     * python3-cups
+    * python3-rich
 
 Then run these commands from the command prompt:
 
