@@ -407,7 +407,7 @@ class MigasFreeSync(MigasFreeCommand):
             server = '{}/{}'.format(self.migas_package_proxy_cache, server)
 
         ret = self.pms.create_repos(
-            self.api_protocol(),
+            self.migas_protocol,
             server,
             repos
         )
