@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -177,7 +177,7 @@ class UrlRequest(object):
         try:
             r = requests.post(
                 url, data=data, headers=headers,
-                proxies=proxies, verify=self._cert
+                proxies=proxies
             )
         except requests.exceptions.ConnectionError as e:
             logger.error(str(e))
