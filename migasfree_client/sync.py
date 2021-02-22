@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -172,22 +172,23 @@ class MigasFreeSync(MigasFreeCommand):
 
         # properties converted in attributes
         self._show_message(_('Evaluating attributes...'))
-        for item in properties:
-            ret, response['sync_attributes'][item['prefix']], error = \
-                self._eval_code(item['prefix'], item['language'], item['code'])
-            info = '{}: {}'.format(
-                item['prefix'],
-                response['sync_attributes'][item['prefix']]
-            )
-            if ret == 0 and response['sync_attributes'][item['prefix']].strip() != '':
-                self.operation_ok(info)
-            else:
-                if error:
-                    info = '{}: {}'.format(item['prefix'], error)
-                self.operation_failed(info)
-                self._write_error(
-                    _('Error: property %s without value') % item['prefix']
+        with self.console.status(''):
+            for item in properties:
+                ret, response['sync_attributes'][item['prefix']], error = \
+                    self._eval_code(item['prefix'], item['language'], item['code'])
+                info = '{}: {}'.format(
+                    item['prefix'],
+                    response['sync_attributes'][item['prefix']]
                 )
+                if ret == 0 and response['sync_attributes'][item['prefix']].strip() != '':
+                    self.operation_ok(info)
+                else:
+                    if error:
+                        info = '{}: {}'.format(item['prefix'], error)
+                    self.operation_failed(info)
+                    self._write_error(
+                        _('Error: property %s without value') % item['prefix']
+                    )
 
         return response
 
@@ -198,18 +199,19 @@ class MigasFreeSync(MigasFreeCommand):
         }
 
         self._show_message(_('Executing faults...'))
-        for item in fault_definitions:
-            ret, result, error = self._eval_code(item['name'], item['language'], item['code'])
-            info = '{}: {}'.format(item['name'], result)
-            if ret == 0:
-                if result:
-                    # only send faults with output!!!
-                    response['faults'][item['name']] = result
-                    self.operation_failed(info)
+        with self.console.status(''):
+            for item in fault_definitions:
+                ret, result, error = self._eval_code(item['name'], item['language'], item['code'])
+                info = '{}: {}'.format(item['name'], result)
+                if ret == 0:
+                    if result:
+                        # only send faults with output!!!
+                        response['faults'][item['name']] = result
+                        self.operation_failed(info)
+                    else:
+                        self.operation_ok(info)
                 else:
-                    self.operation_ok(info)
-            else:
-                self.operation_failed('{}: {}'.format(item['name'], error))
+                    self.operation_failed('{}: {}'.format(item['name'], error))
 
         return response
 
@@ -218,14 +220,15 @@ class MigasFreeSync(MigasFreeCommand):
             self.get_computer_id()
 
         self._show_message(_('Getting properties...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_properties']),
-            data={
-                'id': self._computer_id
-            },
-            debug=self._debug
-        )
-        logger.debug('Response get_properties_id: %s', response)
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_properties']),
+                data={
+                    'id': self._computer_id
+                },
+                debug=self._debug
+            )
+            logger.debug('Response get_properties_id: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -240,14 +243,15 @@ class MigasFreeSync(MigasFreeCommand):
             self.get_computer_id()
 
         self._show_message(_('Getting fault definitions...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_fault_definitions']),
-            data={
-                'id': self._computer_id
-            },
-            debug=self._debug
-        )
-        logger.debug('Response get_fault_definitions: %s', response)
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_fault_definitions']),
+                data={
+                    'id': self._computer_id
+                },
+                debug=self._debug
+            )
+            logger.debug('Response get_fault_definitions: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -262,15 +266,16 @@ class MigasFreeSync(MigasFreeCommand):
             self.get_computer_id()
 
         self._show_message(_('Getting repositories...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_repositories']),
-            data={
-                'id': self._computer_id
-            },
-            exit_on_error=False,
-            debug=self._debug
-        )
-        logger.debug('Response get_repositories: %s', response)
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_repositories']),
+                data={
+                    'id': self._computer_id
+                },
+                exit_on_error=False,
+                debug=self._debug
+            )
+            logger.debug('Response get_repositories: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -285,15 +290,16 @@ class MigasFreeSync(MigasFreeCommand):
             self.get_computer_id()
 
         self._show_message(_('Getting mandatory packages...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_mandatory_packages']),
-            data={
-                'id': self._computer_id
-            },
-            exit_on_error=False,
-            debug=self._debug
-        )
-        logger.debug('Response get_mandatory_packages: %s', response)
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_mandatory_packages']),
+                data={
+                    'id': self._computer_id
+                },
+                exit_on_error=False,
+                debug=self._debug
+            )
+            logger.debug('Response get_mandatory_packages: %s', response)
 
         if 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
@@ -312,15 +318,17 @@ class MigasFreeSync(MigasFreeCommand):
             self.get_computer_id()
 
         self._show_message(_('Getting devices...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_devices']),
-            data={
-                'id': self._computer_id
-            },
-            exit_on_error=False,
-            debug=self._debug
-        )
-        logger.debug('Response get_devices: %s', response)
+
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_devices']),
+                data={
+                    'id': self._computer_id
+                },
+                exit_on_error=False,
+                debug=self._debug
+            )
+            logger.debug('Response get_devices: %s', response)
 
         """
         response: {
@@ -373,15 +381,17 @@ class MigasFreeSync(MigasFreeCommand):
         if os.path.isfile(self.ERROR_FILE) \
                 and os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Uploading old errors...'))
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['upload_errors']),
-                data={
-                    'id': self._computer_id,
-                    'description': utils.read_file(self.ERROR_FILE, 'r')
-                },
-                debug=self._debug
-            )
-            logger.debug('Response upload_old_errors: %s', response)
+            with self.console.status(''):
+                response = self._url_request.run(
+                    url=self.api_endpoint(self.URLS['upload_errors']),
+                    data={
+                        'id': self._computer_id,
+                        'description': utils.read_file(self.ERROR_FILE, 'r')
+                    },
+                    debug=self._debug
+                )
+                logger.debug('Response upload_old_errors: %s', response)
+
             self.operation_ok()
             os.remove(self.ERROR_FILE)
 
@@ -416,7 +426,8 @@ class MigasFreeSync(MigasFreeCommand):
         clean cache of Package Management System
         """
         self._show_message(_('Getting repositories metadata...'))
-        ret = self.pms.clean_all()
+        with self.console.status(''):
+            ret = self.pms.clean_all()
 
         if ret:
             self.operation_ok()
@@ -428,7 +439,9 @@ class MigasFreeSync(MigasFreeCommand):
 
     def uninstall_packages(self, packages):
         self._show_message(_('Uninstalling packages...'))
-        ret, error = self.pms.remove_silent(packages)
+        with self.console.status(''):
+            ret, error = self.pms.remove_silent(packages)
+
         if ret:
             self.operation_ok()
         else:
@@ -440,7 +453,9 @@ class MigasFreeSync(MigasFreeCommand):
 
     def install_mandatory_packages(self, packages):
         self._show_message(_('Installing mandatory packages...'))
-        ret, error = self.pms.install_silent(packages)
+        with self.console.status(''):
+            ret, error = self.pms.install_silent(packages)
+
         if ret:
             self.operation_ok()
         else:
@@ -454,7 +469,9 @@ class MigasFreeSync(MigasFreeCommand):
 
     def _update_packages(self):
         self._show_message(_('Updating packages...'))
-        ret, error = self.pms.update_silent()
+        with self.console.status(''):
+            ret, error = self.pms.update_silent()
+
         if ret:
             self.operation_ok()
         else:
@@ -470,15 +487,16 @@ class MigasFreeSync(MigasFreeCommand):
         if not self._computer_id:
             self.get_computer_id()
 
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_hardware_required']),
-            data={
-                'id': self._computer_id,
-            },
-            exit_on_error=False,
-            debug=self._debug
-        )
-        logger.debug('Response hardware_capture_is_required: %s', response)
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_hardware_required']),
+                data={
+                    'id': self._computer_id,
+                },
+                exit_on_error=False,
+                debug=self._debug
+            )
+            logger.debug('Response hardware_capture_is_required: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -494,7 +512,9 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._show_message(_('Capturing hardware information...'))
         cmd = 'LC_ALL=C lshw -json'
-        ret, output, error = utils.execute(cmd, interactive=False)
+        with self.console.status(''):
+            ret, output, error = utils.execute(cmd, interactive=False)
+
         if ret == 0:
             self.operation_ok()
         else:
@@ -543,14 +563,15 @@ class MigasFreeSync(MigasFreeCommand):
 
         if os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Sending errors to server...'))
-            self._url_request.run(
-                url=self.api_endpoint(self.URLS['upload_errors']),
-                data={
-                    'id': self._computer_id,
-                    'description': utils.read_file(self.ERROR_FILE, 'r')
-                },
-                debug=self._debug
-            )
+            with self.console.status(''):
+                self._url_request.run(
+                    url=self.api_endpoint(self.URLS['upload_errors']),
+                    data={
+                        'id': self._computer_id,
+                        'description': utils.read_file(self.ERROR_FILE, 'r')
+                    },
+                    debug=self._debug
+                )
             self.operation_ok()
 
             if not self._debug:
@@ -563,11 +584,13 @@ class MigasFreeSync(MigasFreeCommand):
         logger.debug('Attributes to send: %s', attributes)
 
         self._show_message(_('Uploading attributes...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['upload_attributes']),
-            data=attributes,
-            debug=self._debug
-        )
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['upload_attributes']),
+                data=attributes,
+                debug=self._debug
+            )
+
         self.operation_ok()
         logger.debug('Response upload_attributes: %s', response)
 
@@ -580,11 +603,13 @@ class MigasFreeSync(MigasFreeCommand):
             logger.debug('Faults to send: %s', data)
 
             self._show_message(_('Uploading faults...'))
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['upload_faults']),
-                data=data,
-                debug=self._debug
-            )
+            with self.console.status(''):
+                response = self._url_request.run(
+                    url=self.api_endpoint(self.URLS['upload_faults']),
+                    data=data,
+                    debug=self._debug
+                )
+
             self.operation_ok()
             logger.debug('Response upload_faults: %s', response)
 
@@ -629,16 +654,17 @@ class MigasFreeSync(MigasFreeCommand):
             print(_('Software diff: %s') % history)
 
         self._show_message(_('Uploading software...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['upload_software']),
-            data={
-                'id': self._computer_id,
-                'inventory': after,
-                'history': history
-            },
-            debug=self._debug
-        )
-        logger.debug('Response upload_software: %s', response)
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['upload_software']),
+                data={
+                    'id': self._computer_id,
+                    'inventory': after,
+                    'history': history
+                },
+                debug=self._debug
+            )
+            logger.debug('Response upload_software: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -653,16 +679,18 @@ class MigasFreeSync(MigasFreeCommand):
             consumer = self.CMD
 
         self._show_message(_('Ending synchronization...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['upload_sync']),
-            data={
-                'id': self._computer_id,
-                'start_date': start_date,
-                'consumer': '{} {}'.format(consumer, utils.get_mfc_release()),
-                'pms_status_ok': self._pms_status_ok
-            },
-            debug=self._debug
-        )
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['upload_sync']),
+                data={
+                    'id': self._computer_id,
+                    'start_date': start_date,
+                    'consumer': '{} {}'.format(consumer, utils.get_mfc_release()),
+                    'pms_status_ok': self._pms_status_ok
+                },
+                debug=self._debug
+            )
+
         self.operation_ok()
         logger.debug('Response upload_sync: %s', response)
 
