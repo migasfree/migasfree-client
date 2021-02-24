@@ -185,10 +185,10 @@ class MigasFreeSync(MigasFreeCommand):
                 else:
                     if error:
                         info = '{}: {}'.format(item['prefix'], error)
-                    self.operation_failed(info)
-                    self._write_error(
-                        _('Error: property %s without value') % item['prefix']
-                    )
+                        self.operation_failed(info)
+                        self._write_error(
+                            _('Error: property %s without value') % item['prefix']
+                        )
 
         return response
 
