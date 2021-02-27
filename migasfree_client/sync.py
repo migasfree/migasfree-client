@@ -426,8 +426,7 @@ class MigasFreeSync(MigasFreeCommand):
         clean cache of Package Management System
         """
         self._show_message(_('Getting repositories metadata...'))
-        with self.console.status(''):
-            ret = self.pms.clean_all()
+        ret = self.pms.clean_all()
 
         if ret:
             self.operation_ok()
@@ -439,8 +438,7 @@ class MigasFreeSync(MigasFreeCommand):
 
     def uninstall_packages(self, packages):
         self._show_message(_('Uninstalling packages...'))
-        with self.console.status(''):
-            ret, error = self.pms.remove_silent(packages)
+        ret, error = self.pms.remove_silent(packages)
 
         if ret:
             self.operation_ok()
@@ -453,8 +451,7 @@ class MigasFreeSync(MigasFreeCommand):
 
     def install_mandatory_packages(self, packages):
         self._show_message(_('Installing mandatory packages...'))
-        with self.console.status(''):
-            ret, error = self.pms.install_silent(packages)
+        ret, error = self.pms.install_silent(packages)
 
         if ret:
             self.operation_ok()
@@ -469,8 +466,7 @@ class MigasFreeSync(MigasFreeCommand):
 
     def _update_packages(self):
         self._show_message(_('Updating packages...'))
-        with self.console.status(''):
-            ret, error = self.pms.update_silent()
+        ret, error = self.pms.update_silent()
 
         if ret:
             self.operation_ok()
@@ -651,7 +647,8 @@ class MigasFreeSync(MigasFreeCommand):
                 else:
                     history['uninstalled'] = data['uninstalled']
 
-            print(_('Software diff: %s') % history)
+            self._show_message(_('Software diff'))
+            self.console.print(history)
 
         self._show_message(_('Uploading software...'))
         with self.console.status(''):
