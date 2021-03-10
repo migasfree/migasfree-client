@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import gettext
 
 from .settings import LOCALE_PATH
 
-__version__ = "4.19"
+__version__ = "4.20"
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __contact__ = "fun.with@migasfree.org"
