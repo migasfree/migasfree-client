@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -277,10 +277,10 @@ class MigasFreeClient(MigasFreeCommand):
             else:
                 if _error:
                     _info = '{0}: {1}'.format(_item['name'], _error)
-                self.operation_failed(_info)
-                self._write_error(
-                    'Error: property %s without value\n' % _item['name']
-                )
+                    self.operation_failed(_info)
+                    self._write_error(
+                        'Error: property %s without value\n' % _item['name']
+                    )
 
         return _response
 
@@ -381,11 +381,17 @@ class MigasFreeClient(MigasFreeCommand):
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
     def _get_server_version(self):
+        _url = '{0}/{1}'.format(
+            self.migas_server,
+            'api/v1/public/server/info/'
+        )
+        if self.migas_ssl_cert:
+            _url = '{0}://{1}'.format('https', _url)
+        else:
+            _url = '{0}://{1}'.format('http', _url)
+
         _curl = curl.Curl(
-            '{0}/{1}'.format(
-                self.migas_server,
-                'api/v1/public/server/info/'
-            ),
+            _url,
             proxy=self.migas_proxy,
             cert=self.migas_ssl_cert,
             post=[('post', 'post'), ]  # dummy data
