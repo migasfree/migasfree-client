@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -347,11 +347,17 @@ class MigasFreeCommand(object):
         return self._save_repos_key()
 
     def _save_repos_key(self):
+        _url = '{0}/{1}'.format(
+            self.migas_server,
+            self.get_key_repositories_command
+        )
+        if self.migas_ssl_cert:
+            _url = '{0}://{1}'.format('https', _url)
+        else:
+            _url = '{0}://{1}'.format('http', _url)
+
         _curl = curl.Curl(
-            '{0}/{1}'.format(
-                self.migas_server,
-                self.get_key_repositories_command
-            ),
+            _url,
             proxy=self.migas_proxy,
             cert=self.migas_ssl_cert,
         )
