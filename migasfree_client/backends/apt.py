@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -185,6 +185,7 @@ class Apt(Pms):
     def query_all(self):
         """
         ordered list query_all(void)
+        list format: name_version_architecture.extension
         """
 
         _, _packages, _ = execute(
@@ -199,7 +200,7 @@ class Apt(Pms):
         for _line in _packages:
             if _line.startswith('ii'):
                 _tmp = re.split(' +', _line)
-                _result.append('{0}-{1}'.format(_tmp[1], _tmp[2]))
+                _result.append('{0}_{1}_{2}.deb'.format(_tmp[1], _tmp[2], _tmp[3]))
 
         return _result
 

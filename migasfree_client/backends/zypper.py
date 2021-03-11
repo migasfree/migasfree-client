@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -180,9 +180,10 @@ class Zypper(Pms):
     def query_all(self):
         """
         ordered list query_all(void)
+        list format: name_version_architecture.extension
         """
 
-        self._cmd = '{0} -qa'.format(self._pm)
+        self._cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
         logging.debug(self._cmd)
         _ret, _output, _ = execute(self._cmd, interactive=False)
         if _ret != 0:
