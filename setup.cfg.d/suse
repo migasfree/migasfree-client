@@ -17,6 +17,7 @@ requires = python3 >= 3.6
            python3-requests-toolbelt
            python3-cryptography >= 1.7
            python3-netifaces
+           python3-distro
            python3-rich
            dialog
            openssl
