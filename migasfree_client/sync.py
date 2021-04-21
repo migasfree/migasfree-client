@@ -249,13 +249,18 @@ class MigasFreeSync(MigasFreeCommand):
                 data={
                     'id': self._computer_id
                 },
-                debug=self._debug
+                debug=self._debug,
+                exit_on_error=False
             )
             logger.debug('Response get_fault_definitions: %s', response)
 
         if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
+            if response['error']['code'] == requests.codes.not_found:
+                self.operation_ok()
+                return ''
+            else:
+                self.operation_failed(response['error']['info'])
+                sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
@@ -278,8 +283,12 @@ class MigasFreeSync(MigasFreeCommand):
             logger.debug('Response get_repositories: %s', response)
 
         if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            return []
+            if response['error']['code'] == requests.codes.not_found:
+                self.operation_ok()
+                return []
+            else:
+                self.operation_failed(response['error']['info'])
+                sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
@@ -399,6 +408,8 @@ class MigasFreeSync(MigasFreeCommand):
 
     def create_repositories(self):
         repos = self.get_repositories()
+        if not repos:
+            return
 
         self._show_message(_('Creating repositories...'))
 
