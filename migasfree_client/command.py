@@ -226,7 +226,7 @@ class MigasFreeCommand(object):
 
     def _ssl_cert(self):
         self.migas_ssl_cert = False
-        if self.migas_protocol == "https":
+        if self.migas_protocol == 'https':
             port = self.migas_port if self.migas_port else 443
 
             if os.path.isfile(settings.CERT_FILE):
@@ -261,6 +261,9 @@ class MigasFreeCommand(object):
             },
             cert=self.migas_ssl_cert
         )
+
+    def api_protocol(self):
+        return self.migas_protocol
 
     def api_endpoint(self, path):
         return urljoin(self._url_base, path)
