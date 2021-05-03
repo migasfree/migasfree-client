@@ -150,7 +150,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         return selected_tags
 
-    def _get_assigned_tags(self):
+    def get_assigned_tags(self):
         if not self._computer_id:
             self.get_computer_id()
 
@@ -163,7 +163,7 @@ class MigasFreeTags(MigasFreeCommand):
             debug=self._debug
         )
 
-        logger.debug('Response _get_assigned_tags: %s', response)
+        logger.debug('Response get_assigned_tags: %s', response)
         if self._debug:
             self.console.log('Response: %s' % response)
 
@@ -171,13 +171,9 @@ class MigasFreeTags(MigasFreeCommand):
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
-        if not response:
-            self.operation_failed(_('There are not assigned tags'))
-            sys.exit(errno.ENODATA)
-
         return response
 
-    def _get_available_tags(self):
+    def get_available_tags(self):
         if not self._check_sign_keys():
             sys.exit(errno.EPERM)
 
@@ -194,25 +190,24 @@ class MigasFreeTags(MigasFreeCommand):
             debug=self._debug
         )
 
-        logger.debug('Response _get_available_tags: %s', response)
+        logger.debug('Response get_available_tags: %s', response)
+        if self._debug:
+            self.console.log('Response: %s' % response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
-        if self._debug:
-            self.console.log('Response: %s' % response)
-
         return response
 
-    def _set_tags(self):
+    def set_tags(self):
         if not self._check_sign_keys():
             sys.exit(errno.EPERM)
 
-        if not self._tags:
+        if len(self._tags) == 0 and self._quiet is False:
             self._tags = self._select_tags(
-                assigned=self._get_assigned_tags(),
-                available=self._get_available_tags(),
+                assigned=self.get_assigned_tags(),
+                available=self.get_available_tags(),
             )
 
         logger.debug('Setting tags: %s', self._tags)
@@ -226,13 +221,13 @@ class MigasFreeTags(MigasFreeCommand):
             debug=self._debug
         )
 
-        if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
         logger.debug('Setting tags response: %s', response)
         if self._debug:
             self.console.log('Response: %s' % response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
 
         print('')
         self.operation_ok(_('Tags setted: %s') % self._tags)
@@ -279,22 +274,23 @@ class MigasFreeTags(MigasFreeCommand):
         # actions dispatcher
         if args.get:
             response = {
-                'assigned': self._get_assigned_tags(),
-                'available': self._get_available_tags()
+                'assigned': self.get_assigned_tags(),
+                'available': self.get_available_tags()
             }
             print(json.dumps(response, ensure_ascii=False))
 
             self.end_of_transmission()
-        elif args.set or args.communicate:
-            if args.set != [] and args.set != [None]:
+        elif isinstance(args.set, list) or isinstance(args.communicate, list):
+            self._tags = []
+            if args.set is not None:
                 self._tags = self._sanitize(args.set)
-            elif args.communicate != [] and args.communicate != [None]:
+            elif args.communicate is not None:
                 self._tags = self._sanitize(args.communicate)
 
             if not self._quiet:
                 self._show_running_options()
 
-            rules = self._set_tags()
+            rules = self.set_tags()
             if args.set:
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
                 self._apply_rules(rules)
