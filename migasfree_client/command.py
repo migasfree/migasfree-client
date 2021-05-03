@@ -72,6 +72,7 @@ class MigasFreeCommand(object):
         'get_computer_id': '/api/v1/safe/computers/id/',
         'upload_computer': '/api/v1/safe/computers/',
         'upload_eot': '/api/v1/safe/eot/',
+
         # sync API
         'get_properties': '/api/v1/safe/computers/properties/',
         'get_fault_definitions': '/api/v1/safe/computers/faults/definitions/',
@@ -86,12 +87,15 @@ class MigasFreeCommand(object):
         'upload_software': '/api/v1/safe/computers/software/',
         'upload_devices_changes': '/api/v1/safe/computers/devices/changes/',
         'upload_sync': '/api/v1/safe/synchronizations/',
+
         # label API
         'get_label': '/api/v1/safe/computers/label/',
+
         # tags API
         'get_assigned_tags': '/api/v1/safe/computers/tags/assigned/',
         'get_available_tags': '/api/v1/safe/computers/tags/available/',
         'upload_tags': '/api/v1/safe/computers/tags/',
+
         # upload API
         'get_packager_keys': '/api/v1/public/keys/packager/',
         'upload_package': '/api/v1/safe/packages/',
@@ -118,7 +122,8 @@ class MigasFreeCommand(object):
 
     pms = None
 
-    console = Console(stderr=True, log_path=False)
+    console = Console(log_path=False)
+    error_console = Console(stderr=True, log_path=False, style='red')
 
     auto_register_user = ''
     auto_register_password = ''
@@ -613,9 +618,9 @@ class MigasFreeCommand(object):
         self.console.log(msg, style='green')
 
     def operation_failed(self, info=''):
-        self.console.rule(_('Failed'), style='red')
+        self.error_console.rule(_('Failed'))
         if info:
-            self.console.log(info, style='red')
+            self.error_console.log(info)
 
     def run(self, args=None):
         raise NotImplementedError
