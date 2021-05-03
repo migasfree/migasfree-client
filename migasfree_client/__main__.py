@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2016-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -123,17 +123,13 @@ def parse_args(argv):
     )
     group_tags.add_argument(
         '-s', '--set',
-        nargs='?',
-        action='append',
-        default=[],
+        nargs='*',
         metavar='TAG',
         help=_('Set tags in server')
     )
     group_tags.add_argument(
         '-c', '--communicate',
-        nargs='?',
-        action='append',
-        default=[],
+        nargs='*',
         metavar='TAG',
         help=_('Communicate tags to server')
     )
