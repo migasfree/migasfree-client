@@ -3,7 +3,7 @@ prefix=/usr
 
 [bdist_rpm]
 release = 1
-doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README TODO migasfree-client.doap
+doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README.md migasfree-client.doap
 install-script = scripts/rpm-install.sh
 post-install = scripts/rpm-post-install.sh
 post-uninstall = scripts/rpm-post-uninstall.sh
