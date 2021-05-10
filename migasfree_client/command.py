@@ -39,7 +39,7 @@ from . import (
     network,
     url_request,
 )
-from .pms import Pms
+from .pms import Pms, get_available_pms
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -584,17 +584,11 @@ class MigasFreeCommand(object):
 
     @staticmethod
     def _search_pms():
-        pms_list = {
-            'apt-get': 'Apt',
-            'yum': 'Yum',
-            'zypper': 'Zypper',
-        }
-
-        for item in pms_list:
-            cmd = 'which {}'.format(item)
+        for item in get_available_pms():
+            cmd = 'command -v {}'.format(item[0])
             ret, _, _ = utils.execute(cmd, interactive=False)
             if ret == 0:
-                return pms_list[item]
+                return item[1]
 
         return None  # if not found
 
