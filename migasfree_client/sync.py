@@ -408,8 +408,6 @@ class MigasFreeSync(MigasFreeCommand):
 
     def create_repositories(self):
         repos = self.get_repositories()
-        if not repos:
-            return
 
         self._show_message(_('Creating repositories...'))
 
