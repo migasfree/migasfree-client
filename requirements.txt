@@ -1,5 +1,5 @@
 netifaces>=0.8
-# jwcrypto>=0.5.0
+jwcrypto>=0.5.0
 requests>=2.4.3
 requests-toolbelt>=0.5.0
 rich>=9.5
