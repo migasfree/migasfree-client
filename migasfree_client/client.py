@@ -136,7 +136,7 @@ class MigasFreeClient(MigasFreeCommand):
 
     def _write_error(self, msg, append=False):
         if append:
-            _mode = 'a'
+            _mode = 'ab'
         else:
             _mode = 'wb'
 
