@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -141,7 +141,7 @@ class MigasFreeTags(MigasFreeCommand):
         logging.debug('Change tags command: %s' % _cmd)
         _ret, _out, _err = utils.execute(_cmd, interactive=False)
         if _ret == 0:
-            _selected_tags = filter(None, _out.split("\n"))
+            _selected_tags = list(filter(None, _out.split("\n")))
             logging.debug('Selected tags: %s' % _selected_tags)
         else:
             # no action chosen -> no change tags
