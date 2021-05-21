@@ -10,13 +10,11 @@ function get_python
 function create_package
 {
     local _PYTHON_BUILD
-    local _STDEB
 
     if [ -f stdeb.cfg ]
     then
         _PYTHON_BUILD=$(get_python stdeb.cfg)
-        _STDEB=$(grep -q 3 <<< "$_PYTHON_BUILD" && echo "stdeb3.command" || echo "stdeb.command")
-        $_PYTHON_BUILD setup.py --command-packages=${_STDEB} bdist_deb
+        $_PYTHON_BUILD setup.py --command-packages=stdeb.command bdist_deb
     else
         _PYTHON_BUILD=$(get_python setup.cfg)
         $_PYTHON_BUILD setup.py bdist_rpm
