@@ -141,7 +141,7 @@ class MigasFreeTags(MigasFreeCommand):
         logger.debug('Change tags command: %s' % cmd)
         ret, out, error = utils.execute(cmd, interactive=False)
         if ret == 0:
-            selected_tags = filter(None, out.split("\n"))
+            selected_tags = list(filter(None, out.split("\n")))
             logger.debug('Selected tags: %s' % selected_tags)
         else:
             # no action chosen -> no change tags
