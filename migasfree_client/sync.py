@@ -135,7 +135,7 @@ class MigasFreeSync(MigasFreeCommand):
         ]
 
         if lang in allowed_languages:
-            if lang == 'python':
+            if lang == 'python' and utils.is_linux():
                 lang = 'python3'
             cmd = '{} {}'.format(lang, filename)
         else:
