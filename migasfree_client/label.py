@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 from . import settings, utils
 
 from .command import MigasFreeCommand
+from .utils import ALL_OK
 
 HTML_TEMPLATE = """<!doctype html>
 <html>
@@ -131,4 +132,4 @@ class MigasFreeLabel(MigasFreeCommand):
         self._show_label()
         self.end_of_transmission()
 
-        sys.exit(os.EX_OK)
+        sys.exit(ALL_OK)
