@@ -66,8 +66,9 @@ class MigasFreeSync(MigasFreeCommand):
         self._user_is_not_root()
 
         signal.signal(signal.SIGINT, self._exit_gracefully)
-        signal.signal(signal.SIGQUIT, self._exit_gracefully)
         signal.signal(signal.SIGTERM, self._exit_gracefully)
+        if utils.is_linux():
+            signal.signal(signal.SIGQUIT, self._exit_gracefully)
 
         MigasFreeCommand.__init__(self)
         self._init_environment()
@@ -886,7 +887,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         if not args or not hasattr(args, 'cmd'):
             self._usage_examples()
-            sys.exit(os.EX_OK)
+            sys.exit(utils.ALL_OK)
 
         if hasattr(args, 'debug') and args.debug:
             self._debug = True
@@ -915,4 +916,4 @@ class MigasFreeSync(MigasFreeCommand):
             self._remove_package(' '.join(args.pkg_purge))
             utils.remove_file(self.LOCK_FILE)
 
-        sys.exit(os.EX_OK)
+        sys.exit(utils.ALL_OK)
