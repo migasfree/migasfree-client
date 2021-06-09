@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,28 +20,32 @@ import sys
 import subprocess
 import time
 import difflib
-import pwd
 import platform
 import errno
 import re
-import fcntl
 import select
 import uuid
 import signal
 import magic
 import hashlib
 import configparser
-import distro
+
+try:
+    import pwd
+except ImportError:
+    from . import winpwd as pwd
 
 import gettext
 _ = gettext.gettext
 
-from . import settings, network
+from . import settings
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 # TODO http://docs.python.org/library/unittest.html
+
+ALL_OK = 0 if sys.platform == 'win32' else os.EX_OK
 
 
 def slugify(s):
@@ -62,6 +66,24 @@ def slugify(s):
     s = s.replace(' ', '-')
 
     return s
+
+
+def is_windows():
+    return sys.platform == 'win32'
+
+
+def is_linux():
+    return sys.platform != 'win32'  # FIXME
+
+
+def sanitize_path(value):
+    if is_windows():
+        return value.replace('\\', '_').replace('/', '_').replace(
+            ':', '_').replace('?', '_').replace('"', '_').replace(
+            '|', '_'
+        )
+
+    return value
 
 
 def get_config(ini_file, section):
@@ -106,29 +128,46 @@ def execute(cmd, verbose=False, interactive=True):
         print(cmd)
 
     if interactive:
-        _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable='/bin/bash'
-        )
+        if is_windows():
+            _process = subprocess.Popen(
+                cmd,
+                shell=True,
+            )
+        else:
+            _process = subprocess.Popen(
+                cmd,
+                shell=True,
+                executable='/bin/bash'
+            )
     else:
-        _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable='/bin/bash',
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE
-        )
+        if is_windows():
+            _process = subprocess.Popen(
+                cmd,
+                shell=True,
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE
+            )
+        else:
+            _process = subprocess.Popen(
+                cmd,
+                shell=True,
+                executable='/bin/bash',
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE
+            )
 
         if verbose:
-            fcntl.fcntl(
-                _process.stdout.fileno(),
-                fcntl.F_SETFL,
+            if not is_windows():
+                import fcntl
+
                 fcntl.fcntl(
                     _process.stdout.fileno(),
-                    fcntl.F_GETFL
-                ) | os.O_NONBLOCK,
-            )
+                    fcntl.F_SETFL,
+                    fcntl.fcntl(
+                        _process.stdout.fileno(),
+                        fcntl.F_GETFL
+                    ) | os.O_NONBLOCK,
+                )
 
             while _process.poll() is None:
                 readx = select.select([_process.stdout.fileno()], [], [])[0]
@@ -146,9 +185,15 @@ def execute(cmd, verbose=False, interactive=True):
         _output = _output_buffer
 
     if isinstance(_output, bytes) and not isinstance(_output, str):
-        _output = str(_output, encoding='utf8')
+        try:
+            _output = str(_output, encoding='utf8')
+        except UnicodeDecodeError:
+            _output = str(_output)
     if isinstance(_error, bytes) and not isinstance(_error, str):
-        _error = str(_error, encoding='utf8')
+        try:
+            _error = str(_error, encoding='utf8')
+        except UnicodeDecodeError:
+            _error = str(_error)
 
     return _process.returncode, _output, _error
 
@@ -156,13 +201,22 @@ def execute(cmd, verbose=False, interactive=True):
 def timeout_execute(cmd, timeout=60):
     # based in http://amix.dk/blog/post/19408
 
-    _process = subprocess.Popen(
-        cmd,
-        shell=True,
-        executable='/bin/bash',
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+    if is_linux():
+        _process = subprocess.Popen(
+            cmd,
+            shell=True,
+            executable='/bin/bash',
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+    else:
+        _process = subprocess.Popen(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
     if timeout > 0:
         _seconds_elapsed = 0
         _interval = 0.2
@@ -178,9 +232,15 @@ def timeout_execute(cmd, timeout=60):
     _output, _error = _process.communicate()
 
     if isinstance(_output, bytes) and not isinstance(_output, str):
-        _output = str(_output, encoding='utf8')
+        try:
+            _output = str(_output, encoding='utf8')
+        except UnicodeDecodeError:
+            _output = str(_output)
     if isinstance(_error, bytes) and not isinstance(_error, str):
-        _error = str(_error, encoding='utf8')
+        try:
+            _error = str(_error, encoding='utf8')
+        except UnicodeDecodeError:
+            _error = str(_error)
 
     return _process.returncode, _output, _error
 
@@ -222,6 +282,11 @@ def get_graphic_user(pid=0):
     string get_graphic_user(int pid=0)
     """
 
+    if is_windows():
+        import getpass
+
+        return getpass.getuser()
+
     if not pid:
         pid = get_graphic_pid()[0]
         if not pid:
@@ -259,6 +324,9 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
         int interval=1
     )
     """
+
+    if is_windows():
+        return ''
 
     _display = []
     while not _display and timeout > 0:
@@ -321,7 +389,7 @@ def get_user_info(user):
 
     try:
         _info = pwd.getpwnam(user)
-    except KeyError:
+    except (KeyError, TypeError):
         try:
             _info = pwd.getpwuid(int(user))
         except KeyError:
@@ -420,6 +488,19 @@ def query_yes_no(question, default="yes"):
             print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
 
 
+def process_is_active(pid):
+    if is_linux():
+        return os.getsid(pid)
+
+    import psutil
+
+    for proc in psutil.process_iter():
+        if proc.pid == pid:
+            return True
+
+    return False
+
+
 def check_lock_file(cmd, lock_file):
     if os.path.isfile(lock_file):
         _file = None
@@ -439,7 +520,7 @@ def check_lock_file(cmd, lock_file):
             _pid = int(_pid)
 
         try:
-            if os.getsid(_pid):
+            if process_is_active(_pid):
                 print(_('Another instance of %(cmd)s is running: %(pid)d') % {
                     'cmd': cmd,
                     'pid': int(_pid)
@@ -473,11 +554,25 @@ def get_current_user():
 
 
 def get_distro_project():
-    return slugify('{}-{}'.format(distro.name(), distro.version()))
+    if is_windows():
+        import platform
+
+        return slugify('{}-{}'.format(platform.system(), platform.version()))
+    else:
+        import distro
+
+        return slugify('{}-{}'.format(distro.name(), distro.version()))
 
 
 def get_distro_name():
-    return slugify(distro.name().strip().split()[0])
+    if is_windows():
+        import platform
+
+        return slugify(platform.system())
+    else:
+        import distro
+
+        return slugify(distro.name().strip().split()[0])
 
 
 def get_mfc_project():
@@ -509,6 +604,8 @@ def get_smbios_version():
 
 
 def get_uuid_from_mac():
+    from . import network
+
     return '00000000-0000-0000-0000-{}'.format(network.get_first_mac())
 
 
