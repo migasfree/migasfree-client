@@ -29,8 +29,9 @@ logger = logging.getLogger(__name__)
 
 from . import settings, utils
 
-from .sync import MigasFreeSync
 from .command import MigasFreeCommand
+from .sync import MigasFreeSync
+from .utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -95,7 +96,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         if len(available) == 0:
             print(_('There is not available tags to select'))
-            sys.exit(os.EX_OK)
+            sys.exit(ALL_OK)
 
         available_tags = collections.OrderedDict(sorted(available.items()))
 
@@ -265,7 +266,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         if not args or not hasattr(args, 'cmd'):
             self._usage_examples()
-            sys.exit(os.EX_OK)
+            sys.exit(ALL_OK)
 
         if hasattr(args, 'debug') and args.debug:
             self._debug = True
@@ -298,4 +299,4 @@ class MigasFreeTags(MigasFreeCommand):
 
             self.end_of_transmission()
 
-        sys.exit(os.EX_OK)
+        sys.exit(ALL_OK)
