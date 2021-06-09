@@ -225,8 +225,13 @@ def timeout_execute(cmd, timeout=60):
             _seconds_elapsed += _interval
 
             if _seconds_elapsed > timeout:
-                os.kill(_process.pid, signal.SIGKILL)
-                os.waitpid(-1, os.WNOHANG)
+                if is_linux():
+                    os.kill(_process.pid, signal.SIGKILL)
+                    os.waitpid(-1, os.WNOHANG)
+                else:
+                    import psutil
+                    psutil.Process(_process.pid).kill()
+
                 return 1, '', _('"%s" command expired timeout') % cmd
 
     _output, _error = _process.communicate()
