@@ -25,7 +25,7 @@ import argparse
 import gettext
 _ = gettext.gettext
 
-from .utils import get_mfc_release
+from .utils import get_mfc_release, ALL_OK
 
 PROGRAM = 'migasfree'
 
@@ -185,7 +185,7 @@ def parse_args(argv):
 
     if len(argv) < 1:
         parser.print_help()
-        sys.exit(os.EX_OK)
+        sys.exit(ALL_OK)
 
     return parser.parse_args()
 
@@ -219,8 +219,8 @@ def main(argv=None):
         from .info import MigasFreeInfo
         MigasFreeInfo().run(args)
 
-    return os.EX_OK
+    return ALL_OK
 
 
 if __name__ == '__main__':
-    sys.exit(main() or os.EX_OK)
+    sys.exit(main() or ALL_OK)
