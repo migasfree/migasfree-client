@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 from rich.table import Table
 
 from .command import MigasFreeCommand
+from .utils import ALL_OK
 
 
 class MigasFreeInfo(MigasFreeCommand):
@@ -120,4 +121,4 @@ class MigasFreeInfo(MigasFreeCommand):
         self._show_info(key=args.key)
         self.end_of_transmission()
 
-        sys.exit(os.EX_OK)
+        sys.exit(ALL_OK)
