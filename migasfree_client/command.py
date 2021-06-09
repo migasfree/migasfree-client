@@ -20,7 +20,6 @@ import sys
 import errno
 import getpass
 import platform
-import pwd
 import requests
 import logging
 import time
@@ -33,13 +32,11 @@ from rich import print
 from rich.console import Console
 from urllib.parse import urljoin
 
-from . import (
-    settings,
-    utils,
-    network,
-    url_request,
-)
+from .network import get_network_info
 from .pms import Pms, get_available_pms
+from .url_request import UrlRequest
+
+from . import settings, utils
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -255,8 +252,11 @@ class MigasFreeCommand(object):
         )
 
     def _init_url_request(self):
-        keys_path = os.path.join(settings.KEYS_PATH, self.migas_server)
-        self._url_request = url_request.UrlRequest(
+        keys_path = os.path.join(
+            settings.KEYS_PATH,
+            utils.sanitize_path(self.migas_server)
+        )
+        self._url_request = UrlRequest(
             debug=self._debug,
             proxy=self.migas_proxy,
             project=self.migas_project,
@@ -309,7 +309,16 @@ class MigasFreeCommand(object):
 
     @staticmethod
     def _check_user_is_root():
-        return pwd.getpwuid(os.getuid()).pw_gid == 0
+        if utils.is_windows():
+            import ctypes
+
+            return ctypes.windll.shell32.IsUserAnAdmin() != 0
+        else:
+            user_info = utils.get_user_info(os.getuid())
+            if not isinstance(user_info, dict):
+                return False
+
+            return user_info.get('gid') == 0
 
     def _user_is_not_root(self):
         if not self._check_user_is_root():
@@ -319,14 +328,16 @@ class MigasFreeCommand(object):
             sys.exit(errno.EACCES)
 
     def _check_sign_keys(self, get_computer_id=True):
+        server = utils.sanitize_path(self.migas_server)
+        
         private_key = os.path.join(
-            settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
+            settings.KEYS_PATH, server, self.PRIVATE_KEY
         )
         public_key = os.path.join(
-            settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
+            settings.KEYS_PATH, server, self.PUBLIC_KEY
         )
         repos_key = os.path.join(
-            settings.KEYS_PATH, self.migas_server, self.REPOS_KEY
+            settings.KEYS_PATH, server, self.REPOS_KEY
         )
 
         if os.path.isfile(private_key) and \
@@ -372,7 +383,7 @@ class MigasFreeCommand(object):
 
         if not self._check_path(os.path.join(
                 os.path.abspath(settings.KEYS_PATH),
-                self.migas_server
+                utils.sanitize_path(self.migas_server)
         )):
             sys.exit(errno.ENOTDIR)
 
@@ -385,7 +396,9 @@ class MigasFreeCommand(object):
                 _file = self.PRIVATE_KEY
 
             path_file = os.path.join(
-                settings.KEYS_PATH, self.migas_server, _file
+                settings.KEYS_PATH,
+                utils.sanitize_path(self.migas_server),
+                _file
             )
             logger.debug('Trying writing file: %s', path_file)
 
@@ -411,7 +424,9 @@ class MigasFreeCommand(object):
         logger.debug('Response _save_repos_key: {}'.format(response))
 
         path = os.path.abspath(
-            os.path.join(settings.KEYS_PATH, self.migas_server)
+            os.path.join(
+                settings.KEYS_PATH, utils.sanitize_path(self.migas_server)
+            )
         )
         if not self._check_path(path):
             return False
@@ -585,7 +600,10 @@ class MigasFreeCommand(object):
     @staticmethod
     def _search_pms():
         for item in get_available_pms():
-            cmd = 'command -v {}'.format(item[0])
+            if utils.is_windows():
+                cmd = 'where /Q {}'.format(item[0])
+            else:
+                cmd = 'command -v {}'.format(item[0])
             ret, _, _ = utils.execute(cmd, interactive=False)
             if ret == 0:
                 return item[1]
