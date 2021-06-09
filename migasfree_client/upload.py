@@ -281,4 +281,4 @@ class MigasFreeUpload(MigasFreeCommand):
             self._upload_set()
         utils.remove_file(self.LOCK_FILE)
 
-        sys.exit(os.EX_OK)  # no error
+        sys.exit(utils.ALL_OK)  # no error
