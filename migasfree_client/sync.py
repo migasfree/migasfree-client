@@ -127,12 +127,15 @@ class MigasFreeSync(MigasFreeCommand):
         utils.write_file(filename, code)
 
         allowed_languages = [
-            'bash',
             'python',
             'perl',
             'php',
             'ruby'
         ]
+        if utils.is_linux():
+            allowed_languages.append('bash')
+        if utils.is_windows():
+            allowed_languages.extend(['cmd', 'powershell'])
 
         if lang in allowed_languages:
             if lang == 'python' and utils.is_linux():
