@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +38,10 @@ if hasattr(gettext, 'bind_textdomain_codeset'):
     gettext.bind_textdomain_codeset(domain, 'UTF-8')
 gettext.textdomain(domain)
 
-locale.bindtextdomain(domain, LOCALE_PATH)
-if hasattr(locale, 'bind_textdomain_codeset'):
-    locale.bind_textdomain_codeset(domain, 'UTF-8')
-locale.textdomain(domain)
+try:
+    locale.bindtextdomain(domain, LOCALE_PATH)
+    if hasattr(locale, 'bind_textdomain_codeset'):
+        locale.bind_textdomain_codeset(domain, 'UTF-8')
+    locale.textdomain(domain)
+except AttributeError:
+    pass
