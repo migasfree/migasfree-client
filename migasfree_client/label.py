@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 from . import settings, utils
 
 from .command import MigasFreeCommand
-from .utils import ALL_OK
+from .utils import ALL_OK, is_windows
 
 HTML_TEMPLATE = """<!doctype html>
 <html>
@@ -106,7 +106,10 @@ class MigasFreeLabel(MigasFreeCommand):
 
         info = self.get_label()
 
-        image = 'file://{}'.format(os.path.join(settings.ICON_PATH, self.ICON))
+        image_path = os.path.join(settings.ICON_PATH, self.ICON)
+        if is_windows():
+            image_path = image_path.replace('\\', '/')
+        image = 'file://{}'.format(image_path)
 
         html = HTML_TEMPLATE % {
             'search': info.get('search'),
@@ -119,7 +122,10 @@ class MigasFreeLabel(MigasFreeCommand):
         _file = os.path.join(settings.TMP_PATH, 'label.html')
         utils.write_file(_file, html)
 
-        utils.execute_as_user(['xdg-open', _file])
+        if utils.is_linux():
+            utils.execute_as_user(['xdg-open', _file])
+        else:
+            utils.execute_as_user(['cmd', '/c', 'start', _file])
 
     def run(self, args=None):
         if hasattr(args, 'debug') and args.debug:
