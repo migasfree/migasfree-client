@@ -909,7 +909,7 @@ class MigasFreeSync(MigasFreeCommand):
         elif args.cmd == 'register':
             self._register_computer(args.user)
         elif args.cmd == 'search':
-            self._search(args.pattern)
+            self._search(' '.join(args.pattern))
         elif args.cmd == 'install':
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self._install_package(' '.join(args.pkg_install))
