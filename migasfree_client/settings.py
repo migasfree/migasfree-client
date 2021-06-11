@@ -21,21 +21,27 @@ __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 if os.environ.get('WINDIR'):
+    import sysconfig
+
     windir_path = os.environ.get('WINDIR')
     program_data_path = os.environ.get('PROGRAMDATA')
+    data_path = os.path.join(sysconfig.get_paths()['data'], 'share')
 
-    APP_DATA_PATH = '{}\\migasfree-client'.format(program_data_path)
-    DOC_PATH = '{}\\doc'.format(APP_DATA_PATH)
-    KEYS_PATH = '{}\\keys'.format(APP_DATA_PATH)
-    DEVICES_PATH = '{}\\devices'.format(APP_DATA_PATH)
-    TMP_PATH = '{}\\temp'.format(windir_path)
-    ICON_PATH = '{}\\icons'.format(APP_DATA_PATH)
-    LOCALE_PATH = '{}\\locale'.format(APP_DATA_PATH)
+    APP_DATA_PATH = os.path.join(program_data_path, 'migasfree-client')
+    DOC_PATH = os.path.join(data_path, 'doc')
+    KEYS_PATH = os.path.join(APP_DATA_PATH, 'keys')
+    DEVICES_PATH = os.path.join(APP_DATA_PATH, 'devices')
+    TMP_PATH = os.path.join(windir_path, 'temp')
+    ICON_PATH = os.path.join(data_path, 'icons', 'hicolor', 'scalable')
+    LOCALE_PATH = os.path.join(data_path, 'locale')
 
-    CONF_FILE = os.environ.get('MIGASFREE_CONF', '{}\\migasfree.conf'.format(APP_DATA_PATH))
+    CONF_FILE = os.environ.get(
+        'MIGASFREE_CONF',
+        os.path.join(APP_DATA_PATH, 'migasfree.conf')
+    )
 
-    LOG_FILE = '{}\\logs\\migasfree.log'.format(TMP_PATH)
-    SOFTWARE_FILE = '{}\\installed_software.txt'.format(APP_DATA_PATH)
+    LOG_FILE = os.path.join(TMP_PATH, 'logs', 'migasfree.log')
+    SOFTWARE_FILE = os.path.join(APP_DATA_PATH, 'installed_software.txt')
 else:
     APP_DATA_PATH = '/usr/share/migasfree-client'
     DOC_PATH = '/usr/share/doc/migasfree-client'
