@@ -203,7 +203,7 @@ def main(argv=None):
         })
         sys.stdout.flush()
 
-    if args.cmd in ['register', 'sync', 'install', 'purge']:
+    if args.cmd in ['register', 'sync', 'install', 'purge', 'search']:
         from .sync import MigasFreeSync
         MigasFreeSync().run(args)
     elif args.cmd == 'label':
