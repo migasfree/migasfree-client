@@ -103,30 +103,33 @@ class MigasFreeTags(MigasFreeCommand):
         # Change tags with gui
         title = _("Change tags")
         text = _("Please, select tags for this computer")
-        if utils.is_xsession() and utils.is_zenity():
-            cmd = "zenity --title='%s' \
-                --text='%s' \
-                --separator='\n' \
-                --window-icon=%s \
+        if utils.is_windows() or (utils.is_xsession() and utils.is_zenity()):
+            cmd = 'zenity --title="%s" \
+                --text="%s" \
+                %s \
+                --window-icon="%s" \
                 --list \
                 --width 600 \
                 --height 400 \
                 --checklist \
                 --multiple \
                 --print-column=2 \
-                --column=' ' \
-                --column='TAG' \
-                --column='TYPE' 2> /dev/null" % \
+                --column=" " \
+                --column=TAG \
+                --column=TYPE' % \
                 (
                     title,
                     text,
+                    '--separator="\n"' if utils.is_linux() else '',
                     os.path.join(settings.ICON_PATH, self.ICON)
                 )
+            if utils.is_linux():
+                cmd += ' 2> /dev/null'
             for key, value in available_tags.items():
                 value.sort()
                 for item in value:
                     tag_active = item in assigned
-                    cmd += " '%s' '%s' '%s'" % (tag_active, item, key)
+                    cmd += ' "%s" "%s" "%s"' % (tag_active, item, key)
         else:
             cmd = "dialog --backtitle '%s' \
                 --separate-output \
