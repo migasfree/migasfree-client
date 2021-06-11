@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import locale
 import gettext
 import builtins
@@ -32,6 +33,9 @@ __homepage__ = "https://github.com/migasfree/migasfree-client/"
 # i18n
 domain = 'migasfree-client'
 gettext.install(domain, LOCALE_PATH)
+
+if not os.environ.get('LANG'):
+    os.environ['LANG'] = locale.getdefaultlocale()[0]
 
 gettext.bindtextdomain(domain, LOCALE_PATH)
 if hasattr(gettext, 'bind_textdomain_codeset'):
