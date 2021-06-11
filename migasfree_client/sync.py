@@ -521,6 +521,8 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._show_message(_('Capturing hardware information...'))
         cmd = 'LC_ALL=C lshw -json'
+        if utils.is_windows():
+            cmd = 'lshw --json'
         with self.console.status(''):
             ret, output, error = utils.execute(cmd, interactive=False)
 
