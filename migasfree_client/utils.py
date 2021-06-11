@@ -696,21 +696,24 @@ def get_mfc_release():
 def execute_as_user(args):
     # http://stackoverflow.com/questions/1770209/run-child-processes-as-different-user-from-a-long-running-process
     user_name, _ = get_current_user().split('~')
-
-    pw_record = pwd.getpwnam(user_name)
-    user_name = pw_record.pw_name
-    user_home_dir = pw_record.pw_dir
-    user_uid = pw_record.pw_uid
-    user_gid = pw_record.pw_gid
+    user_info = get_user_info(user_name)
 
     env = os.environ.copy()
-    env['HOME'] = user_home_dir
-    env['LOGNAME'] = user_name
-    env['PWD'] = user_home_dir
-    env['USER'] = user_name
-    process = subprocess.Popen(
-        args, preexec_fn=demote(user_uid, user_gid), cwd=user_home_dir, env=env
-    )
+    env['HOME'] = user_info.get('home')
+    env['LOGNAME'] = user_info.get('name')
+    env['PWD'] = user_info.get('home')
+    env['USER'] = user_info.get('name')
+
+    if is_linux():
+        process = subprocess.Popen(
+            args, 
+            preexec_fn=demote(user_info.get('uid'), user_info.get('gid')),
+            cwd=user_info.get('home'),
+            env=env
+        )
+    else:
+        process = subprocess.Popen(args, cwd=user_info.get('home'), env=env)
+
     process.wait()
 
 
