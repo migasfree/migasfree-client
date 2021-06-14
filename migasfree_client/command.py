@@ -614,12 +614,16 @@ class MigasFreeCommand(object):
         pms_info = self._search_pms()
         logger.debug('PMS info: {}'.format(pms_info))
         if not pms_info:
+            return
+
+        self.pms = Pms.factory(pms_info)()
+
+    def _check_pms(self):
+        if not self.pms:
             msg = _('Any PMS was not found. Cannot continue.')
             self.operation_failed(msg)
             logger.critical(msg)
             sys.exit(errno.EINPROGRESS)
-
-        self.pms = Pms.factory(pms_info)()
 
     def operation_ok(self, info=''):
         if info:
@@ -630,9 +634,13 @@ class MigasFreeCommand(object):
         self.console.log(msg, style='green')
 
     def operation_failed(self, info=''):
-        self.error_console.rule(_('Failed'))
+        console = self.error_console
+        if utils.is_windows():
+            console = self.console
+
+        console.rule(_('Failed'))
         if info:
-            self.error_console.log(info)
+            console.log(info)
 
     def run(self, args=None):
         raise NotImplementedError
