@@ -125,7 +125,9 @@ class MigasFreeUpload(MigasFreeCommand):
         logger.debug('Uploading file: %s', self._file)
 
         my_magic = utils.build_magic()
-        is_package = my_magic.file(self._file) in self.pms._mimetype
+        is_package = True
+        if self.pms:
+            is_package = my_magic.file(self._file) in self.pms._mimetype
 
         with self.console.status(''):
             response = self._url_request.run(
