@@ -329,7 +329,7 @@ class MigasFreeCommand(object):
 
     def _check_sign_keys(self, get_computer_id=True):
         server = utils.sanitize_path(self.migas_server)
-        
+
         private_key = os.path.join(
             settings.KEYS_PATH, server, self.PRIVATE_KEY
         )
@@ -478,7 +478,7 @@ class MigasFreeCommand(object):
             data={
                 'uuid': utils.get_hardware_uuid(),
                 'name': self.migas_computer_name,
-                'ip_address': network.get_network_info()['ip']
+                'ip_address': get_network_info()['ip']
             },
             debug=self._debug
         )
