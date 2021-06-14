@@ -411,6 +411,8 @@ class MigasFreeSync(MigasFreeCommand):
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
     def create_repositories(self):
+        self._check_pms()
+
         repos = self.get_repositories()
 
         self._show_message(_('Creating repositories...'))
@@ -438,6 +440,8 @@ class MigasFreeSync(MigasFreeCommand):
         """
         clean cache of Package Management System
         """
+        self._check_pms()
+
         self._show_message(_('Getting repositories metadata...'))
         ret = self.pms.clean_all()
 
@@ -450,6 +454,8 @@ class MigasFreeSync(MigasFreeCommand):
             self._write_error(msg)
 
     def uninstall_packages(self, packages):
+        self._check_pms()
+
         self._show_message(_('Uninstalling packages...'))
         ret, error = self.pms.remove_silent(packages)
 
@@ -463,6 +469,8 @@ class MigasFreeSync(MigasFreeCommand):
             self._write_error(msg)
 
     def install_mandatory_packages(self, packages):
+        self._check_pms()
+
         self._show_message(_('Installing mandatory packages...'))
         ret, error = self.pms.install_silent(packages)
 
@@ -478,6 +486,8 @@ class MigasFreeSync(MigasFreeCommand):
         return ret
 
     def _update_packages(self):
+        self._check_pms()
+
         self._show_message(_('Updating packages...'))
         ret, error = self.pms.update_silent()
 
@@ -637,6 +647,8 @@ class MigasFreeSync(MigasFreeCommand):
             self.install_mandatory_packages(response['install'])
 
     def upload_software(self, before, history):
+        self._check_pms()
+
         if not self._computer_id:
             self.get_computer_id()
 
@@ -720,18 +732,19 @@ class MigasFreeSync(MigasFreeCommand):
         self.upload_attributes()
         self.upload_faults()
 
-        software_before = self.pms.query_all()
-        logger.debug('Actual software: %s', software_before)
+        if self.pms:
+            software_before = self.pms.query_all()
+            logger.debug('Actual software: %s', software_before)
 
-        software_history = self.software_history(software_before)
+            software_history = self.software_history(software_before)
 
-        self.create_repositories()
-        self.clean_pms_cache()
-        self.mandatory_pkgs()
-        if self.migas_auto_update_packages is True:
-            self._update_packages()
+            self.create_repositories()
+            self.clean_pms_cache()
+            self.mandatory_pkgs()
+            if self.migas_auto_update_packages is True:
+                self._update_packages()
 
-        self.upload_software(software_before, software_history)
+            self.upload_software(software_before, software_history)
 
         if self.hardware_capture_is_required():
             self.update_hardware_inventory()
@@ -745,9 +758,13 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Completed operations'))
 
     def _search(self, pattern):
+        self._check_pms()
+
         return self.pms.search(pattern)
 
     def _install_package(self, pkg):
+        self._check_pms()
+
         software_before = self.pms.query_all()
         software_history = self.software_history(software_before)
 
@@ -760,6 +777,8 @@ class MigasFreeSync(MigasFreeCommand):
         return ret
 
     def _remove_package(self, pkg):
+        self._check_pms()
+
         software_before = self.pms.query_all()
         software_history = self.software_history(software_before)
 
