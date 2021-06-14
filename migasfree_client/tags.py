@@ -247,21 +247,22 @@ class MigasFreeTags(MigasFreeCommand):
         # Update metadata
         mfs.upload_attributes()
         mfs.upload_faults()
-        mfs.create_repositories()
-        mfs.clean_pms_cache()
+        if self.pms:
+            mfs.create_repositories()
+            mfs.clean_pms_cache()
 
-        software_before = self.pms.query_all()
-        software_history = mfs.software_history(software_before)
+            software_before = self.pms.query_all()
+            software_history = mfs.software_history(software_before)
 
-        mfs.uninstall_packages(rules["remove"])
-        mfs.install_mandatory_packages(rules["preinstall"])
+            mfs.uninstall_packages(rules["remove"])
+            mfs.install_mandatory_packages(rules["preinstall"])
 
-        # Update metadata
-        mfs.clean_pms_cache()
+            # Update metadata
+            mfs.clean_pms_cache()
 
-        mfs.install_mandatory_packages(rules["install"])
+            mfs.install_mandatory_packages(rules["install"])
 
-        mfs.upload_software(software_before, software_history)
+            mfs.upload_software(software_before, software_history)
 
     def run(self, args=None):
         if hasattr(args, 'quiet') and args.quiet:
