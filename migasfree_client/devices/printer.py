@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2014-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2014-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,19 +16,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-try:
-    import cups
-except ImportError:
-    pass
-
-from ..utils import write_file, md5sum
-from ..settings import DEVICES_PATH
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 
 class Printer(object):
+    """
+    Interface class
+    Abstract methods
+    """
+
     conn = ''
     port = ''
     location = ''
@@ -40,13 +38,37 @@ class Printer(object):
     printer_name = ''
     printer_data = {}
 
-    def __init__(self, device):
+    platform = None
+
+    # http://stackoverflow.com/questions/3786762/dynamic-base-class-and-factories
+    _entity_ = None
+    _entities_ = {}
+
+    @classmethod
+    def factory(cls, entity):
+        return cls._entities_[entity]
+
+    @classmethod
+    def register(cls, entity):
+        def decorator(subclass):
+            cls._entities_[entity] = subclass
+            subclass._entity_ = entity
+            return subclass
+        return decorator
+
+    def __init__(self, device=None):
+        if not device:
+            return
+
+        self.load_device(device)
+
+    def load_device(self, device):
         if 'TCP' in device:
             self.conn = device['TCP']
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
                 self.port = self.conn['PORT']
             else:
-                self.port = "9100"
+                self.port = '9100'
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
                 self.uri = 'socket://{}:{}'.format(
                     self.conn['IP'],
@@ -59,21 +81,21 @@ class Printer(object):
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
                 self.port = self.conn['PORT']
             else:
-                self.port = "0"
+                self.port = '0'
             self.uri = 'parallel:/dev/lp{}'.format(self.port)
         elif 'USB' in device:
             self.conn = device['USB']
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
                 self.port = self.conn['PORT']
             else:
-                self.port = "0"
+                self.port = '0'
             self.uri = 'parallel:/dev/usb/lp{}'.format(self.port)
         elif 'SRL' in device:
             self.conn = device['SRL']
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
                 self.port = self.conn['PORT']
             else:
-                self.port = "0"
+                self.port = '0'
             self.uri = 'serial:/dev/ttyS{}'.format(self.port)
         elif 'LPD' in device:
             self.conn = device['LPD']
@@ -84,9 +106,6 @@ class Printer(object):
                 )
                 if self.conn['LOCATION'] != '':
                     self.location = self.conn['LOCATION']
-
-        if 'CUPSWRAPPER' in self.conn and self.conn['CUPSWRAPPER']:
-            self.uri = '{}:{}'.format(self.conn['CUPSWRAPPER'], self.uri)
 
         self.info = '{}__{}__{}__{}__{}'.format(
             device['manufacturer'],
@@ -113,91 +132,42 @@ class Printer(object):
         self.logical_id = device['id']
         self.driver = device.get('driver', None)
 
-    def md5_file(self):
-        return os.path.join(DEVICES_PATH, '{}.md5'.format(self.logical_id))
+        return self
+
+    def get_connection(self):
+        raise NotImplementedError
 
     def install(self):
-        self.remove()
-
-        try:
-            conn = cups.Connection()
-        except (RuntimeError, NameError):
-            return False
-
-        try:
-            if self.driver:
-                conn.addPrinter(
-                    name=self.name,
-                    filename=self.driver,
-                    info=self.info,
-                    location=self.location,
-                    device=self.uri
-                )
-            else:
-                conn.addPrinter(
-                    name=self.name,
-                    info=self.info,
-                    location=self.location,
-                    device=self.uri
-                )
-        except cups.IPPError as e:
-            (status, description) = e.args
-            print('CUPS Error: %d (%s)' % (status, description))
-            return False
-
-        conn.acceptJobs(self.name)
-        conn.enablePrinter(self.name)
-
-        write_file(self.md5_file(), md5sum(self.driver))
-
-        return True
+        raise NotImplementedError
 
     def remove(self):
-        if self.printer_name:
-            try:
-                conn = cups.Connection()
-            except (RuntimeError, NameError):
-                return False
+        raise NotImplementedError
 
-            conn.deletePrinter(self.printer_name)
-            if os.path.exists(self.md5_file()):
-                os.remove(self.md5_file())
-            return True
-
-        return False
+    @staticmethod
+    def delete(name):
+        raise NotImplementedError
 
     def is_changed(self):
         if (
             len(self.printer_data) > 0 and
             self.printer_data['printer-info'] == self.info and
             self.printer_data['printer-location'] == self.location and
-            self.printer_data['device-uri'] == self.uri and
-            not self.is_driver_changed()
+            self.printer_data['device-uri'] == self.uri
         ):
             return False
         else:
             return True
 
-    def is_driver_changed(self):
-        _md5file = self.md5_file()
-        if not os.path.exists(_md5file):
-            return True
-
-        with open(_md5file) as handle:
-            _md5 = handle.read()
-
-        return md5sum(self.driver) != _md5
-
     @staticmethod
     def get_printer_id(name):
-        try:
-            conn = cups.Connection()
-        except (RuntimeError, NameError):
-            return 0
+        raise NotImplementedError
 
-        printers = conn.getPrinters()
-        if name in printers:
-            if len(printers[name]['printer-info'].split('__')) == 5:
-                return int(printers[name]['printer-info'].split('__')[4])
+    def get_printers(self):
+        raise NotImplementedError
 
-        return 0
+    def get_default(self):
+        raise NotImplementedError
+
+    @staticmethod
+    def set_default(name):
+        raise NotImplementedError
