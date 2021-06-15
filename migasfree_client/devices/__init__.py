@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2014-2019 Jose Antonio Chavarría
+# Copyright (c) 2014-2021 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,4 +20,38 @@
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
+import sys
+import inspect
+import importlib
+import pkgutil
+
 from .printer import Printer
+from .cupswrapper import Cupswrapper
+from . import plugins
+
+
+def iter_namespace(ns_pkg):
+    return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + '.')
+
+
+def get_discovered_plugins():
+    return {
+        name: importlib.import_module(name)
+        for finder, name, ispkg
+        in iter_namespace(plugins)
+    }
+
+
+def get_available_devices_classes():
+    ret = [
+        ('cupswrapper', 'Cupswrapper'),
+    ]
+
+    discovered_plugins = get_discovered_plugins()
+
+    for item in discovered_plugins.keys():
+        for class_ in inspect.getmembers(sys.modules[item], inspect.isclass):
+            if class_[0] != 'Printer':
+                ret.append((class_[1]()._name, class_[0]))
+
+    return sorted(ret, key=lambda x: x[0])
