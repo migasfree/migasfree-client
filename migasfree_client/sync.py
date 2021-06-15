@@ -23,11 +23,6 @@ import tempfile
 import requests
 import socket
 
-try:
-    import cups
-except ImportError:
-    pass
-
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
 
@@ -46,7 +41,6 @@ from . import (
 )
 
 from .command import MigasFreeCommand
-from .devices import Printer
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -805,24 +799,26 @@ class MigasFreeSync(MigasFreeCommand):
                 if not self.install_mandatory_packages(device['packages']):
                     return False
 
+        self._devices_class_selection()
+
         logical_devices = {}  # key is id field
         for device in devices['logical']:
             if 'PRINTER' in device:
-                dev = Printer(device['PRINTER'])
+                dev = self.devices_class.load_device(device['PRINTER'])
                 logical_devices[int(dev.logical_id)] = dev
 
         try:
-            conn = cups.Connection()
+            self.devices_class.get_connection()
         except RuntimeError:
             self._show_message(_('Synchronizing logical devices...'))
-            _msg = _('CUPS is not running!!!')
+            _msg = _('Printer service is not running!!!')
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
             return
         except NameError:
             self._show_message(_('Synchronizing logical devices...'))
-            _msg = _('Python CUPS is required. If not, configure Manage_Devices parameter to False.')
+            _msg = _('Printer service is required. If not, configure Manage_Devices parameter to False.')
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
@@ -830,8 +826,8 @@ class MigasFreeSync(MigasFreeCommand):
             return
 
         try:
-            printers = conn.getPrinters()
-        except cups.IPPError:
+            printers = self.devices_class.get_printers()
+        except RuntimeError:
             self._show_message(_('Synchronizing logical devices...'))
             _msg = _('Error getting printers information')
             self.operation_failed(_msg)
@@ -851,10 +847,10 @@ class MigasFreeSync(MigasFreeCommand):
                 else:
                     try:
                         self._show_message(_('Removing device: %s') % printer)
-                        conn.deletePrinter(printer)
+                        self.devices_class.delete(printer)
                         self.operation_ok()
                         logging.debug('Device removed: %s', printer)
-                    except cups.IPPError:
+                    except RuntimeError:
                         _msg = _('Error removing device: %s') % printer
                         self.operation_failed(_msg)
                         logging.error(_msg)
@@ -892,12 +888,12 @@ class MigasFreeSync(MigasFreeCommand):
         if devices['default'] != 0 and devices['default'] in logical_devices:
             _printer_name = logical_devices[devices['default']].name \
                             or logical_devices[devices['default']].printer_name
-            if Printer.get_printer_id(conn.getDefault()) != devices['default']:
+            if self.devices_class.get_printer_id(self.devices_class.get_default()) != devices['default']:
                 try:
                     self._show_message(_('Setting default device: %s') % _printer_name)
-                    conn.setDefault(_printer_name)
+                    self.devices_class.set_default(_printer_name)
                     self.operation_ok()
-                except cups.IPPError:
+                except RuntimeError:
                     _msg = _('Error setting default device: %s') % _printer_name
                     self.operation_failed(_msg)
                     logging.error(_msg)
