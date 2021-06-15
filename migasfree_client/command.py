@@ -120,7 +120,7 @@ class MigasFreeCommand(object):
     pms = None
 
     console = Console(log_path=False)
-    error_console = Console(stderr=True, log_path=False, style='red')
+    error_console = Console(stderr=True, log_path=False, style='bright_red')
 
     auto_register_user = ''
     auto_register_password = ''
@@ -637,10 +637,14 @@ class MigasFreeCommand(object):
         console = self.error_console
         if utils.is_windows():
             console = self.console
+            console.style = 'bright_red'
 
         console.rule(_('Failed'))
         if info:
             console.log(info)
+
+        if utils.is_windows():
+            console.style = ''
 
     def run(self, args=None):
         raise NotImplementedError
