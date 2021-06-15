@@ -34,6 +34,7 @@ from urllib.parse import urljoin
 
 from .network import get_network_info
 from .pms import Pms, get_available_pms
+from .devices import Printer, get_available_devices_classes
 from .url_request import UrlRequest
 
 from . import settings, utils
@@ -118,6 +119,7 @@ class MigasFreeCommand(object):
     _quiet = False
 
     pms = None
+    devices_class = None
 
     console = Console(log_path=False)
     error_console = Console(stderr=True, log_path=False, style='bright_red')
@@ -617,6 +619,14 @@ class MigasFreeCommand(object):
             return
 
         self.pms = Pms.factory(pms_info)()
+
+    def _devices_class_selection(self):
+        _class = None
+        for item in get_available_devices_classes():
+            _class = Printer.factory(item[1])()
+            if _class.platform == sys.platform:
+                self.devices_class = _class
+                return
 
     def _check_pms(self):
         if not self.pms:
