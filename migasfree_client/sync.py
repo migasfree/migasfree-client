@@ -800,6 +800,9 @@ class MigasFreeSync(MigasFreeCommand):
                     return False
 
         self._devices_class_selection()
+        if not self.devices_class:
+            # FIXME add message
+            return
 
         logical_devices = {}  # key is id field
         for device in devices['logical']:
