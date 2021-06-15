@@ -597,10 +597,11 @@ def get_mfc_computer_name():
 
 
 def get_smbios_version():
-    _ret, _smbios, _ = execute(
-        'LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present',
-        interactive=False
-    )
+    _cmd = 'LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present'
+    if is_windows():
+        _cmd = 'dmidecode -t bios | findstr /i SMBIOS | findstr /i present'
+
+    _ret, _smbios, _ = execute(_cmd, interactive=False)
     if _ret != 0 or _smbios == '' or _smbios is None:
         return 0, 0
 
@@ -617,10 +618,11 @@ def get_uuid_from_mac():
 def get_hardware_uuid():
     _uuid_format = '%s%s%s%s-%s%s-%s%s-%s-%s'
 
-    _ret, _uuid, _ = execute(
-        'sudo dmidecode --string system-uuid',
-        interactive=False
-    )
+    _cmd = 'sudo dmidecode --string system-uuid'
+    if is_windows():
+        _cmd = 'dmidecode --string system-uuid'
+
+    _ret, _uuid, _ = execute(_cmd, interactive=False)
     _uuid = remove_commented_lines(_uuid)
     _uuid = _uuid.replace('\n', '')
     if _ret != 0 or _uuid == '' or _uuid is None:
@@ -706,7 +708,7 @@ def execute_as_user(args):
 
     if is_linux():
         process = subprocess.Popen(
-            args, 
+            args,
             preexec_fn=demote(user_info.get('uid'), user_info.get('gid')),
             cwd=user_info.get('home'),
             env=env
