@@ -801,7 +801,9 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._devices_class_selection()
         if not self.devices_class:
-            # FIXME add message
+            _msg = _('A class was not detected to manage the devices')
+            logging.error(_msg)
+            self._write_error(_msg)
             return
 
         logical_devices = {}  # key is id field
