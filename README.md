@@ -29,10 +29,10 @@ Requirements
 * lshw >= B.02.15 (optional in Windows platform)
 * dmidecode
 * Extra requirements in Windows platform:
-** python-magic-bin
-** psam-win
-** pywin32
-** psutil
+    * python-magic-bin
+    * psam-win
+    * pywin32
+    * psutil
 
 
 Features (migasfree suite)
