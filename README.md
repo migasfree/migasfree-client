@@ -24,10 +24,15 @@ See AUTHORS file.
 Requirements
 ============
 
-* a Linux distribution (Fedora, openSUSE, Ubuntu, ...)
+* a Linux distribution (Fedora, openSUSE, Ubuntu, ...) or Windows 10
 * Python >= 3.6 (see requirements.txt file)
-* lshw >= B.02.15
+* lshw >= B.02.15 (optional in Windows platform)
 * dmidecode
+* Extra requirements in Windows platform:
+** python-magic-bin
+** psam-win
+** pywin32
+** psutil
 
 
 Features (migasfree suite)
