@@ -482,9 +482,15 @@ class MigasFreeCommand(object):
                 'name': self.migas_computer_name,
                 'ip_address': get_network_info()['ip']
             },
+            exit_on_error=False,
             debug=self._debug
         )
         logger.debug('Response _save_computer: {}'.format(response))
+
+        if isinstance(response, dict) and 'error' in response:
+            if response['error']['code'] == requests.codes.not_found:
+                self.operation_failed(response['error']['info'])
+                sys.exit(errno.ENODATA)
 
         self._computer_id = response.get('id')
         return self._computer_id
