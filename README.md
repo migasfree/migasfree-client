@@ -30,7 +30,7 @@ Requirements
 * dmidecode
 * Extra requirements in Windows platform:
     * python-magic-bin
-    * psam-win
+    * pysam-win
     * pywin32
     * psutil
 
