@@ -32,7 +32,7 @@ class Apt(Pms):
     """
 
     def __init__(self):
-        Pms.__init__(self)
+        super().__init__()
 
         self._name = 'apt'          # Package Management System name
         self._pm = '/usr/bin/dpkg'  # Package Manager command

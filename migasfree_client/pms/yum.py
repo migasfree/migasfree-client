@@ -32,7 +32,7 @@ class Yum(Pms):
     """
 
     def __init__(self):
-        Pms.__init__(self)
+        super().__init__()
 
         self._name = 'yum'  # Package Management System name
         self._pm = '/bin/rpm'  # Package Manager command
