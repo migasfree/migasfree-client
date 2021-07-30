@@ -584,6 +584,7 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (_('Debug'), self._debug))
         print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
         print('\t%s: %s' % (_('PMS'), self.pms))
+        print('\t%s: %s' % (_('Architecture'), self.pms.get_system_architecture()))
         print('')
 
     def _write_error(self, msg, append=False):
