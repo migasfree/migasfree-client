@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import os
 import logging
 
 from .pms import Pms
+from ..settings import KEYS_PATH
 from ..utils import execute, write_file
 
 __author__ = 'Jose Antonio Chavarría'
@@ -196,7 +197,11 @@ class Yum(Pms):
 
         content = ''
         for repo in repositories:
-            content += repo.get('source_template').format(protocol=protocol, server=server)
+            content += repo.get('source_template').format(
+                protocol=protocol,
+                server=server,
+                keys_path=KEYS_PATH
+            )
 
         return write_file(self._repo, content)
 
