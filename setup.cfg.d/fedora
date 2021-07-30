@@ -8,7 +8,7 @@ install-script = scripts/rpm-install.sh
 post-install = scripts/rpm-post-install.sh
 post-uninstall = scripts/rpm-post-uninstall.sh
 fix-python = /usr/bin/python3
-requires = python3 >= 3.3
+requires = python3 >= 3.6
            lshw >= B.02.15
            sudo
            dmidecode
