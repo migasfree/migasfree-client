@@ -381,6 +381,7 @@ class MigasFreeCommand(object):
 
         if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == errno.ECONNREFUSED:
+                self.operation_failed(response['error']['info'])
                 sys.exit(errno.ECONNREFUSED)
 
         if not self._check_path(os.path.join(
