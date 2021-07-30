@@ -215,7 +215,7 @@ class Yum(Pms):
         string get_system_architecture(void)
         """
 
-        self._cmd = 'echo $(%s -q --qf "%%{arch}" -f /etc/$(sed -n "s/^distroverpkg=//p" /etc/yum.conf))' % self._pm
+        self._cmd = '%s --eval "%%{_arch}"' % self._pm
         logging.debug(self._cmd)
 
         _ret, _arch, _ = execute(self._cmd, interactive=False)
