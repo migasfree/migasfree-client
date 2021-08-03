@@ -380,10 +380,14 @@ class MigasFreeCommand(object):
         logger.debug('Response _save_sign_keys: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
-            if response['error']['code'] == errno.ECONNREFUSED:
+            if 'code' in response['error']:
                 self.operation_failed(response['error']['info'])
                 logger.error(response['error']['info'])
-                sys.exit(errno.ECONNREFUSED)
+                sys.exit(response['error']['code'])
+            else:
+                self.operation_failed(response['error'])
+                logger.error(response['error'])
+                sys.exit(errno.EPERM)
 
         if not self._check_path(os.path.join(
                 os.path.abspath(settings.KEYS_PATH),
