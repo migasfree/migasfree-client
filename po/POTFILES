@@ -6,3 +6,4 @@
 ../migasfree_client/upload.py
 ../migasfree_client/url_request.py
 ../migasfree_client/utils.py
+../migasfree_client/pms/pacman.py
