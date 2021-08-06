@@ -1,0 +1,39 @@
+# Maintainer: Jose Antonio Chavarría <jachavar@gmail.com>
+
+pkgname=migasfree-client
+pkgver=5.0
+pkgrel=1
+arch=('any')
+license=('GPL3')
+
+makedepends=('python-setuptools')
+depends=(
+    'python>=3.6'
+    'lshw>=B.02.15'
+    'sudo'
+    'dmidecode'
+    'python-magic'
+    'python-jwcrypto'
+    'python-requests'
+    'python-requests-toolbelt'
+    'python-cryptography>=1.7'
+    'python-netifaces'
+    'python-distro'
+    'python-rich'
+    'dialog'
+    'openssl'
+    'which'
+    'procps-ng'
+)
+
+build() {
+    cd ../..
+    echo $(pwd)
+    python setup.py build
+}
+
+package() {
+    cd ../..
+    echo $(pwd)
+    python setup.py install --root="$pkgdir" --optimize=1
+}
