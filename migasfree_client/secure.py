@@ -25,15 +25,15 @@ import json
 from jwcrypto import jwk, jwe, jws
 from jwcrypto.common import json_encode
 
+from .settings import LOG_FILE
 from .utils import read_file
-from . import settings
 
 import logging
 try:
     logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
         level=logging.ERROR,
-        filename=settings.LOG_FILE
+        filename=LOG_FILE
     )
 except IOError:
     print('User has insufficient privileges to execute this command')
