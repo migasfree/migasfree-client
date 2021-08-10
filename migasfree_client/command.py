@@ -43,11 +43,16 @@ __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = 'MigasFreeCommand'
 
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
-    level=logging.INFO,
-    filename=settings.LOG_FILE
-)
+try:
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
+        level=logging.INFO,
+        filename=settings.LOG_FILE
+    )
+except IOError:
+    print(_('Failed to configure the log file (%s)') % settings.LOG_FILE)
+    sys.exit(errno.EACCES)
+
 logger = logging.getLogger(__name__)
 
 # implicit print flush
