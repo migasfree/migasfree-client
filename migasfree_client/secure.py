@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,20 +25,7 @@ import json
 from jwcrypto import jwk, jwe, jws
 from jwcrypto.common import json_encode
 
-from .settings import LOG_FILE
 from .utils import read_file
-
-import logging
-try:
-    logging.basicConfig(
-        format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
-        level=logging.ERROR,
-        filename=LOG_FILE
-    )
-except IOError:
-    print('User has insufficient privileges to execute this command')
-    sys.exit(errno.EACCES)
-logger = logging.getLogger(__name__)
 
 
 def sign(claims, priv_key):
@@ -53,7 +40,7 @@ def sign(claims, priv_key):
     jws_token = jws.JWS(str(claims))
     jws_token.add_signature(
         priv_jwk,
-        header=json_encode({'alg': 'RS256', "kid": priv_jwk.thumbprint()})
+        header=json_encode({'alg': 'RS256', 'kid': priv_jwk.thumbprint()})
     )
 
     return jws_token.serialize()
@@ -79,10 +66,10 @@ def encrypt(claims, pub_key):
     pub_jwk = jwk.JWK.from_pem(read_file(pub_key))
 
     protected_header = {
-        "alg": "RSA-OAEP-256",
-        "enc": "A256CBC-HS512",
-        "typ": "JWE",
-        "kid": pub_jwk.thumbprint(),
+        'alg': 'RSA-OAEP-256',
+        'enc': 'A256CBC-HS512',
+        'typ': 'JWE',
+        'kid': pub_jwk.thumbprint(),
     }
     jwe_token = jwe.JWE(
         json.dumps(claims),
