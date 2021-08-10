@@ -15,10 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
-__license__ = 'GPLv3'
-__all__ = 'MigasFreeUpload'
-
 import os
 import sys
 import getpass
@@ -30,9 +26,14 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-from . import settings, utils
+from .settings import KEYS_PATH
+from .utils import build_magic, check_lock_file, remove_file, ALL_OK
 
 from .command import MigasFreeCommand
+
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
+__license__ = 'GPLv3'
+__all__ = 'MigasFreeUpload'
 
 
 class MigasFreeUpload(MigasFreeCommand):
@@ -45,10 +46,10 @@ class MigasFreeUpload(MigasFreeCommand):
         self._init_url_request()
 
         self._private_key = os.path.join(
-            settings.KEYS_PATH, self.migas_server, self.PRIVATE_KEY
+            KEYS_PATH, self.migas_server, self.PRIVATE_KEY
         )
         self._public_key = os.path.join(
-            settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
+            KEYS_PATH, self.migas_server, self.PUBLIC_KEY
         )
 
     def _auto_register(self):
@@ -124,7 +125,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
         logger.debug('Uploading file: %s', self._file)
 
-        my_magic = utils.build_magic()
+        my_magic = build_magic()
         is_package = True
         if self.pms:
             is_package = my_magic.file(self._file) in self.pms._mimetype
@@ -276,11 +277,11 @@ class MigasFreeUpload(MigasFreeCommand):
         if not self._quiet:
             self._show_running_options()
 
-        utils.check_lock_file(self.CMD, self.LOCK_FILE)
+        check_lock_file(self.CMD, self.LOCK_FILE)
         if self._file:
             self._upload_file()
         else:
             self._upload_set()
-        utils.remove_file(self.LOCK_FILE)
+        remove_file(self.LOCK_FILE)
 
-        sys.exit(utils.ALL_OK)  # no error
+        sys.exit(ALL_OK)  # no error
