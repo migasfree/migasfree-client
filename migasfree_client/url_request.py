@@ -25,7 +25,9 @@ import logging
 
 from requests_toolbelt import MultipartEncoder
 
-from . import settings, secure, utils
+from .settings import TMP_PATH
+from .secure import wrap, unwrap
+from .utils import get_mfc_release, build_magic, read_file, write_file
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -76,9 +78,9 @@ class UrlRequest(object):
 
     @staticmethod
     def _check_tmp_path():
-        if not os.path.exists(settings.TMP_PATH):
+        if not os.path.exists(TMP_PATH):
             try:
-                os.makedirs(settings.TMP_PATH, 0o0777)
+                os.makedirs(TMP_PATH, 0o0777)
             except OSError:
                 return False
 
@@ -120,14 +122,14 @@ class UrlRequest(object):
 
         headers = {
             'user-agent': 'migasfree-client/{} {}'.format(
-                utils.get_mfc_release(),
+                get_mfc_release(),
                 requests.utils.default_user_agent()
             ),
             'accept-language': os.getenv('LANGUAGE', os.getenv('LANG', 'en'))
         }
         if safe:
             data = json.dumps({
-                'msg': secure.wrap(
+                'msg': wrap(
                     data,
                     sign_key=self._private_key,
                     encrypt_key=self._public_key
@@ -137,14 +139,14 @@ class UrlRequest(object):
             headers['content-type'] = 'application/json'
 
         if upload_files:
-            my_magic = utils.build_magic()
+            my_magic = build_magic()
 
             files = []
             for _file in upload_files:
-                content = utils.read_file(_file)
+                content = read_file(_file)
 
-                tmp_file = os.path.join(settings.TMP_PATH, os.path.basename(_file))
-                utils.write_file(tmp_file, content[0:1023])  # only header
+                tmp_file = os.path.join(TMP_PATH, os.path.basename(_file))
+                write_file(tmp_file, content[0:1023])  # only header
                 mime = my_magic.file(tmp_file)
                 os.remove(tmp_file)
 
@@ -195,7 +197,7 @@ class UrlRequest(object):
 
     def _evaluate_response(self, json_response, safe=True):
         if safe and 'msg' in json_response:
-            response = secure.unwrap(
+            response = unwrap(
                 json_response['msg'],
                 decrypt_key=self._private_key,
                 verify_key=self._public_key
@@ -225,7 +227,7 @@ class UrlRequest(object):
             print(_('HTTP error code: %s') % request.status_code)
 
             if not self._check_tmp_path():
-                msg = _('Error creating %s directory') % settings.TMP_PATH
+                msg = _('Error creating %s directory') % TMP_PATH
                 logger.exception(msg)
                 print(msg)
                 if self._exit_on_error:
@@ -240,14 +242,14 @@ class UrlRequest(object):
 
             extension = 'txt' if 'json' in request.headers['content-type'] else 'html'
             _file = os.path.join(
-                settings.TMP_PATH,
+                TMP_PATH,
                 'response.{}.{}.{}'.format(
                     request.status_code,
                     url.replace('/', '.').replace(':', '.').rstrip('.'),
                     extension
                 )
             )
-            utils.write_file(_file, str(info))
+            write_file(_file, str(info))
             print(_file)
 
         if self._exit_on_error:
