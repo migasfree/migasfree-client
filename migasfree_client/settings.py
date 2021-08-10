@@ -40,7 +40,7 @@ if os.environ.get('WINDIR'):
         os.path.join(APP_DATA_PATH, 'migasfree.conf')
     )
 
-    LOG_FILE = os.path.join(TMP_PATH, 'logs', 'migasfree.log')
+    LOG_FILE = os.path.join(TMP_PATH, 'migasfree.log')
     SOFTWARE_FILE = os.path.join(APP_DATA_PATH, 'installed_software.txt')
 else:
     APP_DATA_PATH = '/usr/share/migasfree-client'
