@@ -27,11 +27,13 @@ _ = gettext.gettext
 import logging
 logger = logging.getLogger(__name__)
 
-from . import settings, utils
-
 from .command import MigasFreeCommand
+from .settings import ICON_PATH
 from .sync import MigasFreeSync
-from .utils import ALL_OK
+from .utils import (
+    ALL_OK, is_linux, is_windows, check_lock_file,
+    execute, remove_file, is_xsession, is_zenity,
+)
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -103,7 +105,7 @@ class MigasFreeTags(MigasFreeCommand):
         # Change tags with gui
         title = _("Change tags")
         text = _("Please, select tags for this computer")
-        if utils.is_windows() or (utils.is_xsession() and utils.is_zenity()):
+        if is_windows() or (is_xsession() and is_zenity()):
             cmd = 'zenity --title="%s" \
                 --text="%s" \
                 %s \
@@ -120,10 +122,10 @@ class MigasFreeTags(MigasFreeCommand):
                 (
                     title,
                     text,
-                    '--separator="\n"' if utils.is_linux() else '',
-                    os.path.join(settings.ICON_PATH, self.ICON)
+                    '--separator="\n"' if is_linux() else '',
+                    os.path.join(ICON_PATH, self.ICON)
                 )
-            if utils.is_linux():
+            if is_linux():
                 cmd += ' 2> /dev/null'
             for key, value in available_tags.items():
                 value.sort()
@@ -143,7 +145,7 @@ class MigasFreeTags(MigasFreeCommand):
                     cmd += " '%s' '%s' %s" % (item, key, tag_active)
 
         logger.debug('Change tags command: %s' % cmd)
-        ret, out, error = utils.execute(cmd, interactive=False)
+        ret, out, error = execute(cmd, interactive=False)
         if ret == 0:
             selected_tags = list(filter(None, out.split("\n")))
             logger.debug('Selected tags: %s' % selected_tags)
@@ -297,9 +299,9 @@ class MigasFreeTags(MigasFreeCommand):
 
             rules = self.set_tags()
             if args.set:
-                utils.check_lock_file(self.CMD, self.LOCK_FILE)
+                check_lock_file(self.CMD, self.LOCK_FILE)
                 self._apply_rules(rules)
-                utils.remove_file(self.LOCK_FILE)
+                remove_file(self.LOCK_FILE)
 
             self.end_of_transmission()
 
