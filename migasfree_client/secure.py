@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = "Jose Antonio Chavarría"
+__author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 import sys
@@ -40,7 +40,10 @@ def sign(claims, priv_key):
     jws_token = jws.JWS(str(claims))
     jws_token.add_signature(
         priv_jwk,
-        header=json_encode({'alg': 'RS256', 'kid': priv_jwk.thumbprint()})
+        header=json_encode({
+            'alg': 'RS256',
+            'kid': priv_jwk.thumbprint()
+        })
     )
 
     return jws_token.serialize()
@@ -76,9 +79,8 @@ def encrypt(claims, pub_key):
         recipient=pub_jwk,
         protected=protected_header
     )
-    jwt = jwe_token.serialize()
 
-    return jwt
+    return jwe_token.serialize()
 
 
 def decrypt(jwt, priv_key):
