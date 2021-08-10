@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2016 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría'
-
 import socket
 import struct
 import netifaces
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
 
 # http://bytes.com/topic/python/answers/504342-struct-unpack-64-bit-platforms
 
@@ -33,7 +34,7 @@ def get_iface_mask(iface):
     if netifaces.AF_INET in _addresses:
         return _addresses[netifaces.AF_INET][0]['netmask']
 
-    return ''  # empty string
+    return ''
 
 
 def get_iface_address(iface):
@@ -45,7 +46,7 @@ def get_iface_address(iface):
     if netifaces.AF_INET in _addresses:
         return _addresses[netifaces.AF_INET][0]['addr']
 
-    return ''  # empty string
+    return ''
 
 
 def get_iface_net(iface):
@@ -133,7 +134,10 @@ def get_network_info():
     return {
         'ip': get_iface_address(_ifname),
         'netmask': get_iface_mask(_ifname),
-        'net': '%s/%s' % (get_iface_net(_ifname), get_iface_cidr(_ifname))
+        'net': '{}/{}'.format(
+            get_iface_net(_ifname),
+            get_iface_cidr(_ifname)
+        )
     }
 
 
