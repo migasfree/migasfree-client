@@ -621,7 +621,7 @@ class MigasFreeCommand(object):
     def _search_pms():
         for item in get_available_pms():
             if utils.is_windows():
-                cmd = 'where /Q {}'.format(item[0])
+                cmd = 'where {}'.format(item[0])
             else:
                 cmd = 'command -v {}'.format(item[0])
             ret, _, _ = utils.execute(cmd, interactive=False)
