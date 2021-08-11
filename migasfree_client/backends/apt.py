@@ -176,6 +176,7 @@ class Apt(Pms):
         self._cmd = '{0} clean'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
+            execute('rm --force /var/lib/apt/lists/*')
             self._cmd = '{0} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
