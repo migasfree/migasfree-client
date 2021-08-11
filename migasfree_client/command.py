@@ -25,9 +25,6 @@ import logging
 import time
 import ssl
 
-import gettext
-_ = gettext.gettext
-
 from rich import print
 from rich.console import Console
 from urllib.parse import urljoin
@@ -38,6 +35,9 @@ from .devices import Printer, get_available_devices_classes
 from .url_request import UrlRequest
 
 from . import settings, utils
+
+import gettext
+_ = gettext.gettext
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -561,7 +561,7 @@ class MigasFreeCommand(object):
         if os.path.isfile(settings.CONF_FILE):
             conf_file = settings.CONF_FILE
 
-        print('')
+        print()
         print(_('Running options: %s') % conf_file)
         print('\t%s: %s' % (_('Project'), self.migas_project))
         print('\t%s: %s' % (_('Server'), self.migas_server))
@@ -594,7 +594,7 @@ class MigasFreeCommand(object):
         print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
         print('\t%s: %s' % (_('PMS'), self.pms))
         print('\t%s: %s' % (_('Architecture'), self.pms.get_system_architecture()))
-        print('')
+        print()
 
     def _write_error(self, msg, append=False):
         if append:
