@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -183,6 +183,7 @@ class Apt(Pms):
         self._cmd = '{} clean'.format(self._pms)
         logging.debug(self._cmd)
         if execute(self._cmd)[0] == 0:
+            execute('rm --force /var/lib/apt/lists/*')
             self._cmd = '{} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
