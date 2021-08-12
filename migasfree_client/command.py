@@ -126,8 +126,8 @@ class MigasFreeCommand(object):
     pms = None
     devices_class = None
 
-    console = Console(log_path=False)
-    error_console = Console(stderr=True, log_path=False, style='bright_red')
+    console = Console(log_path=False, force_terminal=True)
+    error_console = Console(stderr=True, log_path=False, style='bright_red', force_terminal=True)
 
     auto_register_user = ''
     auto_register_password = ''
@@ -281,7 +281,7 @@ class MigasFreeCommand(object):
         return urljoin(self._url_base, path)
 
     def _show_message(self, msg):
-        print('')
+        print()
         self.console.rule(msg)
 
     def _check_path(self, path):
