@@ -18,8 +18,6 @@
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
-import sys
-import errno
 import json
 
 from jwcrypto import jwk, jwe, jws
