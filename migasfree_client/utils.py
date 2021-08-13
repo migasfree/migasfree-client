@@ -560,8 +560,6 @@ def get_current_user():
 
 def get_distro_project():
     if is_windows():
-        import platform
-
         return slugify('{}-{}'.format(platform.system(), platform.version()))
     else:
         import distro
@@ -571,8 +569,6 @@ def get_distro_project():
 
 def get_distro_name():
     if is_windows():
-        import platform
-
         return slugify(platform.system())
     else:
         import distro
