@@ -18,7 +18,6 @@
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 
-import os
 import sys
 import argparse
 
