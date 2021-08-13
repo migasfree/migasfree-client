@@ -23,6 +23,7 @@ import pkgutil
 from .pms import Pms
 from .apt import Apt
 from .pacman import Pacman
+from .winget import Winget
 from .yum import Yum
 from .zypper import Zypper
 from . import plugins
@@ -44,6 +45,7 @@ def get_available_pms():
     ret = [
         ('apt', 'Apt'),
         ('pacman', 'Pacman'),
+        ('winget', 'Winget'),
         ('yum', 'Yum'),
         ('zypper', 'Zypper'),
     ]
