@@ -19,7 +19,6 @@ __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = 'MigasFreeInfo'
 
-import os
 import sys
 import errno
 
