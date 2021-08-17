@@ -126,10 +126,6 @@ setup(
     },
     data_files=[
         (
-            'share/icons/hicolor/scalable/actions',
-            ['icons/scalable/migasfree-ok.svg']
-        ),
-        (
             'share/icons/hicolor/scalable/apps',
             ['icons/scalable/migasfree.svg']
         ),
@@ -147,8 +143,6 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'Environment :: X11 Applications :: Gnome',
-        'Environment :: X11 Applications :: KDE',
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
