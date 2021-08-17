@@ -115,7 +115,6 @@ class MigasFreeCommand(object):
     REPOS_KEY = 'repositories.pub'
 
     ICON = os.path.join('apps', 'migasfree.svg')
-    ICON_COMPLETED = os.path.join('actions', 'migasfree-ok.svg')
 
     _url_base = None
     _url_request = None
