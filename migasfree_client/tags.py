@@ -97,7 +97,8 @@ class MigasFreeTags(MigasFreeCommand):
         selected_tags = []
 
         if len(available) == 0:
-            print(_('There is not available tags to select'))
+            print()
+            self.console.log(_('There is not available tags to select'), style='yellow')
             sys.exit(ALL_OK)
 
         available_tags = collections.OrderedDict(sorted(available.items()))
