@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2019 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,11 +43,10 @@ class Pms(object):
         return decorator
 
     def __init__(self):
-        self._name = ''      # Package Management System name
-        self._pm = ''        # Package Manager command
-        self._pms = ''       # Package Management System command
-        self._repo = ''      # Repositories file
-        self._cmd = ''       # Command to execute
+        self._name = ''  # Package Management System name
+        self._pm = ''  # Package Manager command
+        self._pms = ''  # Package Management System command
+        self._repo = ''  # Repositories file
         self._mimetype = []  # Allowed mimetypes for packages
 
     def __str__(self):
