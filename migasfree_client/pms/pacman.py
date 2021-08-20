@@ -54,7 +54,7 @@ class Pacman(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{} --upgrade {}'.format(
+        self._cmd = '{} --sync --needed {}'.format(
             self._pms,
             package.strip()
         )
@@ -118,7 +118,7 @@ class Pacman(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} --upgrade --noconfirm {}'.format(
+        self._cmd = '{} --sync --needed --noconfirm {}'.format(
             self._pms,
             ' '.join(package_set)
         )
@@ -249,7 +249,7 @@ class Pacman(Pms):
         TODO test
         """
 
-        self._cmd = '{} --populate {} > /dev/null'.format(
+        self._cmd = '{} --add {} > /dev/null'.format(
             self._pms_key,
             file_key
         )
