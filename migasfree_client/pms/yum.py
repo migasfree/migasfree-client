@@ -55,43 +55,40 @@ class Yum(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{} install {}'.format(self._pms, package.strip())
-        logging.debug(self._cmd)
+        cmd = '{} install {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def remove(self, package):
         """
         bool remove(string package)
         """
 
-        self._cmd = '{} remove {}'.format(self._pms, package.strip())
-        logging.debug(self._cmd)
+        cmd = '{} remove {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def search(self, pattern):
         """
         bool search(string pattern)
         """
 
-        self._cmd = '{} search {}'.format(self._pms, pattern.strip())
-        logging.debug(self._cmd)
+        cmd = '{} search {}'.format(self._pms, pattern.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def update_silent(self):
         """
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{} --assumeyes update'.format(self._pms)
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        cmd = '{} --assumeyes update'.format(self._pms)
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -110,16 +107,13 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} --assumeyes install {}'.format(
+        cmd = '{} --assumeyes install {}'.format(
             self._pms,
             ' '.join(package_set)
         )
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -138,16 +132,13 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} --assumeyes remove {}'.format(
+        cmd = '{} --assumeyes remove {}'.format(
             self._pms,
             ' '.join(package_set)
         )
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -156,22 +147,24 @@ class Yum(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '{} -q {}'.format(self._pm, package.strip())
-        logging.debug(self._cmd)
+        cmd = '{} -q {}'.format(self._pm, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd, interactive=False)[0] == 0
+        return execute(cmd, interactive=False)[0] == 0
 
     def clean_all(self):
         """
         bool clean_all(void)
         """
 
-        self._cmd = '{} clean all'.format(self._pms)
-        logging.debug(self._cmd)
-        if execute(self._cmd)[0] == 0:
-            self._cmd = '{} --assumeyes check-update'.format(self._pms)
-            logging.debug(self._cmd)
-            ret, _, _ = execute(self._cmd)
+        cmd = '{} clean all'.format(self._pms)
+        logging.debug(cmd)
+
+        if execute(cmd)[0] == 0:
+            cmd = '{} --assumeyes check-update'.format(self._pms)
+            logging.debug(cmd)
+            ret, _, _ = execute(cmd)
+
             return ret == 0 or ret == 100
 
         return False
@@ -182,13 +175,12 @@ class Yum(Pms):
         list format: name_version_architecture.extension
         """
 
-        self._cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
-        logging.debug(self._cmd)
-        _ret, _output, _ = execute(self._cmd, interactive=False)
-        if _ret != 0:
-            return []
+        cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
+        logging.debug(cmd)
 
-        return sorted(_output.strip().splitlines())
+        _ret, _output, _ = execute(cmd, interactive=False)
+
+        return sorted(_output.strip().splitlines()) if _ret == 0 else []
 
     def create_repos(self, protocol, server, repositories):
         """
@@ -210,20 +202,20 @@ class Yum(Pms):
         bool import_server_key(string file_key)
         """
 
-        self._cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
-        logging.debug(self._cmd)
+        cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def get_system_architecture(self):
         """
         string get_system_architecture(void)
         """
 
-        self._cmd = '%s --eval "%%{_arch}"' % self._pm
-        logging.debug(self._cmd)
+        cmd = '%s --eval "%%{_arch}"' % self._pm
+        logging.debug(cmd)
 
-        _ret, _arch, _ = execute(self._cmd, interactive=False)
+        _ret, _arch, _ = execute(cmd, interactive=False)
 
         return _arch.strip() if _ret == 0 else ''
 
@@ -232,12 +224,11 @@ class Yum(Pms):
         list available_packages(void)
         """
 
-        self._cmd = "{} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'".format(
+        cmd = "{} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'".format(
             self._pms
         )
-        logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive=False)
-        if _ret == 0:
-            return sorted(_output.strip().splitlines())
+        logging.debug(cmd)
 
-        return []
+        _ret, _output, _error = execute(cmd, interactive=False)
+
+        return sorted(_output.strip().splitlines()) if _ret == 0 else []

@@ -58,49 +58,46 @@ class Apt(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{} install -o APT::Get::Purge=true {}'.format(
+        cmd = '{} install -o APT::Get::Purge=true {}'.format(
             self._pms,
             package.strip()
         )
-        logging.debug(self._cmd)
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def remove(self, package):
         """
         bool remove(string package)
         """
 
-        self._cmd = '{} purge {}'.format(self._pms, package.strip())
-        logging.debug(self._cmd)
+        cmd = '{} purge {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def search(self, pattern):
         """
         bool search(string pattern)
         """
 
-        self._cmd = '{} search {}'.format(self._pms_search, pattern.strip())
-        logging.debug(self._cmd)
+        cmd = '{} search {}'.format(self._pms_search, pattern.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def update_silent(self):
         """
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{} {} dist-upgrade'.format(
+        cmd = '{} {} dist-upgrade'.format(
             self._pms,
             self._silent_options
         )
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -119,17 +116,14 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} {} install {}'.format(
+        cmd = '{} {} install {}'.format(
             self._pms,
             self._silent_options,
             ' '.join(package_set)
         )
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -148,17 +142,14 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} {} purge {}'.format(
+        cmd = '{} {} purge {}'.format(
             self._pms,
             self._silent_options,
             ' '.join(package_set)
         )
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -167,26 +158,28 @@ class Apt(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '{} --status {} | grep "Status: install ok installed"'.format(
+        cmd = '{} --status {} | grep "Status: install ok installed"'.format(
             self._pm,
             package.strip()
         )
-        logging.debug(self._cmd)
+        logging.debug(cmd)
 
-        return execute(self._cmd, interactive=False)[0] == 0
+        return execute(cmd, interactive=False)[0] == 0
 
     def clean_all(self):
         """
         bool clean_all(void)
         """
 
-        self._cmd = '{} clean'.format(self._pms)
-        logging.debug(self._cmd)
-        if execute(self._cmd)[0] == 0:
+        cmd = '{} clean'.format(self._pms)
+        logging.debug(cmd)
+
+        if execute(cmd)[0] == 0:
             execute('rm --recursive --force /var/lib/apt/lists')
-            self._cmd = '{} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
-            logging.debug(self._cmd)
-            return execute(self._cmd)[0] == 0
+            cmd = '{} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
+            logging.debug(cmd)
+
+            return execute(cmd)[0] == 0
 
         return False
 
@@ -228,20 +221,20 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        self._cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {} > /dev/null'.format(file_key)
-        logging.debug(self._cmd)
+        cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {} > /dev/null'.format(file_key)
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def get_system_architecture(self):
         """
         string get_system_architecture(void)
         """
 
-        self._cmd = 'echo "$(%(pm)s --print-architecture) $(%(pm)s --print-foreign-architectures)"' % {'pm': self._pm}
-        logging.debug(self._cmd)
+        cmd = 'echo "$(%(pm)s --print-architecture) $(%(pm)s --print-foreign-architectures)"' % {'pm': self._pm}
+        logging.debug(cmd)
 
-        _ret, _arch, _ = execute(self._cmd, interactive=False)
+        _ret, _arch, _ = execute(cmd, interactive=False)
 
         return _arch.strip() if _ret == 0 else ''
 
@@ -250,10 +243,9 @@ class Apt(Pms):
         list available_packages(void)
         """
 
-        self._cmd = '{} pkgnames'.format(self._pms_search)
-        logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive=False)
-        if _ret == 0:
-            return sorted(_output.strip().splitlines())
+        cmd = '{} pkgnames'.format(self._pms_search)
+        logging.debug(cmd)
 
-        return []
+        _ret, _output, _error = execute(cmd, interactive=False)
+
+        return sorted(_output.strip().splitlines()) if _ret == 0 else []
