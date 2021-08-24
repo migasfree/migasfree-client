@@ -19,21 +19,19 @@ import os
 import sys
 import getpass
 import errno
-
 import gettext
-_ = gettext.gettext
-
 import logging
-logger = logging.getLogger(__name__)
 
 from .settings import KEYS_PATH
 from .utils import build_magic, check_lock_file, remove_file, ALL_OK
-
 from .command import MigasFreeCommand
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = 'MigasFreeUpload'
+
+_ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class MigasFreeUpload(MigasFreeCommand):
@@ -41,7 +39,7 @@ class MigasFreeUpload(MigasFreeCommand):
     _directory = None
 
     def __init__(self):
-        MigasFreeCommand.__init__(self)
+        super().__init__(self)
         self.PRIVATE_KEY = 'packager.pri'
         self._init_url_request()
 
