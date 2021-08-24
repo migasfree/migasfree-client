@@ -20,10 +20,11 @@ import sys
 import errno
 import getpass
 import platform
-import requests
 import logging
 import time
 import ssl
+import gettext
+import requests
 
 from rich import print
 from rich.console import Console
@@ -36,12 +37,11 @@ from .url_request import UrlRequest
 
 from . import settings, utils
 
-import gettext
-_ = gettext.gettext
-
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = 'MigasFreeCommand'
+
+_ = gettext.gettext
 
 try:
     logging.basicConfig(
@@ -62,7 +62,7 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 1)
 
 
-class MigasFreeCommand(object):
+class MigasFreeCommand():
     """
     Interface class
     """
@@ -319,12 +319,12 @@ class MigasFreeCommand(object):
             import ctypes
 
             return ctypes.windll.shell32.IsUserAnAdmin() != 0
-        else:
-            user_info = utils.get_user_info(os.getuid())
-            if not isinstance(user_info, dict):
-                return False
 
-            return user_info.get('gid') == 0
+        user_info = utils.get_user_info(os.getuid())
+        if not isinstance(user_info, dict):
+            return False
+
+        return user_info.get('gid') == 0
 
     def _user_is_not_root(self):
         if not self._check_user_is_root():
@@ -361,7 +361,7 @@ class MigasFreeCommand(object):
         print(_('Autoregistering computer...'))
 
         if self._save_sign_keys(
-            self.auto_register_user, self.auto_register_password
+                self.auto_register_user, self.auto_register_password
         ):
             return self._save_computer() != 0
 
@@ -433,7 +433,7 @@ class MigasFreeCommand(object):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response _save_repos_key: {}'.format(response))
+        logger.debug('Response _save_repos_key: %s', response)
 
         path = os.path.abspath(
             os.path.join(
@@ -444,7 +444,7 @@ class MigasFreeCommand(object):
             return False
 
         path_file = os.path.join(path, self.REPOS_KEY)
-        logger.debug('Trying writing file: {}'.format(path_file))
+        logger.debug('Trying writing file: %s', path_file)
 
         ret = utils.write_file(path_file, response)
         if ret:
@@ -495,7 +495,7 @@ class MigasFreeCommand(object):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response _save_computer: {}'.format(response))
+        logger.debug('Response _save_computer: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
@@ -512,7 +512,7 @@ class MigasFreeCommand(object):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response get_server_info: {}'.format(response))
+        logger.debug('Response get_server_info: %s', response)
 
         if isinstance(response, dict):
             self._server_info = response
@@ -530,7 +530,7 @@ class MigasFreeCommand(object):
             exit_on_error=False,
             debug=self._debug
         )
-        logger.debug('Response get_computer_id: {}'.format(response))
+        logger.debug('Response get_computer_id: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
@@ -553,7 +553,7 @@ class MigasFreeCommand(object):
             },
             debug=self._debug
         )
-        logger.debug('Response end_of_transmission: {}'.format(response))
+        logger.debug('Response end_of_transmission: %s', response)
 
     def _show_running_options(self):
         conf_file = ''
@@ -631,7 +631,7 @@ class MigasFreeCommand(object):
 
     def _pms_selection(self):
         pms_info = self._search_pms()
-        logger.debug('PMS info: {}'.format(pms_info))
+        logger.debug('PMS info: %s', pms_info)
         if not pms_info:
             return
 
@@ -653,11 +653,7 @@ class MigasFreeCommand(object):
             sys.exit(errno.EINPROGRESS)
 
     def operation_ok(self, info=''):
-        if info:
-            msg = str(info)
-        else:
-            msg = _('Ok')
-
+        msg = str(info) if info else _('Ok')
         self.console.log(msg, style='green')
 
     def operation_failed(self, info=''):
