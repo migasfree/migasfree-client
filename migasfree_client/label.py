@@ -15,23 +15,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
-__license__ = 'GPLv3'
-__all__ = 'MigasFreeLabel'
-
 import os
 import sys
 import errno
-
 import gettext
-_ = gettext.gettext
-
 import logging
-logger = logging.getLogger(__name__)
 
 from .command import MigasFreeCommand
 from .settings import ICON_PATH, TMP_PATH
 from .utils import ALL_OK, is_windows, is_linux, write_file, execute_as_user
+
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
+__license__ = 'GPLv3'
+__all__ = 'MigasFreeLabel'
+
+_ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 HTML_TEMPLATE = """<!doctype html>
 <html>
@@ -73,7 +72,7 @@ HTML_TEMPLATE = """<!doctype html>
 class MigasFreeLabel(MigasFreeCommand):
     def __init__(self):
         self._user_is_not_root()
-        MigasFreeCommand.__init__(self)
+        super().__init__(self)
 
     def get_label(self):
         if not self._computer_id:
@@ -89,7 +88,7 @@ class MigasFreeLabel(MigasFreeCommand):
                 debug=self._debug
             )
 
-        logger.debug('Response get_label: {}'.format(response))
+        logger.debug('Response get_label: %s', response)
         if self._debug:
             self.console.log('Response: {}'.format(response))
 
