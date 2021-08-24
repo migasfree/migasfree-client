@@ -15,16 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+import argparse
+import gettext
+
+from .utils import get_mfc_release, ALL_OK
+
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 
-import sys
-import argparse
-
-import gettext
 _ = gettext.gettext
-
-from .utils import get_mfc_release, ALL_OK
 
 PROGRAM = 'migasfree'
 
