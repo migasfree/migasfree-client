@@ -20,12 +20,8 @@ import sys
 import errno
 import collections
 import json
-
 import gettext
-_ = gettext.gettext
-
 import logging
-logger = logging.getLogger(__name__)
 
 from .command import MigasFreeCommand
 from .settings import ICON_PATH
@@ -39,13 +35,16 @@ __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = 'MigasFreeTags'
 
+_ = gettext.gettext
+logger = logging.getLogger(__name__)
+
 
 class MigasFreeTags(MigasFreeCommand):
     _tags = None
 
     def __init__(self):
         self._user_is_not_root()
-        MigasFreeCommand.__init__(self)
+        super().__init__(self)
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
@@ -89,7 +88,7 @@ class MigasFreeTags(MigasFreeCommand):
                     self.operation_failed(msg)
                     sys.exit(errno.ENODATA)
 
-            logger.info('Sanitized list: %s' % tag_list)
+            logger.info('Sanitized list: %s', tag_list)
 
         return tag_list
 
@@ -145,14 +144,14 @@ class MigasFreeTags(MigasFreeCommand):
                     tag_active = 'on' if item in assigned else 'off'
                     cmd += " '%s' '%s' %s" % (item, key, tag_active)
 
-        logger.debug('Change tags command: %s' % cmd)
+        logger.debug('Change tags command: %s', cmd)
         ret, out, error = execute(cmd, interactive=False)
         if ret == 0:
             selected_tags = list(filter(None, out.split("\n")))
-            logger.debug('Selected tags: %s' % selected_tags)
+            logger.debug('Selected tags: %s', selected_tags)
         else:
             # no action chosen -> no change tags
-            logger.debug('Return value command: %d' % ret)
+            logger.debug('Return value command: %d', ret)
             sys.exit(ret)
 
         return selected_tags
