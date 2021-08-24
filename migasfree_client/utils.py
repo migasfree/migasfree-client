@@ -26,22 +26,22 @@ import re
 import select
 import uuid
 import signal
-import magic
-import hashlib
+import gettext
 import configparser
+import hashlib
+import magic
 
 try:
     import pwd
 except ImportError:
     from . import winpwd as pwd
 
-import gettext
-_ = gettext.gettext
-
 from . import settings
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
+
+_ = gettext.gettext
 
 # TODO http://docs.python.org/library/unittest.html
 
@@ -59,9 +59,9 @@ def slugify(s):
     for c in [' ', '-', '.', '/']:
         s = s.replace(c, '_')
 
-    s = re.sub('\W', '', s)
+    s = re.sub(r'\W', '', s)
     s = s.replace('_', ' ')
-    s = re.sub('\s+', ' ', s)
+    s = re.sub(r'\s+', ' ', s)
     s = s.strip()
     s = s.replace(' ', '-')
 
@@ -79,7 +79,8 @@ def is_linux():
 def sanitize_path(value):
     if is_windows():
         return value.replace('\\', '_').replace('/', '_').replace(
-            ':', '_').replace('?', '_').replace('"', '_').replace(
+            ':', '_'
+        ).replace('?', '_').replace('"', '_').replace(
             '|', '_'
         )
 
@@ -303,8 +304,8 @@ def get_graphic_user(pid=0):
         _user_info = get_user_info(_user)
         if _user_info is False:  # p.e. chroot environment
             return 'root'
-        else:
-            return _user_info['name']
+
+        return _user_info['name']
 
     return _user
 
@@ -413,8 +414,8 @@ def get_user_info(user):
 
 
 def read_file(filename, mode='rb'):
-    with open(filename, mode) as fp:
-        ret = fp.read()
+    with open(filename, mode) as _file:
+        ret = _file.read()
 
     return ret
 
@@ -487,10 +488,11 @@ def query_yes_no(question, default="yes"):
         choice = input().lower()
         if default is not None and choice == '':
             return default
-        elif choice in valid.keys():
+
+        if choice in valid.keys():
             return valid[choice]
-        else:
-            print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
+
+        print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
 
 
 def process_is_active(pid):
@@ -561,19 +563,19 @@ def get_current_user():
 def get_distro_project():
     if is_windows():
         return slugify('{}-{}'.format(platform.system(), platform.version()))
-    else:
-        import distro
 
-        return slugify('{}-{}'.format(distro.name(), distro.version()))
+    import distro
+
+    return slugify('{}-{}'.format(distro.name(), distro.version()))
 
 
 def get_distro_name():
     if is_windows():
         return slugify(platform.system())
-    else:
-        import distro
 
-        return slugify(distro.name().strip().split()[0])
+    import distro
+
+    return slugify(distro.name().strip().split()[0])
 
 
 def get_mfc_project():
