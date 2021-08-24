@@ -20,17 +20,14 @@ import sys
 import errno
 import json
 import tempfile
-import requests
 import socket
+import gettext
+import logging
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
 
-import gettext
-_ = gettext.gettext
-
-import logging
-logger = logging.getLogger(__name__)
+import requests
 
 from datetime import datetime
 
@@ -45,6 +42,9 @@ from .command import MigasFreeCommand
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
 __all__ = 'MigasFreeSync'
+
+_ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class MigasFreeSync(MigasFreeCommand):
@@ -64,7 +64,7 @@ class MigasFreeSync(MigasFreeCommand):
         if utils.is_linux():
             signal.signal(signal.SIGQUIT, self._exit_gracefully)
 
-        MigasFreeCommand.__init__(self)
+        super().__init__(self)
         self._init_environment()
 
     def _init_environment(self):
@@ -256,9 +256,9 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return ''
-            else:
-                self.operation_failed(response['error']['info'])
-                sys.exit(errno.ENODATA)
+
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
@@ -284,9 +284,9 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return []
-            else:
-                self.operation_failed(response['error']['info'])
-                sys.exit(errno.ENODATA)
+
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
@@ -312,9 +312,9 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return None
-            else:
-                self.operation_failed(response['error']['info'])
-                sys.exit(errno.ENODATA)
+
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
@@ -348,9 +348,9 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return None
-            else:
-                self.operation_failed(response['error']['info'])
-                sys.exit(errno.ENODATA)
+
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
 
         self.operation_ok()
 
@@ -787,7 +787,7 @@ class MigasFreeSync(MigasFreeCommand):
     def sync_logical_devices(self):
         devices = self.get_devices()
         if not devices:
-            return
+            return False
 
         if not self.migas_manage_devices:
             _msg = _('Assigned device(s) but client does not manage devices')
@@ -804,7 +804,8 @@ class MigasFreeSync(MigasFreeCommand):
             _msg = _('A class was not detected to manage the devices')
             logging.error(_msg)
             self._write_error(_msg)
-            return
+
+            return False
 
         logical_devices = {}  # key is id field
         for device in devices['logical']:
@@ -820,7 +821,8 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
-            return
+
+            return False
         except NameError:
             self._show_message(_('Synchronizing logical devices...'))
             _msg = _('Printer service is required. If not, configure Manage_Devices parameter to False.')
@@ -828,7 +830,7 @@ class MigasFreeSync(MigasFreeCommand):
             logging.error(_msg)
             self._write_error(_msg)
 
-            return
+            return False
 
         try:
             printers = self.devices_class.get_printers()
@@ -839,7 +841,7 @@ class MigasFreeSync(MigasFreeCommand):
             logging.error(_msg)
             self._write_error(_msg)
 
-            return
+            return False
 
         for printer in printers:
             # check if printer is a migasfree printer (by format)
@@ -903,6 +905,10 @@ class MigasFreeSync(MigasFreeCommand):
                     self.operation_failed(_msg)
                     logging.error(_msg)
                     self._write_error(_msg)
+
+                    return False
+
+        return True
 
     def run(self, args=None):
         if hasattr(args, 'quiet') and args.quiet:
