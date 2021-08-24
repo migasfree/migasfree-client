@@ -39,7 +39,7 @@ class MigasFreeUpload(MigasFreeCommand):
     _directory = None
 
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
         self.PRIVATE_KEY = 'packager.pri'
         self._init_url_request()
 

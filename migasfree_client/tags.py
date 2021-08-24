@@ -44,7 +44,7 @@ class MigasFreeTags(MigasFreeCommand):
 
     def __init__(self):
         self._user_is_not_root()
-        super().__init__(self)
+        super().__init__()
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))

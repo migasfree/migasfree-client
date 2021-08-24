@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class MigasFreeInfo(MigasFreeCommand):
     def __init__(self):
         self._user_is_not_root()
-        super().__init__(self)
+        super().__init__()
 
     def get_label(self):
         if not self._computer_id:

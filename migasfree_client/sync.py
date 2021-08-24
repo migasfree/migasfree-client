@@ -64,7 +64,7 @@ class MigasFreeSync(MigasFreeCommand):
         if utils.is_linux():
             signal.signal(signal.SIGQUIT, self._exit_gracefully)
 
-        super().__init__(self)
+        super().__init__()
         self._init_environment()
 
     def _init_environment(self):
