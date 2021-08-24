@@ -18,10 +18,10 @@
 import os
 import sys
 import errno
-import requests
 import json
 import gettext
 import logging
+import requests
 
 from requests_toolbelt import MultipartEncoder
 
@@ -36,7 +36,7 @@ _ = gettext.gettext
 logger = logging.getLogger(__name__)
 
 
-class UrlRequest(object):
+class UrlRequest():
     _debug = False
 
     _safe = True
@@ -52,12 +52,12 @@ class UrlRequest(object):
     ]
 
     def __init__(
-        self,
-        debug=False,
-        proxy='',
-        project='',
-        keys=None,
-        cert=False
+            self,
+            debug=False,
+            proxy='',
+            project='',
+            keys=None,
+            cert=False
     ):
         if keys is None:
             keys = {}
@@ -87,14 +87,14 @@ class UrlRequest(object):
         return True
 
     def run(
-        self,
-        url,
-        data='',
-        upload_files=None,
-        safe=True,
-        exit_on_error=True,
-        debug=False,
-        keys=None
+            self,
+            url,
+            data='',
+            upload_files=None,
+            safe=True,
+            exit_on_error=True,
+            debug=False,
+            keys=None
     ):
         if keys is None:
             keys = {}
@@ -177,7 +177,7 @@ class UrlRequest(object):
             url += '/'
 
         try:
-            r = requests.post(
+            req = requests.post(
                 url, data=data, headers=headers,
                 proxies=proxies
             )
@@ -190,10 +190,10 @@ class UrlRequest(object):
                 }
             }
 
-        if r.status_code not in self._ok_codes:
-            return self._error_response(r, url)
+        if req.status_code not in self._ok_codes:
+            return self._error_response(req, url)
 
-        return self._evaluate_response(r.json(), safe)
+        return self._evaluate_response(req.json(), safe)
 
     def _evaluate_response(self, json_response, safe=True):
         if safe and 'msg' in json_response:
@@ -205,7 +205,7 @@ class UrlRequest(object):
         else:
             response = json_response
 
-        logger.debug('Response text: %s' % response)
+        logger.debug('Response text: %s', response)
 
         return response
 
