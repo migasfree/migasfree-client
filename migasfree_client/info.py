@@ -15,29 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
-__license__ = 'GPLv3'
-__all__ = 'MigasFreeInfo'
-
 import sys
 import errno
-
 import gettext
-_ = gettext.gettext
-
 import logging
-logger = logging.getLogger(__name__)
 
 from rich.table import Table
 
 from .command import MigasFreeCommand
 from .utils import ALL_OK
 
+__author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
+__license__ = 'GPLv3'
+__all__ = 'MigasFreeInfo'
+
+_ = gettext.gettext
+logger = logging.getLogger(__name__)
+
 
 class MigasFreeInfo(MigasFreeCommand):
     def __init__(self):
         self._user_is_not_root()
-        MigasFreeCommand.__init__(self)
+        super().__init__(self)
 
     def get_label(self):
         if not self._computer_id:
@@ -53,7 +52,7 @@ class MigasFreeInfo(MigasFreeCommand):
                 debug=self._debug
             )
 
-        logger.debug('Response get_label: {}'.format(response))
+        logger.debug('Response get_label: %s', response)
         if self._debug:
             self.console.log('Response: {}'.format(response))
 
