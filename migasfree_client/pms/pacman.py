@@ -54,52 +54,40 @@ class Pacman(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{} --sync --needed {}'.format(
-            self._pms,
-            package.strip()
-        )
-        logging.debug(self._cmd)
+        cmd = '{} --sync --needed {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def remove(self, package):
         """
         bool remove(string package)
         """
 
-        self._cmd = '{} --remove --recursive {}'.format(
-            self._pms,
-            package.strip()
-        )
-        logging.debug(self._cmd)
+        cmd = '{} --remove --recursive {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def search(self, pattern):
         """
         bool search(string pattern)
         """
 
-        self._cmd = '{} --sync --search {}'.format(
-            self._pms,
-            pattern.strip()
-        )
-        logging.debug(self._cmd)
+        cmd = '{} --sync --search {}'.format(self._pms, pattern.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def update_silent(self):
         """
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{} --sync --refresh -uu --noconfirm'.format(self._pms)
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        cmd = '{} --sync --refresh -uu --noconfirm'.format(self._pms)
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -118,16 +106,13 @@ class Pacman(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} --sync --needed --noconfirm {}'.format(
+        cmd = '{} --sync --needed --noconfirm {}'.format(
             self._pms,
             ' '.join(package_set)
         )
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -146,16 +131,13 @@ class Pacman(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{} --remove --recursive --noconfirm {}'.format(
+        cmd = '{} --remove --recursive --noconfirm {}'.format(
             self._pms,
             ' '.join(package_set)
         )
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -164,23 +146,20 @@ class Pacman(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '{} --query {}'.format(
-            self._pms,
-            package.strip()
-        )
-        logging.debug(self._cmd)
+        cmd = '{} --query {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd, interactive=False)[0] == 0
+        return execute(cmd, interactive=False)[0] == 0
 
     def clean_all(self):
         """
         bool clean_all(void)
         """
 
-        self._cmd = '{} --remove'.format(self._pms_cache)
-        logging.debug(self._cmd)
+        cmd = '{} --remove'.format(self._pms_cache)
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def query_all(self):
         """
@@ -249,23 +228,20 @@ class Pacman(Pms):
         TODO test
         """
 
-        self._cmd = '{} --add {} > /dev/null'.format(
-            self._pms_key,
-            file_key
-        )
-        logging.debug(self._cmd)
+        cmd = '{} --add {} > /dev/null'.format(self._pms_key, file_key)
+        logging.debug(cmd)
 
-        return execute(self._cmd)[0] == 0
+        return execute(cmd)[0] == 0
 
     def get_system_architecture(self):
         """
         string get_system_architecture(void)
         """
 
-        self._cmd = 'uname -m'
-        logging.debug(self._cmd)
+        cmd = 'uname -m'
+        logging.debug(cmd)
 
-        _ret, _arch, _ = execute(self._cmd, interactive=False)
+        _ret, _arch, _ = execute(cmd, interactive=False)
 
         return _arch.strip() if _ret == 0 else ''
 
@@ -274,10 +250,9 @@ class Pacman(Pms):
         list available_packages(void)
         """
 
-        self._cmd = '{} --sync --search --quiet'.format(self._pms)
-        logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd, interactive=False)
-        if _ret == 0:
-            return sorted(_output.strip().splitlines())
+        cmd = '{} --sync --search --quiet'.format(self._pms)
+        logging.debug(cmd)
 
-        return []
+        _ret, _output, _error = execute(cmd, interactive=False)
+
+        return sorted(_output.strip().splitlines()) if _ret == 0 else []
