@@ -18,7 +18,7 @@
 
 import logging
 
-from ..utils import execute, write_file
+from ..utils import execute
 
 from .pms import Pms
 
@@ -44,39 +44,40 @@ class Winget(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{} install --scope=machine --silent {}'.format(self._pms, package.strip())
-        logging.debug(self._cmd)
+        cmd = '{} install --scope=machine --silent {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd, interactive=True)[0] == 0
+        return execute(cmd, interactive=True)[0] == 0
 
     def remove(self, package):
         """
         bool remove(string package)
         """
 
-        self._cmd = '{} uninstall --silent {}'.format(self._pms, package.strip())
-        logging.debug(self._cmd)
+        cmd = '{} uninstall --silent {}'.format(self._pms, package.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd, interactive=True)[0] == 0
+        return execute(cmd, interactive=True)[0] == 0
 
     def search(self, pattern):
         """
         bool search(string pattern)
         """
 
-        self._cmd = '{} search {}'.format(self._pms, pattern.strip())
-        logging.debug(self._cmd)
+        cmd = '{} search {}'.format(self._pms, pattern.strip())
+        logging.debug(cmd)
 
-        return execute(self._cmd, interactive=True)[0] == 0
+        return execute(cmd, interactive=True)[0] == 0
 
     def update_silent(self):
         """
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{} upgrade --all --silent'.format(self._pms)
-        logging.debug(self._cmd)
-        _ret, _, _error = execute(self._cmd, verbose=True)
+        cmd = '{} upgrade --all --silent'.format(self._pms)
+        logging.debug(cmd)
+
+        _ret, _, _error = execute(cmd, verbose=True)
 
         return _ret == 0, _error
 
@@ -96,12 +97,10 @@ class Winget(Pms):
             return True, None
 
         for pkg in package_set[:]:
-            self._cmd = '{} install --scope=machine --silent {}'.format(
-                self._pms,
-                pkg
-            )
-            logging.debug(self._cmd)
-            _ret, _, _error = execute(self._cmd, verbose=True)
+            cmd = '{} install --scope=machine --silent {}'.format(self._pms, pkg)
+            logging.debug(cmd)
+
+            _ret, _, _error = execute(cmd, verbose=True)
 
         return _ret == 0, _error
 
@@ -121,12 +120,10 @@ class Winget(Pms):
             return True, None
 
         for pkg in package_set[:]:
-            self._cmd = '{} uninstall --silent {}'.format(
-                self._pms,
-                pkg
-            )
-            logging.debug(self._cmd)
-            _ret, _, _error = execute(self._cmd, verbose=True)
+            cmd = '{} uninstall --silent {}'.format(self._pms, pkg)
+            logging.debug(cmd)
+
+            _ret, _, _error = execute(cmd, verbose=True)
 
         return _ret == 0, _error
 
@@ -135,10 +132,10 @@ class Winget(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '{} list {}'.format(self._pms, package)
-        logging.debug(self._cmd)
+        cmd = '{} list {}'.format(self._pms, package)
+        logging.debug(cmd)
 
-        return execute(self._cmd, interactive=True)[0] == 0
+        return execute(cmd, interactive=True)[0] == 0
 
     def clean_all(self):
         """
@@ -175,15 +172,18 @@ class Winget(Pms):
         bool create_repos(string protocol, string server, list repositories)
         """
 
-        self._cmd = [
+        cmd = [
             '{} source reset --force'.format(self._pms),
             '{} source remove winget'.format(self._pms)
         ]
 
         for repo in repositories:
-            self._cmd.append('{pms} source add -n {repo}'.format(pms=self._pms,repo=repo.get('source_template').format(protocol=protocol,server=server)))
+            cmd.append('{pms} source add -n {repo}'.format(
+                pms=self._pms,
+                repo=repo.get('source_template').format(protocol=protocol, server=server)
+            ))
 
-        _, _packages, _ = execute(' && '.join(self._cmd))
+        _, _packages, _ = execute(' && '.join(cmd))
 
         return True  # FIXME
 
@@ -206,10 +206,9 @@ class Winget(Pms):
         list available_packages(void)
         """
 
-        self._cmd = '{} search'.format(self._pms)
-        logging.debug(self._cmd)
-        _ret, _output, _error = execute(self._cmd)
-        if _ret == 0:
-            return sorted(_output.strip().splitlines())
+        cmd = '{} search'.format(self._pms)
+        logging.debug(cmd)
 
-        return []
+        _ret, _output, _error = execute(cmd)
+
+        return sorted(_output.strip().splitlines()) if _ret == 0 else []
