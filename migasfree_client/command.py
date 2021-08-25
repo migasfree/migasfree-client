@@ -24,6 +24,8 @@ import platform
 import pwd
 import ssl
 
+from socket import setdefaulttimeout
+
 from . import (
     settings,
     utils,
@@ -68,6 +70,8 @@ class MigasFreeCommand(object):
 
     ICON = 'apps/migasfree.svg'
     ICON_COMPLETED = 'actions/migasfree-ok.svg'
+
+    SOCKET_TIMEOUT = 5  # seconds
 
     _url_request = None
 
@@ -192,6 +196,8 @@ class MigasFreeCommand(object):
         self._init_url_request()
 
     def _ssl_cert(self):
+        setdefaulttimeout(self.SOCKET_TIMEOUT)
+
         address = self.migas_server.split(':')
         host = address[0]
         port = int(address[1]) if len(address) == 2 else 80
