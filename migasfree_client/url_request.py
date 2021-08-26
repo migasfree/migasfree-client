@@ -203,7 +203,7 @@ class UrlRequest(object):
         else:
             print(_response)
 
-        if not isinstance(_ret, dict) or not ('%s.return' % cmd) in _ret:
+        if not isinstance(_ret, dict) or not '{0}.return'.format(cmd) in _ret:
             if 'errmfs' in _ret:
                 _msg = server_errors.error_info(_ret['errmfs']['code'])
                 logging.error(_msg)
@@ -211,9 +211,9 @@ class UrlRequest(object):
 
             _msg = 'url_request unexpected response: %s. Expected: %s'
             if self._debug:
-                print(_msg % (_ret, '%s.return' % cmd))
+                print(_msg % (_ret, '{0}.return'.format(cmd)))
 
-            logging.critical(_msg, _ret, '%s.return' % cmd)
+            logging.critical(_msg, _ret, '{0}.return'.format(cmd))
             sys.exit(errno.EACCES)
 
         _ret = _ret['%s.return' % cmd]  # unwrapping cmd response
