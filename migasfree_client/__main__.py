@@ -32,7 +32,7 @@ PROGRAM = 'migasfree'
 def parse_args(argv):
     parser = argparse.ArgumentParser(
         prog=PROGRAM,
-        description=_('GNU/Linux Management System (client side)'),
+        description=_('Systems Management System (client side)'),
     )
 
     parser.add_argument(
