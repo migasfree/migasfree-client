@@ -277,7 +277,7 @@ class MigasFreeTags(MigasFreeCommand):
             _response = self._get_tags()
             if options.get:
                 for _item in _response['selected']:
-                    print('"' + _item + '"'),
+                    print('"{0}"'.format(_item)),
             if options.available:
                 print(json.dumps(_response['available'], ensure_ascii=False))
         elif options.set or options.communicate:
