@@ -46,8 +46,6 @@ locale.textdomain(domain)
 
 # http://www.ianbicking.org/illusive-setdefaultencoding.html
 # begin unicode hack
-import sys
-
 if sys.getdefaultencoding() != 'utf-8':
     reload(sys)
     sys.setdefaultencoding('utf-8')
