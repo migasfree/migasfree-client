@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-26 12:13+0200\n"
+"POT-Creation-Date: 2021-09-01 10:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "Register computer at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:59 ../migasfree_client/command.py:476
+#: ../migasfree_client/__main__.py:59 ../migasfree_client/command.py:470
 msgid "User to register computer at server"
 msgstr ""
 
@@ -135,148 +135,152 @@ msgstr ""
 msgid "Failed to configure the log file (%s)"
 msgstr ""
 
-#: ../migasfree_client/command.py:291 ../migasfree_client/url_request.py:230
+#: ../migasfree_client/command.py:285 ../migasfree_client/url_request.py:230
 #, python-format
 msgid "Error creating %s directory"
 msgstr ""
 
-#: ../migasfree_client/command.py:302
+#: ../migasfree_client/command.py:296
 #, python-format
 msgid "Running command %s..."
 msgstr ""
 
-#: ../migasfree_client/command.py:311
+#: ../migasfree_client/command.py:305
 #, python-format
 msgid "Command %s failed: %s"
 msgstr ""
 
-#: ../migasfree_client/command.py:332
+#: ../migasfree_client/command.py:326
 msgid "User has insufficient privileges to execute this command"
 msgstr ""
 
-#: ../migasfree_client/command.py:361 ../migasfree_client/upload.py:54
+#: ../migasfree_client/command.py:355 ../migasfree_client/upload.py:54
 msgid "Autoregistering computer..."
 msgstr ""
 
-#: ../migasfree_client/command.py:419 ../migasfree_client/command.py:452
+#: ../migasfree_client/command.py:413 ../migasfree_client/command.py:446
 #, python-format
 msgid "Key %s created!"
 msgstr ""
 
-#: ../migasfree_client/command.py:421 ../migasfree_client/command.py:456
+#: ../migasfree_client/command.py:415 ../migasfree_client/command.py:450
 msgid "Error writing key file!!!"
 msgstr ""
 
-#: ../migasfree_client/command.py:454
+#: ../migasfree_client/command.py:448
 #, python-format
 msgid "ERROR: not import key: %s!"
 msgstr ""
 
-#: ../migasfree_client/command.py:465
+#: ../migasfree_client/command.py:459
 #, python-format
 msgid "Have you check config options in this machine (%s)?"
 msgstr ""
 
-#: ../migasfree_client/command.py:469
+#: ../migasfree_client/command.py:463
 #, python-format
 msgid "Check %s file and register again"
 msgstr ""
 
-#: ../migasfree_client/command.py:478 ../migasfree_client/upload.py:90
+#: ../migasfree_client/command.py:472 ../migasfree_client/upload.py:90
 #, python-format
 msgid "Empty user. Exiting %s."
 msgstr ""
 
-#: ../migasfree_client/command.py:482
+#: ../migasfree_client/command.py:476
 msgid "Password"
 msgstr ""
 
-#: ../migasfree_client/command.py:485
+#: ../migasfree_client/command.py:479
 msgid "Computer registered at server"
 msgstr ""
 
-#: ../migasfree_client/command.py:564
+#: ../migasfree_client/command.py:558
 #, python-format
-msgid "Running options: %s"
+msgid "Config options: %s"
 msgstr ""
 
-#: ../migasfree_client/command.py:565 ../migasfree_client/upload.py:74
+#: ../migasfree_client/command.py:560 ../migasfree_client/upload.py:74
 msgid "Project"
 msgstr ""
 
-#: ../migasfree_client/command.py:566 ../migasfree_client/label.py:115
+#: ../migasfree_client/command.py:565 ../migasfree_client/label.py:115
 msgid "Server"
 msgstr ""
 
-#: ../migasfree_client/command.py:567
+#: ../migasfree_client/command.py:570
 msgid "Protocol"
 msgstr ""
 
-#: ../migasfree_client/command.py:569
+#: ../migasfree_client/command.py:576
 msgid "Port"
 msgstr ""
 
-#: ../migasfree_client/command.py:571
-msgid "migasfree server version"
-msgstr ""
-
-#: ../migasfree_client/command.py:571
-msgid "None"
-msgstr ""
-
-#: ../migasfree_client/command.py:574
+#: ../migasfree_client/command.py:581
 msgid "Auto update packages"
 msgstr ""
 
-#: ../migasfree_client/command.py:576
+#: ../migasfree_client/command.py:586
 msgid "Manage devices"
 msgstr ""
 
-#: ../migasfree_client/command.py:577
+#: ../migasfree_client/command.py:591
 msgid "Proxy"
 msgstr ""
 
-#: ../migasfree_client/command.py:578
-msgid "SSL certificate"
-msgstr ""
-
-#: ../migasfree_client/command.py:584
-msgid "Warning"
-msgstr ""
-
-#: ../migasfree_client/command.py:585
-msgid "Certificate does not exist and authentication is not guaranteed"
-msgstr ""
-
-#: ../migasfree_client/command.py:589
+#: ../migasfree_client/command.py:596
 msgid "Package Proxy Cache"
 msgstr ""
 
-#: ../migasfree_client/command.py:592
+#: ../migasfree_client/command.py:601
 msgid "Debug"
 msgstr ""
 
-#: ../migasfree_client/command.py:593
+#: ../migasfree_client/command.py:606
 msgid "Computer name"
 msgstr ""
 
-#: ../migasfree_client/command.py:594
+#: ../migasfree_client/command.py:613
+msgid "Running options:"
+msgstr ""
+
+#: ../migasfree_client/command.py:615
+msgid "migasfree server version"
+msgstr ""
+
+#: ../migasfree_client/command.py:615
+msgid "None"
+msgstr ""
+
+#: ../migasfree_client/command.py:617
+msgid "SSL certificate"
+msgstr ""
+
+#: ../migasfree_client/command.py:623
+msgid "Warning"
+msgstr ""
+
+#: ../migasfree_client/command.py:624
+msgid "Certificate does not exist and authentication is not guaranteed"
+msgstr ""
+
+#: ../migasfree_client/command.py:627
 msgid "PMS"
 msgstr ""
 
-#: ../migasfree_client/command.py:595
+#: ../migasfree_client/command.py:628
 msgid "Architecture"
 msgstr ""
 
-#: ../migasfree_client/command.py:650
+#: ../migasfree_client/command.py:682
 msgid "Any PMS was not found. Cannot continue."
 msgstr ""
 
-#: ../migasfree_client/command.py:656
+#: ../migasfree_client/command.py:688
 msgid "Ok"
 msgstr ""
 
-#: ../migasfree_client/command.py:665
+#: ../migasfree_client/command.py:697
 msgid "Failed"
 msgstr ""
 
@@ -560,27 +564,27 @@ msgstr ""
 msgid "Unsetting all tags (command line):"
 msgstr ""
 
-#: ../migasfree_client/tags.py:78
+#: ../migasfree_client/tags.py:79
 msgid "Tag list"
 msgstr ""
 
-#: ../migasfree_client/tags.py:87
+#: ../migasfree_client/tags.py:89
 msgid "Tags must be in \"prefix-value\" format"
 msgstr ""
 
-#: ../migasfree_client/tags.py:100
+#: ../migasfree_client/tags.py:102
 msgid "There is not available tags to select"
 msgstr ""
 
-#: ../migasfree_client/tags.py:106
+#: ../migasfree_client/tags.py:108
 msgid "Change tags"
 msgstr ""
 
-#: ../migasfree_client/tags.py:107
+#: ../migasfree_client/tags.py:109
 msgid "Please, select tags for this computer"
 msgstr ""
 
-#: ../migasfree_client/tags.py:239
+#: ../migasfree_client/tags.py:241
 #, python-format
 msgid "Tags setted: %s"
 msgstr ""
