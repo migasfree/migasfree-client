@@ -107,14 +107,11 @@ class MigasFreeInfo(MigasFreeCommand):
                 print(info[key])
 
     def run(self, args=None):
-        if hasattr(args, 'debug') and args.debug:
-            self._debug = True
-            logger.setLevel(logging.DEBUG)
+        super().run(args)
 
-        if hasattr(args, 'quiet') and args.quiet:
-            self._quiet = True
-        else:
+        if not self._quiet:
             self._show_running_options()
+            print()
 
         self._show_info(key=args.key)
         self.end_of_transmission()
