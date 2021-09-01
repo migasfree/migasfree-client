@@ -74,8 +74,10 @@ class MigasFreeTags(MigasFreeCommand):
         print('\t%s tags --set ""\n' % self.CMD)
 
     def _show_running_options(self):
-        MigasFreeCommand._show_running_options(self)
+        super()._show_running_options()
+
         print('\t%s: %s' % (_('Tag list'), self._tags))
+        print()
 
     def _sanitize(self, tag_list):
         if tag_list:
@@ -235,7 +237,7 @@ class MigasFreeTags(MigasFreeCommand):
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
-        print('')
+        print()
         self.operation_ok(_('Tags setted: %s') % self._tags)
 
         return response
@@ -267,16 +269,13 @@ class MigasFreeTags(MigasFreeCommand):
             mfs.upload_software(software_before, software_history)
 
     def run(self, args=None):
-        if hasattr(args, 'quiet') and args.quiet:
-            self._quiet = True
+        super().run(args)
+        if not self._quiet:
+            print()
 
         if not args or not hasattr(args, 'cmd'):
             self._usage_examples()
             sys.exit(ALL_OK)
-
-        if hasattr(args, 'debug') and args.debug:
-            self._debug = True
-            logger.setLevel(logging.DEBUG)
 
         # actions dispatcher
         if args.get:
