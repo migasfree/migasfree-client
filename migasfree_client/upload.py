@@ -69,7 +69,7 @@ class MigasFreeUpload(MigasFreeCommand):
         print('\t%s upload --dir=local_directory\n' % self.CMD)
 
     def _show_running_options(self):
-        MigasFreeCommand._show_running_options(self)
+        super()._show_running_options()
 
         print('\t%s: %s' % (_('Project'), self.packager_project))
         print('\t%s: %s' % (_('Store'), self.packager_store))
@@ -79,7 +79,7 @@ class MigasFreeUpload(MigasFreeCommand):
             print('\t%s: %s' % (_('File'), self._file))
         if self._directory:
             print('\t%s: %s' % (_('Directory'), self._directory))
-        print('')
+        print()
 
     def _left_parameters(self):
         if not self.packager_user:
@@ -242,12 +242,7 @@ class MigasFreeUpload(MigasFreeCommand):
         return True
 
     def run(self, args=None):
-        if hasattr(args, 'quiet') and args.quiet:
-            self._quiet = True
-
-        if hasattr(args, 'debug') and args.debug:
-            self._debug = True
-            logger.setLevel(logging.DEBUG)
+        super().run(args)
 
         # assign config options
         if args.user:
