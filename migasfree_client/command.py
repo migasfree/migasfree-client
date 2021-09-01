@@ -226,12 +226,6 @@ class MigasFreeCommand():
         logger.debug('Config client: %s', _config_client)
         logger.debug('Config packager: %s', _config_packager)
 
-        self._ssl_cert()
-        self._pms_selection()
-        self._init_url_base()
-        self._init_url_request()
-        self.get_server_info()
-
     def _ssl_cert(self):
         self.migas_ssl_cert = False
         if self.migas_protocol == 'https':
@@ -555,26 +549,71 @@ class MigasFreeCommand():
         )
         logger.debug('Response end_of_transmission: %s', response)
 
-    def _show_running_options(self):
+    def _show_config_options(self):
         conf_file = ''
         if os.path.isfile(settings.CONF_FILE):
             conf_file = settings.CONF_FILE
 
         print()
-        print(_('Running options: %s') % conf_file)
-        print('\t%s: %s' % (_('Project'), self.migas_project))
-        print('\t%s: %s' % (_('Server'), self.migas_server))
-        print('\t%s: %s' % (_('Protocol'), self.migas_protocol))
+        print(_('Config options: %s') % conf_file)
+        print('\t%s: %s %s' % (
+            _('Project'),
+            self.migas_project,
+            '(ENV)' if 'MIGASFREE_CLIENT_PROJECT' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Server'),
+            self.migas_server,
+            '(ENV)' if 'MIGASFREE_CLIENT_SERVER' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Protocol'),
+            self.migas_protocol,
+            '(ENV)' if 'MIGASFREE_CLIENT_PROTOCOL' in os.environ else ''
+        ))
         if self.migas_port:
-            print('\t%s: %s' % (_('Port'), self.migas_port))
+            print('\t%s: %s %s' % (
+                _('Port'),
+                self.migas_port,
+                '(ENV)' if 'MIGASFREE_CLIENT_PORT' in os.environ else ''
+            ))
+        print('\t%s: %s %s' % (
+            _('Auto update packages'),
+            self.migas_auto_update_packages,
+            '(ENV)' if 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Manage devices'),
+            self.migas_manage_devices,
+            '(ENV)' if 'MIGASFREE_CLIENT_MANAGE_DEVICES' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Proxy'),
+            self.migas_proxy,
+            '(ENV)' if 'MIGASFREE_CLIENT_PROXY' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Package Proxy Cache'),
+            self.migas_package_proxy_cache,
+            '(ENV)' if 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Debug'),
+            self._debug,
+            '(ENV)' if 'MIGASFREE_CLIENT_DEBUG' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Computer name'),
+            self.migas_computer_name,
+            '(ENV)' if 'MIGASFREE_CLIENT_COMPUTER_NAME' in os.environ else ''
+        ))
+
+    def _show_running_options(self):
+        print()
+        print(_('Running options:'))
         print('\t%s: %s' % (
             _('migasfree server version'), self._server_info.get('version', _('None')))
         )
-        print('\t%s: %s' % (
-            _('Auto update packages'), self.migas_auto_update_packages
-        ))
-        print('\t%s: %s' % (_('Manage devices'), self.migas_manage_devices))
-        print('\t%s: %s' % (_('Proxy'), self.migas_proxy))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         if self.migas_ssl_cert is not None \
                 and not isinstance(self.migas_ssl_cert, bool) \
@@ -585,15 +624,8 @@ class MigasFreeCommand():
                     _('Certificate does not exist and authentication is not guaranteed')
                 )
             )
-        print('\t%s: %s' % (
-            _('Package Proxy Cache'),
-            self.migas_package_proxy_cache
-        ))
-        print('\t%s: %s' % (_('Debug'), self._debug))
-        print('\t%s: %s' % (_('Computer name'), self.migas_computer_name))
         print('\t%s: %s' % (_('PMS'), self.pms))
         print('\t%s: %s' % (_('Architecture'), self.pms.get_system_architecture()))
-        print()
 
     def _write_error(self, msg, append=False):
         if append:
@@ -670,4 +702,18 @@ class MigasFreeCommand():
             console.style = ''
 
     def run(self, args=None):
-        raise NotImplementedError
+        if hasattr(args, 'debug') and args.debug:
+            self._debug = True
+            logger.setLevel(logging.DEBUG)
+
+        if hasattr(args, 'quiet') and args.quiet:
+            self._quiet = True
+
+        if not self._quiet:
+            self._show_config_options()
+
+        self._ssl_cert()
+        self._pms_selection()
+        self._init_url_base()
+        self._init_url_request()
+        self.get_server_info()
