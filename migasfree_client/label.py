@@ -126,12 +126,7 @@ class MigasFreeLabel(MigasFreeCommand):
             execute_as_user(['cmd', '/c', 'start', _file])
 
     def run(self, args=None):
-        if hasattr(args, 'debug') and args.debug:
-            self._debug = True
-            logger.setLevel(logging.DEBUG)
-
-        if hasattr(args, 'quiet') and args.quiet:
-            self._quiet = True
+        super().run(args)
 
         self._show_label()
         self.end_of_transmission()
