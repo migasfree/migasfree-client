@@ -88,10 +88,10 @@ class MigasFreeSync(MigasFreeCommand):
         sys.exit(errno.EINPROGRESS)
 
     def _show_running_options(self):
-        MigasFreeCommand._show_running_options(self)
+        super()._show_running_options()
 
         print('\t%s: %s' % (_('Graphic user'), self._graphic_user))
-        print('')
+        print()
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
@@ -911,18 +911,14 @@ class MigasFreeSync(MigasFreeCommand):
         return True
 
     def run(self, args=None):
-        if hasattr(args, 'quiet') and args.quiet:
-            self._quiet = True
-        else:
+        super().run(args)
+
+        if not self._quiet:
             self._show_running_options()
 
         if not args or not hasattr(args, 'cmd'):
             self._usage_examples()
             sys.exit(utils.ALL_OK)
-
-        if hasattr(args, 'debug') and args.debug:
-            self._debug = True
-            logger.setLevel(logging.DEBUG)
 
         if args.cmd == 'sync':
             if args.force_upgrade:
