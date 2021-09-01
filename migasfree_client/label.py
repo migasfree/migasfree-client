@@ -39,7 +39,7 @@ HTML_TEMPLATE = """<!doctype html>
         <meta charset="utf-8" />
         <style type="text/css">
         body {
-            width: 25em;
+            width: 30em;
             height: 10em;
             border: 1px solid #000;
             padding: .5em 1em;
