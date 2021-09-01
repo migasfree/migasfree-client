@@ -267,6 +267,13 @@ class MigasFreeCommand():
             cert=self.migas_ssl_cert
         )
 
+    def _init_command(self):
+        self._ssl_cert()
+        self._pms_selection()
+        self._init_url_base()
+        self._init_url_request()
+        self.get_server_info()
+
     def api_protocol(self):
         return self.migas_protocol
 
@@ -512,6 +519,9 @@ class MigasFreeCommand():
             self._server_info = response
 
     def get_computer_id(self):
+        if not self._url_base:
+            self._init_command()
+
         if self._computer_id:
             return self._computer_id
 
@@ -702,6 +712,8 @@ class MigasFreeCommand():
             console.style = ''
 
     def run(self, args=None):
+        self._init_command()
+
         if hasattr(args, 'debug') and args.debug:
             self._debug = True
             logger.setLevel(logging.DEBUG)
@@ -711,9 +723,3 @@ class MigasFreeCommand():
 
         if not self._quiet:
             self._show_config_options()
-
-        self._ssl_cert()
-        self._pms_selection()
-        self._init_url_base()
-        self._init_url_request()
-        self.get_server_info()
