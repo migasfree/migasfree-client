@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,10 +48,7 @@ class Zypper(Pms):
         bool install(string package)
         """
 
-        cmd = '{} install --no-force-resolution {}'.format(
-            self._pms,
-            package.strip()
-        )
+        cmd = f'{self._pms} install --no-force-resolution {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -61,7 +58,7 @@ class Zypper(Pms):
         bool remove(string package)
         """
 
-        cmd = '{} remove {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} remove {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -71,7 +68,7 @@ class Zypper(Pms):
         bool search(string pattern)
         """
 
-        cmd = '{} search {}'.format(self._pms, pattern.strip())
+        cmd = f'{self._pms} search {pattern.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -81,19 +78,19 @@ class Zypper(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = '{} --non-interactive update --no-force-resolution'.format(self._pms)
+        cmd = f'{self._pms} --non-interactive update --no-force-resolution'
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
         if _ret != 0:
-            return False, '{}\n{}\n{}'.format(_ret, _output, _error)
+            return False, f'{_ret}\n{_output}\n{_error}'
 
-        cmd = '{} lu -a'.format(self._pms)
+        cmd = f'{self._pms} lu -a'
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
-        return _ret == 0, '{}\n{}\n{}'.format(_ret, _output, _error)
+        return _ret == 0, f'{_ret}\n{_output}\n{_error}'
 
     def install_silent(self, package_set):
         """
@@ -101,7 +98,7 @@ class Zypper(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if self.is_installed(pkg):
@@ -110,15 +107,12 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} --non-interactive install --no-force-resolution {}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} --non-interactive install --no-force-resolution {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
-        return _ret == 0, '{}\n{}\n{}'.format(_ret, _output, _error)
+        return _ret == 0, f'{_ret}\n{_output}\n{_error}'
 
     def remove_silent(self, package_set):
         """
@@ -126,7 +120,7 @@ class Zypper(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if not self.is_installed(pkg):
@@ -135,10 +129,7 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} --non-interactive remove {}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} --non-interactive remove {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
@@ -150,7 +141,7 @@ class Zypper(Pms):
         bool is_installed(string package)
         """
 
-        cmd = '{} -q {}'.format(self._pm, package.strip())
+        cmd = f'{self._pm} -q {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -160,10 +151,10 @@ class Zypper(Pms):
         bool clean_all(void)
         """
 
-        cmd = '{} clean --all'.format(self._pms)
+        cmd = f'{self._pms} clean --all'
         logging.debug(cmd)
         if execute(cmd)[0] == 0:
-            cmd = '{} --non-interactive refresh'.format(self._pms)
+            cmd = f'{self._pms} --non-interactive refresh'
             logging.debug(cmd)
 
             return execute(cmd)[0] == 0
@@ -203,7 +194,7 @@ class Zypper(Pms):
         bool import_server_key(string file_key)
         """
 
-        cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
+        cmd = f'{self._pm} --import {file_key} > /dev/null'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
