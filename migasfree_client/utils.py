@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -178,7 +178,7 @@ def execute(cmd, verbose=False, interactive=True):
                         chunk = str(chunk, encoding='utf8')
                     if chunk and chunk != '\n':
                         print(chunk)
-                    _output_buffer = '{}{}'.format(_output_buffer, chunk)
+                    _output_buffer = f'{_output_buffer}{chunk}'
 
     _output, _error = _process.communicate()
 
@@ -276,7 +276,7 @@ def get_graphic_pid():
         'mate-session',          # MATE
     ]
     for _process in _graphic_environments:
-        _pid = subprocess.getoutput('pidof -s {}'.format(_process))
+        _pid = subprocess.getoutput(f'pidof -s {_process}')
         if _pid:
             return [_pid, _process]
 
@@ -298,7 +298,7 @@ def get_graphic_user(pid=0):
         if not pid:
             return ''
 
-    _user = subprocess.getoutput('ps hp {} -o "%U"'.format(pid))
+    _user = subprocess.getoutput(f'ps hp {pid} -o "%U"')
     if _user.isdigit():
         # ps command not always show username (show uid if len(username) > 8)
         _user_info = get_user_info(_user)
@@ -339,7 +339,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
         # a data line ends in 0 byte, not newline
         _display = grep(
             'DISPLAY',
-            open('/proc/{}/environ'.format(pid)).read().split('\0')
+            open(f'/proc/{pid}/environ').read().split('\0')
         )
         if _display:
             _display = _display[0].split('=').pop()
@@ -475,13 +475,13 @@ def query_yes_no(question, default="yes"):
         _("no"): "no", _("n"): "no"
     }
     if default is None:
-        prompt = ' %s ' % _("[y/n]")
+        prompt = f' {_("[y/n]")} '
     elif default == "yes":
-        prompt = ' %s ' % _("[Y/n]")
+        prompt = f' {_("[Y/n]")} '
     elif default == "no":
-        prompt = ' %s ' % _("[y/N]")
+        prompt = f' {_("[y/N]")} '
     else:
-        raise ValueError("invalid default answer: '%s'" % default)
+        raise ValueError(f"invalid default answer: '{default}'")
 
     while 1:
         sys.stdout.write(question + prompt)
@@ -557,16 +557,16 @@ def get_current_user():
     else:
         _fullname = _info['fullname']
 
-    return '{}~{}'.format(_graphic_user, _fullname)
+    return f'{_graphic_user}~{_fullname}'
 
 
 def get_distro_project():
     if is_windows():
-        return slugify('{}-{}'.format(platform.system(), platform.version()))
+        return slugify(f'{platform.system()}-{platform.version()}')
 
     import distro
 
-    return slugify('{}-{}'.format(distro.name(), distro.version()))
+    return slugify(f'{distro.name()}-{distro.version()}')
 
 
 def get_distro_name():
@@ -610,7 +610,7 @@ def get_smbios_version():
 def get_uuid_from_mac():
     from . import network
 
-    return '00000000-0000-0000-0000-{}'.format(network.get_first_mac())
+    return f'00000000-0000-0000-0000-{network.get_first_mac()}'
 
 
 def get_hardware_uuid():
