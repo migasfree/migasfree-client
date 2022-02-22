@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -107,8 +107,8 @@ class MigasFreeCommand():
     }
 
     CMD = 'migasfree'  # /usr/bin/migasfree
-    LOCK_FILE = os.path.join(settings.TMP_PATH, '{}.pid'.format(CMD))
-    ERROR_FILE = os.path.join(settings.TMP_PATH, '{}.err'.format(CMD))
+    LOCK_FILE = os.path.join(settings.TMP_PATH, f'{CMD}.pid')
+    ERROR_FILE = os.path.join(settings.TMP_PATH, f'{CMD}.err')
 
     PUBLIC_KEY = 'server.pub'
     PRIVATE_KEY = ''
@@ -145,7 +145,7 @@ class MigasFreeCommand():
             'MIGASFREE_CLIENT_PROJECT', utils.get_mfc_project()
         )
 
-        self.PRIVATE_KEY = '{}.pri'.format(self.migas_project)
+        self.PRIVATE_KEY = f'{self.migas_project}.pri'
 
         self.migas_computer_name = os.environ.get(
             'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
@@ -248,7 +248,7 @@ class MigasFreeCommand():
         self._url_base = '{}://{}{}'.format(
             self.migas_protocol,
             self.migas_server,
-            ':{}'.format(self.migas_port) if self.migas_port else ''
+            f':{self.migas_port}' if self.migas_port else ''
         )
 
     def _init_url_request(self):
@@ -474,13 +474,13 @@ class MigasFreeCommand():
         if not self._auto_register():
             if not user:
                 sys.stdin = open('/dev/tty')
-                user = input('%s: ' % _('User to register computer at server'))
+                user = input(f"{_('User to register computer at server')}: ")
                 if not user:
                     self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
                     logger.info('Empty user in register computer option')
                     sys.exit(errno.EAGAIN)
 
-            password = getpass.getpass('%s: ' % _('Password'))
+            password = getpass.getpass(f"{_('Password')}: ")
             self._save_sign_keys(user, password)
 
         self.operation_ok(_('Computer registered at server'))
@@ -624,7 +624,7 @@ class MigasFreeCommand():
         print('\t%s: %s' % (
             _('migasfree server version'), self._server_info.get('version', _('None')))
         )
-        print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
+        print(f'\t{_("SSL certificate")}: {self.migas_ssl_cert}')
         if self.migas_ssl_cert is not None \
                 and not isinstance(self.migas_ssl_cert, bool) \
                 and not os.path.exists(self.migas_ssl_cert):
@@ -634,8 +634,8 @@ class MigasFreeCommand():
                     _('Certificate does not exist and authentication is not guaranteed')
                 )
             )
-        print('\t%s: %s' % (_('PMS'), self.pms))
-        print('\t%s: %s' % (_('Architecture'), self.pms.get_system_architecture()))
+        print(f'\t{_("PMS")}: {self.pms}')
+        print(f'\t{_("Architecture")}: {self.pms.get_system_architecture()}')
 
     def _write_error(self, msg, append=False):
         if append:
@@ -662,9 +662,9 @@ class MigasFreeCommand():
     def _search_pms():
         for item in get_available_pms():
             if utils.is_windows():
-                cmd = 'where {}'.format(item[0])
+                cmd = f'where {item[0]}'
             else:
-                cmd = 'command -v {}'.format(item[0])
+                cmd = f'command -v {item[0]}'
             ret, _, _ = utils.execute(cmd, interactive=False)
             if ret == 0:
                 return item[1]
