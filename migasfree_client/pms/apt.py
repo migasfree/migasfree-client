@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,10 +58,7 @@ class Apt(Pms):
         bool install(string package)
         """
 
-        cmd = '{} install -o APT::Get::Purge=true {}'.format(
-            self._pms,
-            package.strip()
-        )
+        cmd = f'{self._pms} install -o APT::Get::Purge=true {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -71,7 +68,7 @@ class Apt(Pms):
         bool remove(string package)
         """
 
-        cmd = '{} purge {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} purge {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -81,7 +78,7 @@ class Apt(Pms):
         bool search(string pattern)
         """
 
-        cmd = '{} search {}'.format(self._pms_search, pattern.strip())
+        cmd = f'{self._pms_search} search {pattern.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -91,10 +88,7 @@ class Apt(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = '{} {} dist-upgrade'.format(
-            self._pms,
-            self._silent_options
-        )
+        cmd = f'{self._pms} {self._silent_options} dist-upgrade'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -107,7 +101,7 @@ class Apt(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if self.is_installed(pkg):
@@ -116,11 +110,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} {} install {}'.format(
-            self._pms,
-            self._silent_options,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} {self._silent_options} install {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -133,7 +123,7 @@ class Apt(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if not self.is_installed(pkg):
@@ -142,11 +132,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} {} purge {}'.format(
-            self._pms,
-            self._silent_options,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} {self._silent_options} purge {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -158,10 +144,7 @@ class Apt(Pms):
         bool is_installed(string package)
         """
 
-        cmd = '{} --status {} | grep "Status: install ok installed"'.format(
-            self._pm,
-            package.strip()
-        )
+        cmd = f'{self._pm} --status {package.strip()} | grep "Status: install ok installed"'
         logging.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -171,12 +154,12 @@ class Apt(Pms):
         bool clean_all(void)
         """
 
-        cmd = '{} clean'.format(self._pms)
+        cmd = f'{self._pms} clean'
         logging.debug(cmd)
 
         if execute(cmd)[0] == 0:
             execute('rm --recursive --force /var/lib/apt/lists')
-            cmd = '{} -o Acquire::Languages=none --assume-yes update'.format(self._pms)
+            cmd = f'{self._pms} -o Acquire::Languages=none --assume-yes update'
             logging.debug(cmd)
 
             return execute(cmd)[0] == 0
@@ -189,10 +172,7 @@ class Apt(Pms):
         list format: name_version_architecture.extension
         """
 
-        _, _packages, _ = execute(
-            '{} --list'.format(self._pm),
-            interactive=False
-        )
+        _, _packages, _ = execute(f'{self._pm} --list', interactive=False)
         if not _packages:
             return []
 
@@ -201,7 +181,7 @@ class Apt(Pms):
         for _line in _packages:
             if _line.startswith('ii'):
                 _tmp = re.split(' +', _line)
-                _result.append('{}_{}_{}.deb'.format(_tmp[1], _tmp[2], _tmp[3]))
+                _result.append(f'{_tmp[1]}_{_tmp[2]}_{_tmp[3]}.deb')
 
         return _result
 
@@ -221,7 +201,7 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {} > /dev/null'.format(file_key)
+        cmd = f'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {file_key} > /dev/null'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -231,7 +211,7 @@ class Apt(Pms):
         string get_system_architecture(void)
         """
 
-        cmd = 'echo "$(%(pm)s --print-architecture) $(%(pm)s --print-foreign-architectures)"' % {'pm': self._pm}
+        cmd = f'echo "$({self._pm} --print-architecture) $({self._pm} --print-foreign-architectures)"'
         logging.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
@@ -243,7 +223,7 @@ class Apt(Pms):
         list available_packages(void)
         """
 
-        cmd = '{} pkgnames'.format(self._pms_search)
+        cmd = f'{self._pms_search} pkgnames'
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
