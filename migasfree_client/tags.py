@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,33 +50,33 @@ class MigasFreeTags(MigasFreeCommand):
         print('\n' + _('Examples:'))
 
         print('  ' + _('Get tags in server (JSON format):'))
-        print('\t%s tags -g' % self.CMD)
-        print('\t%s tags --get\n' % self.CMD)
+        print(f'\t{self.CMD} tags -g')
+        print(f'\t{self.CMD} tags --get\n')
 
         print('  ' + _('Communicate tags to server (command line):'))
-        print('\t%s tags -c tag... ' % self.CMD)
-        print('\t%s tags --communicate tag...\n' % self.CMD)
+        print(f'\t{self.CMD} tags -c tag...')
+        print(f'\t{self.CMD} tags --communicate tag...\n')
 
         print('  ' + _('Communicate tags to server (with GUI):'))
-        print('\t%s tags -c' % self.CMD)
-        print('\t%s tags --communicate\n' % self.CMD)
+        print(f'\t{self.CMD} tags -c')
+        print(f'\t{self.CMD} tags --communicate\n')
 
         print('  ' + _('Set tags (command line):'))
-        print('\t%s tags -s tag...' % self.CMD)
-        print('\t%s tags --set tag...\n' % self.CMD)
+        print(f'\t{self.CMD} tags -s tag...')
+        print(f'\t{self.CMD} tags --set tag...\n')
 
         print('  ' + _('Set tags (with GUI):'))
-        print('\t%s tags -s' % self.CMD)
-        print('\t%s tags --set\n' % self.CMD)
+        print(f'\t{self.CMD} tags -s')
+        print(f'\t{self.CMD} tags --set\n')
 
         print('  ' + _('Unsetting all tags (command line):'))
-        print('\t%s tags -s ""' % self.CMD)
-        print('\t%s tags --set ""\n' % self.CMD)
+        print(f'\t{self.CMD} tags -s ""')
+        print(f'\t{self.CMD} tags --set ""\n')
 
     def _show_running_options(self):
         super()._show_running_options()
 
-        print('\t%s: %s' % (_('Tag list'), self._tags))
+        print(f'\t{_("Tag list")}: {self._tags}')
         print()
 
     def _sanitize(self, tag_list):
@@ -133,7 +133,7 @@ class MigasFreeTags(MigasFreeCommand):
                 value.sort()
                 for item in value:
                     tag_active = item in assigned
-                    cmd += ' "%s" "%s" "%s"' % (tag_active, item, key)
+                    cmd += f' "{tag_active}" "{item}" "{key}"'
         else:
             cmd = "dialog --backtitle '%s' \
                 --separate-output \
@@ -144,7 +144,7 @@ class MigasFreeTags(MigasFreeCommand):
                 value.sort()
                 for item in value:
                     tag_active = 'on' if item in assigned else 'off'
-                    cmd += " '%s' '%s' %s" % (item, key, tag_active)
+                    cmd += f" '{item}' '{key}' {tag_active}"
 
         logger.debug('Change tags command: %s', cmd)
         ret, out, error = execute(cmd, interactive=False)
@@ -173,7 +173,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Response get_assigned_tags: %s', response)
         if self._debug:
-            self.console.log('Response: %s' % response)
+            self.console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -200,7 +200,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Response get_available_tags: %s', response)
         if self._debug:
-            self.console.log('Response: %s' % response)
+            self.console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -231,7 +231,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Setting tags response: %s', response)
         if self._debug:
-            self.console.log('Response: %s' % response)
+            self.console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
