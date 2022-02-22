@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2022 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ class Winget(Pms):
         bool install(string package)
         """
 
-        cmd = '{} install --scope=machine --silent {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} install --scope=machine --silent {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
@@ -54,7 +54,7 @@ class Winget(Pms):
         bool remove(string package)
         """
 
-        cmd = '{} uninstall --silent {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} uninstall --silent {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
@@ -64,7 +64,7 @@ class Winget(Pms):
         bool search(string pattern)
         """
 
-        cmd = '{} search {}'.format(self._pms, pattern.strip())
+        cmd = f'{self._pms} search {pattern.strip()}'
         logging.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
@@ -74,7 +74,7 @@ class Winget(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = '{} upgrade --all --silent'.format(self._pms)
+        cmd = f'{self._pms} upgrade --all --silent'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, verbose=True)
@@ -87,7 +87,7 @@ class Winget(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if self.is_installed(pkg):
@@ -97,7 +97,7 @@ class Winget(Pms):
             return True, None
 
         for pkg in package_set[:]:
-            cmd = '{} install --scope=machine --silent {}'.format(self._pms, pkg)
+            cmd = f'{self._pms} install --scope=machine --silent {pkg}'
             logging.debug(cmd)
 
             _ret, _, _error = execute(cmd, verbose=True)
@@ -110,7 +110,7 @@ class Winget(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if not self.is_installed(pkg):
@@ -120,7 +120,7 @@ class Winget(Pms):
             return True, None
 
         for pkg in package_set[:]:
-            cmd = '{} uninstall --silent {}'.format(self._pms, pkg)
+            cmd = f'{self._pms} uninstall --silent {pkg}'
             logging.debug(cmd)
 
             _ret, _, _error = execute(cmd, verbose=True)
@@ -132,7 +132,7 @@ class Winget(Pms):
         bool is_installed(string package)
         """
 
-        cmd = '{} list {}'.format(self._pms, package)
+        cmd = f'{self._pms} list {package}'
         logging.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
@@ -150,10 +150,7 @@ class Winget(Pms):
         list format: name_version_architecture.extension
         """
 
-        _, _packages, _ = execute(
-            '{} list'.format(self._pms),
-            interactive=False
-        )
+        _, _packages, _ = execute(f'{self._pms} list', interactive=False)
 
         _result = list()
         for _line in _packages.splitlines()[4:]:  # Remove header -> 2 lines
@@ -173,8 +170,8 @@ class Winget(Pms):
         """
 
         cmd = [
-            '{} source reset --force'.format(self._pms),
-            '{} source remove winget'.format(self._pms)
+            f'{self._pms} source reset --force',
+            f'{self._pms} source remove winget'
         ]
 
         for repo in repositories:
@@ -206,7 +203,7 @@ class Winget(Pms):
         list available_packages(void)
         """
 
-        cmd = '{} search'.format(self._pms)
+        cmd = f'{self._pms} search'
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd)
