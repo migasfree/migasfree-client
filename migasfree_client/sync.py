@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -90,26 +90,26 @@ class MigasFreeSync(MigasFreeCommand):
     def _show_running_options(self):
         super()._show_running_options()
 
-        print('\t%s: %s' % (_('Graphic user'), self._graphic_user))
+        print(f'\t{_("Graphic user")}: {self._graphic_user}')
         print()
 
     def _usage_examples(self):
         print('\n' + _('Examples:'))
 
         print('  ' + _('Register computer at server:'))
-        print('\t%s register\n' % self.CMD)
+        print(f'\t{self.CMD} register\n')
 
         print('  ' + _('Synchronize computer with server:'))
-        print('\t%s sync\n' % self.CMD)
+        print(f'\t{self.CMD} sync\n')
 
         print('  ' + _('Search package:'))
-        print('\t%s search bluefish\n' % self.CMD)
+        print(f'\t{self.CMD} search bluefish\n')
 
         print('  ' + _('Install package:'))
-        print('\t%s install bluefish\n' % self.CMD)
+        print(f'\t{self.CMD} install bluefish\n')
 
         print('  ' + _('Purge package:'))
-        print('\t%s purge bluefish\n' % self.CMD)
+        print(f'\t{self.CMD} purge bluefish\n')
 
     def _eval_code(self, name, lang, code):
         code = code.replace('\r', '').strip()  # clean code
@@ -134,7 +134,7 @@ class MigasFreeSync(MigasFreeCommand):
         if lang in allowed_languages:
             if lang == 'python' and utils.is_linux():
                 lang = 'python3'
-            cmd = '{} {}'.format(lang, filename)
+            cmd = f'{lang} {filename}'
         else:
             cmd = ':'  # gracefully degradation
 
@@ -174,15 +174,12 @@ class MigasFreeSync(MigasFreeCommand):
             for item in properties:
                 ret, response['sync_attributes'][item['prefix']], error = \
                     self._eval_code(item['prefix'], item['language'], item['code'])
-                info = '{}: {}'.format(
-                    item['prefix'],
-                    response['sync_attributes'][item['prefix']]
-                )
+                info = f"{item['prefix']}: {response['sync_attributes'][item['prefix']]}"
                 if ret == 0 and response['sync_attributes'][item['prefix']].strip() != '':
                     self.operation_ok(info)
                 else:
                     if error:
-                        info = '{}: {}'.format(item['prefix'], error)
+                        info = f"{item['prefix']}: {error}"
                         self.operation_failed(info)
                         self._write_error(
                             _('Error: property %s without value') % item['prefix']
@@ -200,7 +197,7 @@ class MigasFreeSync(MigasFreeCommand):
         with self.console.status(''):
             for item in fault_definitions:
                 ret, result, error = self._eval_code(item['name'], item['language'], item['code'])
-                info = '{}: {}'.format(item['name'], result)
+                info = f"{item['name']}: {result}"
                 if ret == 0:
                     if result:
                         # only send faults with output!!!
@@ -209,7 +206,7 @@ class MigasFreeSync(MigasFreeCommand):
                     else:
                         self.operation_ok(info)
                 else:
-                    self.operation_failed('{}: {}'.format(item['name'], error))
+                    self.operation_failed(f"{item['name']}: {error}")
 
         return response
 
@@ -413,7 +410,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         server = self.migas_server
         if self.migas_package_proxy_cache:
-            server = '{}/{}'.format(self.migas_package_proxy_cache, server)
+            server = f'{self.migas_package_proxy_cache}/{server}'
 
         ret = self.pms.create_repos(
             self.migas_protocol,
@@ -543,7 +540,7 @@ class MigasFreeSync(MigasFreeCommand):
             hardware = json.loads(output)
         except ValueError as e:
             self._show_message(_('Parsing hardware information...'))
-            msg = '{}: {}'.format(_('Hardware information'), str(e))
+            msg = f"{_('Hardware information')}: {str(e)}"
             self.operation_failed(msg)
             logger.error(msg)
             self._write_error(msg)
@@ -703,7 +700,7 @@ class MigasFreeSync(MigasFreeCommand):
                 data={
                     'id': self._computer_id,
                     'start_date': start_date,
-                    'consumer': '{} {}'.format(consumer, utils.get_mfc_release()),
+                    'consumer': f'{consumer} {utils.get_mfc_release()}',
                     'pms_status_ok': self._pms_status_ok
                 },
                 debug=self._debug
