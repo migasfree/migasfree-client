@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2018-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ class MigasFreeInfo(MigasFreeCommand):
 
         logger.debug('Response get_label: %s', response)
         if self._debug:
-            self.console.log('Response: {}'.format(response))
+            self.console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -84,12 +84,7 @@ class MigasFreeInfo(MigasFreeCommand):
                 self.console.print(table)
             else:
                 print(
-                    '{}\t{}\t{}\t{}'.format(
-                        self._computer_id,
-                        info['name'],
-                        info['search'],
-                        info['uuid']
-                    )
+                    f"{self._computer_id}\t{info['name']}\t{info['search']}\t{info['uuid']}"
                 )
         elif key == 'id':
             if not self._quiet:
