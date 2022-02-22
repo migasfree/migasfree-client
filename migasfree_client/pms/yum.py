@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ class Yum(Pms):
         bool install(string package)
         """
 
-        cmd = '{} install {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} install {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -65,7 +65,7 @@ class Yum(Pms):
         bool remove(string package)
         """
 
-        cmd = '{} remove {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} remove {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -75,7 +75,7 @@ class Yum(Pms):
         bool search(string pattern)
         """
 
-        cmd = '{} search {}'.format(self._pms, pattern.strip())
+        cmd = f'{self._pms} search {pattern.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -85,7 +85,7 @@ class Yum(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = '{} --assumeyes update'.format(self._pms)
+        cmd = f'{self._pms} --assumeyes update'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -98,7 +98,7 @@ class Yum(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if self.is_installed(pkg):
@@ -107,10 +107,7 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} --assumeyes install {}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} --assumeyes install {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -123,7 +120,7 @@ class Yum(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if not self.is_installed(pkg):
@@ -132,10 +129,7 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} --assumeyes remove {}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} --assumeyes remove {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -147,7 +141,7 @@ class Yum(Pms):
         bool is_installed(string package)
         """
 
-        cmd = '{} -q {}'.format(self._pm, package.strip())
+        cmd = f'{self._pm} -q {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -157,11 +151,11 @@ class Yum(Pms):
         bool clean_all(void)
         """
 
-        cmd = '{} clean all'.format(self._pms)
+        cmd = f'{self._pms} clean all'
         logging.debug(cmd)
 
         if execute(cmd)[0] == 0:
-            cmd = '{} --assumeyes check-update'.format(self._pms)
+            cmd = f'{self._pms} --assumeyes check-update'
             logging.debug(cmd)
             ret, _, _ = execute(cmd)
 
@@ -202,7 +196,7 @@ class Yum(Pms):
         bool import_server_key(string file_key)
         """
 
-        cmd = '{} --import {} > /dev/null'.format(self._pm, file_key)
+        cmd = f'{self._pm} --import {file_key} > /dev/null'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
