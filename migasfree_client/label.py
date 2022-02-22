@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2015-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ class MigasFreeLabel(MigasFreeCommand):
 
         logger.debug('Response get_label: %s', response)
         if self._debug:
-            self.console.log('Response: {}'.format(response))
+            self.console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -107,12 +107,12 @@ class MigasFreeLabel(MigasFreeCommand):
         image_path = os.path.join(ICON_PATH, self.ICON)
         if is_windows():
             image_path = image_path.replace('\\', '/')
-        image = 'file://{}'.format(image_path)
+        image = f'file://{image_path}'
 
         html = HTML_TEMPLATE % {
             'search': info.get('search'),
             'uuid': info.get('uuid'),
-            'server': '{}: {}'.format(_('Server'), self.migas_server),
+            'server': f'{_("Server")}: {self.migas_server}',
             'helpdesk': info.get('helpdesk'),
             'image': image
         }
