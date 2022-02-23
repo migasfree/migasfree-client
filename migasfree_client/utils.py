@@ -382,8 +382,10 @@ def compare_files(a, b):
 
     # U - open for input as a text file with universal newline interpretation
     # http://www.python.org/dev/peps/pep-0278/
-    _list_a = open(a, 'U').readlines()
-    _list_b = open(b, 'U').readlines()
+    with open(a, mode='U', encoding='utf-8') as f:
+        _list_a = f.readlines()
+    with open(b, mode='U', encoding='utf-8') as f:
+        _list_b = f.readlines()
 
     return compare_lists(_list_a, _list_b)
 
