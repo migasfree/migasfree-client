@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ class Pacman(Pms):
         bool install(string package)
         """
 
-        cmd = '{} --sync --needed {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} --sync --needed {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -64,7 +64,7 @@ class Pacman(Pms):
         bool remove(string package)
         """
 
-        cmd = '{} --remove --recursive {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} --remove --recursive {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -74,7 +74,7 @@ class Pacman(Pms):
         bool search(string pattern)
         """
 
-        cmd = '{} --sync --search {}'.format(self._pms, pattern.strip())
+        cmd = f'{self._pms} --sync --search {pattern.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -84,7 +84,7 @@ class Pacman(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = '{} --sync --refresh -uu --noconfirm'.format(self._pms)
+        cmd = f'{self._pms} --sync --refresh -uu --noconfirm'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -97,7 +97,7 @@ class Pacman(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if self.is_installed(pkg):
@@ -106,10 +106,7 @@ class Pacman(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} --sync --needed --noconfirm {}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} --sync --needed --noconfirm {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -122,7 +119,7 @@ class Pacman(Pms):
         """
 
         if not isinstance(package_set, list):
-            return False, 'package_set is not a list: %s' % package_set
+            return False, f'package_set is not a list: {package_set}'
 
         for pkg in package_set[:]:
             if not self.is_installed(pkg):
@@ -131,10 +128,7 @@ class Pacman(Pms):
         if not package_set:
             return True, None
 
-        cmd = '{} --remove --recursive --noconfirm {}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        cmd = f'{self._pms} --remove --recursive --noconfirm {" ".join(package_set)}'
         logging.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -146,7 +140,7 @@ class Pacman(Pms):
         bool is_installed(string package)
         """
 
-        cmd = '{} --query {}'.format(self._pms, package.strip())
+        cmd = f'{self._pms} --query {package.strip()}'
         logging.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -156,7 +150,7 @@ class Pacman(Pms):
         bool clean_all(void)
         """
 
-        cmd = '{} --remove'.format(self._pms_cache)
+        cmd = f'{self._pms_cache} --remove'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -167,15 +161,12 @@ class Pacman(Pms):
         list format: name_version_architecture.extension
         """
 
-        _, _packages, _ = execute(
-            '{} --query --info'.format(self._pms),
-            interactive=False
-        )
+        _, _packages, _ = execute(f'{self._pms} --query --info', interactive=False)
         if not _packages:
             return []
 
         _packages = _packages.strip().split('\n\n')
-        _result = list()
+        _result = []
         for _info in _packages:
             _pkg_info = {}
             _info = _info.splitlines()
@@ -195,7 +186,7 @@ class Pacman(Pms):
     def _include_config(self):
         # add Include = /etc/pacman.d/migasfree.list in /etc/pacman.conf
         # if not included yet before NOTE pacman-key
-        line = 'Include = {}'.format(self._repo)
+        line = f'Include = {self._repo}'
         config = read_file(self._config).decode()
         if line in config:
             return  # nothing to do
@@ -228,7 +219,7 @@ class Pacman(Pms):
         TODO test
         """
 
-        cmd = '{} --add {} > /dev/null'.format(self._pms_key, file_key)
+        cmd = f'{self._pms_key} --add {file_key} > /dev/null'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -250,7 +241,7 @@ class Pacman(Pms):
         list available_packages(void)
         """
 
-        cmd = '{} --sync --search --quiet'.format(self._pms)
+        cmd = f'{self._pms} --sync --search --quiet'
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
