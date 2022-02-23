@@ -177,7 +177,7 @@ class Apt(Pms):
             return []
 
         _packages = _packages.strip().splitlines()
-        _result = list()
+        _result = []
         for _line in _packages:
             if _line.startswith('ii'):
                 _tmp = re.split(' +', _line)
