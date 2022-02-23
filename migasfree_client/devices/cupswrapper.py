@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ class Cupswrapper(Printer):
         self.platform = 'linux'  # sys.platform value
 
         if 'CUPSWRAPPER' in self.conn and self.conn['CUPSWRAPPER']:
-            self.uri = '{}:{}'.format(self.conn['CUPSWRAPPER'], self.uri)
+            self.uri = f'{self.conn["CUPSWRAPPER"]}:{self.uri}'
 
     def get_connection(self):
         try:
@@ -171,4 +171,4 @@ class Cupswrapper(Printer):
             raise RuntimeError
 
     def md5_file(self):
-        return os.path.join(DEVICES_PATH, '{}.md5'.format(self.logical_id))
+        return os.path.join(DEVICES_PATH, f'{self.logical_id}.md5')
