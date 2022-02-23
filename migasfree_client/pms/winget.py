@@ -152,7 +152,7 @@ class Winget(Pms):
 
         _, _packages, _ = execute(f'{self._pms} list', interactive=False)
 
-        _result = list()
+        _result = []
         for _line in _packages.splitlines()[4:]:  # Remove header -> 2 lines
             _result.append(
                 '{}_{}_{}.yaml'.format(
