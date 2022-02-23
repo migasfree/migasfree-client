@@ -68,10 +68,7 @@ class Printer:
             else:
                 self.port = '9100'
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = 'socket://{}:{}'.format(
-                    self.conn['IP'],
-                    self.port
-                )
+                self.uri = f'socket://{self.conn["IP"]}:{self.port}'
                 if self.conn['LOCATION'] != '':
                     self.location = self.conn['LOCATION']
         elif 'LPT' in device:
@@ -80,28 +77,25 @@ class Printer:
                 self.port = self.conn['PORT']
             else:
                 self.port = '0'
-            self.uri = 'parallel:/dev/lp{}'.format(self.port)
+            self.uri = f'parallel:/dev/lp{self.port}'
         elif 'USB' in device:
             self.conn = device['USB']
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
                 self.port = self.conn['PORT']
             else:
                 self.port = '0'
-            self.uri = 'parallel:/dev/usb/lp{}'.format(self.port)
+            self.uri = f'parallel:/dev/usb/lp{self.port}'
         elif 'SRL' in device:
             self.conn = device['SRL']
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
                 self.port = self.conn['PORT']
             else:
                 self.port = '0'
-            self.uri = 'serial:/dev/ttyS{}'.format(self.port)
+            self.uri = f'serial:/dev/ttyS{self.port}'
         elif 'LPD' in device:
             self.conn = device['LPD']
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = 'lpd://{}/{}'.format(
-                    self.conn['IP'],
-                    self.conn['PORT']
-                )
+                self.uri = f'lpd://{self.conn["IP"]}/{self.conn["PORT"]}'
                 if self.conn['LOCATION'] != '':
                     self.location = self.conn['LOCATION']
 
@@ -114,11 +108,7 @@ class Printer:
         )
 
         if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
-            self.name = '{}__{}__{}'.format(
-                self.conn['NAME'],
-                device['feature'],
-                device['name'],
-            )
+            self.name = f'{self.conn["NAME"]}__{device["feature"]}__{device["name"]}'
         else:
             self.name = '{}__{}__{}__{}'.format(
                 device['manufacturer'],
