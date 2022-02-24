@@ -364,7 +364,7 @@ class MigasFreeSync(MigasFreeCommand):
             diff_software = utils.compare_lists(
                 open(
                     settings.SOFTWARE_FILE,
-                    'U'
+                    encoding='utf_8'
                 ).read().splitlines(),  # not readlines!!!
                 software
             )
