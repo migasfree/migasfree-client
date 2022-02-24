@@ -416,7 +416,7 @@ def get_user_info(user):
 
 
 def read_file(filename, mode='rb'):
-    with open(filename, mode=mode, encoding='utf_8') as _file:
+    with open(filename, mode) as _file:
         ret = _file.read()
 
     return ret
