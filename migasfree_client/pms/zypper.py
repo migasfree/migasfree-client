@@ -134,7 +134,7 @@ class Zypper(Pms):
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
-        return _ret == 0, '{}\n{}\n{}'.format(_ret, _output, _error)
+        return _ret == 0, f'{_ret}\n{_output}\n{_error}'
 
     def is_installed(self, package):
         """
@@ -167,7 +167,7 @@ class Zypper(Pms):
         list format: name_version_architecture.extension
         """
 
-        cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
+        cmd = f'{self._pm} --queryformat "%%{{NAME}}_%%{{VERSION}}-%%{{RELEASE}}_%%{{ARCH}}.rpm\n" -qa'
         logging.debug(cmd)
 
         _ret, _output, _ = execute(cmd, interactive=False)
@@ -204,7 +204,7 @@ class Zypper(Pms):
         string get_system_architecture(void)
         """
 
-        cmd = '%s -q --qf "%%{arch}" -f /etc/lsb-release' % self._pm
+        cmd = f'{self._pm} -q --qf "%%{{arch}}" -f /etc/lsb-release'
         logging.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
@@ -216,7 +216,7 @@ class Zypper(Pms):
         list available_packages(void)
         """
 
-        cmd = "{} pa | awk -F'|' '{{print $3}}'".format(self._pms)
+        cmd = f"{self._pms} pa | awk -F'|' '{{print $3}}'"
         logging.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
