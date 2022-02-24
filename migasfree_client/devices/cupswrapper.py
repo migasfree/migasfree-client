@@ -74,7 +74,7 @@ class Cupswrapper(Printer):
                 )
         except cups.IPPError as e:
             (status, description) = e.args
-            print('CUPS Error: %d (%s)' % (status, description))
+            print(f'CUPS Error: {status} ({description})')
             return False
 
         conn.acceptJobs(self.name)
@@ -120,7 +120,7 @@ class Cupswrapper(Printer):
         if not os.path.exists(_md5file):
             return True
 
-        with open(_md5file) as handle:
+        with open(_md5file, encoding='utf_8') as handle:
             _md5 = handle.read()
 
         return md5sum(self.driver) != _md5
