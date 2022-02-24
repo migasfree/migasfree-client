@@ -135,11 +135,8 @@ class MigasFreeTags(MigasFreeCommand):
                     tag_active = item in assigned
                     cmd += f' "{tag_active}" "{item}" "{key}"'
         else:
-            cmd = "dialog --backtitle '%s' \
-                --separate-output \
-                --stdout \
-                --checklist '%s' \
-                0 0 8" % (title, text)
+            cmd = f"dialog --backtitle '{title}' \
+                --separate-output --stdout --checklist '{text}' 0 0 8"
             for key, value in available_tags.items():
                 value.sort()
                 for item in value:
