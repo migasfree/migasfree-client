@@ -436,7 +436,7 @@ def write_file(filename, content):
 
     _file = None
     try:
-        _file = open(filename, mode='wb', encoding='utf_8')
+        _file = open(filename, mode='wb')
 
         try:
             _file.write(bytes(content))
