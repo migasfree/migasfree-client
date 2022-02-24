@@ -339,7 +339,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
         # a data line ends in 0 byte, not newline
         _display = grep(
             'DISPLAY',
-            open(f'/proc/{pid}/environ').read().split('\0')
+            open(f'/proc/{pid}/environ', encoding='utf_8').read().split('\0')
         )
         if _display:
             _display = _display[0].split('=').pop()
@@ -382,9 +382,9 @@ def compare_files(a, b):
 
     # U - open for input as a text file with universal newline interpretation
     # http://www.python.org/dev/peps/pep-0278/
-    with open(a, encoding='utf-8') as f:
+    with open(a, encoding='utf_8') as f:
         _list_a = f.readlines()
-    with open(b, encoding='utf-8') as f:
+    with open(b, encoding='utf_8') as f:
         _list_b = f.readlines()
 
     return compare_lists(_list_a, _list_b)
@@ -416,7 +416,7 @@ def get_user_info(user):
 
 
 def read_file(filename, mode='rb'):
-    with open(filename, mode) as _file:
+    with open(filename, mode=mode, encoding='utf_8') as _file:
         ret = _file.read()
 
     return ret
@@ -436,12 +436,12 @@ def write_file(filename, content):
 
     _file = None
     try:
-        _file = open(filename, 'wb')
+        _file = open(filename, mode='wb', encoding='utf_8')
 
         try:
             _file.write(bytes(content))
         except TypeError:
-            _file.write(bytes(content, encoding='utf8'))
+            _file.write(bytes(content, encoding='utf_8'))
 
         _file.flush()
         os.fsync(_file.fileno())
@@ -515,7 +515,7 @@ def check_lock_file(cmd, lock_file):
         _file = None
         _pid = None
         try:
-            _file = open(lock_file)
+            _file = open(lock_file, encoding='utf_8')
             _pid = _file.read()
         except IOError:
             pass
@@ -743,7 +743,7 @@ def md5sum(archive):
     if not archive:
         return ''
 
-    with open(archive) as handle:
+    with open(archive, encoding='utf_8') as handle:
         _md5 = handle.read().encode()
 
     return hashlib.md5(_md5).hexdigest()
