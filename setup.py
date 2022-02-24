@@ -37,7 +37,8 @@ if not hasattr(sys, 'version_info') or sys.version_info < (3, 6, 0, 'final'):
 
 import os
 PATH = os.path.dirname(os.path.abspath(__file__))
-README = open(os.path.join(PATH, 'README.md'), encoding='utf_8').read()
+with open(os.path.join(PATH, 'README.md'), encoding='utf_8') as f:
+    README = f.read()
 VERSION = __import__('migasfree_client').__version__
 
 REQUIRES = filter(
