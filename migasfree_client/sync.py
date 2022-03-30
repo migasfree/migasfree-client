@@ -748,6 +748,13 @@ class MigasFreeSync(MigasFreeCommand):
         self.end_of_transmission()
         self._show_message(_('Completed operations'))
 
+    def cmd_devices(self):
+        self.upload_old_errors()
+        self.sync_logical_devices()
+        self.upload_execution_errors()
+        self.end_of_transmission()
+        self._show_message(_('Completed operations'))
+
     def _search(self, pattern):
         self._check_pms()
 
@@ -923,6 +930,13 @@ class MigasFreeSync(MigasFreeCommand):
 
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self.synchronize()
+            utils.remove_file(self.LOCK_FILE)
+
+            if not self._pms_status_ok:
+                sys.exit(errno.EPROTO)
+        elif args.cmd == 'devices':
+            utils.check_lock_file(self.CMD, self.LOCK_FILE)
+            self.cmd_devices()
             utils.remove_file(self.LOCK_FILE)
 
             if not self._pms_status_ok:
