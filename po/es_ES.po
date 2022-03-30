@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-01 10:12+0200\n"
-"PO-Revision-Date: 2021-09-01 10:13+0200\n"
+"POT-Creation-Date: 2022-03-30 13:05+0200\n"
+"PO-Revision-Date: 2022-03-30 13:05+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
 "Language: es_ES\n"
@@ -33,7 +33,7 @@ msgstr "Habilitar modo silencioso (no verboso)"
 msgid "Register computer at server"
 msgstr "Registrar ordenador en el servidor"
 
-#: ../migasfree_client/__main__.py:59 ../migasfree_client/command.py:470
+#: ../migasfree_client/__main__.py:59
 msgid "User to register computer at server"
 msgstr "Usuario para registrar el ordenador en el servidor"
 
@@ -97,7 +97,7 @@ msgstr "Subir ficheros al servidor"
 msgid "Authorized user to upload at server"
 msgstr "Usuario autorizado para subir al servidor"
 
-#: ../migasfree_client/__main__.py:148 ../migasfree_client/upload.py:95
+#: ../migasfree_client/__main__.py:148
 msgid "User password"
 msgstr "Contraseña del usuario"
 
@@ -125,7 +125,11 @@ msgstr "Obtener información del ordenador en el servidor"
 msgid "Get individual value"
 msgstr "Obtener valor individual"
 
-#: ../migasfree_client/__main__.py:199
+#: ../migasfree_client/__main__.py:187
+msgid "Synchronize computer devices with server"
+msgstr "Sincronizar dispositivos del ordenador con el servidor"
+
+#: ../migasfree_client/__main__.py:204
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr "Versión de %(program)s: %(version)s"
@@ -135,152 +139,136 @@ msgstr "Versión de %(program)s: %(version)s"
 msgid "Failed to configure the log file (%s)"
 msgstr "Fallo al configurar el fichero de log (%s)"
 
-#: ../migasfree_client/command.py:285 ../migasfree_client/url_request.py:230
+#: ../migasfree_client/command.py:292 ../migasfree_client/url_request.py:230
 #, python-format
 msgid "Error creating %s directory"
 msgstr "Error creando el directorio %s"
 
-#: ../migasfree_client/command.py:296
+#: ../migasfree_client/command.py:303
 #, python-format
 msgid "Running command %s..."
 msgstr "Ejecutando el comando %s..."
 
-#: ../migasfree_client/command.py:305
+#: ../migasfree_client/command.py:312
 #, python-format
 msgid "Command %s failed: %s"
 msgstr "Comando %s fallido: %s"
 
-#: ../migasfree_client/command.py:326
+#: ../migasfree_client/command.py:333
 msgid "User has insufficient privileges to execute this command"
 msgstr "El usuario no tiene suficientes privilegios para ejecutar este comando"
 
-#: ../migasfree_client/command.py:355 ../migasfree_client/upload.py:54
+#: ../migasfree_client/command.py:362 ../migasfree_client/upload.py:54
 msgid "Autoregistering computer..."
 msgstr "Autoregistrando ordenador..."
 
-#: ../migasfree_client/command.py:413 ../migasfree_client/command.py:446
+#: ../migasfree_client/command.py:420 ../migasfree_client/command.py:453
 #, python-format
 msgid "Key %s created!"
 msgstr "¡Clave %s creada!"
 
-#: ../migasfree_client/command.py:415 ../migasfree_client/command.py:450
+#: ../migasfree_client/command.py:422 ../migasfree_client/command.py:457
 msgid "Error writing key file!!!"
 msgstr "¡Error escribiendo fichero de clave!"
 
-#: ../migasfree_client/command.py:448
+#: ../migasfree_client/command.py:455
 #, python-format
 msgid "ERROR: not import key: %s!"
 msgstr "¡Error: no hay clave para importar: %s!"
 
-#: ../migasfree_client/command.py:459
+#: ../migasfree_client/command.py:466
 #, python-format
 msgid "Have you check config options in this machine (%s)?"
 msgstr "¿Has revisado las opciones de configuración en este ordenador (%s)?"
 
-#: ../migasfree_client/command.py:463
+#: ../migasfree_client/command.py:470
 #, python-format
 msgid "Check %s file and register again"
 msgstr "Verifique el fichero %s y registre de nuevo"
 
-#: ../migasfree_client/command.py:472 ../migasfree_client/upload.py:90
+#: ../migasfree_client/command.py:479 ../migasfree_client/upload.py:88
 #, python-format
 msgid "Empty user. Exiting %s."
 msgstr "El usuario está vacío. Saliendo de %s."
 
-#: ../migasfree_client/command.py:476
-msgid "Password"
-msgstr "Contraseña"
-
-#: ../migasfree_client/command.py:479
+#: ../migasfree_client/command.py:486
 msgid "Computer registered at server"
 msgstr "Ordenador registrado en el servidor"
 
-#: ../migasfree_client/command.py:558
+#: ../migasfree_client/command.py:568
 #, python-format
 msgid "Config options: %s"
 msgstr "Opciones de configuración: %s"
 
-#: ../migasfree_client/command.py:560 ../migasfree_client/upload.py:74
+#: ../migasfree_client/command.py:570
 msgid "Project"
 msgstr "Proyecto"
 
-#: ../migasfree_client/command.py:565 ../migasfree_client/label.py:115
+#: ../migasfree_client/command.py:575
 msgid "Server"
 msgstr "Servidor"
 
-#: ../migasfree_client/command.py:570
+#: ../migasfree_client/command.py:580
 msgid "Protocol"
 msgstr "Protocolo"
 
-#: ../migasfree_client/command.py:576
+#: ../migasfree_client/command.py:586
 msgid "Port"
 msgstr "Puerto"
 
-#: ../migasfree_client/command.py:581
+#: ../migasfree_client/command.py:591
 msgid "Auto update packages"
 msgstr "Actualizar paquetes automáticamente"
 
-#: ../migasfree_client/command.py:586
+#: ../migasfree_client/command.py:596
 msgid "Manage devices"
 msgstr "Gestión de dispositivos"
 
-#: ../migasfree_client/command.py:591
+#: ../migasfree_client/command.py:601
 msgid "Proxy"
 msgstr "Proxy"
 
-#: ../migasfree_client/command.py:596
+#: ../migasfree_client/command.py:606
 msgid "Package Proxy Cache"
 msgstr "Proxy caché de paquetes"
 
-#: ../migasfree_client/command.py:601
+#: ../migasfree_client/command.py:611
 msgid "Debug"
 msgstr "Depuración"
 
-#: ../migasfree_client/command.py:606
+#: ../migasfree_client/command.py:616
 msgid "Computer name"
 msgstr "Nombre del ordenador"
 
-#: ../migasfree_client/command.py:613
+#: ../migasfree_client/command.py:623
 msgid "Running options:"
 msgstr "Opciones de ejecución:"
 
-#: ../migasfree_client/command.py:615
+#: ../migasfree_client/command.py:625
 msgid "migasfree server version"
 msgstr "Versión de MigasFree Server"
 
-#: ../migasfree_client/command.py:615
+#: ../migasfree_client/command.py:625
 msgid "None"
 msgstr "Ninguna"
 
-#: ../migasfree_client/command.py:617
-msgid "SSL certificate"
-msgstr "Certificado SSL"
-
-#: ../migasfree_client/command.py:623
+#: ../migasfree_client/command.py:633
 msgid "Warning"
 msgstr "Aviso"
 
-#: ../migasfree_client/command.py:624
+#: ../migasfree_client/command.py:634
 msgid "Certificate does not exist and authentication is not guaranteed"
 msgstr "El certificado no existe y la autenticación no está garantizada"
 
-#: ../migasfree_client/command.py:627
-msgid "PMS"
-msgstr "PMS"
-
-#: ../migasfree_client/command.py:628
-msgid "Architecture"
-msgstr "Arquitectura"
-
-#: ../migasfree_client/command.py:682
+#: ../migasfree_client/command.py:692
 msgid "Any PMS was not found. Cannot continue."
 msgstr "No se ha encontrado ningún PMS. Imposible continuar."
 
-#: ../migasfree_client/command.py:688
+#: ../migasfree_client/command.py:698
 msgid "Ok"
 msgstr "Correcto"
 
-#: ../migasfree_client/command.py:697
+#: ../migasfree_client/command.py:707
 msgid "Failed"
 msgstr "Fallo"
 
@@ -292,10 +280,6 @@ msgstr "Sesión gráfica no detectada"
 #, python-format
 msgid "Killing %s before time!!!"
 msgstr "¡Saliendo de %s antes de tiempo!"
-
-#: ../migasfree_client/sync.py:93
-msgid "Graphic user"
-msgstr "Usuario gráfico"
 
 #: ../migasfree_client/sync.py:97 ../migasfree_client/tags.py:50
 #: ../migasfree_client/upload.py:61
@@ -336,164 +320,160 @@ msgstr "Código \"%s\" con error: %s"
 msgid "Evaluating attributes..."
 msgstr "Evaluando atributos..."
 
-#: ../migasfree_client/sync.py:188
+#: ../migasfree_client/sync.py:185
 #, python-format
 msgid "Error: property %s without value"
 msgstr "Error: propiedad %s sin valor"
 
-#: ../migasfree_client/sync.py:199
+#: ../migasfree_client/sync.py:196
 msgid "Executing faults..."
 msgstr "Ejecutando fallas..."
 
-#: ../migasfree_client/sync.py:220
+#: ../migasfree_client/sync.py:217
 msgid "Getting properties..."
 msgstr "Obteniendo propiedades..."
 
-#: ../migasfree_client/sync.py:243
+#: ../migasfree_client/sync.py:240
 msgid "Getting fault definitions..."
 msgstr "Obteniendo definiciones de fallas..."
 
-#: ../migasfree_client/sync.py:271
+#: ../migasfree_client/sync.py:268
 msgid "Getting repositories..."
 msgstr "Obteniendo repositorios..."
 
-#: ../migasfree_client/sync.py:299
+#: ../migasfree_client/sync.py:296
 msgid "Getting mandatory packages..."
 msgstr "Obteniendo paquetes obligatorios..."
 
-#: ../migasfree_client/sync.py:327
+#: ../migasfree_client/sync.py:324
 msgid "Getting devices..."
 msgstr "Obteniendo dispositivos..."
 
-#: ../migasfree_client/sync.py:390
+#: ../migasfree_client/sync.py:387
 msgid "Uploading old errors..."
 msgstr "Subiendo errores antiguos..."
 
-#: ../migasfree_client/sync.py:412
+#: ../migasfree_client/sync.py:409
 msgid "Creating repositories..."
 msgstr "Creando repositorios..."
 
-#: ../migasfree_client/sync.py:428
+#: ../migasfree_client/sync.py:425
 #, python-format
 msgid "Error creating repositories: %s"
 msgstr "Error creando repositorios: %s"
 
-#: ../migasfree_client/sync.py:439
+#: ../migasfree_client/sync.py:436
 msgid "Getting repositories metadata..."
 msgstr "Obteniendo los metadatos de los repositorios..."
 
-#: ../migasfree_client/sync.py:445
+#: ../migasfree_client/sync.py:442
 msgid "Error getting repositories metadata"
 msgstr "Error obteniendo los metadatos de los repositorios"
 
-#: ../migasfree_client/sync.py:453
+#: ../migasfree_client/sync.py:450
 msgid "Uninstalling packages..."
 msgstr "Desinstalando paquetes..."
 
-#: ../migasfree_client/sync.py:460
+#: ../migasfree_client/sync.py:457
 #, python-format
 msgid "Error uninstalling packages: %s"
 msgstr "Error desinstalando paquetes: %s"
 
-#: ../migasfree_client/sync.py:468
+#: ../migasfree_client/sync.py:465
 msgid "Installing mandatory packages..."
 msgstr "Instalando paquetes obligatorios..."
 
-#: ../migasfree_client/sync.py:475
+#: ../migasfree_client/sync.py:472
 #, python-format
 msgid "Error installing packages: %s"
 msgstr "Error instalando paquetes: %s"
 
-#: ../migasfree_client/sync.py:485
+#: ../migasfree_client/sync.py:482
 msgid "Updating packages..."
 msgstr "Actualizando paquetes..."
 
-#: ../migasfree_client/sync.py:492
+#: ../migasfree_client/sync.py:489
 #, python-format
 msgid "Error updating packages: %s"
 msgstr "Error actualizando paquetes: %s"
 
-#: ../migasfree_client/sync.py:526
+#: ../migasfree_client/sync.py:523
 msgid "Capturing hardware information..."
 msgstr "Capturando información sobre el hardware..."
 
-#: ../migasfree_client/sync.py:536
+#: ../migasfree_client/sync.py:533
 #, python-format
 msgid "lshw command failed: %s"
 msgstr "Comando lshw fallido: %s"
 
-#: ../migasfree_client/sync.py:545
+#: ../migasfree_client/sync.py:542
 msgid "Parsing hardware information..."
 msgstr "Interpretando información sobre el hardware..."
 
-#: ../migasfree_client/sync.py:546
-msgid "Hardware information"
-msgstr "Información sobre el hardware"
-
-#: ../migasfree_client/sync.py:554
+#: ../migasfree_client/sync.py:551
 msgid "Sending hardware information..."
 msgstr "Enviando información sobre el hardware..."
 
-#: ../migasfree_client/sync.py:580
+#: ../migasfree_client/sync.py:577
 msgid "Sending errors to server..."
 msgstr "Enviando errores al servidor..."
 
-#: ../migasfree_client/sync.py:601
+#: ../migasfree_client/sync.py:598
 msgid "Uploading attributes..."
 msgstr "Subiendo atributos..."
 
-#: ../migasfree_client/sync.py:620
+#: ../migasfree_client/sync.py:617
 msgid "Uploading faults..."
 msgstr "Subiendo fallas..."
 
-#: ../migasfree_client/sync.py:671
+#: ../migasfree_client/sync.py:668
 msgid "Software diff"
 msgstr "Diferencia en el software"
 
-#: ../migasfree_client/sync.py:674
+#: ../migasfree_client/sync.py:671
 msgid "Uploading software..."
 msgstr "Subiendo software..."
 
-#: ../migasfree_client/sync.py:699
+#: ../migasfree_client/sync.py:696
 msgid "Ending synchronization..."
 msgstr "Terminando sincronización..."
 
-#: ../migasfree_client/sync.py:722
+#: ../migasfree_client/sync.py:719
 msgid "Connecting to migasfree server..."
 msgstr "Conectando al servidor migasfree..."
 
-#: ../migasfree_client/sync.py:752
+#: ../migasfree_client/sync.py:749 ../migasfree_client/sync.py:756
 msgid "Completed operations"
 msgstr "Operaciones completadas"
 
-#: ../migasfree_client/sync.py:765
+#: ../migasfree_client/sync.py:769
 #, python-format
 msgid "Installing package: %s"
 msgstr "Instalando paquete: %s"
 
-#: ../migasfree_client/sync.py:779
+#: ../migasfree_client/sync.py:783
 #, python-format
 msgid "Removing package: %s"
 msgstr "Desinstalando paquete: %s"
 
-#: ../migasfree_client/sync.py:793
+#: ../migasfree_client/sync.py:797
 msgid "Assigned device(s) but client does not manage devices"
 msgstr "Dispositivo(s) asignado(s) pero el cliente no los gestiona"
 
-#: ../migasfree_client/sync.py:804
+#: ../migasfree_client/sync.py:808
 msgid "A class was not detected to manage the devices"
 msgstr "No se ha detectado una clase para gestionar los dispositivos"
 
-#: ../migasfree_client/sync.py:819 ../migasfree_client/sync.py:827
-#: ../migasfree_client/sync.py:838
+#: ../migasfree_client/sync.py:823 ../migasfree_client/sync.py:831
+#: ../migasfree_client/sync.py:842
 msgid "Synchronizing logical devices..."
 msgstr "Sincronizando dispositivos lógicos..."
 
-#: ../migasfree_client/sync.py:820
+#: ../migasfree_client/sync.py:824
 msgid "Printer service is not running!!!"
 msgstr "¡El servicio de impresión no está en ejecución!"
 
-#: ../migasfree_client/sync.py:828
+#: ../migasfree_client/sync.py:832
 msgid ""
 "Printer service is required. If not, configure Manage_Devices parameter to "
 "False."
@@ -501,21 +481,21 @@ msgstr ""
 "Es necesario un servicio de impresión es necesario. Si no lo es, configure "
 "el parámetro Manage_Devices como False."
 
-#: ../migasfree_client/sync.py:839
+#: ../migasfree_client/sync.py:843
 msgid "Error getting printers information"
 msgstr "Error obteniendo la información de las impresoras"
 
-#: ../migasfree_client/sync.py:856
+#: ../migasfree_client/sync.py:860
 #, python-format
 msgid "Removing device: %s"
 msgstr "Quitando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:861
+#: ../migasfree_client/sync.py:865
 #, python-format
 msgid "Error removing device: %s"
 msgstr "Error quitando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:870
+#: ../migasfree_client/sync.py:874
 #, python-format
 msgid ""
 "Error: no driver defined for device %s. Please, configure feature %s, in the "
@@ -524,22 +504,22 @@ msgstr ""
 "Error: no hay controlador definido para el dispositivo %s. Por favor, "
 "configure la prestación %s, en el modelo %s %s, y proyecto %s"
 
-#: ../migasfree_client/sync.py:884
+#: ../migasfree_client/sync.py:888
 #, python-format
 msgid "Installing device: %s"
 msgstr "Instalando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:889
+#: ../migasfree_client/sync.py:893
 #, python-format
 msgid "Error installing device: %s"
 msgstr "Error instalando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:900
+#: ../migasfree_client/sync.py:904
 #, python-format
 msgid "Setting default device: %s"
 msgstr "Estableciendo dispositivo por defecto: %s"
 
-#: ../migasfree_client/sync.py:904
+#: ../migasfree_client/sync.py:908
 #, python-format
 msgid "Error setting default device: %s"
 msgstr "Error estableciendo dispositivo por defecto: %s"
@@ -568,10 +548,6 @@ msgstr "Establecer etiquetas (con GUI):"
 msgid "Unsetting all tags (command line):"
 msgstr "Eliminar todas las etiquetas (en línea de comando):"
 
-#: ../migasfree_client/tags.py:79
-msgid "Tag list"
-msgstr "Lista de etiquetas"
-
 #: ../migasfree_client/tags.py:89
 msgid "Tags must be in \"prefix-value\" format"
 msgstr "Las etiquetas deben estar en el formato \"prefijo-valor\""
@@ -588,7 +564,7 @@ msgstr "Cambiar etiquetas"
 msgid "Please, select tags for this computer"
 msgstr "Por favor, seleccione las etiquetas para este ordenador"
 
-#: ../migasfree_client/tags.py:241
+#: ../migasfree_client/tags.py:238
 #, python-format
 msgid "Tags setted: %s"
 msgstr "Etiquetas seleccionadas: %s"
@@ -601,53 +577,25 @@ msgstr "Subir un único paquete:"
 msgid "Upload package set:"
 msgstr "Subir un conjunto de paquetes:"
 
-#: ../migasfree_client/upload.py:75
-msgid "Store"
-msgstr "Ubicación"
-
-#: ../migasfree_client/upload.py:76
-msgid "User"
-msgstr "Usuario"
-
-#: ../migasfree_client/upload.py:79
-msgid "File"
-msgstr "Fichero"
-
-#: ../migasfree_client/upload.py:81
-msgid "Directory"
-msgstr "Directorio"
-
-#: ../migasfree_client/upload.py:87
-msgid "User to upload at server"
-msgstr "Usuario para subir ficheros al servidor"
-
-#: ../migasfree_client/upload.py:99
-msgid "Project to upload at server"
-msgstr "Proyecto al que subir en el servidor"
-
-#: ../migasfree_client/upload.py:102
+#: ../migasfree_client/upload.py:98
 #, python-format
 msgid "Empty project. Exiting %s."
 msgstr "No se ha especificado un proyecto. Saliendo de %s."
 
-#: ../migasfree_client/upload.py:108
-msgid "Store to upload at server"
-msgstr "Ubicación a la que subir en el servidor"
-
-#: ../migasfree_client/upload.py:111
+#: ../migasfree_client/upload.py:105
 #, python-format
 msgid "Empty store. Exiting %s."
 msgstr "No se ha especificado la ubicación. Saliendo de %s."
 
-#: ../migasfree_client/upload.py:118
+#: ../migasfree_client/upload.py:112
 msgid "File not found"
 msgstr "Fichero no encontrado"
 
-#: ../migasfree_client/upload.py:160
+#: ../migasfree_client/upload.py:154
 msgid "Directory not found"
 msgstr "Directorio no encontrado"
 
-#: ../migasfree_client/upload.py:210
+#: ../migasfree_client/upload.py:204
 msgid "Creating repository operation..."
 msgstr "Creando repositorios..."
 
@@ -671,50 +619,89 @@ msgstr "Código de estado: %s"
 msgid "\"%s\" command expired timeout"
 msgstr "El comando \"%s\" ha expirado su tiempo de ejecución"
 
-#: ../migasfree_client/utils.py:474
+#: ../migasfree_client/utils.py:476
 msgid "yes"
 msgstr "sí"
 
-#: ../migasfree_client/utils.py:474
+#: ../migasfree_client/utils.py:476
 msgid "y"
 msgstr "s"
 
-#: ../migasfree_client/utils.py:475
+#: ../migasfree_client/utils.py:477
 msgid "no"
 msgstr "no"
 
-#: ../migasfree_client/utils.py:475
+#: ../migasfree_client/utils.py:477
 msgid "n"
 msgstr "n"
 
-#: ../migasfree_client/utils.py:478
-msgid "[y/n]"
-msgstr "[s/n]"
-
-#: ../migasfree_client/utils.py:480
-msgid "[Y/n]"
-msgstr "[S/n]"
-
-#: ../migasfree_client/utils.py:482
-msgid "[y/N]"
-msgstr "[s/N]"
-
-#: ../migasfree_client/utils.py:495
+#: ../migasfree_client/utils.py:497
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
 msgstr "Por favor, responde 'sí' o 'no' (o 's' o 'n')."
 
-#: ../migasfree_client/utils.py:531
+#: ../migasfree_client/utils.py:533
 #, python-format
 msgid "Another instance of %(cmd)s is running: %(pid)d"
 msgstr "Ya hay en ejecución otra instancia de %(cmd)s: %(pid)d"
 
-#: ../migasfree_client/pms/pacman.py:210
+#: ../migasfree_client/pms/pacman.py:201
 #, python-format
 msgid ""
 "Add manually \"%s\" to file %s inside \"options\" section as last option"
 msgstr ""
 "Añade manualmente \"%s\" al fichero %s dentro de la sección \"options\" como "
 "última opción"
+
+#~ msgid "Password"
+#~ msgstr "Contraseña"
+
+#~ msgid "SSL certificate"
+#~ msgstr "Certificado SSL"
+
+#~ msgid "PMS"
+#~ msgstr "PMS"
+
+#~ msgid "Architecture"
+#~ msgstr "Arquitectura"
+
+#~ msgid "Graphic user"
+#~ msgstr "Usuario gráfico"
+
+#~ msgid "Hardware information"
+#~ msgstr "Información sobre el hardware"
+
+#~ msgid "Tag list"
+#~ msgstr "Lista de etiquetas"
+
+#~ msgid "Store"
+#~ msgstr "Ubicación"
+
+#~ msgid "User"
+#~ msgstr "Usuario"
+
+#~ msgid "File"
+#~ msgstr "Fichero"
+
+#~ msgid "Directory"
+#~ msgstr "Directorio"
+
+#~ msgid "User to upload at server"
+#~ msgstr "Usuario para subir ficheros al servidor"
+
+#~ msgid "Project to upload at server"
+#~ msgstr "Proyecto al que subir en el servidor"
+
+#~ msgid "Store to upload at server"
+#~ msgstr "Ubicación a la que subir en el servidor"
+
+#~ msgid "[y/n]"
+#~ msgstr "[s/n]"
+
+#~ msgid "[Y/n]"
+#~ msgstr "[S/n]"
+
+#~ msgid "[y/N]"
+#~ msgstr "[s/N]"
 
 #~ msgid "There are not assigned tags"
 #~ msgstr "No hay etiquetas asignadas"
