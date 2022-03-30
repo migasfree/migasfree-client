@@ -171,7 +171,8 @@ class Winget(Pms):
 
         cmd = [
             f'{self._pms} source reset --force',
-            f'{self._pms} source remove winget'
+            f'{self._pms} source remove winget',
+            f'{self._pms} source remove msstore',
         ]
 
         for repo in repositories:
