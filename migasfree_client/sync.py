@@ -399,6 +399,7 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_ok()
             os.remove(self.ERROR_FILE)
 
+        self._url_request._check_tmp_path()
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
 
     def create_repositories(self):
@@ -749,11 +750,35 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Completed operations'))
 
     def cmd_devices(self):
+        self._show_message(_('Connecting to migasfree server...'))
         self.upload_old_errors()
         self.sync_logical_devices()
         self.upload_execution_errors()
         self.end_of_transmission()
         self._show_message(_('Completed operations'))
+
+    def cmd_hardware(self):
+        self._show_message(_('Connecting to migasfree server...'))
+        self.upload_old_errors()
+        self.update_hardware_inventory()
+        self.upload_execution_errors()
+        self.end_of_transmission()
+        self._show_message(_('Completed operations'))
+
+    def cmd_software_info(self):
+        if self.pms:
+            self._show_message(_('Connecting to migasfree server...'))
+            self.upload_old_errors()
+
+            software_before = self.pms.query_all()
+            logger.debug('Actual software: %s', software_before)
+
+            software_history = self.software_history(software_before)
+            self.upload_software(software_before, software_history)
+
+            self.upload_execution_errors()
+            self.end_of_transmission()
+            self._show_message(_('Completed operations'))
 
     def _search(self, pattern):
         self._check_pms()
@@ -928,16 +953,20 @@ class MigasFreeSync(MigasFreeCommand):
             if args.force_upgrade:
                 self.migas_auto_update_packages = True
 
-            utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self.synchronize()
-            utils.remove_file(self.LOCK_FILE)
-
-            if not self._pms_status_ok:
-                sys.exit(errno.EPROTO)
-        elif args.cmd == 'devices':
-            utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self.cmd_devices()
-            utils.remove_file(self.LOCK_FILE)
+            if args.devices:
+                utils.check_lock_file(self.CMD, self.LOCK_FILE)
+                self.cmd_devices()
+                utils.remove_file(self.LOCK_FILE)
+            elif args.software_info:
+                utils.check_lock_file(self.CMD, self.LOCK_FILE)
+                self.cmd_software_info()
+                utils.remove_file(self.LOCK_FILE)
+            elif args.hardware:
+                self.cmd_hardware()
+            else:
+                utils.check_lock_file(self.CMD, self.LOCK_FILE)
+                self.synchronize()
+                utils.remove_file(self.LOCK_FILE)
 
             if not self._pms_status_ok:
                 sys.exit(errno.EPROTO)
