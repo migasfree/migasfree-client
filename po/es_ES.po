@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-30 13:05+0200\n"
-"PO-Revision-Date: 2022-03-30 13:05+0200\n"
+"POT-Creation-Date: 2022-05-05 21:04+0200\n"
+"PO-Revision-Date: 2022-05-05 21:05+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
 "Language: es_ES\n"
@@ -53,83 +53,91 @@ msgstr "Sincronizar ordenador con el servidor"
 msgid "Force package upgrades"
 msgstr "Fuerza la actualización de software"
 
-#: ../migasfree_client/__main__.py:86
-msgid "Install package"
-msgstr "Instalar paquete"
-
-#: ../migasfree_client/__main__.py:93
-msgid "Package to install"
-msgstr "Paquete para instalar"
-
-#: ../migasfree_client/__main__.py:98
-msgid "Purge package"
-msgstr "Desinstalar paquete completamente"
-
-#: ../migasfree_client/__main__.py:105
-msgid "Package to purge"
-msgstr "Paquete para desinstalar completamente"
-
-#: ../migasfree_client/__main__.py:110
-msgid "Computer identification"
-msgstr "Indentificación del ordenador"
-
-#: ../migasfree_client/__main__.py:115
-msgid "Computer tags"
-msgstr "Etiquetas del ordenador"
-
-#: ../migasfree_client/__main__.py:121
-msgid "Get tags in server (JSON format)"
-msgstr "Obtener etiquetas del servidor (formato JSON)"
-
-#: ../migasfree_client/__main__.py:127
-msgid "Set tags in server"
-msgstr "Establecer etiquetas en el servidor"
-
-#: ../migasfree_client/__main__.py:133
-msgid "Communicate tags to server"
-msgstr "Comunicar etiquetas al servidor"
-
-#: ../migasfree_client/__main__.py:138
-msgid "Upload files to server"
-msgstr "Subir ficheros al servidor"
-
-#: ../migasfree_client/__main__.py:143
-msgid "Authorized user to upload at server"
-msgstr "Usuario autorizado para subir al servidor"
-
-#: ../migasfree_client/__main__.py:148
-msgid "User password"
-msgstr "Contraseña del usuario"
-
-#: ../migasfree_client/__main__.py:153
-msgid "Project to upload files"
-msgstr "Proyecto al que subir ficheros"
-
-#: ../migasfree_client/__main__.py:158
-msgid "Store at server"
-msgstr "Almacén del servidor"
-
-#: ../migasfree_client/__main__.py:165
-msgid "File to upload at server"
-msgstr "Fichero a subir al servidor"
-
-#: ../migasfree_client/__main__.py:170
-msgid "Directory with files to upload at server"
-msgstr "Directorio con archivos para subir al servidor"
-
-#: ../migasfree_client/__main__.py:175
-msgid "Retrieve computer info at server"
-msgstr "Obtener información del ordenador en el servidor"
-
-#: ../migasfree_client/__main__.py:182
-msgid "Get individual value"
-msgstr "Obtener valor individual"
-
-#: ../migasfree_client/__main__.py:187
+#: ../migasfree_client/__main__.py:88
 msgid "Synchronize computer devices with server"
 msgstr "Sincronizar dispositivos del ordenador con el servidor"
 
-#: ../migasfree_client/__main__.py:204
+#: ../migasfree_client/__main__.py:93
+msgid "Synchronize computer hardware with server"
+msgstr "Sincronizar hardware del ordenador con el servidor"
+
+#: ../migasfree_client/__main__.py:98
+msgid "Upload computer software to server"
+msgstr "Subir información del software del ordenador al servidor"
+
+#: ../migasfree_client/__main__.py:103
+msgid "Install package"
+msgstr "Instalar paquete"
+
+#: ../migasfree_client/__main__.py:110
+msgid "Package to install"
+msgstr "Paquete para instalar"
+
+#: ../migasfree_client/__main__.py:115
+msgid "Purge package"
+msgstr "Desinstalar paquete completamente"
+
+#: ../migasfree_client/__main__.py:122
+msgid "Package to purge"
+msgstr "Paquete para desinstalar completamente"
+
+#: ../migasfree_client/__main__.py:127
+msgid "Computer identification"
+msgstr "Indentificación del ordenador"
+
+#: ../migasfree_client/__main__.py:132
+msgid "Computer tags"
+msgstr "Etiquetas del ordenador"
+
+#: ../migasfree_client/__main__.py:138
+msgid "Get tags in server (JSON format)"
+msgstr "Obtener etiquetas del servidor (formato JSON)"
+
+#: ../migasfree_client/__main__.py:144
+msgid "Set tags in server"
+msgstr "Establecer etiquetas en el servidor"
+
+#: ../migasfree_client/__main__.py:150
+msgid "Communicate tags to server"
+msgstr "Comunicar etiquetas al servidor"
+
+#: ../migasfree_client/__main__.py:155
+msgid "Upload files to server"
+msgstr "Subir ficheros al servidor"
+
+#: ../migasfree_client/__main__.py:160
+msgid "Authorized user to upload at server"
+msgstr "Usuario autorizado para subir al servidor"
+
+#: ../migasfree_client/__main__.py:165
+msgid "User password"
+msgstr "Contraseña del usuario"
+
+#: ../migasfree_client/__main__.py:170
+msgid "Project to upload files"
+msgstr "Proyecto al que subir ficheros"
+
+#: ../migasfree_client/__main__.py:175
+msgid "Store at server"
+msgstr "Almacén del servidor"
+
+#: ../migasfree_client/__main__.py:182
+msgid "File to upload at server"
+msgstr "Fichero a subir al servidor"
+
+#: ../migasfree_client/__main__.py:187
+msgid "Directory with files to upload at server"
+msgstr "Directorio con archivos para subir al servidor"
+
+#: ../migasfree_client/__main__.py:192
+msgid "Retrieve computer info at server"
+msgstr "Obtener información del ordenador en el servidor"
+
+#: ../migasfree_client/__main__.py:199
+msgid "Get individual value"
+msgstr "Obtener valor individual"
+
+#: ../migasfree_client/__main__.py:216
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr "Versión de %(program)s: %(version)s"
@@ -353,127 +361,129 @@ msgstr "Obteniendo dispositivos..."
 msgid "Uploading old errors..."
 msgstr "Subiendo errores antiguos..."
 
-#: ../migasfree_client/sync.py:409
+#: ../migasfree_client/sync.py:410
 msgid "Creating repositories..."
 msgstr "Creando repositorios..."
 
-#: ../migasfree_client/sync.py:425
+#: ../migasfree_client/sync.py:426
 #, python-format
 msgid "Error creating repositories: %s"
 msgstr "Error creando repositorios: %s"
 
-#: ../migasfree_client/sync.py:436
+#: ../migasfree_client/sync.py:437
 msgid "Getting repositories metadata..."
 msgstr "Obteniendo los metadatos de los repositorios..."
 
-#: ../migasfree_client/sync.py:442
+#: ../migasfree_client/sync.py:443
 msgid "Error getting repositories metadata"
 msgstr "Error obteniendo los metadatos de los repositorios"
 
-#: ../migasfree_client/sync.py:450
+#: ../migasfree_client/sync.py:451
 msgid "Uninstalling packages..."
 msgstr "Desinstalando paquetes..."
 
-#: ../migasfree_client/sync.py:457
+#: ../migasfree_client/sync.py:458
 #, python-format
 msgid "Error uninstalling packages: %s"
 msgstr "Error desinstalando paquetes: %s"
 
-#: ../migasfree_client/sync.py:465
+#: ../migasfree_client/sync.py:466
 msgid "Installing mandatory packages..."
 msgstr "Instalando paquetes obligatorios..."
 
-#: ../migasfree_client/sync.py:472
+#: ../migasfree_client/sync.py:473
 #, python-format
 msgid "Error installing packages: %s"
 msgstr "Error instalando paquetes: %s"
 
-#: ../migasfree_client/sync.py:482
+#: ../migasfree_client/sync.py:483
 msgid "Updating packages..."
 msgstr "Actualizando paquetes..."
 
-#: ../migasfree_client/sync.py:489
+#: ../migasfree_client/sync.py:490
 #, python-format
 msgid "Error updating packages: %s"
 msgstr "Error actualizando paquetes: %s"
 
-#: ../migasfree_client/sync.py:523
+#: ../migasfree_client/sync.py:524
 msgid "Capturing hardware information..."
 msgstr "Capturando información sobre el hardware..."
 
-#: ../migasfree_client/sync.py:533
+#: ../migasfree_client/sync.py:534
 #, python-format
 msgid "lshw command failed: %s"
 msgstr "Comando lshw fallido: %s"
 
-#: ../migasfree_client/sync.py:542
+#: ../migasfree_client/sync.py:543
 msgid "Parsing hardware information..."
 msgstr "Interpretando información sobre el hardware..."
 
-#: ../migasfree_client/sync.py:551
+#: ../migasfree_client/sync.py:552
 msgid "Sending hardware information..."
 msgstr "Enviando información sobre el hardware..."
 
-#: ../migasfree_client/sync.py:577
+#: ../migasfree_client/sync.py:578
 msgid "Sending errors to server..."
 msgstr "Enviando errores al servidor..."
 
-#: ../migasfree_client/sync.py:598
+#: ../migasfree_client/sync.py:599
 msgid "Uploading attributes..."
 msgstr "Subiendo atributos..."
 
-#: ../migasfree_client/sync.py:617
+#: ../migasfree_client/sync.py:618
 msgid "Uploading faults..."
 msgstr "Subiendo fallas..."
 
-#: ../migasfree_client/sync.py:668
+#: ../migasfree_client/sync.py:669
 msgid "Software diff"
 msgstr "Diferencia en el software"
 
-#: ../migasfree_client/sync.py:671
+#: ../migasfree_client/sync.py:672
 msgid "Uploading software..."
 msgstr "Subiendo software..."
 
-#: ../migasfree_client/sync.py:696
+#: ../migasfree_client/sync.py:697
 msgid "Ending synchronization..."
 msgstr "Terminando sincronización..."
 
-#: ../migasfree_client/sync.py:719
+#: ../migasfree_client/sync.py:720 ../migasfree_client/sync.py:753
+#: ../migasfree_client/sync.py:761 ../migasfree_client/sync.py:770
 msgid "Connecting to migasfree server..."
 msgstr "Conectando al servidor migasfree..."
 
-#: ../migasfree_client/sync.py:749 ../migasfree_client/sync.py:756
+#: ../migasfree_client/sync.py:750 ../migasfree_client/sync.py:758
+#: ../migasfree_client/sync.py:766 ../migasfree_client/sync.py:781
 msgid "Completed operations"
 msgstr "Operaciones completadas"
 
-#: ../migasfree_client/sync.py:769
+#: ../migasfree_client/sync.py:794
 #, python-format
 msgid "Installing package: %s"
 msgstr "Instalando paquete: %s"
 
-#: ../migasfree_client/sync.py:783
+#: ../migasfree_client/sync.py:808
 #, python-format
 msgid "Removing package: %s"
 msgstr "Desinstalando paquete: %s"
 
-#: ../migasfree_client/sync.py:797
+#: ../migasfree_client/sync.py:822
 msgid "Assigned device(s) but client does not manage devices"
 msgstr "Dispositivo(s) asignado(s) pero el cliente no los gestiona"
 
-#: ../migasfree_client/sync.py:808
+#: ../migasfree_client/sync.py:833
 msgid "A class was not detected to manage the devices"
 msgstr "No se ha detectado una clase para gestionar los dispositivos"
 
-#: ../migasfree_client/sync.py:823 ../migasfree_client/sync.py:831
-#: ../migasfree_client/sync.py:842
+#: ../migasfree_client/sync.py:848 ../migasfree_client/sync.py:856
+#: ../migasfree_client/sync.py:867
 msgid "Synchronizing logical devices..."
 msgstr "Sincronizando dispositivos lógicos..."
 
-#: ../migasfree_client/sync.py:824
+#: ../migasfree_client/sync.py:849
 msgid "Printer service is not running!!!"
 msgstr "¡El servicio de impresión no está en ejecución!"
 
-#: ../migasfree_client/sync.py:832
+#: ../migasfree_client/sync.py:857
 msgid ""
 "Printer service is required. If not, configure Manage_Devices parameter to "
 "False."
@@ -481,21 +491,21 @@ msgstr ""
 "Es necesario un servicio de impresión es necesario. Si no lo es, configure "
 "el parámetro Manage_Devices como False."
 
-#: ../migasfree_client/sync.py:843
+#: ../migasfree_client/sync.py:868
 msgid "Error getting printers information"
 msgstr "Error obteniendo la información de las impresoras"
 
-#: ../migasfree_client/sync.py:860
+#: ../migasfree_client/sync.py:885
 #, python-format
 msgid "Removing device: %s"
 msgstr "Quitando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:865
+#: ../migasfree_client/sync.py:890
 #, python-format
 msgid "Error removing device: %s"
 msgstr "Error quitando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:874
+#: ../migasfree_client/sync.py:899
 #, python-format
 msgid ""
 "Error: no driver defined for device %s. Please, configure feature %s, in the "
@@ -504,22 +514,22 @@ msgstr ""
 "Error: no hay controlador definido para el dispositivo %s. Por favor, "
 "configure la prestación %s, en el modelo %s %s, y proyecto %s"
 
-#: ../migasfree_client/sync.py:888
+#: ../migasfree_client/sync.py:913
 #, python-format
 msgid "Installing device: %s"
 msgstr "Instalando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:893
+#: ../migasfree_client/sync.py:918
 #, python-format
 msgid "Error installing device: %s"
 msgstr "Error instalando dispositivo: %s"
 
-#: ../migasfree_client/sync.py:904
+#: ../migasfree_client/sync.py:929
 #, python-format
 msgid "Setting default device: %s"
 msgstr "Estableciendo dispositivo por defecto: %s"
 
-#: ../migasfree_client/sync.py:908
+#: ../migasfree_client/sync.py:933
 #, python-format
 msgid "Error setting default device: %s"
 msgstr "Error estableciendo dispositivo por defecto: %s"
