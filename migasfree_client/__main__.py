@@ -81,6 +81,23 @@ def parse_args(argv):
         help=_('Force package upgrades')
     )
 
+    group_sync = subparser_sync.add_mutually_exclusive_group(required=False)
+    group_sync.add_argument(
+        '-dev', '--devices',
+        action='store_true',
+        help=_('Synchronize computer devices with server')
+    )
+    group_sync.add_argument(
+        '-hard', '--hardware',
+        action='store_true',
+        help=_('Synchronize computer hardware with server')
+    )
+    group_sync.add_argument(
+        '-soft', '--software-info',
+        action='store_true',
+        help=_('Upload computer software to server')
+    )
+
     subparser_install = subparsers.add_parser(
         'install',
         help=_('Install package')
@@ -182,11 +199,6 @@ def parse_args(argv):
         help=_('Get individual value')
     )
 
-    subparser_devices = subparsers.add_parser(
-        'devices',
-        help=_('Synchronize computer devices with server')
-    )
-
     if len(argv) < 1:
         parser.print_help()
         sys.exit(ALL_OK)
@@ -207,7 +219,7 @@ def main(argv=None):
         })
         sys.stdout.flush()
 
-    if args.cmd in ['register', 'sync', 'install', 'purge', 'search', 'devices']:
+    if args.cmd in ['register', 'sync', 'install', 'purge', 'search']:
         from .sync import MigasFreeSync
         MigasFreeSync().run(args)
     elif args.cmd == 'label':
