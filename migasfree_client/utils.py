@@ -477,11 +477,11 @@ def query_yes_no(question, default="yes"):
         _("no"): "no", _("n"): "no"
     }
     if default is None:
-        prompt = f' {_("[y/n]")} '
+        prompt = ' {} '.format(_("[y/n]"))
     elif default == "yes":
-        prompt = f' {_("[Y/n]")} '
+        prompt = ' {} '.format(_("[Y/n]"))
     elif default == "no":
-        prompt = f' {_("[y/N]")} '
+        prompt = ' {} '.format(_("[y/N]"))
     else:
         raise ValueError(f"invalid default answer: '{default}'")
 

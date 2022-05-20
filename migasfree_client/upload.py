@@ -71,36 +71,36 @@ class MigasFreeUpload(MigasFreeCommand):
     def _show_running_options(self):
         super()._show_running_options()
 
-        print(f'\t{_("Project")}: {self.packager_project}')
-        print(f'\t{_("Store")}: {self.packager_store}')
-        print(f'\t{_("User")}: {self.packager_user}')
-        # print(f'\t{_("Password")}: {self.packager_pwd}')
+        print('\t{}: {}'.format(_("Project"), self.packager_project))
+        print('\t{}: {}'.format(_("Store"), self.packager_store))
+        print('\t{}: {}'.format(_("User"), self.packager_user))
+        # print('\t{}: {}'.format(_("Password"), self.packager_pwd))
         if self._file:
-            print(f'\t{_("File")}: {self._file}')
+            print('\t{}: {}'.format(_("File"), self._file))
         if self._directory:
-            print(f'\t{_("Directory")}: {self._directory}')
+            print('\t{}: {}'.format(_("Directory"), self._directory))
         print()
 
     def _left_parameters(self):
         if not self.packager_user:
-            self.packager_user = input(f'{_("User to upload at server")}: ')
+            self.packager_user = input('{} :'.format(_("User to upload at server")))
             if not self.packager_user:
                 print(_('Empty user. Exiting %s.') % self.CMD)
                 logger.info('Empty user in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_pwd:
-            self.packager_pwd = getpass.getpass(f'{_("User password")}: ')
+            self.packager_pwd = getpass.getpass('{} :'.format(_("User password")))
 
         if not self.packager_project:
-            self.packager_project = input(f'{_("Project to upload at server")}: ')
+            self.packager_project = input('{} :'.format(_("Project to upload at server")))
             if not self.packager_project:
                 print(_('Empty project. Exiting %s.') % self.CMD)
                 logger.info('Empty project in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
-            self.packager_store = input(f'{_("Store to upload at server")}: ')
+            self.packager_store = input('{} :'.format(_("Store to upload at server")))
             if not self.packager_store:
                 print(_('Empty store. Exiting %s.') % self.CMD)
                 logger.info('Empty store in upload operation')

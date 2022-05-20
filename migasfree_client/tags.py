@@ -76,7 +76,7 @@ class MigasFreeTags(MigasFreeCommand):
     def _show_running_options(self):
         super()._show_running_options()
 
-        print(f'\t{_("Tag list")}: {self._tags}')
+        print('\t{}: {}'.format(_("Tag list"), self._tags))
         print()
 
     def _sanitize(self, tag_list):

@@ -90,7 +90,7 @@ class MigasFreeSync(MigasFreeCommand):
     def _show_running_options(self):
         super()._show_running_options()
 
-        print(f'\t{_("Graphic user")}: {self._graphic_user}')
+        print('\t{}: {}'.format(_('Graphic user'), self._graphic_user))
         print()
 
     def _usage_examples(self):

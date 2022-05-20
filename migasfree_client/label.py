@@ -112,7 +112,7 @@ class MigasFreeLabel(MigasFreeCommand):
         html = HTML_TEMPLATE % {
             'search': info.get('search'),
             'uuid': info.get('uuid'),
-            'server': f'{_("Server")}: {self.migas_server}',
+            'server': '{}: {}'.format(_('Server'), self.migas_server),
             'helpdesk': info.get('helpdesk'),
             'image': image
         }

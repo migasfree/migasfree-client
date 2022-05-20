@@ -624,7 +624,7 @@ class MigasFreeCommand():
         print('\t%s: %s' % (
             _('migasfree server version'), self._server_info.get('version', _('None')))
         )
-        print(f'\t{_("SSL certificate")}: {self.migas_ssl_cert}')
+        print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
         if self.migas_ssl_cert is not None \
                 and not isinstance(self.migas_ssl_cert, bool) \
                 and not os.path.exists(self.migas_ssl_cert):
@@ -634,8 +634,8 @@ class MigasFreeCommand():
                     _('Certificate does not exist and authentication is not guaranteed')
                 )
             )
-        print(f'\t{_("PMS")}: {self.pms}')
-        print(f'\t{_("Architecture")}: {self.pms.get_system_architecture()}')
+        print('\t%s: %s' % (_('PMS'), self.pms))
+        print('\t%s: %s' % (_('Architecture'), self.pms.get_system_architecture()))
 
     def _write_error(self, msg, append=False):
         if append:
