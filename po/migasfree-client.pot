@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-05 21:04+0200\n"
+"POT-Creation-Date: 2022-05-20 12:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,7 +109,7 @@ msgstr ""
 msgid "Authorized user to upload at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:165
+#: ../migasfree_client/__main__.py:165 ../migasfree_client/upload.py:93
 msgid "User password"
 msgstr ""
 
@@ -208,11 +208,11 @@ msgstr ""
 msgid "Config options: %s"
 msgstr ""
 
-#: ../migasfree_client/command.py:570
+#: ../migasfree_client/command.py:570 ../migasfree_client/upload.py:74
 msgid "Project"
 msgstr ""
 
-#: ../migasfree_client/command.py:575
+#: ../migasfree_client/command.py:575 ../migasfree_client/label.py:115
 msgid "Server"
 msgstr ""
 
@@ -260,12 +260,24 @@ msgstr ""
 msgid "None"
 msgstr ""
 
+#: ../migasfree_client/command.py:627
+msgid "SSL certificate"
+msgstr ""
+
 #: ../migasfree_client/command.py:633
 msgid "Warning"
 msgstr ""
 
 #: ../migasfree_client/command.py:634
 msgid "Certificate does not exist and authentication is not guaranteed"
+msgstr ""
+
+#: ../migasfree_client/command.py:637
+msgid "PMS"
+msgstr ""
+
+#: ../migasfree_client/command.py:638
+msgid "Architecture"
 msgstr ""
 
 #: ../migasfree_client/command.py:692
@@ -287,6 +299,10 @@ msgstr ""
 #: ../migasfree_client/sync.py:86
 #, python-format
 msgid "Killing %s before time!!!"
+msgstr ""
+
+#: ../migasfree_client/sync.py:93
+msgid "Graphic user"
 msgstr ""
 
 #: ../migasfree_client/sync.py:97 ../migasfree_client/tags.py:50
@@ -554,6 +570,10 @@ msgstr ""
 msgid "Unsetting all tags (command line):"
 msgstr ""
 
+#: ../migasfree_client/tags.py:79
+msgid "Tag list"
+msgstr ""
+
 #: ../migasfree_client/tags.py:89
 msgid "Tags must be in \"prefix-value\" format"
 msgstr ""
@@ -583,9 +603,37 @@ msgstr ""
 msgid "Upload package set:"
 msgstr ""
 
+#: ../migasfree_client/upload.py:75
+msgid "Store"
+msgstr ""
+
+#: ../migasfree_client/upload.py:76
+msgid "User"
+msgstr ""
+
+#: ../migasfree_client/upload.py:79
+msgid "File"
+msgstr ""
+
+#: ../migasfree_client/upload.py:81
+msgid "Directory"
+msgstr ""
+
+#: ../migasfree_client/upload.py:86
+msgid "User to upload at server"
+msgstr ""
+
+#: ../migasfree_client/upload.py:96
+msgid "Project to upload at server"
+msgstr ""
+
 #: ../migasfree_client/upload.py:98
 #, python-format
 msgid "Empty project. Exiting %s."
+msgstr ""
+
+#: ../migasfree_client/upload.py:103
+msgid "Store to upload at server"
 msgstr ""
 
 #: ../migasfree_client/upload.py:105
@@ -639,6 +687,18 @@ msgstr ""
 
 #: ../migasfree_client/utils.py:477
 msgid "n"
+msgstr ""
+
+#: ../migasfree_client/utils.py:480
+msgid "[y/n]"
+msgstr ""
+
+#: ../migasfree_client/utils.py:482
+msgid "[Y/n]"
+msgstr ""
+
+#: ../migasfree_client/utils.py:484
+msgid "[y/N]"
 msgstr ""
 
 #: ../migasfree_client/utils.py:497

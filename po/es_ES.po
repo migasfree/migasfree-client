@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-05 21:04+0200\n"
+"POT-Creation-Date: 2022-05-20 12:45+0200\n"
 "PO-Revision-Date: 2022-05-05 21:05+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
@@ -109,7 +109,7 @@ msgstr "Subir ficheros al servidor"
 msgid "Authorized user to upload at server"
 msgstr "Usuario autorizado para subir al servidor"
 
-#: ../migasfree_client/__main__.py:165
+#: ../migasfree_client/__main__.py:165 ../migasfree_client/upload.py:93
 msgid "User password"
 msgstr "Contraseña del usuario"
 
@@ -208,11 +208,11 @@ msgstr "Ordenador registrado en el servidor"
 msgid "Config options: %s"
 msgstr "Opciones de configuración: %s"
 
-#: ../migasfree_client/command.py:570
+#: ../migasfree_client/command.py:570 ../migasfree_client/upload.py:74
 msgid "Project"
 msgstr "Proyecto"
 
-#: ../migasfree_client/command.py:575
+#: ../migasfree_client/command.py:575 ../migasfree_client/label.py:115
 msgid "Server"
 msgstr "Servidor"
 
@@ -260,6 +260,10 @@ msgstr "Versión de MigasFree Server"
 msgid "None"
 msgstr "Ninguna"
 
+#: ../migasfree_client/command.py:627
+msgid "SSL certificate"
+msgstr "Certificado SSL"
+
 #: ../migasfree_client/command.py:633
 msgid "Warning"
 msgstr "Aviso"
@@ -267,6 +271,14 @@ msgstr "Aviso"
 #: ../migasfree_client/command.py:634
 msgid "Certificate does not exist and authentication is not guaranteed"
 msgstr "El certificado no existe y la autenticación no está garantizada"
+
+#: ../migasfree_client/command.py:637
+msgid "PMS"
+msgstr "PMS"
+
+#: ../migasfree_client/command.py:638
+msgid "Architecture"
+msgstr "Arquitectura"
 
 #: ../migasfree_client/command.py:692
 msgid "Any PMS was not found. Cannot continue."
@@ -288,6 +300,10 @@ msgstr "Sesión gráfica no detectada"
 #, python-format
 msgid "Killing %s before time!!!"
 msgstr "¡Saliendo de %s antes de tiempo!"
+
+#: ../migasfree_client/sync.py:93
+msgid "Graphic user"
+msgstr "Usuario gráfico"
 
 #: ../migasfree_client/sync.py:97 ../migasfree_client/tags.py:50
 #: ../migasfree_client/upload.py:61
@@ -558,6 +574,10 @@ msgstr "Establecer etiquetas (con GUI):"
 msgid "Unsetting all tags (command line):"
 msgstr "Eliminar todas las etiquetas (en línea de comando):"
 
+#: ../migasfree_client/tags.py:79
+msgid "Tag list"
+msgstr "Lista de etiquetas"
+
 #: ../migasfree_client/tags.py:89
 msgid "Tags must be in \"prefix-value\" format"
 msgstr "Las etiquetas deben estar en el formato \"prefijo-valor\""
@@ -587,10 +607,38 @@ msgstr "Subir un único paquete:"
 msgid "Upload package set:"
 msgstr "Subir un conjunto de paquetes:"
 
+#: ../migasfree_client/upload.py:75
+msgid "Store"
+msgstr "Ubicación"
+
+#: ../migasfree_client/upload.py:76
+msgid "User"
+msgstr "Usuario"
+
+#: ../migasfree_client/upload.py:79
+msgid "File"
+msgstr "Fichero"
+
+#: ../migasfree_client/upload.py:81
+msgid "Directory"
+msgstr "Directorio"
+
+#: ../migasfree_client/upload.py:86
+msgid "User to upload at server"
+msgstr "Usuario para subir ficheros al servidor"
+
+#: ../migasfree_client/upload.py:96
+msgid "Project to upload at server"
+msgstr "Proyecto al que subir en el servidor"
+
 #: ../migasfree_client/upload.py:98
 #, python-format
 msgid "Empty project. Exiting %s."
 msgstr "No se ha especificado un proyecto. Saliendo de %s."
+
+#: ../migasfree_client/upload.py:103
+msgid "Store to upload at server"
+msgstr "Ubicación a la que subir en el servidor"
 
 #: ../migasfree_client/upload.py:105
 #, python-format
@@ -645,6 +693,18 @@ msgstr "no"
 msgid "n"
 msgstr "n"
 
+#: ../migasfree_client/utils.py:480
+msgid "[y/n]"
+msgstr "[s/n]"
+
+#: ../migasfree_client/utils.py:482
+msgid "[Y/n]"
+msgstr "[S/n]"
+
+#: ../migasfree_client/utils.py:484
+msgid "[y/N]"
+msgstr "[s/N]"
+
 #: ../migasfree_client/utils.py:497
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
 msgstr "Por favor, responde 'sí' o 'no' (o 's' o 'n')."
@@ -665,53 +725,8 @@ msgstr ""
 #~ msgid "Password"
 #~ msgstr "Contraseña"
 
-#~ msgid "SSL certificate"
-#~ msgstr "Certificado SSL"
-
-#~ msgid "PMS"
-#~ msgstr "PMS"
-
-#~ msgid "Architecture"
-#~ msgstr "Arquitectura"
-
-#~ msgid "Graphic user"
-#~ msgstr "Usuario gráfico"
-
 #~ msgid "Hardware information"
 #~ msgstr "Información sobre el hardware"
-
-#~ msgid "Tag list"
-#~ msgstr "Lista de etiquetas"
-
-#~ msgid "Store"
-#~ msgstr "Ubicación"
-
-#~ msgid "User"
-#~ msgstr "Usuario"
-
-#~ msgid "File"
-#~ msgstr "Fichero"
-
-#~ msgid "Directory"
-#~ msgstr "Directorio"
-
-#~ msgid "User to upload at server"
-#~ msgstr "Usuario para subir ficheros al servidor"
-
-#~ msgid "Project to upload at server"
-#~ msgstr "Proyecto al que subir en el servidor"
-
-#~ msgid "Store to upload at server"
-#~ msgstr "Ubicación a la que subir en el servidor"
-
-#~ msgid "[y/n]"
-#~ msgstr "[s/n]"
-
-#~ msgid "[Y/n]"
-#~ msgstr "[S/n]"
-
-#~ msgid "[y/N]"
-#~ msgstr "[s/N]"
 
 #~ msgid "There are not assigned tags"
 #~ msgstr "No hay etiquetas asignadas"
