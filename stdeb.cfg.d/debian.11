@@ -7,6 +7,6 @@ Source = migasfree-client
 Package3 = migasfree-client
 Maintainer = Jose Antonio Chavarría <jachavar@gmail.com>
 Debian-Version = 1
-Build-Depends = python3 (>=3.3), python3-stdeb, python3-netifaces, python3-distro, dh-python
-Depends3 = lshw (>=02.15), sudo, dmidecode, python3-pycurl (>=7.19), python3-netifaces, dialog, openssl, gnupg, python3-distutils
+Build-Depends = python3 (>=3.3), python3-stdeb, python3-netifaces, python3-distro, dh-python, python3-distutils
+Depends3 = lshw (>=02.15), sudo, dmidecode, python3-pycurl (>=7.19), python3-netifaces, dialog, openssl, gnupg
 Suggests3 = python3-notify, zenity, python3-cups
