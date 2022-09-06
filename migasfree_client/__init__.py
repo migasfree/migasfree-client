@@ -21,7 +21,7 @@ import gettext
 
 from .settings import LOCALE_PATH
 
-__version__ = "4.20"
+__version__ = "4.21"
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __contact__ = "fun.with@migasfree.org"
