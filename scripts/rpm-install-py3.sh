@@ -5,8 +5,7 @@
 
 # This is what dist.py normally does.
 PYTHONDONTWRITEBYTECODE=1 python3 setup.py install --no-compile --prefix=/usr \
-    --root=${RPM_BUILD_ROOT} --record="INSTALLED_FILES" \
-    --install-lib=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+    --root=${RPM_BUILD_ROOT} --record="INSTALLED_FILES"
 
 # Sort the filelist so that directories appear before files. This avoids
 # duplicate filename problems on some systems.
