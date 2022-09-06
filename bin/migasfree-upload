@@ -10,12 +10,6 @@ then
 fi
 
 _CMD=$(cat << EOF
-import sys
-from distutils.sysconfig import get_python_lib
-
-if not get_python_lib() in sys.path:
-    sys.path.append(get_python_lib())
-
 import migasfree_client.upload
 
 if __name__ == '__main__':
