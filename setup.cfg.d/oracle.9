@@ -1,0 +1,22 @@
+[install]
+prefix=/usr
+
+[bdist_rpm]
+build-requires = python3-netifaces
+                 python3-distro
+release = 1
+doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README TODO migasfree-client.doap
+install-script = scripts/rpm-install-py3.sh
+post-install = scripts/rpm-post-install.sh
+post-uninstall = scripts/rpm-post-uninstall.sh
+fix-python = /usr/bin/python3
+requires = python3 >= 3.3
+           lshw >= B.02.15
+           sudo
+           dmidecode
+           python3-pycurl >= 7.19
+           python3-netifaces
+           dialog
+           openssl
+           which
+           procps-ng
