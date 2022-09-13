@@ -244,6 +244,12 @@ class MigasFreeCommand():
             except:
                 pass
 
+    def _get_keys_path(self):
+        return os.path.join(
+            settings.KEYS_PATH,
+            utils.sanitize_path(self.migas_server)
+        )
+
     def _init_url_base(self):
         self._url_base = '{}://{}{}'.format(
             self.migas_protocol,
@@ -252,10 +258,7 @@ class MigasFreeCommand():
         )
 
     def _init_url_request(self):
-        keys_path = os.path.join(
-            settings.KEYS_PATH,
-            utils.sanitize_path(self.migas_server)
-        )
+        keys_path = self._get_keys_path()
         self._url_request = UrlRequest(
             debug=self._debug,
             proxy=self.migas_proxy,
@@ -335,17 +338,11 @@ class MigasFreeCommand():
             sys.exit(errno.EACCES)
 
     def _check_sign_keys(self, get_computer_id=True):
-        server = utils.sanitize_path(self.migas_server)
+        keys_path = self._get_keys_path()
 
-        private_key = os.path.join(
-            settings.KEYS_PATH, server, self.PRIVATE_KEY
-        )
-        public_key = os.path.join(
-            settings.KEYS_PATH, server, self.PUBLIC_KEY
-        )
-        repos_key = os.path.join(
-            settings.KEYS_PATH, server, self.REPOS_KEY
-        )
+        private_key = os.path.join(keys_path, self.PRIVATE_KEY)
+        public_key = os.path.join(keys_path, self.PUBLIC_KEY)
+        repos_key = os.path.join(keys_path, self.REPOS_KEY)
 
         if os.path.isfile(private_key) and \
                 os.path.isfile(public_key) and \
@@ -519,6 +516,11 @@ class MigasFreeCommand():
             self._server_info = response
 
     def get_computer_id(self):
+        if not os.path.isfile(
+            os.path.join(self._get_keys_path(), self.PRIVATE_KEY)
+        ):
+            return 0
+
         if not self._url_base:
             self._init_command()
 
