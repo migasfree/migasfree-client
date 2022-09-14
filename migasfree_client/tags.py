@@ -156,6 +156,9 @@ class MigasFreeTags(MigasFreeCommand):
         return selected_tags
 
     def get_assigned_tags(self):
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
+
         if not self._computer_id:
             self.get_computer_id()
 
