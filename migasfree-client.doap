@@ -5,9 +5,11 @@
          xmlns="http://usefulinc.com/ns/doap#">
 
   <name xml:lang="en">migasfree-client</name>
+
   <shortdesc xml:lang="en">
       migasfree is a very simple, but effective, systems management system
   </shortdesc>
+
   <homepage rdf:resource="http://migasfree.org/" />
 
   <maintainer>
@@ -16,4 +18,13 @@
       <foaf:mbox rdf:resource="mailto:jachavar@gmail.com" />
     </foaf:Person>
   </maintainer>
+
+  <license rdf:resource="http://spdx.org/licenses/GPL-3.0+" />
+
+  <repository>
+    <GitRepository>
+      <location rdf:resource="https://github.com/migasfree/migasfree-client.git"/>
+      <browse rdf:resource="https://github.com/migasfree/migasfree-client/"/>
+    </GitRepository>
+  </repository>
 </Project>
