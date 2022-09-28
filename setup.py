@@ -49,6 +49,8 @@ REQUIRES = filter(
 import glob
 import subprocess
 
+# set DISTUTILS_DEBUG as environment variable to get debug info
+
 from setuptools import setup, find_packages
 from distutils.command.build import build
 from distutils.command.install_data import install_data
@@ -109,11 +111,13 @@ setup(
     description='Synchronizes a computer from a migasfree server',
     long_description=README,
     license='GPLv3',
-    keywords='migasfree systems management devops',
+    keywords=['migasfree', 'systems management', 'devops'],
     author='Jose Antonio Chavarría',
     author_email='jachavar@gmail.com',
+    maintainer='Jose Antonio Chavarría',
+    maintainer_email='jachavar@gmail.com',
     url='http://www.migasfree.org/',
-    platforms=['Linux'],
+    platforms=['Linux', 'Windows 10'],
     install_requires=REQUIRES,
     packages=find_packages(),
     entry_points={
@@ -150,6 +154,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Natural Language :: English',
         'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft :: Windows :: Windows 10',
         'Programming Language :: Python',
         'Topic :: System :: Software Distribution',
     ],
