@@ -1,0 +1,49 @@
+# https://setuptools.pypa.io/
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "migasfree-client"
+authors = [
+  {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
+]
+license = { text = "GPL-3.0-or-later" }
+version = "5.0"
+description = "Synchronizes a computer from a migasfree server"
+readme = "README.md"
+keywords = ["migasfree", "systems management", "devops"]
+requires-python = ">=3.6"
+dependencies = [
+    "netifaces>=0.8",
+    "jwcrypto>=0.5.0",
+    "requests>=2.4.3",
+    "requests-toolbelt>=0.5.0",
+    "rich>=9.5",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Programming Language :: Python",
+    "Topic :: System :: Software Distribution",
+]
+
+[project.urls]
+homepage = "http://migasfree.org"
+repository = "https://github.com/migasfree/migasfree-client"
+documentation = "https://fun-with-migasfree.readthedocs.io"
+"Bug Report" = "https://github.com/migasfree/migasfree-client/issues"
+
+[project.scripts]
+migasfree = "migasfree_client.__main__:main"
+
+[tool.setuptools.packages]
+find = {}
