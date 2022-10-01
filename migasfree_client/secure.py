@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@ __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 import json
+
+from gettext import gettext
 
 from jwcrypto import jwk, jwe, jws
 from jwcrypto.common import json_encode
@@ -113,8 +115,16 @@ def unwrap(data, decrypt_key, verify_key):
     """
     dict unwrap(string data, string decrypt_key, string verify_key)
     """
-    jwt = json.loads(decrypt(data, decrypt_key))
-    jws_token = verify(jwt['sign'], verify_key)
+    try:
+        jwt = json.loads(decrypt(data, decrypt_key))
+    except jwe.InvalidJWEData:
+        return gettext('Invalid Data')
+
+    try:
+        jws_token = verify(jwt['sign'], verify_key)
+    except jws.InvalidJWSSignature:
+        return gettext('Invalid Signature')
+
     if jws_token:
         return jwt['data']
 
