@@ -542,7 +542,12 @@ class MigasFreeCommand():
             if response['error']['code'] == requests.codes.not_found:
                 response = self._save_computer()
             else:
-                self.operation_failed(response['error']['info'])
+                self.operation_failed(
+                    '{} ({})'.format(
+                        response['error']['info'],
+                        _('Review keys or register computer again')
+                    )
+                )
                 sys.exit(errno.ENODATA)
 
         self._computer_id = response
