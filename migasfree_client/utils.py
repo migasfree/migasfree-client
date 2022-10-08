@@ -73,7 +73,7 @@ def is_windows():
 
 
 def is_linux():
-    return sys.platform != 'win32'  # FIXME
+    return sys.platform == 'linux'
 
 
 def sanitize_path(value):
