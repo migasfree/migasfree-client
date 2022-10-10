@@ -356,14 +356,18 @@ class MigasFreeCommand():
         return self._auto_register()
 
     def _auto_register(self):
-        print(_('Autoregistering computer...'))
+        self._show_message(_('Autoregistering computer...'))
 
         if self._save_sign_keys(
                 self.auto_register_user, self.auto_register_password
         ):
             return self._save_computer() != 0
 
+        return False
+
     def _save_sign_keys(self, user, password):
+        exit_on_error = (user != self.auto_register_user)
+
         # API keys
         response = self._url_request.run(
             url=self.api_endpoint(self.auto_register_end_point),
@@ -376,7 +380,7 @@ class MigasFreeCommand():
                 'architecture': self.pms.get_system_architecture()
             },
             safe=False,
-            exit_on_error=(user != self.auto_register_user),
+            exit_on_error=exit_on_error,
             debug=self._debug
         )
         logger.debug('Response _save_sign_keys: %s', response)
@@ -385,11 +389,17 @@ class MigasFreeCommand():
             if 'code' in response['error']:
                 self.operation_failed(response['error']['info'])
                 logger.error(response['error']['info'])
-                sys.exit(response['error']['code'])
+                if exit_on_error:
+                    sys.exit(response['error']['code'])
+
+                return False
             else:
                 self.operation_failed(response['error'])
                 logger.error(response['error'])
-                sys.exit(errno.EPERM)
+                if exit_on_error:
+                    sys.exit(errno.EPERM)
+
+                return False
 
         if not self._check_path(os.path.join(
                 os.path.abspath(settings.KEYS_PATH),
