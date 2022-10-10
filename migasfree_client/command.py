@@ -488,6 +488,8 @@ class MigasFreeCommand():
                     sys.exit(errno.EAGAIN)
 
             password = getpass.getpass(f"{_('Password')}: ")
+
+            self._show_message(_('Registering computer...'))
             self._save_sign_keys(user, password)
 
         self.operation_ok(_('Computer registered at server'))
