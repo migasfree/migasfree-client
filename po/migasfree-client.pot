@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-01 17:15+0200\n"
+"POT-Creation-Date: 2022-10-10 09:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -147,7 +147,7 @@ msgstr ""
 msgid "Failed to configure the log file (%s)"
 msgstr ""
 
-#: ../migasfree_client/command.py:295 ../migasfree_client/url_request.py:230
+#: ../migasfree_client/command.py:295 ../migasfree_client/url_request.py:233
 #, python-format
 msgid "Error creating %s directory"
 msgstr ""
@@ -170,129 +170,133 @@ msgstr ""
 msgid "Autoregistering computer..."
 msgstr ""
 
-#: ../migasfree_client/command.py:417 ../migasfree_client/command.py:450
+#: ../migasfree_client/command.py:427 ../migasfree_client/command.py:460
 #, python-format
 msgid "Key %s created!"
 msgstr ""
 
-#: ../migasfree_client/command.py:419 ../migasfree_client/command.py:454
+#: ../migasfree_client/command.py:429 ../migasfree_client/command.py:464
 msgid "Error writing key file!!!"
 msgstr ""
 
-#: ../migasfree_client/command.py:452
+#: ../migasfree_client/command.py:462
 #, python-format
 msgid "ERROR: not import key: %s!"
 msgstr ""
 
-#: ../migasfree_client/command.py:463
+#: ../migasfree_client/command.py:473
 #, python-format
 msgid "Have you check config options in this machine (%s)?"
 msgstr ""
 
-#: ../migasfree_client/command.py:467
+#: ../migasfree_client/command.py:477
 #, python-format
 msgid "Check %s file and register again"
 msgstr ""
 
-#: ../migasfree_client/command.py:476 ../migasfree_client/upload.py:88
+#: ../migasfree_client/command.py:486 ../migasfree_client/upload.py:88
 #, python-format
 msgid "Empty user. Exiting %s."
 msgstr ""
 
-#: ../migasfree_client/command.py:483
+#: ../migasfree_client/command.py:492
+msgid "Registering computer..."
+msgstr ""
+
+#: ../migasfree_client/command.py:495
 msgid "Computer registered at server"
 msgstr ""
 
-#: ../migasfree_client/command.py:548
+#: ../migasfree_client/command.py:560
 msgid "Review keys or register computer again"
 msgstr ""
 
-#: ../migasfree_client/command.py:575
+#: ../migasfree_client/command.py:587
 #, python-format
 msgid "Config options: %s"
 msgstr ""
 
-#: ../migasfree_client/command.py:577 ../migasfree_client/upload.py:74
+#: ../migasfree_client/command.py:589 ../migasfree_client/upload.py:74
 msgid "Project"
 msgstr ""
 
-#: ../migasfree_client/command.py:582 ../migasfree_client/label.py:115
+#: ../migasfree_client/command.py:594 ../migasfree_client/label.py:115
 msgid "Server"
 msgstr ""
 
-#: ../migasfree_client/command.py:587
+#: ../migasfree_client/command.py:599
 msgid "Protocol"
 msgstr ""
 
-#: ../migasfree_client/command.py:593
+#: ../migasfree_client/command.py:605
 msgid "Port"
 msgstr ""
 
-#: ../migasfree_client/command.py:598
+#: ../migasfree_client/command.py:610
 msgid "Auto update packages"
 msgstr ""
 
-#: ../migasfree_client/command.py:603
+#: ../migasfree_client/command.py:615
 msgid "Manage devices"
 msgstr ""
 
-#: ../migasfree_client/command.py:608
+#: ../migasfree_client/command.py:620
 msgid "Proxy"
 msgstr ""
 
-#: ../migasfree_client/command.py:613
+#: ../migasfree_client/command.py:625
 msgid "Package Proxy Cache"
 msgstr ""
 
-#: ../migasfree_client/command.py:618
+#: ../migasfree_client/command.py:630
 msgid "Debug"
 msgstr ""
 
-#: ../migasfree_client/command.py:623
+#: ../migasfree_client/command.py:635
 msgid "Computer name"
 msgstr ""
 
-#: ../migasfree_client/command.py:630
+#: ../migasfree_client/command.py:642
 msgid "Running options:"
 msgstr ""
 
-#: ../migasfree_client/command.py:632
+#: ../migasfree_client/command.py:644
 msgid "migasfree server version"
 msgstr ""
 
-#: ../migasfree_client/command.py:632
+#: ../migasfree_client/command.py:644
 msgid "None"
 msgstr ""
 
-#: ../migasfree_client/command.py:634
+#: ../migasfree_client/command.py:646
 msgid "SSL certificate"
 msgstr ""
 
-#: ../migasfree_client/command.py:640
+#: ../migasfree_client/command.py:652
 msgid "Warning"
 msgstr ""
 
-#: ../migasfree_client/command.py:641
+#: ../migasfree_client/command.py:653
 msgid "Certificate does not exist and authentication is not guaranteed"
 msgstr ""
 
-#: ../migasfree_client/command.py:644
+#: ../migasfree_client/command.py:656
 msgid "PMS"
 msgstr ""
 
-#: ../migasfree_client/command.py:645
+#: ../migasfree_client/command.py:657
 msgid "Architecture"
 msgstr ""
 
-#: ../migasfree_client/command.py:699
+#: ../migasfree_client/command.py:711
 msgid "Any PMS was not found. Cannot continue."
 msgstr ""
 
-#: ../migasfree_client/command.py:705
+#: ../migasfree_client/command.py:717
 msgid "Ok"
 msgstr ""
 
-#: ../migasfree_client/command.py:714
+#: ../migasfree_client/command.py:726
 msgid "Failed"
 msgstr ""
 
@@ -665,17 +669,17 @@ msgstr ""
 msgid "Creating repository operation..."
 msgstr ""
 
-#: ../migasfree_client/url_request.py:227
+#: ../migasfree_client/url_request.py:230
 #, python-format
 msgid "HTTP error code: %s"
 msgstr ""
 
-#: ../migasfree_client/url_request.py:257
+#: ../migasfree_client/url_request.py:260
 #, python-format
 msgid "Error: %s"
 msgstr ""
 
-#: ../migasfree_client/url_request.py:259
+#: ../migasfree_client/url_request.py:262
 #, python-format
 msgid "Status code: %s"
 msgstr ""
