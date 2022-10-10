@@ -361,7 +361,9 @@ class MigasFreeCommand():
         if self._save_sign_keys(
                 self.auto_register_user, self.auto_register_password
         ):
-            return self._save_computer() != 0
+            return self._save_computer(
+                self.auto_register_user, self.auto_register_password
+            ) != 0
 
         return False
 
@@ -491,16 +493,19 @@ class MigasFreeCommand():
 
             self._show_message(_('Registering computer...'))
             self._save_sign_keys(user, password)
+            self._save_computer(user, password)
 
         self.operation_ok(_('Computer registered at server'))
 
-    def _save_computer(self):
+    def _save_computer(self, user, password):
         response = self._url_request.run(
             url=self.api_endpoint(self.URLS['upload_computer']),
             data={
                 'uuid': utils.get_hardware_uuid(),
                 'name': self.migas_computer_name,
-                'ip_address': get_network_info()['ip']
+                'ip_address': get_network_info()['ip'],
+                'username': user,
+                'password': password
             },
             exit_on_error=False,
             debug=self._debug
@@ -552,7 +557,9 @@ class MigasFreeCommand():
 
         if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
-                response = self._save_computer()
+                response = self._save_computer(
+                    self.auto_register_user, self.auto_register_password
+                )
             else:
                 self.operation_failed(
                     '{} ({})'.format(
