@@ -203,7 +203,10 @@ class UrlRequest():
                 verify_key=self._public_key
             )
         else:
-            response = json_response
+            if 'detail' in json_response:
+                response = json_response['detail']
+            else:
+                response = json_response
 
         logger.debug('Response text: %s', response)
 
