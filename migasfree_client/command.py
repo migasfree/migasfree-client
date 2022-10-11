@@ -480,16 +480,21 @@ class MigasFreeCommand():
             self.operation_failed(msg)
             sys.exit(errno.EAGAIN)
 
-        if not self._auto_register():
-            if not user:
-                sys.stdin = open('/dev/tty')
-                user = input(f"{_('User to register computer at server')}: ")
-                if not user:
-                    self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
-                    logger.info('Empty user in register computer option')
-                    sys.exit(errno.EAGAIN)
+        if user:
+            password = getpass.getpass('{}: '.format(_('Password')))
 
-            password = getpass.getpass(f"{_('Password')}: ")
+            self._show_message(_('Registering computer...'))
+            self._save_sign_keys(user, password)
+            self._save_computer(user, password)
+        elif not self._auto_register():
+            sys.stdin = open('/dev/tty')
+            user = input('{}: '.format(_('User to register computer at server')))
+            if not user:
+                self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
+                logger.info('Empty user in register computer option')
+                sys.exit(errno.EAGAIN)
+
+            password = getpass.getpass('{}: '.format(_('Password')))
 
             self._show_message(_('Registering computer...'))
             self._save_sign_keys(user, password)
@@ -513,12 +518,11 @@ class MigasFreeCommand():
         logger.debug('Response _save_computer: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
+            self.operation_failed(response['error']['info'])
             if response['error']['code'] == requests.codes.not_found:
-                self.operation_failed(response['error']['info'])
                 sys.exit(errno.ENODATA)
 
-        self._computer_id = response.get('id')
-        return self._computer_id
+        return response.get('id', 0)  # computer ID
 
     def get_server_info(self):
         response = self._url_request.run(
