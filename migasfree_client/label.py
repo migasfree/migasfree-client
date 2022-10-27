@@ -40,7 +40,7 @@ HTML_TEMPLATE = """<!doctype html>
         <style type="text/css">
         body {
             width: 20em;
-            height: 7em;
+            min-height: 7em;
             margin: 0;
             border: 1px solid #000;
             padding: .5em 1em;
@@ -145,8 +145,8 @@ class MigasFreeLabel(MigasFreeCommand):
 
         info = self.get_label()
 
-        app_icon_path = os.path.join(ICON_PATH, self.ICON_MINI)
-        server_icon_path = os.path.join(ICON_PATH, self.ICON_SERVER)
+        app_icon_path = os.path.join(ICON_PATH, self.APP_ICON)
+        server_icon_path = os.path.join(ICON_PATH, self.SERVER_ICON)
         if is_windows():
             app_icon_path = app_icon_path.replace('\\', '/')
             server_icon_path = server_icon_path.replace('\\', '/')
