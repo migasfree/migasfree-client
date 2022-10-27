@@ -132,7 +132,11 @@ setup(
     data_files=[
         (
             'share/icons/hicolor/scalable/apps',
-            ['icons/scalable/migasfree.svg']
+            [
+                'icons/scalable/migasfree.svg',
+                'icons/scalable/migasfree-logo-mini.svg',
+                'icons/scalable/server-network.svg'
+            ]
         ),
         ('share/doc/migasfree-client', [
             'AUTHORS',
