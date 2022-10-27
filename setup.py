@@ -135,7 +135,7 @@ setup(
             [
                 'icons/scalable/migasfree.svg',
                 'icons/scalable/migasfree-logo-mini.svg',
-                'icons/scalable/server-network.svg'
+                'icons/scalable/migasfree-server-network.svg'
             ]
         ),
         ('share/doc/migasfree-client', [
