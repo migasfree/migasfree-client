@@ -39,31 +39,72 @@ HTML_TEMPLATE = """<!doctype html>
         <meta charset="utf-8" />
         <style type="text/css">
         body {
-            width: 30em;
-            height: 10em;
+            width: 20em;
+            height: 7em;
+            margin: 0;
             border: 1px solid #000;
             padding: .5em 1em;
-            font-family: sans-serif;
+            font-family: Dosis, "Roboto", "-apple-system", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 16px;
         }
         h1 {
-            margin: 0 .5em;
-            text-align: right;
-            background: url('%(image)s') left center no-repeat;
+            margin: 0;
+            font-size: 16px;
+            font-weight: normal;
         }
         h2 {
-            font-size: 100%%;
-            text-align: center;
+            font-size: 16px;
+            font-weight: normal;
+            margin: 0;
         }
         p {
-            border-top: 1px solid #000;
+            margin: 4px 0 0 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.12);
+            padding: 8px;
             text-align: center;
+        }
+        img {
+            width: 40px;
+        }
+        .row, .column {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .column {
+            flex-direction: column;
+        }
+        .text-caption {
+            font-size: 0.75rem;
+            padding-top: 4px;
+        }
+        .avatar {
+            min-width: 56px;
+        }
+        .justify-center {
+            justify-content: center;
         }
         </style>
     </head>
     <body>
-        <h1>%(search)s</h1>
-        <h2>%(uuid)s</h2>
-        <h2>%(server)s</h2>
+        <div class="row">
+            <div class="column avatar">
+                <img src="file:///usr/share/icons/hicolor/scalable/apps/migasfree-logo-mini.svg" />
+            </div>
+            <div class="column">
+                <h1>%(search)s</h1>
+                <h2 class="text-caption">%(uuid)s</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column avatar">
+                <img src="file:///usr/share/icons/hicolor/scalable/apps/server-network.svg" />
+            </div>
+            <div class="column justify-center">
+                <h2>%(server)s</h2>
+            </div>
+        </div>
+
         <p>%(helpdesk)s</p>
     </body>
 </html>"""
@@ -104,17 +145,21 @@ class MigasFreeLabel(MigasFreeCommand):
 
         info = self.get_label()
 
-        image_path = os.path.join(ICON_PATH, self.ICON)
+        app_icon_path = os.path.join(ICON_PATH, self.ICON_MINI)
+        server_icon_path = os.path.join(ICON_PATH, self.ICON_SERVER)
         if is_windows():
-            image_path = image_path.replace('\\', '/')
-        image = f'file://{image_path}'
+            app_icon_path = app_icon_path.replace('\\', '/')
+            server_icon_path = server_icon_path.replace('\\', '/')
+        app_icon = f'file://{app_icon_path}'
+        server_icon = f'file://{server_icon_path}'
 
         html = HTML_TEMPLATE % {
             'search': info.get('search'),
             'uuid': info.get('uuid'),
-            'server': '{}: {}'.format(_('Server'), self.migas_server),
+            'server': self.migas_server,
             'helpdesk': info.get('helpdesk'),
-            'image': image
+            'app_icon': app_icon,
+            'server_icon': server_icon,
         }
 
         _file = os.path.join(TMP_PATH, 'label.html')
