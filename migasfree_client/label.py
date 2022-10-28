@@ -88,7 +88,7 @@ HTML_TEMPLATE = """<!doctype html>
     <body>
         <div class="row">
             <div class="column avatar">
-                <img src="file:///usr/share/icons/hicolor/scalable/apps/migasfree-logo-mini.svg" />
+                <img src="%(app_icon)s" />
             </div>
             <div class="column">
                 <h1>%(search)s</h1>
@@ -98,7 +98,7 @@ HTML_TEMPLATE = """<!doctype html>
 
         <div class="row">
             <div class="column avatar">
-                <img src="file:///usr/share/icons/hicolor/scalable/apps/server-network.svg" />
+                <img src="%(server_icon)s" />
             </div>
             <div class="column justify-center">
                 <h2>%(server)s</h2>
@@ -145,7 +145,7 @@ class MigasFreeLabel(MigasFreeCommand):
 
         info = self.get_label()
 
-        app_icon_path = os.path.join(ICON_PATH, self.APP_ICON)
+        app_icon_path = os.path.join(ICON_PATH, self.APP_ICON_MINI)
         server_icon_path = os.path.join(ICON_PATH, self.SERVER_ICON)
         if is_windows():
             app_icon_path = app_icon_path.replace('\\', '/')
@@ -156,7 +156,7 @@ class MigasFreeLabel(MigasFreeCommand):
         html = HTML_TEMPLATE % {
             'search': info.get('search'),
             'uuid': info.get('uuid'),
-            'server': self.migas_server,
+            'server': f'{self.migas_protocol}://{self.migas_server}',
             'helpdesk': info.get('helpdesk'),
             'app_icon': app_icon,
             'server_icon': server_icon,
