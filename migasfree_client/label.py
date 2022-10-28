@@ -39,11 +39,11 @@ HTML_TEMPLATE = """<!doctype html>
         <meta charset="utf-8" />
         <style type="text/css">
         body {
-            width: 20em;
+            width: 18em;
             min-height: 7em;
             margin: 0;
             border: 1px solid #000;
-            padding: .5em 1em;
+            padding: 2px 16px 0 16px;
             font-family: Dosis, "Roboto", "-apple-system", "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 16px;
         }
@@ -58,9 +58,9 @@ HTML_TEMPLATE = """<!doctype html>
             margin: 0;
         }
         p {
-            margin: 4px 0 0 0;
+            margin: 2px 0 0 0;
             border-top: 1px solid rgba(0, 0, 0, 0.12);
-            padding: 8px;
+            padding: 2px 0 0 0;
             text-align: center;
         }
         img {
@@ -79,6 +79,7 @@ HTML_TEMPLATE = """<!doctype html>
         }
         .avatar {
             min-width: 56px;
+            padding-right: 8px;
         }
         .justify-center {
             justify-content: center;
