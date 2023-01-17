@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -205,7 +205,7 @@ def get_hostname():
 def get_graphic_pid():
     """
     list get_graphic_pid(void)
-    Detects Gnome, KDE, Xfce, Xfce4, LXDE, Unity, MATE
+    Detects Gnome, KDE, Xfce, Xfce4, LXDE, LXQt, Unity, MATE
     """
 
     _graphic_environments = [
@@ -215,6 +215,7 @@ def get_graphic_pid():
         'xfce-mcs-manage',       # Xfce
         'xfce4-session',         # Xfce4
         'lxsession',             # LXDE
+        'lxqt-session',          # LXQt
         'mate-session',          # MATE
     ]
     for _process in _graphic_environments:
