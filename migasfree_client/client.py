@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ class MigasFreeClient(MigasFreeCommand):
 
         if not _graphic_pid:
             self._graphic_user = os.environ.get('USER')
-            print(_('No detected graphic process'))
+            logging.warning('No detected graphic process')
         else:
             self._graphic_user = utils.get_graphic_user(_graphic_pid)
             _user_display = utils.get_user_display_graphic(_graphic_pid)
