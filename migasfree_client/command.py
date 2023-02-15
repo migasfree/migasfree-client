@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -274,7 +274,7 @@ class MigasFreeCommand():
 
     def _init_command(self):
         self._ssl_cert()
-        self._pms_selection()
+        self.pms_selection()
         self._init_url_base()
         self._init_url_request()
         self.get_server_info()
@@ -703,7 +703,7 @@ class MigasFreeCommand():
 
         return None  # if not found
 
-    def _pms_selection(self):
+    def pms_selection(self):
         pms_info = self._search_pms()
         logger.debug('PMS info: %s', pms_info)
         if not pms_info:
