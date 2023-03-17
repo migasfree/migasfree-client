@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,15 @@
 import logging
 
 from .pms import Pms
-from ..settings import KEYS_PATH
-from ..utils import execute, write_file
+from .yum import Yum
+from ..utils import execute
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 
 @Pms.register('Zypper')
-class Zypper(Pms):
+class Zypper(Yum):
     """
     PMS for zypper based systems (openSUSE, SLED, SLES, ...)
     """
@@ -35,13 +35,8 @@ class Zypper(Pms):
         super().__init__()
 
         self._name = 'zypper'  # Package Management System name
-        self._pm = '/bin/rpm'  # Package Manager command
         self._pms = '/usr/bin/zypper'  # Package Management System command
         self._repo = '/etc/zypp/repos.d/migasfree.repo'  # Repositories file
-        self._mimetype = [
-            'application/x-rpm',
-            'application/x-redhat-package-manager'
-        ]
 
     def install(self, package):
         """
@@ -49,26 +44,6 @@ class Zypper(Pms):
         """
 
         cmd = f'{self._pms} install --no-force-resolution {package.strip()}'
-        logging.debug(cmd)
-
-        return execute(cmd)[0] == 0
-
-    def remove(self, package):
-        """
-        bool remove(string package)
-        """
-
-        cmd = f'{self._pms} remove {package.strip()}'
-        logging.debug(cmd)
-
-        return execute(cmd)[0] == 0
-
-    def search(self, pattern):
-        """
-        bool search(string pattern)
-        """
-
-        cmd = f'{self._pms} search {pattern.strip()}'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -136,16 +111,6 @@ class Zypper(Pms):
 
         return _ret == 0, f'{_ret}\n{_output}\n{_error}'
 
-    def is_installed(self, package):
-        """
-        bool is_installed(string package)
-        """
-
-        cmd = f'{self._pm} -q {package.strip()}'
-        logging.debug(cmd)
-
-        return execute(cmd, interactive=False)[0] == 0
-
     def clean_all(self):
         """
         bool clean_all(void)
@@ -153,6 +118,7 @@ class Zypper(Pms):
 
         cmd = f'{self._pms} clean --all'
         logging.debug(cmd)
+
         if execute(cmd)[0] == 0:
             cmd = f'{self._pms} --non-interactive refresh'
             logging.debug(cmd)
@@ -160,44 +126,6 @@ class Zypper(Pms):
             return execute(cmd)[0] == 0
 
         return False
-
-    def query_all(self):
-        """
-        ordered list query_all(void)
-        list format: name_version_architecture.extension
-        """
-
-        cmd = f'{self._pm} --queryformat "%%{{NAME}}_%%{{VERSION}}-%%{{RELEASE}}_%%{{ARCH}}.rpm\n" -qa'
-        logging.debug(cmd)
-
-        _ret, _output, _ = execute(cmd, interactive=False)
-
-        return sorted(_output.strip().splitlines()) if _ret == 0 else []
-
-    def create_repos(self, protocol, server, repositories):
-        """
-        bool create_repos(string protocol, string server, list repositories)
-        """
-
-        content = ''
-        for repo in repositories:
-            content += repo.get('source_template').format(
-                protocol=protocol,
-                server=server,
-                keys_path=KEYS_PATH
-            )
-
-        return write_file(self._repo, content)
-
-    def import_server_key(self, file_key):
-        """
-        bool import_server_key(string file_key)
-        """
-
-        cmd = f'{self._pm} --import {file_key} > /dev/null'
-        logging.debug(cmd)
-
-        return execute(cmd)[0] == 0
 
     def get_system_architecture(self):
         """
