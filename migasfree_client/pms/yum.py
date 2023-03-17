@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@ class Yum(Pms):
         list format: name_version_architecture.extension
         """
 
-        cmd = '%s --queryformat "%%{NAME}_%%{VERSION}-%%{RELEASE}_%%{ARCH}.rpm\n" -qa' % self._pm
+        cmd = f'{self._pm} --queryformat "%%{{NAME}}_%%{{VERSION}}-%%{{RELEASE}}_%%{{ARCH}}.rpm\n" -qa'
         logging.debug(cmd)
 
         _ret, _output, _ = execute(cmd, interactive=False)
