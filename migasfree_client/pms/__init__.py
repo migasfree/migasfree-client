@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import pkgutil
 
 from .pms import Pms
 from .apt import Apt
+from .dnf import Dnf
 from .pacman import Pacman
 from .winget import Winget
 from .yum import Yum
@@ -44,6 +45,7 @@ def get_discovered_plugins():
 def get_available_pms():
     ret = [
         ('apt', 'Apt'),
+        ('dnf', 'Dnf'),
         ('pacman', 'Pacman'),
         ('winget', 'Winget'),
         ('yum', 'Yum'),
