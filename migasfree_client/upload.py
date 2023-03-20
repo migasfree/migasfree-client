@@ -41,6 +41,7 @@ class MigasFreeUpload(MigasFreeCommand):
     def __init__(self):
         super().__init__()
         self.PRIVATE_KEY = 'packager.pri'
+        self._ssl_cert()
         self._init_url_request()
 
         self._private_key = os.path.join(
@@ -83,24 +84,24 @@ class MigasFreeUpload(MigasFreeCommand):
 
     def _left_parameters(self):
         if not self.packager_user:
-            self.packager_user = input('{} :'.format(_("User to upload at server")))
+            self.packager_user = input('{}: '.format(_("User to upload at server")))
             if not self.packager_user:
                 print(_('Empty user. Exiting %s.') % self.CMD)
                 logger.info('Empty user in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_pwd:
-            self.packager_pwd = getpass.getpass('{} :'.format(_("User password")))
+            self.packager_pwd = getpass.getpass('{}: '.format(_("User password")))
 
         if not self.packager_project:
-            self.packager_project = input('{} :'.format(_("Project to upload at server")))
+            self.packager_project = input('{}: '.format(_("Project to upload at server")))
             if not self.packager_project:
                 print(_('Empty project. Exiting %s.') % self.CMD)
                 logger.info('Empty project in upload operation')
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
-            self.packager_store = input('{} :'.format(_("Store to upload at server")))
+            self.packager_store = input('{}: '.format(_("Store to upload at server")))
             if not self.packager_store:
                 print(_('Empty store. Exiting %s.') % self.CMD)
                 logger.info('Empty store in upload operation')
