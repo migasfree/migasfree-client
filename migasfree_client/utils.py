@@ -308,7 +308,7 @@ def get_graphic_user(pid=0):
 
         return _user_info['name']
 
-    return _user
+    return _user.strip()
 
 
 def grep(string, list_strings):
