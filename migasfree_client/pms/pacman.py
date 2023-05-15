@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -99,10 +99,7 @@ class Pacman(Pms):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
         if not package_set:
             return True, None
 
@@ -121,10 +118,7 @@ class Pacman(Pms):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if not self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
         if not package_set:
             return True, None
 
@@ -207,9 +201,9 @@ class Pacman(Pms):
 
         self._include_config()
 
-        content = ''
-        for repo in repositories:
-            content += repo.get('source_template').format(protocol=protocol, server=server)
+        content = ''.join(
+            f"{repo.get('source_template').format(protocol=protocol, server=server)}" for repo in repositories
+        )
 
         return write_file(self._repo, content)
 
