@@ -75,10 +75,7 @@ class Zypper(Yum):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
         if not package_set:
             return True, None
 
@@ -97,10 +94,7 @@ class Zypper(Yum):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if not self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
         if not package_set:
             return True, None
 
