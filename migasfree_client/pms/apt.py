@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,10 +103,7 @@ class Apt(Pms):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
         if not package_set:
             return True, None
 
@@ -125,10 +122,7 @@ class Apt(Pms):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if not self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
         if not package_set:
             return True, None
 
@@ -172,27 +166,25 @@ class Apt(Pms):
         list format: name_version_architecture.extension
         """
 
-        _, _packages, _ = execute(f'{self._pm} --list', interactive=False)
-        if not _packages:
+        packages = execute(f'{self._pm} --list', interactive=False)[1].strip().splitlines()
+        if not packages:
             return []
 
-        _packages = _packages.strip().splitlines()
-        _result = []
-        for _line in _packages:
-            if _line.startswith('ii'):
-                _tmp = re.split(' +', _line)
-                _result.append(f'{_tmp[1]}_{_tmp[2]}_{_tmp[3]}.deb')
+        pattern = re.compile(r'^ii\s+(\S+)\s+(\S+)\s+(\S+)')
+        result = [f'{match.group(1)}_{match.group(2)}_{match.group(3)}.deb' for match in (
+            pattern.match(line) for line in packages
+        ) if match]
 
-        return _result
+        return result
 
     def create_repos(self, protocol, server, repositories):
         """
         bool create_repos(string protocol, string server, list repositories)
         """
 
-        content = ''
-        for repo in repositories:
-            content += repo.get('source_template').format(protocol=protocol, server=server)
+        content = ''.join(
+            f"{repo.get('source_template').format(protocol=protocol, server=server)}" for repo in repositories
+        )
 
         return write_file(self._repo, content)
 
