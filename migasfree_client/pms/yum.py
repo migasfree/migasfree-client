@@ -100,10 +100,7 @@ class Yum(Pms):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
         if not package_set:
             return True, None
 
@@ -122,10 +119,7 @@ class Yum(Pms):
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        for pkg in package_set[:]:
-            if not self.is_installed(pkg):
-                package_set.remove(pkg)
-
+        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
         if not package_set:
             return True, None
 
@@ -181,13 +175,9 @@ class Yum(Pms):
         bool create_repos(string protocol, string server, list repositories)
         """
 
-        content = ''
-        for repo in repositories:
-            content += repo.get('source_template').format(
-                protocol=protocol,
-                server=server,
-                keys_path=KEYS_PATH
-            )
+        content = ''.join(
+            f"{repo.get('source_template').format(protocol=protocol, server=server, keys_path=KEYS_PATH)}" for repo in repositories
+        )
 
         return write_file(self._repo, content)
 
