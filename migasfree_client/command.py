@@ -520,6 +520,15 @@ class MigasFreeCommand():
         logger.debug('Response _save_computer: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
+            if response['error']['code'] == requests.codes.unauthorized:
+                self.operation_failed(
+                    '{} ({})'.format(
+                        response['error']['info'],
+                        _('You must register the computer with a valid user')
+                    )
+                )
+                sys.exit(errno.EPERM)
+
             self.operation_failed(response['error']['info'])
             if response['error']['code'] == requests.codes.not_found:
                 sys.exit(errno.ENODATA)
