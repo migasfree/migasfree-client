@@ -897,9 +897,9 @@ class MigasFreeSync(MigasFreeCommand):
 
             if logical_devices[key].driver is None:
                 _msg = _('Error: no driver defined for device %s. '
-                         'Please, configure feature %s, in the model %s %s, and project %s') % (
+                         'Please, configure capability %s, in the model %s %s, and project %s') % (
                     _printer_name,
-                    logical_devices[key].info.split('__')[2],  # feature
+                    logical_devices[key].info.split('__')[2],  # capability
                     logical_devices[key].info.split('__')[0],  # manufacturer
                     logical_devices[key].info.split('__')[1],  # model
                     self.migas_project
