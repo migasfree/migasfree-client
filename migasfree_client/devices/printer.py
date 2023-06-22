@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2014-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2014-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -102,18 +102,18 @@ class Printer:
         self.info = '{}__{}__{}__{}__{}'.format(
             device['manufacturer'],
             device['model'],
-            device['feature'],
+            device['capability'],
             device['name'],
             int(device['id'])
         )
 
         if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
-            self.name = f'{self.conn["NAME"]}__{device["feature"]}__{device["name"]}'
+            self.name = f'{self.conn["NAME"]}__{device["capability"]}__{device["name"]}'
         else:
             self.name = '{}__{}__{}__{}'.format(
                 device['manufacturer'],
                 device['model'],
-                device['feature'],
+                device['capability'],
                 device['name'],
             )
 
