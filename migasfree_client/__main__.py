@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2016-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -122,6 +122,19 @@ def parse_args(argv):
         help=_('Package to purge')
     )
 
+    subparser_traits = subparsers.add_parser(
+        'traits',
+        help=_('Get computer traits at server')
+    )
+    subparser_traits.add_argument(
+        'prefix',
+        nargs='?',
+        action='store',
+        metavar='PREFIX',
+        default='',
+        help=_('Prefix to search')
+    )
+
     subparsers.add_parser(
         'label',
         help=_('Computer identification')
@@ -219,7 +232,7 @@ def main(argv=None):
         })
         sys.stdout.flush()
 
-    if args.cmd in ['register', 'sync', 'install', 'purge', 'search']:
+    if args.cmd in ['register', 'sync', 'install', 'purge', 'search', 'traits']:
         from .sync import MigasFreeSync
         MigasFreeSync().run(args)
     elif args.cmd == 'label':
