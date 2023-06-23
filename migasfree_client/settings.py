@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ if os.environ.get('WINDIR'):
 
     LOG_FILE = os.path.join(TMP_PATH, 'migasfree.log')
     SOFTWARE_FILE = os.path.join(APP_DATA_PATH, 'installed_software.txt')
+    TRAITS_FILE = os.path.join(APP_DATA_PATH, 'computer_traits.json')
 else:
     APP_DATA_PATH = '/usr/share/migasfree-client'
     DOC_PATH = '/usr/share/doc/migasfree-client'
@@ -55,6 +56,7 @@ else:
 
     LOG_FILE = '/var/tmp/migasfree.log'
     SOFTWARE_FILE = '/var/tmp/installed_software.txt'
+    TRAITS_FILE = '/var/tmp/computer_traits.json'
 
 PRE_SYNC_PATH = os.path.join(APP_DATA_PATH, 'pre-sync.d')
 POST_SYNC_PATH = os.path.join(APP_DATA_PATH, 'post-sync.d')
