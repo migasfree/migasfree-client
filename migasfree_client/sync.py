@@ -111,6 +111,11 @@ class MigasFreeSync(MigasFreeCommand):
         print('  ' + _('Purge package:'))
         print(f'\t{self.CMD} purge bluefish\n')
 
+        print('  ' + _('Get computer traits at server:'))
+        print(f'\t{self.CMD} traits\n')
+        print(f'\t{self.CMD} traits SET\n')
+        print(f'\t{self.CMD} traits PCI\n')
+
     def _eval_code(self, name, lang, code):
         code = code.replace('\r', '').strip()  # clean code
         logger.debug('Name: %s', name)
@@ -223,7 +228,7 @@ class MigasFreeSync(MigasFreeCommand):
                 },
                 debug=self._debug
             )
-            logger.debug('Response get_properties_id: %s', response)
+            logger.debug('Response get_properties: %s', response)
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -350,6 +355,32 @@ class MigasFreeSync(MigasFreeCommand):
             sys.exit(errno.ENODATA)
 
         self.operation_ok()
+
+        return response
+
+    def get_traits(self):
+        if not self._computer_id:
+            self.get_computer_id()
+
+        if not self._quiet:
+            self._show_message(_('Getting traits...'))
+
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS['get_traits']),
+                data={
+                    'id': self._computer_id
+                },
+                debug=self._debug
+            )
+            logger.debug('Response get_traits: %s', response)
+
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+
+        if not self._quiet:
+            self.operation_ok()
 
         return response
 
@@ -743,6 +774,8 @@ class MigasFreeSync(MigasFreeCommand):
 
         self.sync_logical_devices()
 
+        self._traits()
+
         self._execute_path(settings.POST_SYNC_PATH)
         self.upload_execution_errors()
         self.end_synchronization(start_date)
@@ -779,6 +812,30 @@ class MigasFreeSync(MigasFreeCommand):
             self.upload_execution_errors()
             self.end_of_transmission()
             self._show_message(_('Completed operations'))
+
+    def _traits(self, show=True):
+        traits = self.get_traits()
+        if show:
+            print(json.dumps(traits, ensure_ascii=False))
+
+        utils.write_file(settings.TRAITS_FILE, json.dumps(traits, indent=4))
+
+        return traits
+
+    def cmd_traits(self, prefix):
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
+
+        traits = self._traits(show=False)
+        self.end_of_transmission()
+
+        if prefix:
+            print(json.dumps(
+                list(filter(lambda item: item['prefix'] == prefix, traits)),
+                ensure_ascii=False
+            ))
+        else:
+            print(json.dumps(traits, ensure_ascii=False))
 
     def _search(self, pattern):
         self._check_pms()
@@ -982,5 +1039,7 @@ class MigasFreeSync(MigasFreeCommand):
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
             self._remove_package(' '.join(args.pkg_purge))
             utils.remove_file(self.LOCK_FILE)
+        elif args.cmd == 'traits':
+            self.cmd_traits(args.prefix)
 
         sys.exit(utils.ALL_OK)
