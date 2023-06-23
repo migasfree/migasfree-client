@@ -83,6 +83,7 @@ class MigasFreeCommand():
         'get_mandatory_packages': '/api/v1/safe/computers/packages/mandatory/',
         'get_devices': '/api/v1/safe/computers/devices/',
         'get_hardware_required': '/api/v1/safe/computers/hardware/required/',
+        'get_traits': '/api/v1/safe/computers/traits/',
         'upload_errors': '/api/v1/safe/computers/errors/',
         'upload_hardware': '/api/v1/safe/computers/hardware/',
         'upload_attributes': '/api/v1/safe/computers/attributes/',
