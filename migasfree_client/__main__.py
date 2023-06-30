@@ -134,6 +134,12 @@ def parse_args(argv):
         default='',
         help=_('Prefix to search')
     )
+    subparser_traits.add_argument(
+        'traits_key',
+        nargs='?',
+        choices=('id', 'description', 'name', 'value', 'prefix', 'sort'),
+        help=_('Get individual value')
+    )
 
     subparsers.add_parser(
         'label',
