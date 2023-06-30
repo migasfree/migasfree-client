@@ -114,7 +114,7 @@ class MigasFreeSync(MigasFreeCommand):
         print('  ' + _('Get computer traits at server:'))
         print(f'\t{self.CMD} traits\n')
         print(f'\t{self.CMD} traits SET\n')
-        print(f'\t{self.CMD} traits PCI\n')
+        print(f'\t{self.CMD} traits CID id\n')
 
     def _eval_code(self, name, lang, code):
         code = code.replace('\r', '').strip()  # clean code
@@ -822,7 +822,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         return traits
 
-    def cmd_traits(self, prefix):
+    def cmd_traits(self, prefix, key):
         if not self._check_sign_keys():
             sys.exit(errno.EPERM)
 
@@ -830,12 +830,13 @@ class MigasFreeSync(MigasFreeCommand):
         self.end_of_transmission()
 
         if prefix:
-            print(json.dumps(
-                list(filter(lambda item: item['prefix'] == prefix, traits)),
-                ensure_ascii=False
-            ))
-        else:
-            print(json.dumps(traits, ensure_ascii=False))
+            ret = filter(lambda item: item['prefix'] == prefix, traits)
+            if key:
+                ret = [item.get(key) for item in ret]
+
+            traits = list(ret)
+
+        print(json.dumps(traits, ensure_ascii=False))
 
     def _search(self, pattern):
         self._check_pms()
@@ -1040,6 +1041,6 @@ class MigasFreeSync(MigasFreeCommand):
             self._remove_package(' '.join(args.pkg_purge))
             utils.remove_file(self.LOCK_FILE)
         elif args.cmd == 'traits':
-            self.cmd_traits(args.prefix)
+            self.cmd_traits(args.prefix, args.traits_key)
 
         sys.exit(utils.ALL_OK)
