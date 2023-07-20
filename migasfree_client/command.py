@@ -127,7 +127,7 @@ class MigasFreeCommand():
     pms = None
     devices_class = None
 
-    console = Console(log_path=False, force_terminal=True)
+    console = Console(log_path=False)
     error_console = Console(stderr=True, log_path=False, style='bright_red', force_terminal=True)
 
     auto_register_user = ''
