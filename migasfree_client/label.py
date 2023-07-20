@@ -146,7 +146,7 @@ class MigasFreeLabel(MigasFreeCommand):
 
         info = self.get_label()
 
-        app_icon_path = os.path.join(ICON_PATH, self.APP_ICON_MINI)
+        app_icon_path = os.path.join(ICON_PATH, self.APP_ICON)
         server_icon_path = os.path.join(ICON_PATH, self.SERVER_ICON)
         if is_windows():
             app_icon_path = app_icon_path.replace('\\', '/')
