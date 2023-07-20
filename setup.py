@@ -134,7 +134,6 @@ setup(
             'share/icons/hicolor/scalable/apps',
             [
                 'icons/scalable/migasfree.svg',
-                'icons/scalable/migasfree-logo-mini.svg',
                 'icons/scalable/migasfree-server-network.svg'
             ]
         ),
