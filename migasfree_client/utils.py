@@ -21,6 +21,7 @@ import subprocess
 import time
 import difflib
 import platform
+import json
 import errno
 import re
 import select
@@ -748,3 +749,28 @@ def md5sum(archive):
         _md5 = handle.read().encode()
 
     return hashlib.md5(_md5).hexdigest()
+
+
+def get_trait(prefix, state='after'):
+    if state not in ['before', 'after']:
+        return None
+
+    data = json.loads(read_file(settings.TRAITS_FILE))
+    data = data[state]
+
+    if prefix:
+        ret = list(filter(lambda item: item['prefix'] == prefix, data))
+        if len(ret) == 1:
+            return ret[0]
+        else:
+            return ret
+    else:
+        return None
+
+
+def trait_exists(prefix, value, state='after'):
+    result = get_trait(prefix, state)
+    if type(result) == dict:
+        return result['value'] == value
+
+    return False
