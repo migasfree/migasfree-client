@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 311.74435 273.99712"
    version="1.0"
-   width="47.999992"
-   height="48"
-   id="svg2">
+   id="svg2"
+   height="292.26361"
+   width="332.52731">
   <defs
-     id="defs4">
-    <inkscape:path-effect
-       effect="bend_path"
-       id="path-effect2627" />
-  </defs>
+     id="defs4" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -31,29 +25,31 @@
     </rdf:RDF>
   </metadata>
   <g
-     transform="translate(-409.93872,-324.46271)"
-     id="layer1">
-    <g
-       transform="matrix(0.1752836,0,0,0.1752836,357.87637,288.17239)"
-       id="g2385">
-      <path
-         d="m 359.84121,422.66665 c 17.16887,8.15768 200.19256,-14.53545 190.65916,-21.98127 0.25846,-53.82004 -72.75382,-140.39226 -72.75382,-140.39226 -97.63364,2.19781 -156.7331,25.62844 -156.7331,33.5001 -6.16605,0 -12.13088,34.92399 38.98938,129.17879"
-         id="path7004"
-         style="fill:none;stroke:#ff6600;stroke-width:40;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-      <path
-         d="m 99,188.98618 c 0.333333,0 0.666667,0 0,0 z"
-         transform="translate(239.75989,167.58713)"
-         id="path4849"
-         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         d="m 422.52326,249.90699 c -6.39981,0.53506 -12.99555,4.09097 -17.61874,12.11738 -4.14372,7.81016 -4.84073,19.64246 -3.11065,29.52092 2.14271,12.6547 8.35659,23.5367 15.96252,25.69904 7.1416,2.14855 14.53656,-1.29374 20.67501,-7.719 4.62907,-4.79836 9.0278,-11.71293 10.42843,-21.09828 1.81609,-11.3853 -1.541,-24.13043 -7.25564,-30.16108 -5.43719,-5.98302 -11.98332,-8.10383 -18.33235,-8.39097 -0.24952,0.0107 -0.49906,0.0213 -0.74858,0.032 l 0,-1e-5 z"
-         id="path3180"
-         style="fill:#feda00;fill-opacity:1;fill-rule:nonzero;stroke:#feda00;stroke-width:0.67614418;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:200" />
-      <path
-         d="m 215,100.2803 a 9,6 0 1 1 -18,0 9,6 0 1 1 18,0 z"
-         transform="matrix(1.8413123,0,0,2.4506692,82.116143,70.135995)"
-         id="path3190"
-         style="fill:#feda00;fill-opacity:1;fill-rule:nonzero;stroke:none" />
-    </g>
+     transform="matrix(3.4729059,0,0,3.4729059,-393.19531,-100.50611)"
+     id="g834">
+    <path
+       id="path3180"
+       d="m 142.57003,31.282665 c -5.8392,0.494201 -11.85716,3.778568 -16.07537,11.19205 -3.78073,7.213746 -4.41669,18.142486 -2.83816,27.266588 1.95501,11.688338 7.62457,21.739346 14.56423,23.736561 6.516,1.984479 13.26318,-1.194945 18.86391,-7.129547 4.22357,-4.431938 8.23698,-10.818485 9.51491,-19.487133 1.65701,-10.515874 -1.40601,-22.287737 -6.62005,-27.857863 -4.9609,-5.526133 -10.9336,-7.48499 -16.72647,-7.750203 -0.22766,0.0099 -0.45534,0.01967 -0.683,0.02956 z"
+       style="fill:#ff6600;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.62070143;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:200;stroke-opacity:1" />
+    <ellipse
+       id="path3190"
+       style="fill:#feda00;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.9500668"
+       cx="178.0654"
+       cy="92.226799"
+       rx="15.120144"
+       ry="13.581159" />
   </g>
-</svg>
+  <flowRoot
+     xml:space="preserve"
+     id="flowRoot840"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     transform="matrix(0.93749997,0,0,0.93749997,-33.073666,-31.428358)"><flowRegion
+       id="flowRegion842"
+       style="fill:#000000;stroke:none"><rect
+         id="rect844"
+         width="241.43697"
+         height="42.502354"
+         x="65.52446"
+         y="299.39099"
+         style="fill:#000000;stroke:none" /></flowRegion><flowPara
+       id="flowPara846">migasfree</flowPara></flowRoot></svg>
