@@ -776,6 +776,8 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._traits()
 
+        self._events()
+
         self._execute_path(settings.POST_SYNC_PATH)
         self.upload_execution_errors()
         self.end_synchronization(start_date)
@@ -818,7 +820,15 @@ class MigasFreeSync(MigasFreeCommand):
         if show:
             print(json.dumps(traits, ensure_ascii=False))
 
-        utils.write_file(settings.TRAITS_FILE, json.dumps(traits, indent=4))
+        content = {}
+        if os.path.isfile(settings.TRAITS_FILE):
+            content = json.loads(utils.read_file(settings.TRAITS_FILE))
+
+        before = content.get('after', [])
+
+        content = {'before': before, 'after': traits}
+
+        utils.write_file(settings.TRAITS_FILE, json.dumps(content, indent=4))
 
         return traits
 
@@ -836,7 +846,17 @@ class MigasFreeSync(MigasFreeCommand):
 
             traits = list(ret)
 
-        print(json.dumps(traits, ensure_ascii=False))
+        print(json.dumps(traits, indent=4, ensure_ascii=False))
+
+    def _events(self):
+        # read traits
+        content = json.loads(utils.read_file(settings.TRAITS_FILE))
+        before = content.get('before', [])
+        after = content.get('after', [])
+
+        # save .env
+        # calculate diff
+        # run events
 
     def _search(self, pattern):
         self._check_pms()
