@@ -116,7 +116,6 @@ class MigasFreeCommand():
     REPOS_KEY = 'repositories.pub'
 
     APP_ICON = os.path.join('apps', 'migasfree.svg')
-    APP_ICON_MINI = os.path.join('apps', 'migasfree-logo-mini.svg')
     SERVER_ICON = os.path.join('apps', 'migasfree-server-network.svg')
 
     _url_base = None
