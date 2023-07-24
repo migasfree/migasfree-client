@@ -751,6 +751,10 @@ def md5sum(archive):
     return hashlib.md5(_md5).hexdigest()
 
 
+def escape_quotes(text):
+    return text.replace('"', '\\\"')
+
+
 def get_trait(prefix, key=None, state='after'):
     if state not in ['before', 'after']:
         return None
