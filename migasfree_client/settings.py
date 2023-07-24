@@ -60,5 +60,10 @@ else:
 
 PRE_SYNC_PATH = os.path.join(APP_DATA_PATH, 'pre-sync.d')
 POST_SYNC_PATH = os.path.join(APP_DATA_PATH, 'post-sync.d')
+EVENTS_SYNC_PATH = os.path.join(APP_DATA_PATH, 'events.d')
+EVENTS_ENV_FILE = os.path.join(EVENTS_SYNC_PATH, '.env')
+EVENTS_JSON_FILE = os.path.join(EVENTS_SYNC_PATH, '.json')
 
 CERT_FILE = os.path.join(TMP_PATH, 'cert.pem')
+
+JSON_INDENT = 4
