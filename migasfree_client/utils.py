@@ -751,7 +751,7 @@ def md5sum(archive):
     return hashlib.md5(_md5).hexdigest()
 
 
-def get_trait(prefix, state='after'):
+def get_trait(prefix, key=None, state='after'):
     if state not in ['before', 'after']:
         return None
 
@@ -760,6 +760,8 @@ def get_trait(prefix, state='after'):
 
     if prefix:
         ret = list(filter(lambda item: item['prefix'] == prefix, data))
+        if key:
+            ret = [item.get(key) for item in ret]
         if len(ret) == 1:
             return ret[0]
         else:
@@ -768,9 +770,10 @@ def get_trait(prefix, state='after'):
         return None
 
 
-def trait_exists(prefix, value, state='after'):
-    result = get_trait(prefix, state)
-    if type(result) == dict:
-        return result['value'] == value
+def trait_value_exists(prefix, value, state='after'):
+    result = get_trait(prefix, 'value', state)
 
-    return False
+    if type(result) == list:
+        return value in result
+
+    return result == value
