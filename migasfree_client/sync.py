@@ -29,6 +29,7 @@ import signal
 
 import requests
 
+from collections import defaultdict
 from datetime import datetime
 
 from . import (
@@ -818,7 +819,7 @@ class MigasFreeSync(MigasFreeCommand):
     def _traits(self, show=True):
         traits = self.get_traits()
         if show:
-            print(json.dumps(traits, ensure_ascii=False))
+            print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
 
         content = {}
         if os.path.isfile(settings.TRAITS_FILE):
@@ -828,7 +829,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         content = {'before': before, 'after': traits}
 
-        utils.write_file(settings.TRAITS_FILE, json.dumps(content, indent=4))
+        utils.write_file(settings.TRAITS_FILE, json.dumps(content, indent=settings.JSON_INDENT))
 
         return traits
 
@@ -846,17 +847,84 @@ class MigasFreeSync(MigasFreeCommand):
 
             traits = list(ret)
 
-        print(json.dumps(traits, indent=4, ensure_ascii=False))
+        print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
+
+    def _run_events(self, diff):
+        self._show_message(_('Running events...'))
+
+        sentinel = True
+        for key, value in diff:
+            event = os.path.join(settings.EVENTS_SYNC_PATH, key)
+            if os.path.exists(event):
+                for _file in os.listdir(event):
+                    ret, output, error = utils.execute(_file, interactive=False)
+                    if ret != 0:
+                        sentinel = False
+                        msg = _('Error running event %s: %s') % (_file, error)
+                        self.operation_failed(_msg)
+                        logging.error(msg)
+                        self._write_error(msg)
+
+        if sentinel:
+            self.operation_ok()
 
     def _events(self):
+        def to_prefix_dict(traits_list):
+            ret = defaultdict(list)
+
+            for item in traits_list:
+                ret[item['prefix']].append(item['value'])
+
+            return dict(ret)
+
+
+        def to_env(content, prefix):
+            ret = ''
+            for key in content.keys():
+                if len(content[key]) == 1:
+                    value = utils.escape_quotes(content[key][0])
+                    ret += f'{prefix}{key}="{value}"\n'
+                else:
+                    value = ' '.join([f'"{utils.escape_quotes(item)}"' for item in content[key]])
+                    ret += f'{prefix}{key}=({value})\n'
+
+            return ret
+
         # read traits
         content = json.loads(utils.read_file(settings.TRAITS_FILE))
         before = content.get('before', [])
         after = content.get('after', [])
 
+        before_prefix_value = to_prefix_dict(before)
+        after_prefix_value = to_prefix_dict(after)
+
         # save .env
+        if not os.path.isdir(settings.EVENTS_SYNC_PATH):
+            os.makedirs(settings.EVENTS_SYNC_PATH)
+
+        utils.write_file(
+            settings.EVENTS_JSON_FILE,
+            json.dumps(
+                {
+                    'before': before_prefix_value,
+                    'after': after_prefix_value,
+                },
+                indent=settings.JSON_INDENT
+            )
+        )
+
+        utils.write_file(
+            settings.EVENTS_ENV_FILE,
+            f"{to_env(before_prefix_value, 'BEFORE_TRAIT_')}{to_env(after_prefix_value, 'TRAIT_')}"
+        )
+
         # calculate diff
-        # run events
+        diff = list((
+            (key, {'before': before_prefix_value[key], 'after': after_prefix_value[key]})
+            for key in before_prefix_value if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
+        ))
+
+        self._run_events(diff)
 
     def _search(self, pattern):
         self._check_pms()
