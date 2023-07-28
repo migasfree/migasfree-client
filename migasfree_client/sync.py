@@ -897,14 +897,6 @@ class MigasFreeSync(MigasFreeCommand):
         before_prefix_value = to_prefix_dict(before)
         after_prefix_value = to_prefix_dict(after)
 
-        # calculate diff
-        diff = list((
-            (key, {'before': before_prefix_value[key], 'after': after_prefix_value[key]})
-            for key in before_prefix_value if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
-        ))
-        if not diff:
-            return
-
         # create events environment
         if not os.path.isdir(settings.EVENTS_SYNC_PATH):
             os.makedirs(settings.EVENTS_SYNC_PATH)
@@ -924,6 +916,14 @@ class MigasFreeSync(MigasFreeCommand):
             settings.EVENTS_ENV_FILE,
             f"{to_env(before_prefix_value, 'BEFORE_TRAIT_')}{to_env(after_prefix_value, 'TRAIT_')}"
         )
+
+        # calculate diff
+        diff = list((
+            (key, {'before': before_prefix_value[key], 'after': after_prefix_value[key]})
+            for key in before_prefix_value if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
+        ))
+        if not diff:
+            return
 
         self._run_events(diff)
 
