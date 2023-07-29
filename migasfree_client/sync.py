@@ -856,14 +856,15 @@ class MigasFreeSync(MigasFreeCommand):
         for key, value in diff:
             event = os.path.join(settings.EVENTS_SYNC_PATH, key)
             if os.path.exists(event):
-                for _file in os.listdir(event):
+                for _file_name in os.listdir(event):
+                    _file = os.path.join(event, _file_name)
                     ret, output, error = utils.execute(_file, interactive=False)
                     if ret != 0:
                         sentinel = False
-                        msg = _('Error running event %s: %s') % (_file, error)
+                        _msg = _('Error running event %s: %s') % (_file, error)
                         self.operation_failed(_msg)
-                        logging.error(msg)
-                        self._write_error(msg)
+                        logging.error(_msg)
+                        self._write_error(_msg)
 
         if sentinel:
             self.operation_ok()
