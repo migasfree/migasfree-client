@@ -335,10 +335,7 @@ class MigasFreeClient(MigasFreeCommand):
         if os.path.isfile(settings.SOFTWARE_FILE) \
                 and os.stat(settings.SOFTWARE_FILE).st_size:
             _diff_software = utils.compare_lists(
-                open(
-                    settings.SOFTWARE_FILE,
-                    'U'
-                ).read().splitlines(),  # not readlines!!!
+                open(settings.SOFTWARE_FILE).read().splitlines(),  # not readlines!!!
                 _software_before
             )
 
@@ -595,7 +592,7 @@ class MigasFreeClient(MigasFreeCommand):
         self.operation_ok()
         logging.debug('Server response: %s', _request)
 
-        if len(_request['faultsdef']) > 0:
+        if 'faultsdef' in _request and len(_request['faultsdef']) > 0:
             _response = self._eval_faults(_request['faultsdef'])
             logging.debug('Faults to send: %s', _response)
 
@@ -609,12 +606,14 @@ class MigasFreeClient(MigasFreeCommand):
 
         _software_before = self._software_inventory()
 
-        self._create_repositories(_request['repositories'])
+        self._create_repositories(_request.get('repositories', []))
 
         self._clean_pms_cache()
 
-        self._uninstall_packages(_request['packages']['remove'])
-        self._install_mandatory_packages(_request['packages']['install'])
+        if 'packages' in _request:
+            self._uninstall_packages(_request['packages']['remove'])
+            self._install_mandatory_packages(_request['packages']['install'])
+
         if self.migas_auto_update_packages is True:
             self._update_packages()
 
