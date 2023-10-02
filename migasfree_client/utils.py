@@ -315,10 +315,8 @@ def compare_files(a, b):
     if not os.path.isfile(a) or not os.path.isfile(b):
         return None
 
-    # U - open for input as a text file with universal newline interpretation
-    # http://www.python.org/dev/peps/pep-0278/
-    _list_a = open(a, 'U').readlines()
-    _list_b = open(b, 'U').readlines()
+    _list_a = open(a).readlines()
+    _list_b = open(b).readlines()
 
     return compare_lists(_list_a, _list_b)
 
