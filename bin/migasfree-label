@@ -10,6 +10,7 @@ then
 fi
 
 _CMD=$(cat << EOF
+import os
 import webbrowser
 
 from migasfree_client.utils import get_config, get_hardware_uuid, get_mfc_computer_name
@@ -17,8 +18,11 @@ from migasfree_client import settings
 
 if __name__ == '__main__':
     config = get_config(settings.CONF_FILE, 'client')
+    protocol = 'https' if os.path.isfile(settings.CERT_FILE) else 'http'
+
     webbrowser.open(
-        'http://{0}/computer/{1}/label/?name={2}'.format(
+        '{0}://{1}/computer/{2}/label/?name={3}'.format(
+            protocol,
             config.get('server', 'localhost'),
             get_hardware_uuid(),
             get_mfc_computer_name()
