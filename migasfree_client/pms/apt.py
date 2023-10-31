@@ -20,6 +20,7 @@ import logging
 
 from .pms import Pms
 from ..utils import execute, write_file
+from ..settings import KEYS_PATH
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -193,7 +194,8 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        cmd = f'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {file_key} > /dev/null'
+        name = file_key.rsplit('.', 1)[0].replace(KEYS_PATH, '').split('/')[1]
+        cmd = f'gpg --output /etc/apt/trusted.gpg.d/{name}.gpg --dearmor {file_key} > /dev/null'
         logging.debug(cmd)
 
         return execute(cmd)[0] == 0
