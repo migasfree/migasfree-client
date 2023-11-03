@@ -300,7 +300,7 @@ def get_graphic_user(pid=0):
         if not pid:
             return ''
 
-    _user = subprocess.getoutput(f'ps hp {pid} -o "%U"')
+    _user = subprocess.getoutput(f'ps hp {pid} -o euser')
     if _user.isdigit():
         # ps command not always show username (show uid if len(username) > 8)
         _user_info = get_user_info(_user)
