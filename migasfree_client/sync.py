@@ -920,7 +920,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         # calculate diff
         diff = list((
-            (key, {'before': before_prefix_value[key], 'after': after_prefix_value[key]})
+            (key, {'before': before_prefix_value.get(key), 'after': after_prefix_value.get(key)})
             for key in before_prefix_value if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
         ))
         if not diff:
