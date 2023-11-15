@@ -785,6 +785,22 @@ class MigasFreeSync(MigasFreeCommand):
         self.end_of_transmission()
         self._show_message(_('Completed operations'))
 
+    def cmd_attributes(self):
+        self._show_message(_('Connecting to migasfree server...'))
+        self.upload_old_errors()
+        self.upload_attributes()
+        self.upload_execution_errors()
+        self.end_of_transmission()
+        self._show_message(_('Completed operations'))
+
+    def cmd_faults(self):
+        self._show_message(_('Connecting to migasfree server...'))
+        self.upload_old_errors()
+        self.upload_faults()
+        self.upload_execution_errors()
+        self.end_of_transmission()
+        self._show_message(_('Completed operations'))
+
     def cmd_devices(self):
         self._show_message(_('Connecting to migasfree server...'))
         self.upload_old_errors()
@@ -1111,6 +1127,10 @@ class MigasFreeSync(MigasFreeCommand):
                 utils.remove_file(self.LOCK_FILE)
             elif args.hardware:
                 self.cmd_hardware()
+            elif args.attributes:
+                self.cmd_attributes()
+            elif args.faults:
+                self.cmd_faults()
             else:
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
                 self.synchronize()
