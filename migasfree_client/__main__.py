@@ -97,6 +97,16 @@ def parse_args(argv):
         action='store_true',
         help=_('Upload computer software to server')
     )
+    group_sync.add_argument(
+        '-att', '--attributes',
+        action='store_true',
+        help=_('Upload attributes information to server')
+    )
+    group_sync.add_argument(
+        '-fau', '--faults',
+        action='store_true',
+        help=_('Upload faults information to server')
+    )
 
     subparser_install = subparsers.add_parser(
         'install',
