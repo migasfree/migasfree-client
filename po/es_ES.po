@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-15 12:07+0100\n"
-"PO-Revision-Date: 2023-11-15 12:09+0100\n"
+"POT-Creation-Date: 2023-11-17 12:59+0100\n"
+"PO-Revision-Date: 2023-11-17 13:01+0100\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
 "Language: es_ES\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
-"X-Generator: Poedit 3.4.1\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: ../migasfree_client/__main__.py:35
 msgid "Systems Management System (client side)"
@@ -97,7 +97,7 @@ msgstr "Obtener características del ordenador en el servidor"
 msgid "Prefix to search"
 msgstr "Prefijo a buscar"
 
-#: ../migasfree_client/__main__.py:151 ../migasfree_client/__main__.py:228
+#: ../migasfree_client/__main__.py:151 ../migasfree_client/__main__.py:233
 msgid "Get individual value"
 msgstr "Obtener valor individual"
 
@@ -106,54 +106,58 @@ msgid "Computer identification"
 msgstr "Indentificación del ordenador"
 
 #: ../migasfree_client/__main__.py:161
+msgid "Show version info"
+msgstr "Mostrar información de la versión"
+
+#: ../migasfree_client/__main__.py:166
 msgid "Computer tags"
 msgstr "Etiquetas del ordenador"
 
-#: ../migasfree_client/__main__.py:167
+#: ../migasfree_client/__main__.py:172
 msgid "Get tags in server (JSON format)"
 msgstr "Obtener etiquetas del servidor (formato JSON)"
 
-#: ../migasfree_client/__main__.py:173
+#: ../migasfree_client/__main__.py:178
 msgid "Set tags in server"
 msgstr "Establecer etiquetas en el servidor"
 
-#: ../migasfree_client/__main__.py:179
+#: ../migasfree_client/__main__.py:184
 msgid "Communicate tags to server"
 msgstr "Comunicar etiquetas al servidor"
 
-#: ../migasfree_client/__main__.py:184
+#: ../migasfree_client/__main__.py:189
 msgid "Upload files to server"
 msgstr "Subir ficheros al servidor"
 
-#: ../migasfree_client/__main__.py:189
+#: ../migasfree_client/__main__.py:194
 msgid "Authorized user to upload at server"
 msgstr "Usuario autorizado para subir al servidor"
 
-#: ../migasfree_client/__main__.py:194 ../migasfree_client/upload.py:94
+#: ../migasfree_client/__main__.py:199 ../migasfree_client/upload.py:94
 msgid "User password"
 msgstr "Contraseña del usuario"
 
-#: ../migasfree_client/__main__.py:199
+#: ../migasfree_client/__main__.py:204
 msgid "Project to upload files"
 msgstr "Proyecto al que subir ficheros"
 
-#: ../migasfree_client/__main__.py:204
+#: ../migasfree_client/__main__.py:209
 msgid "Store at server"
 msgstr "Almacén del servidor"
 
-#: ../migasfree_client/__main__.py:211
+#: ../migasfree_client/__main__.py:216
 msgid "File to upload at server"
 msgstr "Fichero a subir al servidor"
 
-#: ../migasfree_client/__main__.py:216
+#: ../migasfree_client/__main__.py:221
 msgid "Directory with files to upload at server"
 msgstr "Directorio con archivos para subir al servidor"
 
-#: ../migasfree_client/__main__.py:221
+#: ../migasfree_client/__main__.py:226
 msgid "Retrieve computer info at server"
 msgstr "Obtener información del ordenador en el servidor"
 
-#: ../migasfree_client/__main__.py:245
+#: ../migasfree_client/__main__.py:250
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr "Versión de %(program)s: %(version)s"

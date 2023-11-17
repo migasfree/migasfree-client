@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-15 12:07+0100\n"
+"POT-Creation-Date: 2023-11-17 12:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -97,7 +97,7 @@ msgstr ""
 msgid "Prefix to search"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:151 ../migasfree_client/__main__.py:228
+#: ../migasfree_client/__main__.py:151 ../migasfree_client/__main__.py:233
 msgid "Get individual value"
 msgstr ""
 
@@ -106,54 +106,58 @@ msgid "Computer identification"
 msgstr ""
 
 #: ../migasfree_client/__main__.py:161
+msgid "Show version info"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:166
 msgid "Computer tags"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:167
+#: ../migasfree_client/__main__.py:172
 msgid "Get tags in server (JSON format)"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:173
+#: ../migasfree_client/__main__.py:178
 msgid "Set tags in server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:179
+#: ../migasfree_client/__main__.py:184
 msgid "Communicate tags to server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:184
+#: ../migasfree_client/__main__.py:189
 msgid "Upload files to server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:189
+#: ../migasfree_client/__main__.py:194
 msgid "Authorized user to upload at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:194 ../migasfree_client/upload.py:94
+#: ../migasfree_client/__main__.py:199 ../migasfree_client/upload.py:94
 msgid "User password"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:199
+#: ../migasfree_client/__main__.py:204
 msgid "Project to upload files"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:204
+#: ../migasfree_client/__main__.py:209
 msgid "Store at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:211
+#: ../migasfree_client/__main__.py:216
 msgid "File to upload at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:216
+#: ../migasfree_client/__main__.py:221
 msgid "Directory with files to upload at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:221
+#: ../migasfree_client/__main__.py:226
 msgid "Retrieve computer info at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:245
+#: ../migasfree_client/__main__.py:250
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr ""
