@@ -817,7 +817,7 @@ class MigasFreeSync(MigasFreeCommand):
         self.end_of_transmission()
         self._show_message(_('Completed operations'))
 
-    def cmd_software_info(self):
+    def cmd_software(self):
         if self.pms:
             self._show_message(_('Connecting to migasfree server...'))
             self.upload_old_errors()
@@ -1121,9 +1121,9 @@ class MigasFreeSync(MigasFreeCommand):
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
                 self.cmd_devices()
                 utils.remove_file(self.LOCK_FILE)
-            elif args.software_info:
+            elif args.software:
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
-                self.cmd_software_info()
+                self.cmd_software()
                 utils.remove_file(self.LOCK_FILE)
             elif args.hardware:
                 self.cmd_hardware()
