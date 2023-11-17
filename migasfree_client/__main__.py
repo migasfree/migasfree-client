@@ -156,6 +156,11 @@ def parse_args(argv):
         help=_('Computer identification')
     )
 
+    subparsers.add_parser(
+        'version',
+        help=_('Show version info')
+    )
+
     subparser_tags = subparsers.add_parser(
         'tags',
         help=_('Computer tags')
@@ -263,6 +268,9 @@ def main(argv=None):
     elif args.cmd == 'info':
         from .info import MigasFreeInfo
         MigasFreeInfo().run(args)
+    elif args.cmd == 'version':
+        from .command import MigasFreeCommand
+        MigasFreeCommand().cmd_version(args)
 
     return ALL_OK
 
