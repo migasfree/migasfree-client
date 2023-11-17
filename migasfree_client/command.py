@@ -752,6 +752,14 @@ class MigasFreeCommand():
         if utils.is_windows():
             console.style = ''
 
+    def cmd_version(self, args=None):
+        if hasattr(args, 'quiet') and args.quiet:
+            print(utils.get_mfc_release())
+        else:
+            self._show_config_options()
+
+        sys.exit(utils.ALL_OK)
+
     def run(self, args=None):
         self._init_command()
 
