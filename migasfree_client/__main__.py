@@ -93,7 +93,7 @@ def parse_args(argv):
         help=_('Synchronize computer hardware with server')
     )
     group_sync.add_argument(
-        '-soft', '--software-info',
+        '-soft', '--software',
         action='store_true',
         help=_('Upload computer software to server')
     )
