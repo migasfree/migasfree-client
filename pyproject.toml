@@ -9,6 +9,9 @@ name = "migasfree-client"
 authors = [
   {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
 ]
+maintainers = [
+  {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
+]
 license = { text = "GPL-3.0-or-later" }
 version = "5.0"
 description = "Synchronizes a computer from a migasfree server"
