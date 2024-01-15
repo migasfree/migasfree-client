@@ -243,7 +243,7 @@ class MigasFreeCommand():
                 )
                 if utils.write_file(settings.CERT_FILE, cert):
                     self.migas_ssl_cert = settings.CERT_FILE
-            except:
+            except ssl.SSLError:
                 pass
 
     def _get_keys_path(self):
