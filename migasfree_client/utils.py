@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -101,19 +101,15 @@ def get_config(ini_file, section):
         config.read(ini_file)
 
         return dict(config.items(section))
-    except:
+    except configparser.Error:
         return errno.ENOMSG  # INVALID_DATA
 
 
 def remove_commented_lines(text):
-    ret = []
-
     lines = text.split('\n')
-    for line in lines:
-        if not re.match(r'^([^#]*)#(.*)$', line):
-            ret.append(line)
+    result = [line for line in lines if not re.match(r'^([^#]*)#(.*)$', line)]
 
-    return '\n'.join(ret)
+    return '\n'.join(result)
 
 
 def execute(cmd, verbose=False, interactive=True):
@@ -436,25 +432,19 @@ def write_file(filename, content):
         except OSError:
             return False
 
-    _file = None
     try:
-        _file = open(filename, mode='wb')
+        with open(filename, 'wb') as _file:
+            try:
+                _file.write(content.encode('utf-8'))
+            except AttributeError:
+                _file.write(content)
 
-        try:
-            _file.write(bytes(content))
-        except TypeError:
-            _file.write(bytes(content, encoding='utf_8'))
-
-        _file.flush()
-        os.fsync(_file.fileno())
-        _file.close()
+            _file.flush()
+            os.fsync(_file.fileno())
 
         return True
     except IOError:
         return False
-    finally:
-        if _file is not None:
-            _file.close()
 
 
 def remove_file(archive):
@@ -777,7 +767,7 @@ def get_trait(prefix, key=None, state='after'):
 def trait_value_exists(prefix, value, state='after'):
     result = get_trait(prefix, 'value', state)
 
-    if type(result) == list:
+    if isinstance(result, list):
         return value in result
 
     return result == value
