@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -176,7 +176,8 @@ class Yum(Pms):
         """
 
         content = ''.join(
-            f"{repo.get('source_template').format(protocol=protocol, server=server, keys_path=KEYS_PATH)}" for repo in repositories
+            f"{repo.get('source_template').format(protocol=protocol, server=server, keys_path=KEYS_PATH)}"
+            for repo in repositories
         )
 
         return write_file(self._repo, content)
