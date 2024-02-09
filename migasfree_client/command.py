@@ -482,13 +482,7 @@ class MigasFreeCommand():
             self.operation_failed(msg)
             sys.exit(errno.EAGAIN)
 
-        if user:
-            password = getpass.getpass('{}: '.format(_('Password')))
-
-            self._show_message(_('Registering computer...'))
-            self._save_sign_keys(user, password)
-            self._save_computer(user, password)
-        elif not self._auto_register():
+        if not self._auto_register():
             sys.stdin = open('/dev/tty')
             user = input('{}: '.format(_('User to register computer at server')))
             if not user:
@@ -496,11 +490,11 @@ class MigasFreeCommand():
                 logger.info('Empty user in register computer option')
                 sys.exit(errno.EAGAIN)
 
-            password = getpass.getpass('{}: '.format(_('Password')))
+        password = getpass.getpass('{}: '.format(_('Password')))
 
-            self._show_message(_('Registering computer...'))
-            self._save_sign_keys(user, password)
-            self._save_computer(user, password)
+        self._show_message(_('Registering computer...'))
+        self._save_sign_keys(user, password)
+        self._save_computer(user, password)
 
         self.operation_ok(_('Computer registered at server'))
 
