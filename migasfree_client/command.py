@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import time
 import ssl
 import gettext
 import requests
+import shutil
 
 from rich import print
 from rich.console import Console
@@ -751,6 +752,31 @@ class MigasFreeCommand():
             print(utils.get_mfc_release())
         else:
             self._show_config_options()
+
+        sys.exit(utils.ALL_OK)
+
+    def cmd_remove_keys(self, args=None):
+        if hasattr(args, 'all') and args.all:
+            keys_path = settings.KEYS_PATH
+        else:
+            keys_path = self._get_keys_path()
+
+        if hasattr(args, 'debug') and args.debug:
+            print(_('Trying to remove %s directory') % keys_path)
+
+        try:
+            shutil.rmtree(keys_path)
+        except shutil.Error:
+            if hasattr(args, 'quiet') and not args.quiet:
+                print(_('An error occurred while deleting directory %s') % keys_path)
+            sys.exit(errno.EPERM)
+        except FileNotFoundError:
+            if hasattr(args, 'quiet') and not args.quiet:
+                print(_('No such directory %s') % keys_path)
+            sys.exit(errno.EACCES)
+
+        if hasattr(args, 'quiet') and not args.quiet:
+            print(_('Directory %s has been removed') % keys_path)
 
         sys.exit(utils.ALL_OK)
 
