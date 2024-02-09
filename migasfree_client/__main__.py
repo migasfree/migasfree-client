@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2016-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -233,6 +233,17 @@ def parse_args(argv):
         help=_('Get individual value')
     )
 
+    subparser_remove_keys = subparsers.add_parser(
+        'remove-keys',
+        help=_('Remove client keys')
+    )
+
+    subparser_remove_keys.add_argument(
+        '-a', '--all',
+        action='store_true',
+        help=_('Remove client keys from all servers')
+    )
+
     if len(argv) < 1:
         parser.print_help()
         sys.exit(ALL_OK)
@@ -271,6 +282,9 @@ def main(argv=None):
     elif args.cmd == 'version':
         from .command import MigasFreeCommand
         MigasFreeCommand().cmd_version(args)
+    elif args.cmd == 'remove-keys':
+        from .command import MigasFreeCommand
+        MigasFreeCommand().cmd_remove_keys(args)
 
     return ALL_OK
 
