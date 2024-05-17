@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@ _ = gettext.gettext
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
+
+logger = logging.getLogger('migasfree_client')
 
 
 @Pms.register('Pacman')
@@ -55,7 +57,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms} --sync --needed {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -65,7 +67,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms} --remove --recursive {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -75,7 +77,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms} --sync --search {pattern.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -85,7 +87,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms} --sync --refresh -uu --noconfirm'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -104,7 +106,7 @@ class Pacman(Pms):
             return True, None
 
         cmd = f'{self._pms} --sync --needed --noconfirm {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -123,7 +125,7 @@ class Pacman(Pms):
             return True, None
 
         cmd = f'{self._pms} --remove --recursive --noconfirm {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -135,7 +137,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms} --query {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -145,7 +147,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms_cache} --remove'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -155,7 +157,10 @@ class Pacman(Pms):
         list format: name_version_architecture.extension
         """
 
-        _, _packages, _ = execute(f'{self._pms} --query --info', interactive=False)
+        cmd = f'{self._pms} --query --info'
+        logger.debug(cmd)
+
+        _, _packages, _ = execute(cmd, interactive=False)
         if not _packages:
             return []
 
@@ -214,7 +219,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms_key} --add {file_key} > /dev/null'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -224,7 +229,7 @@ class Pacman(Pms):
         """
 
         cmd = 'uname -m'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
@@ -236,7 +241,7 @@ class Pacman(Pms):
         """
 
         cmd = f'{self._pms} --sync --search --quiet'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
 
