@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2018-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ __license__ = 'GPLv3'
 __all__ = 'MigasFreeInfo'
 
 _ = gettext.gettext
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('migasfree_client')
 
 
 class MigasFreeInfo(MigasFreeCommand):
