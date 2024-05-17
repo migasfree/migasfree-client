@@ -25,6 +25,8 @@ from ..utils import execute, write_file
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
+logger = logging.getLogger('migasfree_client')
+
 
 @Pms.register('Yum')
 class Yum(Pms):
@@ -56,7 +58,7 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pms} install {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -66,7 +68,7 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pms} remove {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -76,7 +78,7 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pms} search {pattern.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -86,7 +88,7 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pms} --assumeyes update'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -105,7 +107,7 @@ class Yum(Pms):
             return True, None
 
         cmd = f'{self._pms} --assumeyes install {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -124,7 +126,7 @@ class Yum(Pms):
             return True, None
 
         cmd = f'{self._pms} --assumeyes remove {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -136,7 +138,7 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pm} -q {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -146,11 +148,11 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pms} clean all'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         if execute(cmd)[0] == 0:
             cmd = f'{self._pms} --assumeyes check-update'
-            logging.debug(cmd)
+            logger.debug(cmd)
             ret, _, _ = execute(cmd)
 
             return ret == 0 or ret == 100
@@ -164,7 +166,7 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pm} --queryformat "%{{NAME}}_%{{VERSION}}-%{{RELEASE}}_%{{ARCH}}.rpm\n" -qa'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _ = execute(cmd, interactive=False)
 
@@ -188,7 +190,7 @@ class Yum(Pms):
         """
 
         cmd = f'{self._pm} --import {file_key} > /dev/null'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -198,7 +200,7 @@ class Yum(Pms):
         """
 
         cmd = '%s --eval "%%{_arch}"' % self._pm
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
@@ -212,7 +214,7 @@ class Yum(Pms):
         cmd = "{} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'".format(
             self._pms
         )
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
 
