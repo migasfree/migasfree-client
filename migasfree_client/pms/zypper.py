@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ from ..utils import execute
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
+logger = logging.getLogger('migasfree_client')
+
 
 @Pms.register('Zypper')
 class Zypper(Yum):
@@ -44,7 +46,7 @@ class Zypper(Yum):
         """
 
         cmd = f'{self._pms} install --no-force-resolution {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -54,14 +56,14 @@ class Zypper(Yum):
         """
 
         cmd = f'{self._pms} --non-interactive update --no-force-resolution'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
         if _ret != 0:
             return False, f'{_ret}\n{_output}\n{_error}'
 
         cmd = f'{self._pms} lu -a'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -80,7 +82,7 @@ class Zypper(Yum):
             return True, None
 
         cmd = f'{self._pms} --non-interactive install --no-force-resolution {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -99,7 +101,7 @@ class Zypper(Yum):
             return True, None
 
         cmd = f'{self._pms} --non-interactive remove {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -111,11 +113,11 @@ class Zypper(Yum):
         """
 
         cmd = f'{self._pms} clean --all'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         if execute(cmd)[0] == 0:
             cmd = f'{self._pms} --non-interactive refresh'
-            logging.debug(cmd)
+            logger.debug(cmd)
 
             return execute(cmd)[0] == 0
 
@@ -127,7 +129,7 @@ class Zypper(Yum):
         """
 
         cmd = f'{self._pm} -q --qf "%%{{arch}}" -f /etc/lsb-release'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
@@ -139,7 +141,7 @@ class Zypper(Yum):
         """
 
         cmd = f"{self._pms} pa | awk -F'|' '{{print $3}}'"
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
 
