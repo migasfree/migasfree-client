@@ -163,7 +163,7 @@ class Yum(Pms):
         list format: name_version_architecture.extension
         """
 
-        cmd = f'{self._pm} --queryformat "%%{{NAME}}_%%{{VERSION}}-%%{{RELEASE}}_%%{{ARCH}}.rpm\n" -qa'
+        cmd = f'{self._pm} --queryformat "%{{NAME}}_%{{VERSION}}-%{{RELEASE}}_%{{ARCH}}.rpm\n" -qa'
         logging.debug(cmd)
 
         _ret, _output, _ = execute(cmd, interactive=False)
