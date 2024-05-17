@@ -21,6 +21,8 @@ import errno
 import getpass
 import platform
 import logging
+import logging.config
+import logging.handlers
 import time
 import ssl
 import gettext
@@ -44,23 +46,61 @@ __all__ = 'MigasFreeCommand'
 
 _ = gettext.gettext
 
+LOGGING_CONF = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S%z',
+        },
+    },
+    'handlers': {
+        'stderr': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'stream': 'ext://sys.stderr',
+            'level': 'WARNING'
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'INFO',
+            'formatter': 'simple',
+            'filename': settings.LOG_FILE,
+            'maxBytes': 10_000_000,
+            'backupCount': 5,
+        },
+    },
+    'loggers': {
+        'root': {
+            'level': 'INFO',
+            'handlers': [
+                'stderr',
+                'file',
+            ],
+        },
+    },
+}
+
 try:
-    logging.basicConfig(
-        format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s',
-        level=logging.INFO,
-        filename=settings.LOG_FILE
-    )
+    logging.config.dictConfig(LOGGING_CONF)
 except IOError:
     print(_('Failed to configure the log file (%s)') % settings.LOG_FILE)
     sys.exit(errno.EACCES)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('migasfree_client')
 
 # implicit print flush
 os.environ['PYTHONUNBUFFERED'] = '1'
 
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
 sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 1)
+
+
+def set_debug_log_level():
+    LOGGING_CONF['handlers']['file']['level'] = 'DEBUG'
+    LOGGING_CONF['loggers']['root']['level'] = 'DEBUG'
+    logging.config.dictConfig(LOGGING_CONF)
 
 
 class MigasFreeCommand():
@@ -200,7 +240,7 @@ class MigasFreeCommand():
             )
         )
         if self._debug:
-            logger.setLevel(logging.DEBUG)
+            set_debug_log_level()
 
         _config_packager = utils.get_config(settings.CONF_FILE, 'packager')
         if not isinstance(_config_packager, dict):
@@ -297,7 +337,7 @@ class MigasFreeCommand():
             except OSError:
                 _msg = _('Error creating %s directory') % path
                 self.operation_failed(_msg)
-                logging.error(_msg)
+                logger.error(_msg)
                 return False
 
         return True
@@ -317,7 +357,7 @@ class MigasFreeCommand():
             else:
                 _msg = _('Command %s failed: %s') % (file_, _error)
                 self.operation_failed(_msg)
-                logging.error(_msg)
+                logger.error(_msg)
                 self._write_error(_msg)
 
     @staticmethod
@@ -786,7 +826,7 @@ class MigasFreeCommand():
 
         if hasattr(args, 'debug') and args.debug:
             self._debug = True
-            logger.setLevel(logging.DEBUG)
+            set_debug_log_level()
 
         if hasattr(args, 'quiet') and args.quiet:
             self._quiet = True
