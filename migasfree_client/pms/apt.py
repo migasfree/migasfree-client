@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ from ..settings import KEYS_PATH
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
+
+logger = logging.getLogger('migasfree_client')
 
 
 @Pms.register('Apt')
@@ -60,7 +62,7 @@ class Apt(Pms):
         """
 
         cmd = f'{self._pms} install -o APT::Get::Purge=true {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -70,7 +72,7 @@ class Apt(Pms):
         """
 
         cmd = f'{self._pms} purge {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -80,7 +82,7 @@ class Apt(Pms):
         """
 
         cmd = f'{self._pms_search} search {pattern.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -90,7 +92,7 @@ class Apt(Pms):
         """
 
         cmd = f'{self._pms} {self._silent_options} dist-upgrade'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -109,7 +111,7 @@ class Apt(Pms):
             return True, None
 
         cmd = f'{self._pms} {self._silent_options} install {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -128,7 +130,7 @@ class Apt(Pms):
             return True, None
 
         cmd = f'{self._pms} {self._silent_options} purge {" ".join(package_set)}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -140,7 +142,7 @@ class Apt(Pms):
         """
 
         cmd = f'{self._pm} --status {package.strip()} | grep "Status: install ok installed"'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -150,12 +152,12 @@ class Apt(Pms):
         """
 
         cmd = f'{self._pms} clean'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         if execute(cmd)[0] == 0:
             execute('rm --recursive --force /var/lib/apt/lists')
             cmd = f'{self._pms} -o Acquire::Languages=none --assume-yes update'
-            logging.debug(cmd)
+            logger.debug(cmd)
 
             return execute(cmd)[0] == 0
 
@@ -167,7 +169,10 @@ class Apt(Pms):
         list format: name_version_architecture.extension
         """
 
-        packages = execute(f'{self._pm} --list', interactive=False)[1].strip().splitlines()
+        cmd = f'{self._pm} --list'
+        logger.debug(cmd)
+
+        packages = execute(cmd, interactive=False)[1].strip().splitlines()
         if not packages:
             return []
 
@@ -196,7 +201,7 @@ class Apt(Pms):
 
         name = file_key.rsplit('.', 1)[0].replace(KEYS_PATH, '').split('/')[1]
         cmd = f'gpg --output /etc/apt/trusted.gpg.d/{name}.gpg --dearmor {file_key} > /dev/null'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd)[0] == 0
 
@@ -206,7 +211,7 @@ class Apt(Pms):
         """
 
         cmd = f'echo "$({self._pm} --print-architecture) $({self._pm} --print-foreign-architectures)"'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
@@ -218,7 +223,7 @@ class Apt(Pms):
         """
 
         cmd = f'{self._pms_search} pkgnames'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
 
