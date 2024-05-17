@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ def getpwnam(name):
         _info = win32net.NetUserGetInfo(None, name, 11)  # TODO using ctypes
         _name = _info['name']
         _fullname = _info['full_name']
-    except:
+    except Exception:
         _name = 'NoName'
         _fullname = 'NoFullName'
 
