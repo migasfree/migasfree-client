@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
-# Copyright (c) 2021-2022 Alberto Gacías <alberto@migasfree.org>
+# Copyright (c) 2021-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2024 Alberto Gacías <alberto@migasfree.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@ from .pms import Pms
 __author__ = ['Jose Antonio Chavarría', 'Alberto Gacías']
 __license__ = 'GPLv3'
 
+logger = logging.getLogger('migasfree_client')
+
 
 @Pms.register('Winget')
 class Winget(Pms):
@@ -45,7 +47,7 @@ class Winget(Pms):
         """
 
         cmd = f'{self._pms} install --scope=machine --silent {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
 
@@ -55,7 +57,7 @@ class Winget(Pms):
         """
 
         cmd = f'{self._pms} uninstall --silent {package.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
 
@@ -65,7 +67,7 @@ class Winget(Pms):
         """
 
         cmd = f'{self._pms} search {pattern.strip()}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
 
@@ -75,7 +77,7 @@ class Winget(Pms):
         """
 
         cmd = f'{self._pms} upgrade --all --silent'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, verbose=True)
 
@@ -98,7 +100,7 @@ class Winget(Pms):
 
         for pkg in package_set[:]:
             cmd = f'{self._pms} install --scope=machine --silent {pkg}'
-            logging.debug(cmd)
+            logger.debug(cmd)
 
             _ret, _, _error = execute(cmd, verbose=True)
 
@@ -121,7 +123,7 @@ class Winget(Pms):
 
         for pkg in package_set[:]:
             cmd = f'{self._pms} uninstall --silent {pkg}'
-            logging.debug(cmd)
+            logger.debug(cmd)
 
             _ret, _, _error = execute(cmd, verbose=True)
 
@@ -133,7 +135,7 @@ class Winget(Pms):
         """
 
         cmd = f'{self._pms} list {package}'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         return execute(cmd, interactive=True)[0] == 0
 
@@ -150,7 +152,10 @@ class Winget(Pms):
         list format: name_version_architecture.extension
         """
 
-        _, _packages, _ = execute(f'{self._pms} list', interactive=False)
+        cmd = f'{self._pms} list'
+        logger.debug(cmd)
+
+        _, _packages, _ = execute(cmd, interactive=False)
 
         _result = []
         for _line in _packages.splitlines()[4:]:  # Remove header -> 2 lines
@@ -205,7 +210,7 @@ class Winget(Pms):
         """
 
         cmd = f'{self._pms} search'
-        logging.debug(cmd)
+        logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd)
 
