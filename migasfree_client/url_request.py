@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 _ = gettext.gettext
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('migasfree_client')
 
 
 class UrlRequest():
@@ -100,8 +100,6 @@ class UrlRequest():
             keys = {}
 
         self._debug = debug
-        if self._debug:
-            logger.setLevel(logging.DEBUG)
 
         self._exit_on_error = exit_on_error
         if 'private' in keys:
