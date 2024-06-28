@@ -26,6 +26,12 @@ Or these commands if you are in Arch based distro:
     $ makepkg
     # <install package>
 
+Or these commands to create a wheel Python package and install it:
+
+    $ python3 setup.py bdist_wheel
+    $ cd dist
+    # pip3 install <generated_wheel_package>.whl
+
 Check /etc/migasfree.conf configuration before run migasfree bin scripts.
 If this file not exists, you can copy it from /usr/share/doc/migasfree-client/migasfree.conf.
 
