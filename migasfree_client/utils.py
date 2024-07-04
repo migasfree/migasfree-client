@@ -616,7 +616,7 @@ def get_hardware_uuid():
 
     _ret, _uuid, _ = execute(_cmd, interactive=False)
     _uuid = remove_commented_lines(_uuid)
-    _uuid = _uuid.replace('\n', '')
+    _uuid = _uuid.strip()
     if _ret != 0 or _uuid == '' or _uuid is None:
         return get_uuid_from_mac()
 
