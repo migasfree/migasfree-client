@@ -422,7 +422,7 @@ class MigasFreeCommand():
                 'project': self.migas_project,
                 'platform': platform.system(),
                 'pms': str(self.pms),
-                'architecture': self.pms.get_system_architecture()
+                'architecture': self.pms.get_system_architecture() if self.pms else ''
             },
             safe=False,
             exit_on_error=exit_on_error,
