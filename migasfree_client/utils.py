@@ -287,9 +287,18 @@ def get_graphic_user(pid=0):
     """
 
     if is_windows():
-        import getpass
+        try:
+            import win32ts
 
-        return getpass.getuser()
+            return win32ts.WTSQuerySessionInformation(None, -1, win32ts.WTSUserName)
+        except ImportError:
+            res = subprocess.check_output(
+                ['WMIC', 'ComputerSystem', 'GET', 'UserName'],
+                universal_newlines=True
+            )
+            _, username = res.strip().rsplit('\n', 1)
+
+            return username.rsplit('\\', 1)[1]
 
     if not pid:
         pid = get_graphic_pid()[0]
