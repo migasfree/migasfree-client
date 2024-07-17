@@ -119,6 +119,7 @@ setup(
     url='http://www.migasfree.org/',
     platforms=['Linux', 'Windows 10'],
     install_requires=REQUIRES,
+    python_requires='>=3.6.0',
     packages=find_packages(),
     entry_points={
         'console_scripts': [
