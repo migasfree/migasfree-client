@@ -42,7 +42,7 @@ from .command import MigasFreeCommand
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = 'MigasFreeSync'
+__all__ = ['MigasFreeSync']
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
