@@ -26,8 +26,8 @@ import logging.handlers
 import time
 import ssl
 import gettext
-import requests
 import shutil
+import requests
 
 from rich import print
 from rich.console import Console
@@ -42,7 +42,7 @@ from . import settings, utils
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = 'MigasFreeCommand'
+__all__ = ['MigasFreeCommand']
 
 _ = gettext.gettext
 
@@ -411,7 +411,7 @@ class MigasFreeCommand():
         return False
 
     def _save_sign_keys(self, user, password):
-        exit_on_error = (user != self.auto_register_user)
+        exit_on_error = user != self.auto_register_user
 
         # API keys
         response = self._url_request.run(
@@ -721,7 +721,7 @@ class MigasFreeCommand():
             _mode = 'wb'
 
         if not self._error_file_descriptor:
-            self._error_file_descriptor = open(self.ERROR_FILE, _mode)
+            self._error_file_descriptor = open(self.ERROR_FILE, _mode, encoding='utf8')
 
         _text = '{}\n{}\n{}\n\n'.format(
             '-' * 20,
