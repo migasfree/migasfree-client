@@ -48,13 +48,13 @@ REQUIRES = filter(
 
 import glob
 import subprocess
+import logging
 
 # set DISTUTILS_DEBUG as environment variable to get debug info
 
 from setuptools import setup, find_packages
 from distutils.command.build import build
 from distutils.command.install_data import install_data
-from distutils.log import info, error
 from distutils.dep_util import newer
 
 APP_NAME = 'migasfree-client'
@@ -72,19 +72,19 @@ class BuildData(build):
 
             directory = os.path.dirname(mo)
             if not os.path.exists(directory):
-                info(f'creating {directory}')
+                logging.info('creating %s', directory)
                 os.makedirs(directory)
 
             if newer(po, mo):
-                info(f'compiling {po} -> {mo}')
+                logging.info('compiling %s -> %s', po, mo)
                 try:
                     rc = subprocess.call(['msgfmt', '-o', mo, po])
                     if rc != 0:
                         raise Warning(f'msgfmt returned {rc}')
-                except Exception as e:
-                    error("Building gettext files failed.  Try setup.py \
+                except OSError as e:
+                    logging.error("Building gettext files failed.  Try setup.py \
                         --without-gettext [build|install]")
-                    error(f'Error: {str(e)}')
+                    logging.error('Error: %s', {str(e)})
                     sys.exit(1)
 
 
