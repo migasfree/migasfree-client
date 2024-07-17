@@ -27,7 +27,7 @@ from .utils import ALL_OK, is_windows, is_linux, write_file, execute_as_user
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = 'MigasFreeLabel'
+__all__ = ['MigasFreeLabel']
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
