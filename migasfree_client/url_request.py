@@ -45,6 +45,8 @@ class UrlRequest():
     _proxy = ''
     _cert = False
 
+    _timeout = 10  # seconds
+
     _ok_codes = [
         requests.codes.ok, requests.codes.created,
         requests.codes.moved, requests.codes.found,
@@ -177,7 +179,7 @@ class UrlRequest():
         try:
             req = requests.post(
                 url, data=data, headers=headers,
-                proxies=proxies
+                proxies=proxies, timeout=self._timeout
             )
         except requests.exceptions.ConnectionError as e:
             logger.error(str(e))
