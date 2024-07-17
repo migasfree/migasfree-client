@@ -287,18 +287,18 @@ def get_graphic_user(pid=0):
     """
 
     if is_windows():
-        try:
-            import win32ts
+        import win32ts
 
-            return win32ts.WTSQuerySessionInformation(None, -1, win32ts.WTSUserName)
-        except ImportError:
-            res = subprocess.check_output(
-                ['WMIC', 'ComputerSystem', 'GET', 'UserName'],
-                universal_newlines=True
-            )
-            _, username = res.strip().rsplit('\n', 1)
+        _user = win32ts.WTSQuerySessionInformation(None, -1, win32ts.WTSUserName)
+        if not _user:
+            import psutil
 
-            return username.rsplit('\\', 1)[1]
+            for p in psutil.process_iter():
+                if p.name() == 'explorer.exe':
+                    _user = p.username().rsplit('\\', 1)[1]
+                    break
+
+        return _user.strip()
 
     if not pid:
         pid = get_graphic_pid()[0]
