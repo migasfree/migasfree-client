@@ -33,7 +33,7 @@ from .utils import (
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
-__all__ = 'MigasFreeTags'
+__all__ = ['MigasFreeTags']
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
