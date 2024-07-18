@@ -155,7 +155,7 @@ class Yum(Pms):
             logger.debug(cmd)
             ret, _, _ = execute(cmd)
 
-            return ret == 0 or ret == 100
+            return ret in (0, 100)
 
         return False
 
