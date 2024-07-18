@@ -45,7 +45,7 @@ class UrlRequest():
     _proxy = ''
     _cert = False
 
-    _timeout = 10  # seconds
+    _timeout = 60  # seconds
 
     _ok_codes = [
         requests.codes.ok, requests.codes.created,
