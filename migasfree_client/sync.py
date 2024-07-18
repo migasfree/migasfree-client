@@ -1057,16 +1057,14 @@ class MigasFreeSync(MigasFreeCommand):
                         logging.error(_msg)
                         self._write_error(_msg)
 
-        for key in logical_devices:
-            _printer_name = logical_devices[key].name
-
-            if logical_devices[key].driver is None:
+        for key, value in logical_devices.items():
+            if value.driver is None:
                 _msg = _('Error: no driver defined for device %s. '
                          'Please, configure capability %s, in the model %s %s, and project %s') % (
-                    _printer_name,
-                    logical_devices[key].info.split('__')[2],  # capability
-                    logical_devices[key].info.split('__')[0],  # manufacturer
-                    logical_devices[key].info.split('__')[1],  # model
+                    value.name,
+                    value.info.split('__')[2],  # capability
+                    value.info.split('__')[0],  # manufacturer
+                    value.info.split('__')[1],  # model
                     self.migas_project
                 )
                 self.operation_failed(_msg)
@@ -1074,13 +1072,13 @@ class MigasFreeSync(MigasFreeCommand):
                 self._write_error(_msg)
                 continue
 
-            if logical_devices[key].is_changed():
-                self._show_message(_('Installing device: %s') % _printer_name)
-                if logical_devices[key].install():
+            if value.is_changed():
+                self._show_message(_('Installing device: %s') % value.name)
+                if value.install():
                     self.operation_ok()
-                    logging.debug('Device installed: %s', _printer_name)
+                    logging.debug('Device installed: %s', value.name)
                 else:
-                    _msg = _('Error installing device: %s') % _printer_name
+                    _msg = _('Error installing device: %s') % value.name
                     self.operation_failed(_msg)
                     logging.error(_msg)
                     self._write_error(_msg)
