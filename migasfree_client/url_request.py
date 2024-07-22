@@ -189,6 +189,14 @@ class UrlRequest():
                     'code': errno.ECONNREFUSED
                 }
             }
+        except requests.exceptions.ReadTimeout as e:
+            logger.error(str(e))
+            return {
+                'error': {
+                    'info': e,
+                    'code': errno.ETIMEDOUT
+                }
+            }
 
         if req.status_code not in self._ok_codes:
             return self._error_response(req, url)
