@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ __license__ = 'GPLv3'
 # https://pythonhosted.org/setuptools
 # python setup.py --help-commands
 # python setup.py bdist_egg
+# python setup.py bdist_wheel
 # python setup.py build
 # python setup.py sdist
 # python setup.py bdist --format=rpm
@@ -30,22 +31,8 @@ __license__ = 'GPLv3'
 # TODO https://wiki.ubuntu.com/PackagingGuide/Python
 # TODO https://help.ubuntu.com/community/PythonRecipes/DebianPackage
 
-import sys
-
-if not hasattr(sys, 'version_info') or sys.version_info < (3, 6, 0, 'final'):
-    raise SystemExit('migasfree-client requires Python 3.6 or later.')
-
 import os
-PATH = os.path.dirname(os.path.abspath(__file__))
-with open(os.path.join(PATH, 'README.md'), encoding='utf_8') as f:
-    README = f.read()
-VERSION = __import__('migasfree_client').__version__
-
-REQUIRES = filter(
-    lambda s: len(s) > 0,
-    open(os.path.join(PATH, 'requirements.txt'), encoding='utf_8').read().split('\n')
-)
-
+import sys
 import glob
 import subprocess
 import logging
@@ -56,6 +43,16 @@ from setuptools import setup, find_packages
 from distutils.command.build import build
 from distutils.command.install_data import install_data
 from distutils.dep_util import newer
+
+PATH = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(PATH, 'README.md'), encoding='utf_8') as f:
+    README = f.read()
+VERSION = __import__('migasfree_client').__version__
+
+REQUIRES = filter(
+    lambda s: len(s) > 0,
+    open(os.path.join(PATH, 'requirements.txt'), encoding='utf_8').read().split('\n')
+)
 
 APP_NAME = 'migasfree-client'
 PO_DIR = 'po'
@@ -89,8 +86,7 @@ class BuildData(build):
 
 
 class InstallData(install_data):
-    @staticmethod
-    def _find_mo_files():
+    def _find_mo_files(self):
         data_files = []
 
         for mo in glob.glob(os.path.join(MO_DIR, '*', f'{APP_NAME}.mo')):
@@ -98,10 +94,10 @@ class InstallData(install_data):
             dest = os.path.join('share', 'locale', lang, 'LC_MESSAGES')
             data_files.append((dest, [mo]))
 
-        return data_files
+        self.data_files.extend(data_files)
 
     def run(self):
-        self.data_files.extend(self._find_mo_files())
+        self._find_mo_files()
         install_data.run(self)
 
 
