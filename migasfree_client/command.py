@@ -513,7 +513,7 @@ class MigasFreeCommand():
 
         return True
 
-    def _register_computer(self, user=None):
+    def cmd_register_computer(self, user=None):
         carry_on = utils.query_yes_no(
             _('Have you check config options in this machine (%s)?')
             % settings.CONF_FILE
