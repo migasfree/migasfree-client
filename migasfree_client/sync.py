@@ -744,7 +744,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response
 
-    def synchronize(self):
+    def cmd_synchronize(self):
         if not self._check_sign_keys():
             sys.exit(errno.EPERM)
 
@@ -945,12 +945,12 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._run_events(diff)
 
-    def _search(self, pattern):
+    def cmd_search(self, pattern):
         self._check_pms()
 
         return self.pms.search(pattern)
 
-    def _install_package(self, pkg):
+    def cmd_install_package(self, pkg):
         self._check_pms()
 
         software_before = self.pms.query_all()
@@ -964,7 +964,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         return ret
 
-    def _remove_package(self, pkg):
+    def cmd_remove_package(self, pkg):
         self._check_pms()
 
         software_before = self.pms.query_all()
@@ -1132,22 +1132,22 @@ class MigasFreeSync(MigasFreeCommand):
                 self.cmd_faults()
             else:
                 utils.check_lock_file(self.CMD, self.LOCK_FILE)
-                self.synchronize()
+                self.cmd_synchronize()
                 utils.remove_file(self.LOCK_FILE)
 
             if not self._pms_status_ok:
                 sys.exit(errno.EPROTO)
         elif args.cmd == 'register':
-            self._register_computer(args.user)
+            self.cmd_register_computer(args.user)
         elif args.cmd == 'search':
-            self._search(' '.join(args.pattern))
+            self.cmd_search(' '.join(args.pattern))
         elif args.cmd == 'install':
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self._install_package(' '.join(args.pkg_install))
+            self.cmd_install_package(' '.join(args.pkg_install))
             utils.remove_file(self.LOCK_FILE)
         elif args.cmd == 'purge':
             utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self._remove_package(' '.join(args.pkg_purge))
+            self.cmd_remove_package(' '.join(args.pkg_purge))
             utils.remove_file(self.LOCK_FILE)
         elif args.cmd == 'traits':
             self.cmd_traits(args.prefix, args.traits_key)
