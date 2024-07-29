@@ -23,7 +23,7 @@ import gettext
 import logging
 
 from .settings import KEYS_PATH
-from .utils import build_magic, check_lock_file, remove_file, ALL_OK
+from .utils import build_magic, check_lock_file, remove_file, sanitize_path, ALL_OK
 from .command import MigasFreeCommand
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -45,10 +45,10 @@ class MigasFreeUpload(MigasFreeCommand):
         self._init_url_request()
 
         self._private_key = os.path.join(
-            KEYS_PATH, self.migas_server, self.PRIVATE_KEY
+            KEYS_PATH, sanitize_path(self.migas_server), self.PRIVATE_KEY
         )
         self._public_key = os.path.join(
-            KEYS_PATH, self.migas_server, self.PUBLIC_KEY
+            KEYS_PATH, sanitize_path(self.migas_server), self.PUBLIC_KEY
         )
 
     def _auto_register(self):
