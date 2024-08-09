@@ -168,7 +168,11 @@ def execute(cmd, verbose=False, interactive=True):
                 )
 
             while _process.poll() is None:
-                readx = select.select([_process.stdout.fileno()], [], [])[0]
+                try:
+                    readx = select.select([_process.stdout.fileno()], [], [])[0]
+                except OSError:
+                    readx = None
+
                 if readx:
                     chunk = _process.stdout.read()
                     if isinstance(chunk, bytes) and not isinstance(chunk, str):
