@@ -1,0 +1,19 @@
+[install]
+prefix=/usr
+
+[bdist_rpm]
+build-requires = python-netifaces
+release = 1
+doc_files = AUTHORS INSTALL LICENSE MANIFEST.in README TODO migasfree-client.doap
+install-script = scripts/rpm-install.sh
+post-install = scripts/rpm-post-install.sh
+post-uninstall = scripts/rpm-post-uninstall.sh
+fix-python = /usr/bin/python2
+requires = python3 >= 3.6
+           sudo
+           dmidecode
+           python3-pycurl >= 7.19
+           python3-netifaces
+           dialog
+           openssl
+           util-linux
