@@ -236,14 +236,14 @@ def get_graphic_user(pid=0):
         if not pid:
             return ''
 
-    _user = commands.getoutput('ps hp {0} -o "%U"'.format(pid))
+    _user = commands.getoutput('ps hp {0} -o euser'.format(pid))
     if _user.isdigit():
         # ps command not always show username (show uid if len(username) > 8)
         _user_info = get_user_info(_user)
         if _user_info is False:  # p.e. chroot environment
             return 'root'
-        else:
-            return _user_info['name']
+
+        return _user_info['name']
 
     return _user.strip()
 
