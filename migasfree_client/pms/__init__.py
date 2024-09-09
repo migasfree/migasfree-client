@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ from .apt import Apt
 from .dnf import Dnf
 from .pacman import Pacman
 from .winget import Winget
+from .wpt import Wpt
 from .yum import Yum
 from .zypper import Zypper
 from . import plugins
@@ -48,6 +49,7 @@ def get_available_pms():
         ('dnf', 'Dnf'),
         ('pacman', 'Pacman'),
         ('winget', 'Winget'),
+        ('wpt', 'Wpt'),
         ('yum', 'Yum'),
         ('zypper', 'Zypper'),
     ]
