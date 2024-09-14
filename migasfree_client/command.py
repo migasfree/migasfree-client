@@ -286,6 +286,10 @@ class MigasFreeCommand():
                     self.migas_ssl_cert = settings.CERT_FILE
             except ssl.SSLError:
                 pass
+            except OSError as e:
+                _msg = _('Error getting server certificate: %s') % e
+                self.operation_failed(_msg)
+                sys.exit(errno.ECONNREFUSED)
 
     def _get_keys_path(self):
         return os.path.join(
