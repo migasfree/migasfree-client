@@ -200,7 +200,7 @@ class Apt(Pms):
         """
 
         name = file_key.rsplit('.', 1)[0].replace(KEYS_PATH, '').split('/')[1]
-        cmd = f'gpg --output /etc/apt/trusted.gpg.d/{name}.gpg --dearmor {file_key} > /dev/null'
+        cmd = f'gpg --output /etc/apt/trusted.gpg.d/{name}.gpg --dearmor --yes {file_key} > /dev/null'
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
