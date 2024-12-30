@@ -324,6 +324,13 @@ class MigasFreeSync(MigasFreeCommand):
         return response
 
     def get_devices(self):
+        """
+        response: {
+            "logical": [{}, ...],
+            "default": int
+        }
+        """
+
         if not self._computer_id:
             self.get_computer_id()
 
@@ -339,13 +346,6 @@ class MigasFreeSync(MigasFreeCommand):
                 debug=self._debug
             )
             logger.debug('Response get_devices: %s', response)
-
-        """
-        response: {
-            "logical": [{}, ...],
-            "default": int
-        }
-        """
 
         if 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
