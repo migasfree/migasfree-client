@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "migasfree-client"
-dynamic = ["version"]
+dynamic = ["version", "entry-points"]
 authors = [
   {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
 ]
