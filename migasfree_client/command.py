@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -442,13 +442,13 @@ class MigasFreeCommand():
                     sys.exit(response['error']['code'])
 
                 return False
-            else:
-                self.operation_failed(response['error'])
-                logger.error(response['error'])
-                if exit_on_error:
-                    sys.exit(errno.EPERM)
 
-                return False
+            self.operation_failed(response['error'])
+            logger.error(response['error'])
+            if exit_on_error:
+                sys.exit(errno.EPERM)
+
+            return False
 
         if not self._check_path(os.path.join(
                 os.path.abspath(settings.KEYS_PATH),
@@ -509,13 +509,14 @@ class MigasFreeCommand():
                 print(_('Key %s created!') % path_file)
             else:
                 print(_('ERROR: not import key: %s!') % path_file)
-        else:
-            msg = _('Error writing key file!!!')
-            self.operation_failed(msg)
-            logger.error(msg)
-            return False
 
-        return True
+            return True
+
+        msg = _('Error writing key file!!!')
+        self.operation_failed(msg)
+        logger.error(msg)
+
+        return False
 
     def cmd_register_computer(self, user=None):
         carry_on = utils.query_yes_no(
