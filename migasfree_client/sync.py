@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -414,6 +414,9 @@ class MigasFreeSync(MigasFreeCommand):
         """
         if there are old errors, upload them to server
         """
+        if not self._computer_id:
+            self.get_computer_id()
+
         if os.path.isfile(self.ERROR_FILE) \
                 and os.stat(self.ERROR_FILE).st_size:
             self._show_message(_('Uploading old errors...'))
