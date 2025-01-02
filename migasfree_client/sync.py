@@ -414,11 +414,11 @@ class MigasFreeSync(MigasFreeCommand):
         """
         if there are old errors, upload them to server
         """
-        if not self._computer_id:
-            self.get_computer_id()
-
         if os.path.isfile(self.ERROR_FILE) \
                 and os.stat(self.ERROR_FILE).st_size:
+            if not self._computer_id:
+                self.get_computer_id()
+
             self._show_message(_('Uploading old errors...'))
             with self.console.status(''):
                 response = self._url_request.run(
