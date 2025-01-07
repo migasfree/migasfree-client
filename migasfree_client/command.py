@@ -225,6 +225,14 @@ class MigasFreeCommand():
             default=True
         )
 
+        self.migas_upload_hardware = utils.cast_to_bool(
+            os.environ.get(
+                'MIGASFREE_CLIENT_UPLOAD_HARDWARE',
+                _config_client.get('upload_hardware', True)
+            ),
+            default=True
+        )
+
         self.migas_proxy = os.environ.get(
             'MIGASFREE_CLIENT_PROXY', _config_client.get('proxy', None)
         )
@@ -677,6 +685,11 @@ class MigasFreeCommand():
             _('Manage devices'),
             self.migas_manage_devices,
             '(ENV)' if 'MIGASFREE_CLIENT_MANAGE_DEVICES' in os.environ else ''
+        ))
+        print('\t%s: %s %s' % (
+            _('Upload hardware'),
+            self.migas_upload_hardware,
+            '(ENV)' if 'MIGASFREE_CLIENT_UPLOAD_HARDWARE' in os.environ else ''
         ))
         print('\t%s: %s %s' % (
             _('Proxy'),
