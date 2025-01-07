@@ -773,7 +773,7 @@ class MigasFreeSync(MigasFreeCommand):
 
             self.upload_software(software_before, software_history)
 
-        if self.hardware_capture_is_required():
+        if self.migas_upload_hardware and self.hardware_capture_is_required():
             self.update_hardware_inventory()
 
         self.sync_logical_devices()
