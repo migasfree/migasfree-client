@@ -991,6 +991,8 @@ class MigasFreeSync(MigasFreeCommand):
             logging.error(_msg)
             self._write_error(_msg)
 
+            return False
+
         for device in devices['logical']:
             if 'packages' in device and device['packages']:
                 if not self.install_mandatory_packages(device['packages']):
