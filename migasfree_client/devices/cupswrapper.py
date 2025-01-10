@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ class Cupswrapper(Printer):
 
         try:
             conn.setDefault(name)
-        except RuntimeError:
+        except (RuntimeError, cups.IPPError):
             raise RuntimeError
 
     def md5_file(self):
