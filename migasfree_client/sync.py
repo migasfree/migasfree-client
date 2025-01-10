@@ -994,8 +994,9 @@ class MigasFreeSync(MigasFreeCommand):
             return False
 
         for device in devices['logical']:
-            if 'packages' in device and device['packages']:
-                if not self.install_mandatory_packages(device['packages']):
+            if 'PRINTER' in device and 'packages' in device['PRINTER'] \
+                    and device['PRINTER']['packages']:
+                if not self.install_mandatory_packages(device['PRINTER']['packages']):
                     return False
 
         self._devices_class_selection()
