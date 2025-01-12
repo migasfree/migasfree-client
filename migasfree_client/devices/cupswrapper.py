@@ -110,10 +110,7 @@ class Cupswrapper(Printer):
             raise RuntimeError
 
     def is_changed(self):
-        if super().is_changed() and not self.is_driver_changed():
-            return False
-        else:
-            return True
+        return super().is_changed() or self.is_driver_changed()
 
     def is_driver_changed(self):
         _md5file = self.md5_file()
