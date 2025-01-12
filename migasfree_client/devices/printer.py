@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2014-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2014-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -136,15 +136,12 @@ class Printer:
         raise NotImplementedError
 
     def is_changed(self):
-        if (
+        return not (
             len(self.printer_data) > 0 and
             self.printer_data['printer-info'] == self.info and
             self.printer_data['printer-location'] == self.location and
             self.printer_data['device-uri'] == self.uri
-        ):
-            return False
-        else:
-            return True
+        )
 
     @staticmethod
     def get_printer_id(name):
