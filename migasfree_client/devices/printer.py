@@ -69,8 +69,6 @@ class Printer:
                 self.port = '9100'
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
                 self.uri = f'socket://{self.conn["IP"]}:{self.port}'
-                if self.conn['LOCATION'] != '':
-                    self.location = self.conn['LOCATION']
         elif 'LPT' in device:
             self.conn = device['LPT']
             if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
@@ -96,8 +94,9 @@ class Printer:
             self.conn = device['LPD']
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
                 self.uri = f'lpd://{self.conn["IP"]}/{self.conn["PORT"]}'
-                if self.conn['LOCATION'] != '':
-                    self.location = self.conn['LOCATION']
+
+        if 'LOCATION' in self.conn and self.conn['LOCATION']:
+            self.location = self.conn['LOCATION']
 
         self.info = '{}__{}__{}__{}__{}'.format(
             device['manufacturer'],
