@@ -23,6 +23,7 @@ import tempfile
 import socket
 import gettext
 import logging
+import copy
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
@@ -1011,7 +1012,7 @@ class MigasFreeSync(MigasFreeCommand):
         for device in devices['logical']:
             if 'PRINTER' in device:
                 dev = self.devices_class.load_device(device['PRINTER'])
-                logical_devices[int(dev.logical_id)] = dev
+                logical_devices[int(dev.logical_id)] = copy.deepcopy(dev)
 
         try:
             self.devices_class.get_connection()
