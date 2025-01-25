@@ -5,8 +5,8 @@ To install it, make sure you have these programs installed:
     * Python >= 3.6
     * python3-requests
     * python3-requests-toolbelt
-    * python3-distro
-    * python3-crypto
+    * python3-jwcrypto
+    * python3-magic
     * python3-netifaces
     * python3-stdeb (to create a DEB package)
     * python3-cups
