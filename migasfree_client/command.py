@@ -757,7 +757,7 @@ class MigasFreeCommand():
     def _devices_class_selection(self):
         _class = None
         for item in get_available_devices_classes():
-            _class = Printer.factory(item[1])()
+            _class = Printer.factory(item[1])(self.migas_server)
             if _class.platform == sys.platform:
                 self.devices_class = _class
                 return
