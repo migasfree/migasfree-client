@@ -17,9 +17,6 @@
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-__author__ = 'Jose Antonio Chavarría'
-__license__ = 'GPLv3'
-
 import sys
 import inspect
 import importlib
@@ -28,6 +25,10 @@ import pkgutil
 from .printer import Printer
 from .cupswrapper import Cupswrapper
 from . import plugins
+
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
+__all__ = ['Printer', 'Cupswrapper']
 
 
 def iter_namespace(ns_pkg):
