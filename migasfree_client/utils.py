@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -424,6 +424,19 @@ def get_user_info(user):
         'home': _info[5],
         'shell': _info[6]
     }
+
+
+def is_root_user():
+    if is_windows():
+        import ctypes
+
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+    user_info = get_user_info(os.getuid())
+    if not isinstance(user_info, dict):
+        return False
+
+    return user_info.get('gid') == 0
 
 
 def read_file(filename, mode='rb'):
