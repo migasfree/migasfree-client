@@ -84,7 +84,7 @@ LOGGING_CONF = {
 
 try:
     logging.config.dictConfig(LOGGING_CONF)
-except IOError:
+except (IOError, ValueError):
     print(_('Failed to configure the log file (%s)') % settings.LOG_FILE)
     sys.exit(errno.EACCES)
 
@@ -372,21 +372,8 @@ class MigasFreeCommand():
                 logger.error(_msg)
                 self._write_error(_msg)
 
-    @staticmethod
-    def _check_user_is_root():
-        if utils.is_windows():
-            import ctypes
-
-            return ctypes.windll.shell32.IsUserAnAdmin() != 0
-
-        user_info = utils.get_user_info(os.getuid())
-        if not isinstance(user_info, dict):
-            return False
-
-        return user_info.get('gid') == 0
-
-    def _user_is_not_root(self):
-        if not self._check_user_is_root():
+    def _check_user_is_root(self):
+        if not utils.is_root_user():
             self.operation_failed(
                 _('User has insufficient privileges to execute this command')
             )
