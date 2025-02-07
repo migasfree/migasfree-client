@@ -30,6 +30,10 @@ from .yum import Yum
 from .zypper import Zypper
 from . import plugins
 
+__author__ = 'Jose Antonio Chavarría'
+__license__ = 'GPLv3'
+__all__ = ['Pms', 'Apt', 'Dnf', 'Pacman', 'Winget', 'Wpt', 'Yum', 'Zypper']
+
 
 def iter_namespace(ns_pkg):
     if not hasattr(ns_pkg, '__path__'):
