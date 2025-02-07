@@ -25,6 +25,8 @@ class Printer:
     Abstract methods
     """
 
+    server = ''
+
     conn = ''
     port = ''
     location = ''
@@ -54,7 +56,9 @@ class Printer:
             return subclass
         return decorator
 
-    def __init__(self, device=None):
+    def __init__(self, server='', device=None):
+        self.server = server
+
         if not device:
             return
 
