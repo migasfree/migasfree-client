@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2014-2021 Jose Antonio Chavarría
+# Copyright (c) 2014-2025 Jose Antonio Chavarría
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,15 +31,22 @@ from . import plugins
 
 
 def iter_namespace(ns_pkg):
+    if not hasattr(ns_pkg, '__path__'):
+        return []
+
     return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + '.')
 
 
 def get_discovered_plugins():
-    return {
-        name: importlib.import_module(name)
-        for finder, name, ispkg
-        in iter_namespace(plugins)
-    }
+    ret = {}
+    for finder, name, ispkg in iter_namespace(plugins):
+        try:
+            module = importlib.import_module(name)
+            ret[name] = module
+        except ImportError as e:
+            print(f'Error importing {name} module: {e}', file=sys.stderr)
+
+    return ret
 
 
 def get_available_devices_classes():
@@ -48,10 +55,12 @@ def get_available_devices_classes():
     ]
 
     discovered_plugins = get_discovered_plugins()
-
-    for item in discovered_plugins.keys():
-        for class_ in inspect.getmembers(sys.modules[item], inspect.isclass):
-            if class_[0] != 'Printer':
-                ret.append((class_[1]()._name, class_[0]))
+    for module_name, module in discovered_plugins.items():
+        for class_name, class_ in inspect.getmembers(module, inspect.isclass):
+            if issubclass(class_, Printer) and class_ != Printer:
+                try:
+                    ret.append((class_()._name, class_name))
+                except Exception as e:
+                    print(f'Error processing {class_name} class: {e}', file=sys.stderr)
 
     return sorted(ret, key=lambda x: x[0])
