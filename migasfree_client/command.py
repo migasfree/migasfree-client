@@ -500,11 +500,7 @@ class MigasFreeCommand():
         )
         logger.debug('Response _save_repos_key: %s', response)
 
-        path = os.path.abspath(
-            os.path.join(
-                settings.KEYS_PATH, utils.sanitize_path(self.migas_server)
-            )
-        )
+        path = self._get_keys_path()
         if not self._check_path(path):
             return False
 
