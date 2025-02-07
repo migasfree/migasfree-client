@@ -22,7 +22,7 @@ try:
 except ImportError:
     pass
 
-from ..utils import write_file, md5sum
+from ..utils import write_file, md5sum, sanitize_path
 from ..settings import DEVICES_PATH
 
 from .printer import Printer
@@ -33,8 +33,8 @@ __license__ = 'GPLv3'
 
 @Printer.register('Cupswrapper')
 class Cupswrapper(Printer):
-    def __init__(self, device=None):
-        super().__init__(device)
+    def __init__(self, server='', device=None):
+        super().__init__(server, device)
         self.platform = 'linux'  # sys.platform value
 
         if 'CUPSWRAPPER' in self.conn and self.conn['CUPSWRAPPER']:
@@ -168,4 +168,8 @@ class Cupswrapper(Printer):
             raise RuntimeError
 
     def md5_file(self):
-        return os.path.join(DEVICES_PATH, f'{self.logical_id}.md5')
+        return os.path.join(
+            DEVICES_PATH,
+            sanitize_path(self.server),
+            f'{self.logical_id}.md5'
+        )
