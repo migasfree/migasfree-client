@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -211,10 +211,7 @@ class UrlRequest():
                 verify_key=self._public_key
             )
         else:
-            if 'detail' in json_response:
-                response = json_response['detail']
-            else:
-                response = json_response
+            response = json_response.get('detail', json_response)
 
         logger.debug('Response text: %s', response)
 
