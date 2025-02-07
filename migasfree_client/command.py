@@ -395,19 +395,22 @@ class MigasFreeCommand():
     def _check_sign_keys(self, get_computer_id=True):
         keys_path = self._get_keys_path()
 
-        private_key = os.path.join(keys_path, self.PRIVATE_KEY)
-        public_key = os.path.join(keys_path, self.PUBLIC_KEY)
-        repos_key = os.path.join(keys_path, self.REPOS_KEY)
+        paths = {
+            'private': os.path.join(keys_path, self.PRIVATE_KEY),
+            'public': os.path.join(keys_path, self.PUBLIC_KEY),
+            'repos': os.path.join(keys_path, self.REPOS_KEY),
+        }
 
-        if os.path.isfile(private_key) and \
-                os.path.isfile(public_key) and \
-                os.path.isfile(repos_key):
+        all_keys_exist = all(os.path.isfile(path) for path in paths.values())
+
+        if all_keys_exist:
             if get_computer_id and not self._computer_id:
                 self.get_computer_id()
 
             return True  # all OK
 
-        logger.warning('Security keys are not present!!!')
+        missing_keys = [key for key, path in paths.items() if not os.path.isfile(path)]
+        logger.warning('Security keys are not present!!!', ', '.join(missing_keys))
         return self._auto_register()
 
     def _auto_register(self):
@@ -469,11 +472,7 @@ class MigasFreeCommand():
             if _file == 'migasfree-packager.pri':
                 _file = self.PRIVATE_KEY
 
-            path_file = os.path.join(
-                settings.KEYS_PATH,
-                utils.sanitize_path(self.migas_server),
-                _file
-            )
+            path_file = os.path.join(self._get_keys_path(), _file)
             logger.debug('Trying writing file: %s', path_file)
 
             ret = utils.write_file(path_file, str(content))
