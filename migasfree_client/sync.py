@@ -59,7 +59,7 @@ class MigasFreeSync(MigasFreeCommand):
     _pms_status_ok = True  # indicates the status of transactions with PMS
 
     def __init__(self):
-        self._user_is_not_root()
+        self._check_user_is_root()
 
         signal.signal(signal.SIGINT, self._exit_gracefully)
         signal.signal(signal.SIGTERM, self._exit_gracefully)
