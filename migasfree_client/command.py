@@ -458,10 +458,7 @@ class MigasFreeCommand():
 
             return False
 
-        if not self._check_path(os.path.join(
-                os.path.abspath(settings.KEYS_PATH),
-                utils.sanitize_path(self.migas_server)
-        )):
+        if not self._check_path(self._get_keys_path()):
             sys.exit(errno.ENOTDIR)
 
         for _file, content in list(response.items()):
