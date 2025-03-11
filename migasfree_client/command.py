@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2013-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -83,6 +83,7 @@ class MigasFreeCommand(object):
     auto_register_password = ''
     auto_register_command = 'register_computer'
     get_key_repositories_command = 'get_key_repositories'
+    get_computer_info_command = 'get_computer_info'
 
     def __init__(self):
         _log_level = logging.INFO
