@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2020 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -143,6 +143,7 @@ setup(
         'bin/migasfree-upload',
         'bin/migasfree-label',
         'bin/migasfree-tags',
+        'bin/migasfree-info',
     ],
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
