@@ -1,5 +1,6 @@
 ../migasfree_client/client.py
 ../migasfree_client/command.py
+../migasfree_client/info.py
 ../migasfree_client/tags.py
 ../migasfree_client/upload.py
 ../migasfree_client/url_request.py
