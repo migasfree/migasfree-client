@@ -157,7 +157,7 @@ class MigasFreeTags(MigasFreeCommand):
 
     def get_assigned_tags(self):
         if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
+            raise PermissionError
 
         if not self._computer_id:
             self.get_computer_id()
@@ -177,13 +177,13 @@ class MigasFreeTags(MigasFreeCommand):
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
+            raise RuntimeError
 
         return response
 
     def get_available_tags(self):
         if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
+            raise PermissionError
 
         if not self._computer_id:
             self.get_computer_id()
@@ -191,9 +191,7 @@ class MigasFreeTags(MigasFreeCommand):
         logger.debug('Getting available tags')
         response = self._url_request.run(
             url=self.api_endpoint(self.URLS['get_available_tags']),
-            data={
-                'id': self._computer_id
-            },
+            data={'id': self._computer_id},
             exit_on_error=False,
             debug=self._debug
         )
@@ -204,13 +202,13 @@ class MigasFreeTags(MigasFreeCommand):
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
+            raise RuntimeError
 
         return response
 
     def set_tags(self):
         if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
+            raise PermissionError
 
         if len(self._tags) == 0 and self._quiet is False:
             self._tags = self._select_tags(
@@ -235,7 +233,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
+            raise RuntimeError
 
         print()
         self.operation_ok(_('Tags setted: %s') % self._tags)
@@ -244,7 +242,7 @@ class MigasFreeTags(MigasFreeCommand):
 
     def _apply_rules(self, rules):
         if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
+            raise PermissionError
 
         mfs = MigasFreeSync()
 
@@ -279,10 +277,19 @@ class MigasFreeTags(MigasFreeCommand):
 
         # actions dispatcher
         if args.get:
-            response = {
-                'assigned': self.get_assigned_tags(),
-                'available': self.get_available_tags()
-            }
+            check_lock_file(self.CMD, self.LOCK_FILE)
+            try:
+                response = {
+                    'assigned': self.get_assigned_tags(),
+                    'available': self.get_available_tags()
+                }
+            except PermissionError:
+                sys.exit(errno.EPERM)
+            except RuntimeError:
+                sys.exit(errno.ENODATA)
+            finally:
+                remove_file(self.LOCK_FILE)
+
             print(json.dumps(response, ensure_ascii=False))
 
             self.end_of_transmission()
@@ -296,10 +303,16 @@ class MigasFreeTags(MigasFreeCommand):
             if not self._quiet:
                 self._show_running_options()
 
-            rules = self.set_tags()
-            if args.set:
-                check_lock_file(self.CMD, self.LOCK_FILE)
-                self._apply_rules(rules)
+            check_lock_file(self.CMD, self.LOCK_FILE)
+            try:
+                rules = self.set_tags()
+                if args.set:
+                    self._apply_rules(rules)
+            except PermissionError:
+                sys.exit(errno.EPERM)
+            except RuntimeError:
+                sys.exit(errno.ENODATA)
+            finally:
                 remove_file(self.LOCK_FILE)
 
             self.end_of_transmission()
