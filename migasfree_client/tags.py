@@ -274,7 +274,10 @@ class MigasFreeTags(MigasFreeCommand):
 
         # actions dispatcher
         if options.get or options.available:
+            utils.check_lock_file(self.CMD, self.LOCK_FILE)
             _response = self._get_tags()
+            utils.remove_file(self.LOCK_FILE)
+
             if options.get:
                 for _item in _response['selected']:
                     print('"{0}"'.format(_item))
