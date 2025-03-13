@@ -49,29 +49,25 @@ class MigasFreeTags(MigasFreeCommand):
     def _usage_examples(self):
         print('\n' + _('Examples:'))
 
-        print('  ' + _('Get tags in server (JSON format):'))
-        print(f'\t{self.CMD} tags -g')
-        print(f'\t{self.CMD} tags --get\n')
-
-        print('  ' + _('Communicate tags to server (command line):'))
-        print(f'\t{self.CMD} tags -c tag...')
-        print(f'\t{self.CMD} tags --communicate tag...\n')
-
-        print('  ' + _('Communicate tags to server (with GUI):'))
-        print(f'\t{self.CMD} tags -c')
-        print(f'\t{self.CMD} tags --communicate\n')
-
-        print('  ' + _('Set tags (command line):'))
-        print(f'\t{self.CMD} tags -s tag...')
-        print(f'\t{self.CMD} tags --set tag...\n')
-
-        print('  ' + _('Set tags (with GUI):'))
-        print(f'\t{self.CMD} tags -s')
-        print(f'\t{self.CMD} tags --set\n')
-
-        print('  ' + _('Unsetting all tags (command line):'))
-        print(f'\t{self.CMD} tags -s ""')
-        print(f'\t{self.CMD} tags --set ""\n')
+        examples = [
+            (_('Get tags in server (JSON format):'),
+                [f'{self.CMD} tags -g', f'{self.CMD} tags --get']),
+            (_('Communicate tags to server (command line):'),
+                [f'{self.CMD} tags -c tag...', f'{self.CMD} tags --communicate tag...']),
+            (_('Communicate tags to server (with GUI):'),
+                [f'{self.CMD} tags -c', f'{self.CMD} tags --communicate']),
+            (_('Set tags (command line):'),
+                [f'{self.CMD} tags -s tag...', f'{self.CMD} tags --set tag...']),
+            (_('Set tags (with GUI):'),
+                [f'{self.CMD} tags -s', f'{self.CMD} tags --set']),
+            (_('Unsetting all tags (command line):'),
+                [f'{self.CMD} tags -s ""', f'{self.CMD} tags --set ""']),
+        ]
+        for title, cmds in examples:
+            print(f'  {title}')
+            for cmd in cmds:
+                print(f'\t{cmd}')
+            print()
 
     def _show_running_options(self):
         super()._show_running_options()
