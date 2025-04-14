@@ -211,7 +211,10 @@ class UrlRequest():
                 verify_key=self._public_key
             )
         else:
-            response = json_response.get('detail', json_response)
+            if isinstance(json_response, dict):
+                response = json_response.get('detail', json_response)
+            else:
+                response = json_response
 
         logger.debug('Response text: %s', response)
 
