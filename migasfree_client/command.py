@@ -397,7 +397,7 @@ class MigasFreeCommand():
             return True  # all OK
 
         missing_keys = [key for key, path in paths.items() if not os.path.isfile(path)]
-        logger.warning('Security keys are not present!!!', ', '.join(missing_keys))
+        logger.warning('Security keys are not present!!! %s', ', '.join(missing_keys))
         return self._auto_register()
 
     def _auto_register(self):
