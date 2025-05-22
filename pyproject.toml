@@ -13,7 +13,8 @@ authors = [
 maintainers = [
   {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
 ]
-license = { text = "GPL-3.0-or-later" }
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 description = "Synchronizes a computer from a migasfree server"
 readme = "README.md"
 keywords = ["migasfree", "systems management", "devops"]
@@ -31,7 +32,6 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: GNU General Public License (GPL)",
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows :: Windows 10",
