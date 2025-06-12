@@ -63,10 +63,11 @@ class MigasFreeInfo(MigasFreeCommand):
         MigasFreeCommand._show_running_options(self)
 
     def _get_computer_info(self):
-        _url = '{0}/{1}/?uuid={2}'.format(
+        _url = '{0}/{1}/?uuid={2}&name={3}'.format(
             self.migas_server,
             self.get_computer_info_command,
-            utils.get_hardware_uuid()
+            utils.get_hardware_uuid(),
+            self.migas_computer_name
         )
         _url = '{0}://{1}'.format('https' if self.migas_ssl_cert else 'http', _url)
 
