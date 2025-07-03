@@ -264,7 +264,7 @@ def get_hostname():
 def get_graphic_pid():
     """
     list get_graphic_pid(void)
-    Detects Gnome, KDE, Xfce, Xfce4, LXDE, LXQt, Unity
+    Detects Gnome, KDE, Xfce, Xfce4, LXDE, LXQt, Unity, MATE, Cinnamon
     """
 
     _graphic_environments = [
@@ -276,6 +276,7 @@ def get_graphic_pid():
         'lxsession',             # LXDE
         'lxqt-session',          # LXQt
         'mate-session',          # MATE
+        'cinnamon-session',      # Cinnamon
     ]
     for _process in _graphic_environments:
         _pid = subprocess.getoutput(f'pidof -s {_process}')
