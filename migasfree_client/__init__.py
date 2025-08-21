@@ -21,28 +21,28 @@ import gettext
 
 from .settings import LOCALE_PATH
 
-__version__ = "4.25"
+__version__ = '4.26'
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-__contact__ = "fun.with@migasfree.org"
-__homepage__ = "https://github.com/migasfree/migasfree-client/"
+__contact__ = 'fun.with@migasfree.org'
+__homepage__ = 'https://github.com/migasfree/migasfree-client/'
 
 # i18n
-domain = 'migasfree-client'
+DOMAIN = 'migasfree-client'
 if sys.version_info[0] <= 2:
-    gettext.install(domain, LOCALE_PATH, unicode=1)
+    gettext.install(DOMAIN, LOCALE_PATH, unicode=1)
 else:
-    gettext.install(domain, LOCALE_PATH)
+    gettext.install(DOMAIN, LOCALE_PATH)
 
-gettext.bindtextdomain(domain, LOCALE_PATH)
+gettext.bindtextdomain(DOMAIN, LOCALE_PATH)
 if hasattr(gettext, 'bind_textdomain_codeset'):
-    gettext.bind_textdomain_codeset(domain, 'UTF-8')
-gettext.textdomain(domain)
+    gettext.bind_textdomain_codeset(DOMAIN, 'UTF-8')
+gettext.textdomain(DOMAIN)
 
-locale.bindtextdomain(domain, LOCALE_PATH)
+locale.bindtextdomain(DOMAIN, LOCALE_PATH)
 if hasattr(locale, 'bind_textdomain_codeset'):
-    locale.bind_textdomain_codeset(domain, 'UTF-8')
-locale.textdomain(domain)
+    locale.bind_textdomain_codeset(DOMAIN, 'UTF-8')
+locale.textdomain(DOMAIN)
 
 # http://www.ianbicking.org/illusive-setdefaultencoding.html
 # begin unicode hack
