@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -62,9 +62,9 @@ def slugify(s):
     for c in [' ', '-', '.', '/']:
         s = s.replace(c, '_')
 
-    s = re.sub('\W', '', s)
+    s = re.sub(r'\W', '', s)
     s = s.replace('_', ' ')
-    s = re.sub('\s+', ' ', s)
+    s = re.sub(r'\s+', ' ', s)
     s = s.strip()
     s = s.replace(' ', '-')
 
@@ -217,6 +217,7 @@ def get_graphic_pid():
         'lxsession',             # LXDE
         'lxqt-session',          # LXQt
         'mate-session',          # MATE
+        'cinnamon-session',      # Cinnamon
     ]
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof -s {0}'.format(_process))
