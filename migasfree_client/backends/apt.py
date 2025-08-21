@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import shutil
 import re
 import logging
+import tempfile
 
 from .pms import Pms
 from migasfree_client.utils import execute, write_file
@@ -37,14 +40,15 @@ class Apt(Pms):
         self._name = 'apt-get'      # Package Management System name
         self._pm = '/usr/bin/dpkg'  # Package Manager command
         self._pms = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get'  # Package Management System command
-        self._repo = '/etc/apt/sources.list.d/migasfree.list'  # Repositories file
+        self._repo_dir = '/etc/apt/sources.list.d'  # Repositories path
 
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'
 
         self._silent_options = '-o APT::Get::Purge=true -o Dpkg::Options::=--force-confdef' \
-            ' -o Dpkg::Options::=--force-confold -o Debug::pkgProblemResolver=1 ' \
-            '--assume-yes --force-yes --allow-unauthenticated --auto-remove'
+            ' -o Dpkg::Options::=--force-confold -o Debug::pkgProblemResolver=1' \
+            ' --assume-yes --allow-downgrades --allow-change-held-packages' \
+            ' --allow-unauthenticated --auto-remove'
 
     def install(self, package):
         """
@@ -197,7 +201,7 @@ class Apt(Pms):
             return []
 
         _packages = _packages.strip().splitlines()
-        _result = list()
+        _result = []
         for _line in _packages:
             if _line.startswith('ii'):
                 _tmp = re.split(' +', _line)
@@ -205,10 +209,104 @@ class Apt(Pms):
 
         return _result
 
+    def _adapt_sources(self, sources_content):
+        """
+        Adds 'Trusted: yes' in each block of sources content if not exists (deb822)
+        Deletes empty 'Signed-By' lines
+        """
+
+        trusted_line = 'Trusted: yes'
+
+        blocks = sources_content.split('\n\n')  # each block separated by empty line
+        new_blocks = []
+
+        for block in blocks:
+            lines = block.splitlines()
+            signed_by_index = None
+            for i, line in enumerate(lines):
+                line_lower = line.lower()
+                if line_lower.startswith('signed-by:'):
+                    value = line[10:].strip()
+                    if not value:
+                        signed_by_index = i
+
+            # If trusted not exists, add to the end
+            if all(not l.lower().startswith('trusted:') for l in lines):
+                lines.append(trusted_line)
+
+            # Delete empty Signed-By line if exists
+            if signed_by_index is not None:
+                lines.pop(signed_by_index)
+
+            new_blocks.append('\n'.join(lines))
+
+        return '\n\n'.join(new_blocks)
+
+    def _convert_list_to_sources(self, list_content):
+        """
+        Converts formated content .list to .sources format using 'apt modernize-sources'
+
+        Returns .sources content as string, or None if it fails
+        """
+
+        # Create temp file .list at _repo_dir
+        fd, list_path = tempfile.mkstemp(prefix='tmp_repo_', suffix='.list', dir=self._repo_dir)
+        os.close(fd)
+
+        try:
+            if not write_file(list_path, list_content):
+                logging.error('Error writing temp file %s', list_path)
+                return None
+
+            cmd = 'yes | apt modernize-sources {0}'.format(list_path)
+            ret, _, err = execute(cmd, interactive=False)
+            if ret != 0:
+                logging.error('apt modernize-sources failed: %s', str(err))
+                return None
+
+            sources_path = list_path[:-5] + ".sources"
+            if not os.path.isfile(sources_path):
+                logging.error('Generated .sources file not found: %s', sources_path)
+                return None
+
+            with open(sources_path) as f:
+                sources_content = f.read()
+
+            return self._adapt_sources(sources_content)
+
+        finally:  # Cleaning temp files
+            if os.path.isfile(list_path):
+                os.remove(list_path)
+
+            sources_path = list_path[:-5] + '.sources'
+            if os.path.isfile(sources_path):
+                os.remove(sources_path)
+
+            backup_path = list_path + '.bak'
+            if os.path.isfile(backup_path):
+                os.remove(backup_path)
+
     def create_repos(self, protocol, server, project, repositories, template=''):
         """
         bool create_repos(string protocol, string server, string project, list repositories, string template='')
         """
+
+        base_url = template.format(server=server, project=project, protocol=protocol)
+
+        # Detect APT version (if fails, default to 2.x for compatibility)
+        apt_version_cmd = "apt --version | head -n1 | awk '{print $2}'"
+        ret, out, _ = execute(apt_version_cmd, interactive=False)
+        apt_version = out.strip() if ret == 0 else '2.0'
+        logging.debug('Detected APT version: %s', apt_version)
+
+        # Choose format by version
+        use_sources_format = False
+        try:
+            major = int(apt_version.split('.')[0])
+            if major >= 3:
+                use_sources_format = True
+        except Exception:
+            pass
 
         content = ''
         for repo in repositories:
@@ -219,21 +317,53 @@ class Apt(Pms):
                     protocol=protocol
                 )
             else:
-                content += 'deb {0} {repo} PKGS\n'.format(
-                    template.format(server=server, project=project),
+                content += 'deb {url} {repo} PKGS\n'.format(
+                    url=base_url,
                     repo=repo['name']
                 )
 
-        return write_file(self._repo, content)
+        if use_sources_format:
+            content = self._convert_list_to_sources(content)
+            repo_file = os.path.join(self._repo_dir, 'migasfree.sources')
+            logging.debug('Creating repos (apt 3.x .sources): %s', repo_file)
+        else:
+            repo_file = os.path.join(self._repo_dir, 'migasfree.list')
+            logging.debug('Creating repos (apt 2.x .list): %s', repo_file)
+
+        return write_file(repo_file, content)
 
     def import_server_key(self, file_key):
         """
         bool import_server_key(string file_key)
         """
 
-        self._cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {0} >/dev/null'.format(file_key)
-        logging.debug(self._cmd)
-        return execute(self._cmd)[0] == 0
+        if shutil.which('apt-key'):
+            self._cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {0} >/dev/null'.format(file_key)
+            logging.debug(self._cmd)
+            return execute(self._cmd)[0] == 0
+
+        # try with gpg --dearmor (APT 3.0+)
+        keyring_dir = '/etc/apt/keyrings'
+        try:
+            if not os.path.exists(keyring_dir):
+                os.makedirs(keyring_dir)
+
+            key_dest = os.path.join(keyring_dir, '{0}.gpg'.format(os.path.basename(file_key)))
+
+            self._cmd = 'gpg --dearmor < {0} > {1}'.format(file_key, key_dest)
+            logging.debug(self._cmd)
+
+            ret, _, err = execute(self._cmd, interactive=False)
+            if ret == 0:
+                logging.debug('Imported key with gpg --dearmor at %s', key_dest)
+                return True
+
+            logging.warning('Error gpg --dearmor: %s', err)
+            return False
+
+        except Exception as e:
+            logging.error('Error in import_server_key with gpg: %s', str(e))
+            return False
 
     def available_packages(self):
         """
