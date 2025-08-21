@@ -42,11 +42,30 @@ VERSION = __import__('migasfree_client').__version__
 import glob
 import subprocess
 
-from distutils.core import setup
-from distutils.command.build import build
-from distutils.command.install_data import install_data
-from distutils.log import info, error
-from distutils.dep_util import newer
+try:
+    from setuptools import setup
+    from setuptools.command.build_py import build_py as build
+    from setuptools.command.install_data import install_data
+    from setuptools import find_packages
+    USING_SETUPTOOLS = True
+except ImportError:
+    from distutils.core import setup
+    from distutils.command.build import build
+    from distutils.command.install_data import install_data
+    USING_SETUPTOOLS = False
+
+try:
+    from distutils.log import info, error
+    from distutils.dep_util import newer
+except ImportError:
+    import logging
+    info = error = logging.getLogger(__name__).info
+
+    def newer(source, target):
+        try:
+            return os.path.getmtime(source) > os.path.getmtime(target)
+        except OSError:
+            return True  # if target not exist, source is newer
 
 PO_DIR = 'po'
 MO_DIR = os.path.join('build', 'mo')
