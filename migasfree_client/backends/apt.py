@@ -232,7 +232,7 @@ class Apt(Pms):
                         signed_by_index = i
 
             # If trusted not exists, add to the end
-            if all(not l.lower().startswith('trusted:') for l in lines):
+            if all(not line.lower().startswith('trusted:') for line in lines):
                 lines.append(trusted_line)
 
             # Delete empty Signed-By line if exists
