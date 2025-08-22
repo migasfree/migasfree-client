@@ -37,10 +37,11 @@ class Apt(Pms):
     def __init__(self):
         Pms.__init__(self)
 
-        self._name = 'apt-get'      # Package Management System name
+        self._name = 'apt-get'  # Package Management System name
         self._pm = '/usr/bin/dpkg'  # Package Manager command
         self._pms = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get'  # Package Management System command
         self._repo_dir = '/etc/apt/sources.list.d'  # Repositories path
+        self._keyring_dir = '/etc/apt/trusted.gpg.d'
 
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'
@@ -258,7 +259,7 @@ class Apt(Pms):
                 logging.error('Error writing temp file %s', list_path)
                 return None
 
-            cmd = 'yes | apt modernize-sources {0}'.format(list_path)
+            cmd = 'yes | {0} modernize-sources {1}'.format(self._pms, list_path)
             ret, _, err = execute(cmd, interactive=False)
             if ret != 0:
                 logging.error('apt modernize-sources failed: %s', str(err))
@@ -292,22 +293,6 @@ class Apt(Pms):
         """
 
         base_url = template.format(server=server, project=project, protocol=protocol)
-
-        # Detect APT version (if fails, default to 2.x for compatibility)
-        apt_version_cmd = "apt --version | head -n1 | awk '{print $2}'"
-        ret, out, _ = execute(apt_version_cmd, interactive=False)
-        apt_version = out.strip() if ret == 0 else '2.0'
-        logging.debug('Detected APT version: %s', apt_version)
-
-        # Choose format by version
-        use_sources_format = False
-        try:
-            major = int(apt_version.split('.')[0])
-            if major >= 3:
-                use_sources_format = True
-        except Exception:
-            pass
-
         content = ''
         for repo in repositories:
             if 'source_template' in repo:
@@ -322,15 +307,25 @@ class Apt(Pms):
                     repo=repo['name']
                 )
 
-        if use_sources_format:
-            content = self._convert_list_to_sources(content)
-            repo_file = os.path.join(self._repo_dir, 'migasfree.sources')
-            logging.debug('Creating repos (apt 3.x .sources): %s', repo_file)
-        else:
-            repo_file = os.path.join(self._repo_dir, 'migasfree.list')
-            logging.debug('Creating repos (apt 2.x .list): %s', repo_file)
+        # Detect APT version (if fails, default to 2.x for compatibility)
+        apt_version_cmd = "{0} --version | head -n1 | awk '{{print $2}}'".format(self._pms)
+        ret, out, _ = execute(apt_version_cmd, interactive=False)
+        apt_version = out.strip() if ret == 0 else '2.0'
+        logging.debug('Detected APT version: %s', apt_version)
 
-        return write_file(repo_file, content)
+        # Choose format by APT version
+        self._repo = os.path.join(self._repo_dir, 'migasfree.list')
+        try:
+            major = int(apt_version.split('.')[0])
+            if major >= 3:
+                content = self._convert_list_to_sources(content)
+                self._repo = os.path.join(self._repo_dir, 'migasfree.sources')
+        except Exception:
+            pass
+
+        logging.debug('Creating repos: %s', self._repo)
+
+        return write_file(self._repo, content)
 
     def import_server_key(self, file_key):
         """
@@ -343,12 +338,11 @@ class Apt(Pms):
             return execute(self._cmd)[0] == 0
 
         # try with gpg --dearmor (APT 3.0+)
-        keyring_dir = '/etc/apt/keyrings'
         try:
-            if not os.path.exists(keyring_dir):
-                os.makedirs(keyring_dir)
+            if not os.path.exists(self._keyring_dir):
+                os.makedirs(self._keyring_dir)
 
-            key_dest = os.path.join(keyring_dir, '{0}.gpg'.format(os.path.basename(file_key)))
+            key_dest = os.path.join(self._keyring_dir, '{0}.gpg'.format(os.path.basename(file_key)))
 
             self._cmd = 'gpg --dearmor < {0} > {1}'.format(file_key, key_dest)
             logging.debug(self._cmd)
