@@ -30,6 +30,8 @@ __license__ = 'GPLv3'
 # TODO https://help.ubuntu.com/community/PythonRecipes/DebianPackage
 
 import sys
+import glob
+import subprocess
 
 if not hasattr(sys, 'version_info') or sys.version_info < (2, 6, 0, 'final'):
     raise SystemExit('migasfree-client requires Python 2.6 or later.')
@@ -38,9 +40,6 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__))
 README = open(os.path.join(PATH, 'README')).read()
 VERSION = __import__('migasfree_client').__version__
-
-import glob
-import subprocess
 
 try:
     from setuptools import setup
@@ -165,8 +164,6 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
-        'Environment :: X11 Applications :: Gnome',
-        'Environment :: X11 Applications :: KDE',
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
