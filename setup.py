@@ -46,13 +46,10 @@ try:
     from setuptools import setup
     from setuptools.command.build_py import build_py as build
     from setuptools.command.install_data import install_data
-    from setuptools import find_packages
-    USING_SETUPTOOLS = True
 except ImportError:
     from distutils.core import setup
     from distutils.command.build import build
     from distutils.command.install_data import install_data
-    USING_SETUPTOOLS = False
 
 try:
     from distutils.log import info, error
