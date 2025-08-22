@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@ from .settings import LOCALE_PATH
 
 builtins._ = gettext.gettext
 
-__version__ = "5.0"
+__version__ = '5.0'
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-__contact__ = "fun.with@migasfree.org"
-__homepage__ = "https://github.com/migasfree/migasfree-client/"
+__contact__ = 'fun.with@migasfree.org'
+__homepage__ = 'https://github.com/migasfree/migasfree-client/'
 
 # i18n
 DOMAIN = 'migasfree-client'
