@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,9 +40,22 @@ import logging
 # set DISTUTILS_DEBUG as environment variable to get debug info
 
 from setuptools import setup, find_packages
-from distutils.command.build import build
-from distutils.command.install_data import install_data
-from distutils.dep_util import newer
+
+try:
+    from setuptools.command.build_py import build_py as build
+    from setuptools.command.install_data import install_data
+except ImportError:
+    from distutils.command.build import build
+    from distutils.command.install_data import install_data
+
+try:
+    from distutils.dep_util import newer
+except ImportError:
+    def newer(source, target):
+        try:
+            return os.path.getmtime(source) > os.path.getmtime(target)
+        except OSError:
+            return True  # if target not exist, source is newer
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(PATH, 'README.md'), encoding='utf_8') as f:
