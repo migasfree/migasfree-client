@@ -491,19 +491,19 @@ class MigasFreeCommand():
         logger.debug('Trying writing file: %s', path_file)
 
         ret = utils.write_file(path_file, response)
-        if ret:
-            if self.pms.import_server_key(path_file):
-                print(_('Key %s created!') % path_file)
-            else:
-                print(_('ERROR: not import key: %s!') % path_file)
+        if not ret:
+            msg = _('Error writing key file!!!')
+            self.operation_failed(msg)
+            logger.error(msg)
 
-            return True
+            return False
 
-        msg = _('Error writing key file!!!')
-        self.operation_failed(msg)
-        logger.error(msg)
+        if self.pms.import_server_key(path_file):
+            print(_('Key %s created!') % path_file)
+        else:
+            print(_('ERROR: not import key: %s!') % path_file)
 
-        return False
+        return True
 
     def cmd_register_computer(self, user=None):
         carry_on = utils.query_yes_no(
