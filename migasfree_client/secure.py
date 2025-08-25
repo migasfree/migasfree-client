@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 import json
+import logging
 
 from gettext import gettext
 
@@ -27,21 +28,42 @@ from jwcrypto.common import json_encode
 
 from .utils import read_file
 
+ALG_SIGN = 'RS256'
+ALG_ENC = 'RSA-OAEP-256'
+ENC_CONTENT = 'A256CBC-HS512'
+TYPE_JWE = 'JWE'
+
+logger = logging.getLogger('migasfree_client')
+
+
+def load_jwk(filename):
+    """
+    Loads a JWK from a PEM file
+
+    Args:
+        filename (str)
+
+    Returns:
+        jwk.JWK: loaded JWK object
+    """
+    return jwk.JWK.from_pem(read_file(filename))
+
 
 def sign(claims, priv_key):
     """
     string sign(dict claims, string priv_key)
     """
-    priv_jwk = jwk.JWK.from_pem(read_file(priv_key))
+    priv_jwk = load_jwk(priv_key)
 
-    if isinstance(claims, dict):
-        claims = json.dumps(claims)
+    # Normalize to JSON string
+    payload = json.dumps(claims) if isinstance(claims, dict) else claims
+    payload_bytes = payload.encode('utf-8')
 
-    jws_token = jws.JWS(str(claims))
+    jws_token = jws.JWS(payload_bytes)
     jws_token.add_signature(
         priv_jwk,
         header=json_encode({
-            'alg': 'RS256',
+            'alg': ALG_SIGN,
             'kid': priv_jwk.thumbprint()
         })
     )
@@ -53,7 +75,7 @@ def verify(jwt, pub_key):
     """
     dict verify(string jwt, string pub_key)
     """
-    pub_jwk = jwk.JWK.from_pem(read_file(pub_key))
+    pub_jwk = load_jwk(pub_key)
 
     jws_token = jws.JWS()
     jws_token.deserialize(jwt)
@@ -66,16 +88,16 @@ def encrypt(claims, pub_key):
     """
     string encrypt(dict claims, string pub_key)
     """
-    pub_jwk = jwk.JWK.from_pem(read_file(pub_key))
+    pub_jwk = load_jwk(pub_key)
 
     protected_header = {
-        'alg': 'RSA-OAEP-256',
-        'enc': 'A256CBC-HS512',
-        'typ': 'JWE',
+        'alg': ALG_ENC,
+        'enc': ENC_CONTENT,
+        'typ': TYPE_JWE,
         'kid': pub_jwk.thumbprint(),
     }
     jwe_token = jwe.JWE(
-        json.dumps(claims),
+        json.dumps(claims).encode('utf-8'),
         recipient=pub_jwk,
         protected=protected_header
     )
@@ -87,16 +109,13 @@ def decrypt(jwt, priv_key):
     """
     string decrypt(string jwt, string priv_key)
     """
-    priv_jwk = jwk.JWK.from_pem(read_file(priv_key))
+    priv_jwk = load_jwk(priv_key)
 
     jwe_token = jwe.JWE()
     jwe_token.deserialize(jwt, key=priv_jwk)
+    payload = jwe_token.payload
 
-    if isinstance(jwe_token.payload, bytes) \
-            and not isinstance(jwe_token.payload, str):
-        return str(jwe_token.payload, encoding='utf8')
-
-    return jwe_token.payload
+    return payload.decode('utf-8') if isinstance(payload, bytes) else str(payload)
 
 
 def wrap(data, sign_key, encrypt_key):
@@ -117,15 +136,18 @@ def unwrap(data, decrypt_key, verify_key):
     """
     try:
         jwt = json.loads(decrypt(data, decrypt_key))
-    except jwe.InvalidJWEData:
+    except jwe.InvalidJWEData as e:
+        logger.debug('exception: %s', str(e))
+        logger.debug('data: %s', data)
+        logger.debug('decrypt key: %s', decrypt_key)
         return gettext('Invalid Data')
 
     try:
         jws_token = verify(jwt['sign'], verify_key)
-    except jws.InvalidJWSSignature:
+    except jws.InvalidJWSSignature as e:
+        logger.debug('exception: %s', str(e))
+        logger.debug('sign: %s', jwt['sign'])
+        logger.debug('verify key: %s', verify_key)
         return gettext('Invalid Signature')
 
-    if jws_token:
-        return jwt['data']
-
-    return None
+    return jwt['data'] if jws_token else None
