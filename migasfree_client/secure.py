@@ -57,7 +57,7 @@ def sign(claims, priv_key):
 
     # Normalize to JSON string
     payload = json.dumps(claims) if isinstance(claims, dict) else claims
-    payload_bytes = payload.encode('utf-8')
+    payload_bytes = str(payload).encode('utf-8')
 
     jws_token = jws.JWS(payload_bytes)
     jws_token.add_signature(
