@@ -237,13 +237,14 @@ class Apt(Pms):
                 logging.error('Error writing temp file %s', list_path)
                 return ''
 
-            cmd = 'yes | {0} modernize-sources {1}'.format(self._pms, list_path)
+            cmd = f'yes | /usr/bin/apt modernize-sources {list_path}'
+            logging.debug(cmd)
             ret, _, err = execute(cmd, interactive=False)
             if ret != 0:
                 logging.error('apt modernize-sources failed: %s', str(err))
                 return ''
 
-            sources_path = list_path[:-5] + ".sources"
+            sources_path = list_path[:-5] + '.sources'
             if not os.path.isfile(sources_path):
                 logging.error('Generated .sources file not found: %s', sources_path)
                 return ''
