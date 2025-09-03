@@ -31,7 +31,6 @@ from . import (
     utils,
     url_request,
     printcolor,
-    curl
 )
 
 from .backends import Pms
@@ -41,7 +40,7 @@ _ = gettext.gettext
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-__all__ = 'MigasFreeCommand'
+__all__ = ['MigasFreeCommand']
 
 # implicit print flush
 buf_arg = 0
@@ -66,7 +65,6 @@ class MigasFreeCommand(object):
 
     PUBLIC_KEY = 'server.pub'
     PRIVATE_KEY = ''
-    REPOS_KEY = 'repositories.pub'
 
     ICON = 'apps/migasfree.svg'
     ICON_COMPLETED = 'actions/migasfree-ok.svg'
@@ -279,12 +277,8 @@ class MigasFreeCommand(object):
         _public_key = os.path.join(
             settings.KEYS_PATH, self.migas_server, self.PUBLIC_KEY
         )
-        _repos_key = os.path.join(
-            settings.KEYS_PATH, self.migas_server, self.REPOS_KEY
-        )
         if os.path.isfile(_private_key) and \
-                os.path.isfile(_public_key) and \
-                os.path.isfile(_repos_key):
+                os.path.isfile(_public_key):
             return True  # all OK
 
         logging.warning('Security keys are not present!!!')
@@ -349,50 +343,6 @@ class MigasFreeCommand(object):
                 self.operation_failed(_msg)
                 logging.error(_msg)
                 return False
-
-        # Repositories key
-        return self._save_repos_key()
-
-    def _save_repos_key(self):
-        _url = '{0}/{1}'.format(
-            self.migas_server,
-            self.get_key_repositories_command
-        )
-        if self.migas_ssl_cert:
-            _url = '{0}://{1}'.format('https', _url)
-        else:
-            _url = '{0}://{1}'.format('http', _url)
-
-        _curl = curl.Curl(
-            _url,
-            proxy=self.migas_proxy,
-            cert=self.migas_ssl_cert,
-        )
-        _curl.run()
-
-        _response = str(_curl.body)
-
-        logging.debug('Response _save_repos_key: %s', _response)
-
-        _path = os.path.abspath(
-            os.path.join(settings.KEYS_PATH, self.migas_server)
-        )
-        if not self._check_path(_path):
-            return False
-
-        _path_file = os.path.join(_path, self.REPOS_KEY)
-        logging.debug('Trying writing file: %s', _path_file)
-        _ret = utils.write_file(_path_file, _response)
-        if _ret:
-            if self.pms.import_server_key(_path_file):
-                print(_('Key %s created!') % _path_file)
-            else:
-                print(_('ERROR: not import key: %s!') % _path_file)
-        else:
-            _msg = _('Error writing key file!!!')
-            self.operation_failed(_msg)
-            logging.error(_msg)
-            return False
 
         return True
 
