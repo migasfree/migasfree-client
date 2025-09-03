@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -306,6 +306,47 @@ class MigasFreeClient(MigasFreeCommand):
 
         return _response
 
+    def _get_repos_key(self):
+        _url = '{0}/{1}'.format(
+            self.migas_server,
+            self.get_key_repositories_command
+        )
+        if self.migas_ssl_cert:
+            _url = '{0}://{1}'.format('https', _url)
+        else:
+            _url = '{0}://{1}'.format('http', _url)
+
+        self._send_message(_('Getting repositories key...'))
+        _curl = curl.Curl(
+            _url,
+            proxy=self.migas_proxy,
+            cert=self.migas_ssl_cert,
+        )
+        _curl.run()
+
+        _response = str(_curl.body)
+
+        logging.debug('Response _get_repos_key: %s', _response)
+
+        _path_file = os.path.join(settings.TMP_PATH, self.migas_server)
+        logging.debug('Trying writing file: %s', _path_file)
+        _ret = utils.write_file(_path_file, _response)
+        if _ret:
+            if self.pms.import_server_key(_path_file):
+                self.operation_ok()
+            else:
+                _msg = _('ERROR: not import repositories key: %s!') % _path_file
+                self.operation_failed(_msg)
+                logging.error(_msg)
+                return False
+        else:
+            _msg = _('Error writing repositories key file!!!')
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            return False
+
+        return True
+
     def _get_attributes(self):
         """
         get properties and returns attributes to send
@@ -605,6 +646,9 @@ class MigasFreeClient(MigasFreeCommand):
             logging.debug('Server response: %s', _request_faults)
 
         _software_before = self._software_inventory()
+
+        if not self._get_repos_key():
+            sys.exit(errno.EPERM)
 
         self._create_repositories(_request.get('repositories', []))
 
