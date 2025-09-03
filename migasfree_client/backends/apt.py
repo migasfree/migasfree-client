@@ -21,8 +21,8 @@ import re
 import logging
 import tempfile
 
-from .pms import Pms
 from migasfree_client.utils import execute, write_file
+from .pms import Pms
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -210,40 +210,37 @@ class Apt(Pms):
 
         return _result
 
-    def _adapt_sources(self, sources_content):
+    def _adapt_sources(self, sources_content, server):
         """
         Adds 'Trusted: yes' in each block of sources content if not exists (deb822)
         Deletes empty 'Signed-By' lines
         """
 
-        trusted_line = 'Trusted: yes'
+        signed_by_line = 'Signed-By: {0}'.format(
+            os.path.join(self._keyring_dir, '{0}.gpg'.format(server))
+        )
 
         blocks = sources_content.split('\n\n')  # each block separated by empty line
         new_blocks = []
 
         for block in blocks:
             lines = block.splitlines()
-            signed_by_index = None
             for i, line in enumerate(lines):
                 line_lower = line.lower()
                 if line_lower.startswith('signed-by:'):
                     value = line[10:].strip()
                     if not value:
-                        signed_by_index = i
+                        lines[i] = signed_by_line
 
-            # If trusted not exists, add to the end
-            if all(not line.lower().startswith('trusted:') for line in lines):
-                lines.append(trusted_line)
-
-            # Delete empty Signed-By line if exists
-            if signed_by_index is not None:
-                lines.pop(signed_by_index)
+            # if signed-by not exists, add to the end
+            if all(not line.lower().startswith('signed-by:') for line in lines):
+                lines.append(signed_by_line)
 
             new_blocks.append('\n'.join(lines))
 
         return '\n\n'.join(new_blocks)
 
-    def _convert_list_to_sources(self, list_content):
+    def _convert_list_to_sources(self, list_content, server):
         """
         Converts formated content .list to .sources format using 'apt modernize-sources'
 
@@ -274,7 +271,7 @@ class Apt(Pms):
             with open(sources_path) as f:
                 sources_content = f.read()
 
-            return self._adapt_sources(sources_content)
+            return self._adapt_sources(sources_content, server)
 
         finally:  # Cleaning temp files
             if os.path.isfile(list_path):
@@ -319,7 +316,7 @@ class Apt(Pms):
         try:
             major = int(apt_version.split('.')[0])
             if major >= 3:
-                content = self._convert_list_to_sources(content)
+                content = self._convert_list_to_sources(content, server)
                 self._repo = os.path.join(self._repo_dir, 'migasfree.sources')
         except Exception:
             pass
