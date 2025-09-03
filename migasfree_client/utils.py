@@ -420,10 +420,10 @@ def query_yes_no(question, default="yes"):
             choice = input().lower()
         if default is not None and choice == '':
             return default
-        elif choice in valid.keys():
+        if choice in valid.keys():
             return valid[choice]
-        else:
-            print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
+
+        print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
 
 
 def check_lock_file(cmd, lock_file):
