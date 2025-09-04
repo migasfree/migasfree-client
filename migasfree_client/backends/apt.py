@@ -94,13 +94,13 @@ class Apt(Pms):
             self._silent_options
         )
         logging.debug(self._cmd)
-        _ret, _, _error = execute(
+        _ret, _output, _error = execute(
             self._cmd,
             interactive=False,
             verbose=True
         )
 
-        return _ret == 0, _error
+        return _ret == 0, _output + _error
 
     def install_silent(self, package_set):
         """
@@ -123,13 +123,13 @@ class Apt(Pms):
             ' '.join(package_set)
         )
         logging.debug(self._cmd)
-        _ret, _, _error = execute(
+        _ret, _output, _error = execute(
             self._cmd,
             interactive=False,
             verbose=True
         )
 
-        return _ret == 0, _error
+        return _ret == 0, _output + _error
 
     def remove_silent(self, package_set):
         """
@@ -152,13 +152,13 @@ class Apt(Pms):
             ' '.join(package_set)
         )
         logging.debug(self._cmd)
-        _ret, _, _error = execute(
+        _ret, _output, _error = execute(
             self._cmd,
             interactive=False,
             verbose=True
         )
 
-        return _ret == 0, _error
+        return _ret == 0, _output + _error
 
     def is_installed(self, package):
         """
