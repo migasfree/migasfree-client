@@ -212,8 +212,7 @@ class Apt(Pms):
 
     def _adapt_sources(self, sources_content, server):
         """
-        Adds 'Trusted: yes' in each block of sources content if not exists (deb822)
-        Deletes empty 'Signed-By' lines
+        Adds 'Signed-By: <key>' in each block of sources content if not exists (deb822)
         """
 
         signed_by_line = 'Signed-By: {0}'.format(
