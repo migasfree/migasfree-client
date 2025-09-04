@@ -217,6 +217,42 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response
 
+    def get_repos_key(self):
+        self._show_message(_('Getting repositories key...'))
+
+        response = self._url_request.run(
+            url=self.api_endpoint(self.URLS['get_repositories_keys']),
+            safe=False,
+            exit_on_error=False,
+            debug=self._debug
+        )
+        logger.debug('Response get_repos_key: %s', response)
+
+        path = settings.TMP_PATH
+        if not self._check_path(path):
+            return False
+
+        path_file = os.path.join(path, utils.sanitize_path(self.migas_server))
+        logger.debug('Trying writing file: %s', path_file)
+
+        ret = utils.write_file(path_file, response)
+        if not ret:
+            msg = _('Error writing key file!!!')
+            self.operation_failed(msg)
+            logger.error(msg)
+
+            return False
+
+        if self.pms.import_server_key(path_file):
+            self.operation_ok()
+        else:
+            _msg = _('ERROR: not import repositories key: %s!') % path_file
+            self.operation_failed(_msg)
+            logging.error(_msg)
+            return False
+
+        return True
+
     def get_properties(self):
         if not self._computer_id:
             self.get_computer_id()
@@ -271,6 +307,9 @@ class MigasFreeSync(MigasFreeCommand):
     def get_repositories(self):
         if not self._computer_id:
             self.get_computer_id()
+
+        if not self.get_repos_key():
+            sys.exit(errno.EPERM)
 
         self._show_message(_('Getting repositories...'))
         with self.console.status(''):
