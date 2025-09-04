@@ -285,6 +285,18 @@ class Apt(Pms):
             if os.path.isfile(backup_path):
                 os.remove(backup_path)
 
+    def _get_pms_version(self):
+        """
+        Detects APT version (if fails, default to 2.x for compatibility)
+        """
+
+        cmd = "{0} --version | head -n1 | awk '{{print $2}}'".format(self._pms)
+        ret, out, _ = execute(cmd, interactive=False)
+        apt_version = out.strip() if ret == 0 else '2.0'
+        logging.debug('Detected APT version: %s', apt_version)
+
+        return tuple(int(x) for x in apt_version.split('.'))
+
     def create_repos(self, protocol, server, project, repositories, template=''):
         """
         bool create_repos(string protocol, string server, string project, list repositories, string template='')
@@ -305,17 +317,11 @@ class Apt(Pms):
                     repo=repo['name']
                 )
 
-        # Detect APT version (if fails, default to 2.x for compatibility)
-        apt_version_cmd = "{0} --version | head -n1 | awk '{{print $2}}'".format(self._pms)
-        ret, out, _ = execute(apt_version_cmd, interactive=False)
-        apt_version = out.strip() if ret == 0 else '2.0'
-        logging.debug('Detected APT version: %s', apt_version)
-
         # Choose format by APT version
         self._repo = os.path.join(self._repo_dir, 'migasfree.list')
         try:
-            major = int(apt_version.split('.')[0])
-            if major >= 3:
+            apt_version = self._get_pms_version()
+            if apt_version[0] >= 3:
                 content = self._convert_list_to_sources(content, server)
                 self._repo = os.path.join(self._repo_dir, 'migasfree.sources')
         except Exception:
@@ -330,32 +336,34 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        if shutil.which('apt-key'):
+        apt_version = self._get_pms_version()
+        if apt_version and apt_version >= (2, 1):
+            # try with gpg --dearmor
+            try:
+                if not os.path.exists(self._keyring_dir):
+                    os.makedirs(self._keyring_dir)
+
+                key_dest = os.path.join(self._keyring_dir, '{0}.gpg'.format(os.path.basename(file_key)))
+
+                self._cmd = 'gpg --dearmor < {0} > {1}'.format(file_key, key_dest)
+                logging.debug(self._cmd)
+
+                ret, _, err = execute(self._cmd, interactive=False)
+                if ret == 0:
+                    logging.debug('Imported key with gpg --dearmor at %s', key_dest)
+                    return True
+
+                logging.warning('Error gpg --dearmor: %s', err)
+                return False
+
+            except Exception as e:
+                logging.error('Error in import_server_key with gpg: %s', str(e))
+                return False
+
+        elif shutil.which('apt-key'):
             self._cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {0} >/dev/null'.format(file_key)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
-
-        # try with gpg --dearmor (APT 3.0+)
-        try:
-            if not os.path.exists(self._keyring_dir):
-                os.makedirs(self._keyring_dir)
-
-            key_dest = os.path.join(self._keyring_dir, '{0}.gpg'.format(os.path.basename(file_key)))
-
-            self._cmd = 'gpg --dearmor < {0} > {1}'.format(file_key, key_dest)
-            logging.debug(self._cmd)
-
-            ret, _, err = execute(self._cmd, interactive=False)
-            if ret == 0:
-                logging.debug('Imported key with gpg --dearmor at %s', key_dest)
-                return True
-
-            logging.warning('Error gpg --dearmor: %s', err)
-            return False
-
-        except Exception as e:
-            logging.error('Error in import_server_key with gpg: %s', str(e))
-            return False
 
     def available_packages(self):
         """
