@@ -21,7 +21,7 @@ import logging
 import tempfile
 
 from .pms import Pms
-from ..utils import execute, write_file
+from ..utils import execute, write_file, sanitize_path
 from ..settings import KEYS_PATH
 
 __author__ = 'Jose Antonio Chavarría'
@@ -33,7 +33,7 @@ logger = logging.getLogger('migasfree_client')
 @Pms.register('Apt')
 class Apt(Pms):
     """
-    PMS for apt based systems (Debian, Ubuntu, Mint, ...)
+    PMS for apt based systems (Debian, Ubuntu, Mint, Zorin, ...)
     """
 
     def __init__(self):
@@ -99,9 +99,9 @@ class Apt(Pms):
         cmd = f'{self._pms} {self._silent_options} dist-upgrade'
         logger.debug(cmd)
 
-        ret, _, error = execute(cmd, interactive=False, verbose=True)
+        ret, output, error = execute(cmd, interactive=False, verbose=True)
 
-        return ret == 0, error
+        return ret == 0, f'{output}{error}'
 
     def install_silent(self, package_set):
         """
@@ -118,9 +118,9 @@ class Apt(Pms):
         cmd = f'{self._pms} {self._silent_options} install {" ".join(package_set)}'
         logger.debug(cmd)
 
-        ret, _, error = execute(cmd, interactive=False, verbose=True)
+        ret, output, error = execute(cmd, interactive=False, verbose=True)
 
-        return ret == 0, error
+        return ret == 0, f'{output}{error}'
 
     def remove_silent(self, package_set):
         """
@@ -137,9 +137,9 @@ class Apt(Pms):
         cmd = f'{self._pms} {self._silent_options} purge {" ".join(package_set)}'
         logger.debug(cmd)
 
-        ret, _, error = execute(cmd, interactive=False, verbose=True)
+        ret, output, error = execute(cmd, interactive=False, verbose=True)
 
-        return ret == 0, error
+        return ret == 0, f'{output}{error}'
 
     def is_installed(self, package):
         """
@@ -188,40 +188,35 @@ class Apt(Pms):
 
         return result
 
-    def _adapt_sources(self, sources_content):
+    def _adapt_sources(self, sources_content, server):
         """
-        Adds 'Trusted: yes' in each block of sources content if not exists (deb822)
-        Deletes empty 'Signed-By' lines
+        Adds 'Signed-By: <key>' in each block of sources content if not exists (deb822)
         """
 
-        trusted_line = 'Trusted: yes'
+        key_path = os.path.join(self._keyring_dir, f'{sanitize_path(server)}.gpg')
+        signed_by_line = f'Signed-By: {key_path}'
 
         blocks = sources_content.split('\n\n')  # each block separated by empty line
         new_blocks = []
 
         for block in blocks:
             lines = block.splitlines()
-            signed_by_index = None
             for i, line in enumerate(lines):
                 line_lower = line.lower()
                 if line_lower.startswith('signed-by:'):
                     value = line[10:].strip()
                     if not value:
-                        signed_by_index = i
+                        lines[i] = signed_by_line
 
-            # If trusted not exists, add to the end
-            if all(not line.lower().startswith('trusted:') for line in lines):
-                lines.append(trusted_line)
-
-            # Delete empty Signed-By line if exists
-            if signed_by_index is not None:
-                lines.pop(signed_by_index)
+            # if signed-by not exists, add to the end
+            if all(not line.lower().startswith('signed-by:') for line in lines):
+                lines.append(signed_by_line)
 
             new_blocks.append('\n'.join(lines))
 
         return '\n\n'.join(new_blocks)
 
-    def _convert_list_to_sources(self, list_content):
+    def _convert_list_to_sources(self, list_content, server):
         """
         Converts formated content .list to .sources format using 'apt modernize-sources'
 
@@ -252,7 +247,7 @@ class Apt(Pms):
             with open(sources_path) as f:
                 sources_content = f.read()
 
-            return self._adapt_sources(sources_content)
+            return self._adapt_sources(sources_content, server)
 
         finally:  # Cleaning temp files
             if os.path.isfile(list_path):
@@ -266,6 +261,18 @@ class Apt(Pms):
             if os.path.isfile(backup_path):
                 os.remove(backup_path)
 
+    def _get_pms_version(self):
+        """
+        Detects APT version (if fails, default to 2.x for compatibility)
+        """
+
+        cmd = f"{self._pms} --version | head -n1 | awk '{{print $2}}'"
+        ret, out, _ = execute(cmd, interactive=False)
+        apt_version = out.strip() if ret == 0 else '2.0'
+        logging.debug('Detected APT version: %s', apt_version)
+
+        return tuple(int(x) for x in apt_version.split('.'))
+
     def create_repos(self, protocol, server, repositories):
         """
         bool create_repos(string protocol, string server, list repositories)
@@ -275,20 +282,12 @@ class Apt(Pms):
             f"{repo.get('source_template').format(protocol=protocol, server=server)}" for repo in repositories
         )
 
-        # Detect APT version (if fails, default to 2.x for compatibility)
-        cmd = f"{self._pms} --version | head -n1 | awk '{{print $2}}'"
-        logger.debug(cmd)
-
-        ret, output, _ = execute(cmd, interactive=False)
-        apt_version = output.strip() if ret == 0 else '2.0'
-        logging.debug('Detected APT version: %s', apt_version)
-
         # Choose format by APT version
         self._repo = os.path.join(self._repo_dir, 'migasfree.list')
         try:
-            major_version = int(apt_version.split('.')[0])
-            if major_version >= 3:
-                content = self._convert_list_to_sources(content)
+            apt_version = self._get_pms_version()
+            if apt_version[0] >= 3:
+                content = self._convert_list_to_sources(content, server)
                 self._repo = os.path.join(self._repo_dir, 'migasfree.sources')
         except Exception:
             pass
@@ -302,7 +301,7 @@ class Apt(Pms):
         bool import_server_key(string file_key)
         """
 
-        name = file_key.rsplit('.', 1)[0].replace(KEYS_PATH, '').split('/')[1]
+        name = os.path.basename(file_key)
         key_target = os.path.join(self._keyring_dir, f'{name}.gpg')
         cmd = f'gpg --output {key_target} --dearmor --yes {file_key} > /dev/null'
         logger.debug(cmd)
