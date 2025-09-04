@@ -154,7 +154,6 @@ class MigasFreeCommand():
 
     PUBLIC_KEY = 'server.pub'
     PRIVATE_KEY = ''
-    REPOS_KEY = 'repositories.pub'
 
     APP_ICON = os.path.join('apps', 'migasfree.svg')
     SERVER_ICON = os.path.join('apps', 'migasfree-server-network.svg')
@@ -385,7 +384,6 @@ class MigasFreeCommand():
         paths = {
             'private': os.path.join(keys_path, self.PRIVATE_KEY),
             'public': os.path.join(keys_path, self.PUBLIC_KEY),
-            'repos': os.path.join(keys_path, self.REPOS_KEY),
         }
 
         all_keys_exist = all(os.path.isfile(path) for path in paths.values())
@@ -470,38 +468,6 @@ class MigasFreeCommand():
                 self.operation_failed(msg)
                 logger.error(msg)
                 sys.exit(errno.ENOENT)
-
-        # Repositories key
-        return self._save_repos_key()
-
-    def _save_repos_key(self):
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_repositories_keys']),
-            safe=False,
-            exit_on_error=False,
-            debug=self._debug
-        )
-        logger.debug('Response _save_repos_key: %s', response)
-
-        path = self._get_keys_path()
-        if not self._check_path(path):
-            return False
-
-        path_file = os.path.join(path, self.REPOS_KEY)
-        logger.debug('Trying writing file: %s', path_file)
-
-        ret = utils.write_file(path_file, response)
-        if not ret:
-            msg = _('Error writing key file!!!')
-            self.operation_failed(msg)
-            logger.error(msg)
-
-            return False
-
-        if self.pms.import_server_key(path_file):
-            print(_('Key %s created!') % path_file)
-        else:
-            print(_('ERROR: not import key: %s!') % path_file)
 
         return True
 
