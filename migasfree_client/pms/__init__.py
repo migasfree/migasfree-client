@@ -24,7 +24,6 @@ from .pms import Pms
 from .apt import Apt
 from .dnf import Dnf
 from .pacman import Pacman
-from .winget import Winget
 from .wpt import Wpt
 from .yum import Yum
 from .zypper import Zypper
@@ -32,7 +31,7 @@ from . import plugins
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-__all__ = ['Pms', 'Apt', 'Dnf', 'Pacman', 'Winget', 'Wpt', 'Yum', 'Zypper']
+__all__ = ['Pms', 'Apt', 'Dnf', 'Pacman', 'Wpt', 'Yum', 'Zypper']
 
 
 def iter_namespace(ns_pkg):
@@ -59,7 +58,6 @@ def get_available_pms():
         ('apt', 'Apt'),
         ('dnf', 'Dnf'),
         ('pacman', 'Pacman'),
-        ('winget', 'Winget'),
         ('wpt', 'Wpt'),
         ('yum', 'Yum'),
         ('zypper', 'Zypper'),
