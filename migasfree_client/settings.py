@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2023 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,10 +35,7 @@ if os.environ.get('WINDIR'):
     ICON_PATH = os.path.join(data_path, 'icons', 'hicolor', 'scalable')
     LOCALE_PATH = os.path.join(data_path, 'locale')
 
-    CONF_FILE = os.environ.get(
-        'MIGASFREE_CONF',
-        os.path.join(APP_DATA_PATH, 'migasfree.conf')
-    )
+    CONF_FILE = os.environ.get('MIGASFREE_CONF', os.path.join(APP_DATA_PATH, 'migasfree.conf'))
 
     LOG_FILE = os.path.join(TMP_PATH, 'migasfree.log')
     SOFTWARE_FILE = os.path.join(APP_DATA_PATH, 'installed_software.txt')
