@@ -22,7 +22,6 @@ import tempfile
 
 from .pms import Pms
 from ..utils import execute, write_file, sanitize_path
-from ..settings import KEYS_PATH
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -53,13 +52,15 @@ class Apt(Pms):
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'
 
-        self._silent_options = '-o APT::Get::Purge=true ' \
-                               '-o Dpkg::Options::=--force-confdef ' \
-                               '-o Dpkg::Options::=--force-confold ' \
-                               '-o Debug::pkgProblemResolver=1 ' \
-                               '--assume-yes --allow-downgrades ' \
-                               '--allow-change-held-packages ' \
-                               '--allow-unauthenticated --auto-remove'
+        self._silent_options = (
+            '-o APT::Get::Purge=true '
+            '-o Dpkg::Options::=--force-confdef '
+            '-o Dpkg::Options::=--force-confold '
+            '-o Debug::pkgProblemResolver=1 '
+            '--assume-yes --allow-downgrades '
+            '--allow-change-held-packages '
+            '--allow-unauthenticated --auto-remove'
+        )
 
     def install(self, package):
         """
@@ -182,9 +183,11 @@ class Apt(Pms):
             return []
 
         pattern = re.compile(r'^ii\s+(\S+)\s+(\S+)\s+(\S+)')
-        result = [f'{match.group(1)}_{match.group(2)}_{match.group(3)}.deb' for match in (
-            pattern.match(line) for line in packages
-        ) if match]
+        result = [
+            f'{match.group(1)}_{match.group(2)}_{match.group(3)}.deb'
+            for match in (pattern.match(line) for line in packages)
+            if match
+        ]
 
         return result
 
@@ -279,7 +282,7 @@ class Apt(Pms):
         """
 
         content = ''.join(
-            f"{repo.get('source_template').format(protocol=protocol, server=server)}" for repo in repositories
+            f'{repo.get("source_template").format(protocol=protocol, server=server)}' for repo in repositories
         )
 
         # Choose format by APT version
