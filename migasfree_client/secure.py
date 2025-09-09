@@ -60,13 +60,7 @@ def sign(claims, priv_key):
     payload_bytes = str(payload).encode('utf-8')
 
     jws_token = jws.JWS(payload_bytes)
-    jws_token.add_signature(
-        priv_jwk,
-        header=json_encode({
-            'alg': ALG_SIGN,
-            'kid': priv_jwk.thumbprint()
-        })
-    )
+    jws_token.add_signature(priv_jwk, header=json_encode({'alg': ALG_SIGN, 'kid': priv_jwk.thumbprint()}))
 
     return jws_token.serialize()
 
@@ -96,11 +90,7 @@ def encrypt(claims, pub_key):
         'typ': TYPE_JWE,
         'kid': pub_jwk.thumbprint(),
     }
-    jwe_token = jwe.JWE(
-        json.dumps(claims).encode('utf-8'),
-        recipient=pub_jwk,
-        protected=protected_header
-    )
+    jwe_token = jwe.JWE(json.dumps(claims).encode('utf-8'), recipient=pub_jwk, protected=protected_header)
 
     return jwe_token.serialize()
 
@@ -122,10 +112,7 @@ def wrap(data, sign_key, encrypt_key):
     """
     string wrap(dict data, string sign_key, string encrypt_key)
     """
-    claims = {
-        'data': data,
-        'sign': sign(data, sign_key)
-    }
+    claims = {'data': data, 'sign': sign(data, sign_key)}
 
     return encrypt(claims, encrypt_key)
 
