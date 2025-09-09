@@ -36,7 +36,7 @@ _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
 
 
-class UrlRequest():
+class UrlRequest:
     _debug = False
 
     _safe = True
@@ -48,19 +48,15 @@ class UrlRequest():
     _timeout = 60  # seconds
 
     _ok_codes = [
-        requests.codes.ok, requests.codes.created,
-        requests.codes.moved, requests.codes.found,
-        requests.codes.temporary_redirect, requests.codes.resume
+        requests.codes.ok,
+        requests.codes.created,
+        requests.codes.moved,
+        requests.codes.found,
+        requests.codes.temporary_redirect,
+        requests.codes.resume,
     ]
 
-    def __init__(
-            self,
-            debug=False,
-            proxy='',
-            project='',
-            keys=None,
-            cert=False
-    ):
+    def __init__(self, debug=False, proxy='', project='', keys=None, cert=False):
         if keys is None:
             keys = {}
 
@@ -88,16 +84,7 @@ class UrlRequest():
 
         return True
 
-    def run(
-            self,
-            url,
-            data='',
-            upload_files=None,
-            safe=True,
-            exit_on_error=True,
-            debug=False,
-            keys=None
-    ):
+    def run(self, url, data='', upload_files=None, safe=True, exit_on_error=True, debug=False, keys=None):
         if keys is None:
             keys = {}
 
@@ -121,21 +108,13 @@ class UrlRequest():
             logger.info('Public key: %s', self._public_key)
 
         headers = {
-            'user-agent': 'migasfree-client/{} {}'.format(
-                get_mfc_release(),
-                requests.utils.default_user_agent()
-            ),
-            'accept-language': os.getenv('LANGUAGE', os.getenv('LANG', 'en'))
+            'user-agent': f'migasfree-client/{get_mfc_release()} {requests.utils.default_user_agent()}',
+            'accept-language': os.getenv('LANGUAGE', os.getenv('LANG', 'en')),
         }
         if safe:
-            data = json.dumps({
-                'msg': wrap(
-                    data,
-                    sign_key=self._private_key,
-                    encrypt_key=self._public_key
-                ),
-                'project': self._project
-            })
+            data = json.dumps(
+                {'msg': wrap(data, sign_key=self._private_key, encrypt_key=self._public_key), 'project': self._project}
+            )
             headers['content-type'] = 'application/json'
 
         if upload_files:
@@ -150,9 +129,7 @@ class UrlRequest():
                 mime = my_magic.file(tmp_file)
                 os.remove(tmp_file)
 
-                files.append(
-                    ('file', (_file, content, mime))
-                )
+                files.append(('file', (_file, content, mime)))
 
             logger.debug('URL upload files: %s', files)
             # http://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request
@@ -161,9 +138,7 @@ class UrlRequest():
 
             fields = data
             fields.update(dict(files))
-            data = MultipartEncoder(
-                fields=fields
-            )
+            data = MultipartEncoder(fields=fields)
             headers['content-type'] = data.content_type
 
         proxies = None
@@ -177,26 +152,13 @@ class UrlRequest():
             url += '/'
 
         try:
-            req = requests.post(
-                url, data=data, headers=headers,
-                proxies=proxies, timeout=self._timeout
-            )
+            req = requests.post(url, data=data, headers=headers, proxies=proxies, timeout=self._timeout)
         except requests.exceptions.ConnectionError as e:
             logger.error(str(e))
-            return {
-                'error': {
-                    'info': e,
-                    'code': errno.ECONNREFUSED
-                }
-            }
+            return {'error': {'info': e, 'code': errno.ECONNREFUSED}}
         except requests.exceptions.ReadTimeout as e:
             logger.error(str(e))
-            return {
-                'error': {
-                    'info': e,
-                    'code': errno.ETIMEDOUT
-                }
-            }
+            return {'error': {'info': e, 'code': errno.ETIMEDOUT}}
 
         if req.status_code not in self._ok_codes:
             return self._error_response(req, url)
@@ -205,11 +167,7 @@ class UrlRequest():
 
     def _evaluate_response(self, json_response, safe=True):
         if safe and 'msg' in json_response:
-            response = unwrap(
-                json_response['msg'],
-                decrypt_key=self._private_key,
-                verify_key=self._public_key
-            )
+            response = unwrap(json_response['msg'], decrypt_key=self._private_key, verify_key=self._public_key)
         else:
             if isinstance(json_response, dict):
                 response = json_response.get('detail', json_response)
@@ -221,14 +179,8 @@ class UrlRequest():
         return response
 
     def _error_response(self, request, url):
-        logger.error(
-            'url_request server error response code: %s',
-            str(request.status_code)
-        )
-        logger.error(
-            'url_request server error response info: %s',
-            str(request.text)
-        )
+        logger.error('url_request server error response code: %s', str(request.status_code))
+        logger.error('url_request server error response info: %s', str(request.text))
 
         info = request.text
         if 'json' in request.headers['content-type']:
@@ -244,21 +196,14 @@ class UrlRequest():
                 if self._exit_on_error:
                     sys.exit(errno.EPERM)
 
-                return {
-                    'error': {
-                        'info': msg,
-                        'code': errno.EPERM
-                    }
-                }
+                return {'error': {'info': msg, 'code': errno.EPERM}}
 
             extension = 'txt' if 'json' in request.headers['content-type'] else 'html'
             _file = os.path.join(
                 TMP_PATH,
                 'response.{}.{}.{}'.format(
-                    request.status_code,
-                    url.replace('/', '.').replace(':', '.').rstrip('.'),
-                    extension
-                )
+                    request.status_code, url.replace('/', '.').replace(':', '.').rstrip('.'), extension
+                ),
             )
             write_file(_file, str(info))
             print(_file)
@@ -270,9 +215,4 @@ class UrlRequest():
                 print(_('Status code: %s') % str(request.status_code))
             sys.exit(errno.EACCES)
 
-        return {
-            'error': {
-                'info': str(info),
-                'code': request.status_code
-            }
-        }
+        return {'error': {'info': str(info), 'code': request.status_code}}
