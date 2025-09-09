@@ -60,7 +60,7 @@ LOGGING_CONF = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
             'stream': 'ext://sys.stderr',
-            'level': 'WARNING'
+            'level': 'WARNING',
         },
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
@@ -103,7 +103,7 @@ def set_debug_log_level():
     logging.config.dictConfig(LOGGING_CONF)
 
 
-class MigasFreeCommand():
+class MigasFreeCommand:
     """
     Interface class
     """
@@ -116,7 +116,7 @@ class MigasFreeCommand():
         'get_computer_id': '/api/v1/safe/computers/id/',
         'upload_computer': '/api/v1/safe/computers/',
         'upload_eot': '/api/v1/safe/eot/',
-
+        #
         # sync API
         'get_properties': '/api/v1/safe/computers/properties/',
         'get_fault_definitions': '/api/v1/safe/computers/faults/definitions/',
@@ -132,15 +132,15 @@ class MigasFreeCommand():
         'upload_software': '/api/v1/safe/computers/software/',
         'upload_devices_changes': '/api/v1/safe/computers/devices/changes/',
         'upload_sync': '/api/v1/safe/synchronizations/',
-
+        #
         # label API
         'get_label': '/api/v1/safe/computers/label/',
-
+        #
         # tags API
         'get_assigned_tags': '/api/v1/safe/computers/tags/assigned/',
         'get_available_tags': '/api/v1/safe/computers/tags/available/',
         'upload_tags': '/api/v1/safe/computers/tags/',
-
+        #
         # upload API
         'get_packager_keys': '/api/v1/public/keys/packager/',
         'upload_package': '/api/v1/safe/packages/',
@@ -183,69 +183,38 @@ class MigasFreeCommand():
         if not isinstance(_config_client, dict):
             _config_client = {}
 
-        self.migas_project = os.environ.get(
-            'MIGASFREE_CLIENT_PROJECT', utils.get_mfc_project()
-        )
+        self.migas_project = os.environ.get('MIGASFREE_CLIENT_PROJECT', utils.get_mfc_project())
 
         self.PRIVATE_KEY = f'{self.migas_project}.pri'
 
-        self.migas_computer_name = os.environ.get(
-            'MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name()
-        )
+        self.migas_computer_name = os.environ.get('MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name())
 
-        self.migas_server = os.environ.get(
-            'MIGASFREE_CLIENT_SERVER',
-            _config_client.get('server', 'localhost')
-        )
+        self.migas_server = os.environ.get('MIGASFREE_CLIENT_SERVER', _config_client.get('server', 'localhost'))
 
-        self.migas_port = os.environ.get(
-            'MIGASFREE_CLIENT_PORT',
-            _config_client.get('port', '')
-        )
+        self.migas_port = os.environ.get('MIGASFREE_CLIENT_PORT', _config_client.get('port', ''))
 
-        self.migas_protocol = os.environ.get(
-            'MIGASFREE_CLIENT_PROTOCOL',
-            _config_client.get('protocol', 'http')
-        )
+        self.migas_protocol = os.environ.get('MIGASFREE_CLIENT_PROTOCOL', _config_client.get('protocol', 'http'))
 
         self.migas_auto_update_packages = utils.cast_to_bool(
-            os.environ.get(
-                'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES',
-                _config_client.get('auto_update_packages', True)
-            ),
-            default=True
+            os.environ.get('MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', _config_client.get('auto_update_packages', True)),
+            default=True,
         )
 
         self.migas_manage_devices = utils.cast_to_bool(
-            os.environ.get(
-                'MIGASFREE_CLIENT_MANAGE_DEVICES',
-                _config_client.get('manage_devices', True)
-            ),
-            default=True
+            os.environ.get('MIGASFREE_CLIENT_MANAGE_DEVICES', _config_client.get('manage_devices', True)), default=True
         )
 
         self.migas_upload_hardware = utils.cast_to_bool(
-            os.environ.get(
-                'MIGASFREE_CLIENT_UPLOAD_HARDWARE',
-                _config_client.get('upload_hardware', True)
-            ),
-            default=True
+            os.environ.get('MIGASFREE_CLIENT_UPLOAD_HARDWARE', _config_client.get('upload_hardware', True)),
+            default=True,
         )
 
-        self.migas_proxy = os.environ.get(
-            'MIGASFREE_CLIENT_PROXY', _config_client.get('proxy', None)
-        )
+        self.migas_proxy = os.environ.get('MIGASFREE_CLIENT_PROXY', _config_client.get('proxy', None))
         self.migas_package_proxy_cache = os.environ.get(
-            'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE',
-            _config_client.get('package_proxy_cache', None)
+            'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE', _config_client.get('package_proxy_cache', None)
         )
 
-        self._debug = utils.cast_to_bool(
-            os.environ.get(
-                'MIGASFREE_CLIENT_DEBUG',
-                _config_client.get('debug', False)
-            )
-        )
+        self._debug = utils.cast_to_bool(os.environ.get('MIGASFREE_CLIENT_DEBUG', _config_client.get('debug', False)))
         if self._debug:
             set_debug_log_level()
 
@@ -253,19 +222,10 @@ class MigasFreeCommand():
         if not isinstance(_config_packager, dict):
             _config_packager = {}
 
-        self.packager_user = os.environ.get(
-            'MIGASFREE_PACKAGER_USER', _config_packager.get('user', None)
-        )
-        self.packager_pwd = os.environ.get(
-            'MIGASFREE_PACKAGER_PASSWORD',
-            _config_packager.get('password', None)
-        )
-        self.packager_project = os.environ.get(
-            'MIGASFREE_PACKAGER_PROJECT', _config_packager.get('project', None)
-        )
-        self.packager_store = os.environ.get(
-            'MIGASFREE_PACKAGER_STORE', _config_packager.get('store', None)
-        )
+        self.packager_user = os.environ.get('MIGASFREE_PACKAGER_USER', _config_packager.get('user', None))
+        self.packager_pwd = os.environ.get('MIGASFREE_PACKAGER_PASSWORD', _config_packager.get('password', None))
+        self.packager_project = os.environ.get('MIGASFREE_PACKAGER_PROJECT', _config_packager.get('project', None))
+        self.packager_store = os.environ.get('MIGASFREE_PACKAGER_STORE', _config_packager.get('store', None))
 
         self._server_info = {}
 
@@ -285,10 +245,7 @@ class MigasFreeCommand():
                 os.remove(settings.CERT_FILE)
 
             try:
-                cert = ssl.get_server_certificate(
-                    (self.migas_server, port),
-                    ssl.PROTOCOL_SSLv23
-                )
+                cert = ssl.get_server_certificate((self.migas_server, port), ssl.PROTOCOL_SSLv23)
                 if utils.write_file(settings.CERT_FILE, cert):
                     self.migas_ssl_cert = settings.CERT_FILE
             except ssl.SSLError:
@@ -299,16 +256,11 @@ class MigasFreeCommand():
                 sys.exit(errno.ECONNREFUSED)
 
     def _get_keys_path(self):
-        return os.path.join(
-            settings.KEYS_PATH,
-            utils.sanitize_path(self.migas_server)
-        )
+        return os.path.join(settings.KEYS_PATH, utils.sanitize_path(self.migas_server))
 
     def _init_url_base(self):
         self._url_base = '{}://{}{}'.format(
-            self.migas_protocol,
-            self.migas_server,
-            f':{self.migas_port}' if self.migas_port else ''
+            self.migas_protocol, self.migas_server, f':{self.migas_port}' if self.migas_port else ''
         )
 
     def _init_url_request(self):
@@ -319,9 +271,9 @@ class MigasFreeCommand():
             project=self.migas_project,
             keys={
                 'private': os.path.join(keys_path, self.PRIVATE_KEY),
-                'public': os.path.join(keys_path, self.PUBLIC_KEY)
+                'public': os.path.join(keys_path, self.PUBLIC_KEY),
             },
-            cert=self.migas_ssl_cert
+            cert=self.migas_ssl_cert,
         )
 
     def _init_command(self):
@@ -358,11 +310,7 @@ class MigasFreeCommand():
         files = os.listdir(path)
         for file_ in sorted(files):
             self._show_message(_('Running command %s...') % file_)
-            _ret, _output, _error = utils.execute(
-                os.path.join(path, file_),
-                verbose=True,
-                interactive=False
-            )
+            _ret, _output, _error = utils.execute(os.path.join(path, file_), verbose=True, interactive=False)
             if _ret == 0:
                 self.operation_ok()
             else:
@@ -373,9 +321,7 @@ class MigasFreeCommand():
 
     def _check_user_is_root(self):
         if not utils.is_root_user():
-            self.operation_failed(
-                _('User has insufficient privileges to execute this command')
-            )
+            self.operation_failed(_('User has insufficient privileges to execute this command'))
             sys.exit(errno.EACCES)
 
     def _check_sign_keys(self, get_computer_id=True):
@@ -401,12 +347,8 @@ class MigasFreeCommand():
     def _auto_register(self):
         self._show_message(_('Autoregistering computer...'))
 
-        if self._save_sign_keys(
-                self.auto_register_user, self.auto_register_password
-        ):
-            return self._save_computer(
-                self.auto_register_user, self.auto_register_password
-            ) != 0
+        if self._save_sign_keys(self.auto_register_user, self.auto_register_password):
+            return self._save_computer(self.auto_register_user, self.auto_register_password) != 0
 
         return False
 
@@ -422,11 +364,11 @@ class MigasFreeCommand():
                 'project': self.migas_project,
                 'platform': platform.system(),
                 'pms': str(self.pms),
-                'architecture': self.pms.get_system_architecture() if self.pms else ''
+                'architecture': self.pms.get_system_architecture() if self.pms else '',
             },
             safe=False,
             exit_on_error=exit_on_error,
-            debug=self._debug
+            debug=self._debug,
         )
         logger.debug('Response _save_sign_keys: %s', response)
 
@@ -472,10 +414,7 @@ class MigasFreeCommand():
         return True
 
     def cmd_register_computer(self, user=None):
-        carry_on = utils.query_yes_no(
-            _('Have you check config options in this machine (%s)?')
-            % settings.CONF_FILE
-        )
+        carry_on = utils.query_yes_no(_('Have you check config options in this machine (%s)?') % settings.CONF_FILE)
         if carry_on == 'no':
             msg = _('Check %s file and register again') % settings.CONF_FILE
             self.operation_failed(msg)
@@ -505,20 +444,17 @@ class MigasFreeCommand():
                 'name': self.migas_computer_name,
                 'ip_address': get_network_info()['ip'],
                 'username': user,
-                'password': password
+                'password': password,
             },
             exit_on_error=False,
-            debug=self._debug
+            debug=self._debug,
         )
         logger.debug('Response _save_computer: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == requests.codes.unauthorized:
                 self.operation_failed(
-                    '{} ({})'.format(
-                        response['error']['info'],
-                        _('You must register the computer with a valid user')
-                    )
+                    '{} ({})'.format(response['error']['info'], _('You must register the computer with a valid user'))
                 )
                 sys.exit(errno.EPERM)
 
@@ -530,10 +466,7 @@ class MigasFreeCommand():
 
     def get_server_info(self):
         response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_server_info']),
-            safe=False,
-            exit_on_error=False,
-            debug=self._debug
+            url=self.api_endpoint(self.URLS['get_server_info']), safe=False, exit_on_error=False, debug=self._debug
         )
         logger.debug('Response get_server_info: %s', response)
 
@@ -541,9 +474,7 @@ class MigasFreeCommand():
             self._server_info = response
 
     def get_computer_id(self):
-        if not os.path.isfile(
-            os.path.join(self._get_keys_path(), self.PRIVATE_KEY)
-        ):
+        if not os.path.isfile(os.path.join(self._get_keys_path(), self.PRIVATE_KEY)):
             return 0
 
         if not self._url_base:
@@ -554,26 +485,18 @@ class MigasFreeCommand():
 
         response = self._url_request.run(
             url=self.api_endpoint(self.URLS['get_computer_id']),
-            data={
-                'uuid': utils.get_hardware_uuid(),
-                'name': self.migas_computer_name
-            },
+            data={'uuid': utils.get_hardware_uuid(), 'name': self.migas_computer_name},
             exit_on_error=False,
-            debug=self._debug
+            debug=self._debug,
         )
         logger.debug('Response get_computer_id: %s', response)
 
         if isinstance(response, dict) and 'error' in response:
             if response['error']['code'] == requests.codes.not_found:
-                response = self._save_computer(
-                    self.auto_register_user, self.auto_register_password
-                )
+                response = self._save_computer(self.auto_register_user, self.auto_register_password)
             else:
                 self.operation_failed(
-                    '{} ({})'.format(
-                        response['error']['info'],
-                        _('Review keys or register computer again')
-                    )
+                    '{} ({})'.format(response['error']['info'], _('Review keys or register computer again'))
                 )
                 sys.exit(errno.ENODATA)
 
@@ -589,7 +512,7 @@ class MigasFreeCommand():
             data={
                 'id': self._computer_id,
             },
-            debug=self._debug
+            debug=self._debug,
         )
         logger.debug('Response end_of_transmission: %s', response)
 
@@ -600,79 +523,75 @@ class MigasFreeCommand():
 
         print()
         print(_('Config options: %s') % conf_file)
-        print('\t%s: %s %s' % (
-            _('Project'),
-            self.migas_project,
-            '(ENV)' if 'MIGASFREE_CLIENT_PROJECT' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Server'),
-            self.migas_server,
-            '(ENV)' if 'MIGASFREE_CLIENT_SERVER' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Protocol'),
-            self.migas_protocol,
-            '(ENV)' if 'MIGASFREE_CLIENT_PROTOCOL' in os.environ else ''
-        ))
+        print(
+            '\t%s: %s %s'
+            % (_('Project'), self.migas_project, '(ENV)' if 'MIGASFREE_CLIENT_PROJECT' in os.environ else '')
+        )
+        print(
+            '\t%s: %s %s' % (_('Server'), self.migas_server, '(ENV)' if 'MIGASFREE_CLIENT_SERVER' in os.environ else '')
+        )
+        print(
+            '\t%s: %s %s'
+            % (_('Protocol'), self.migas_protocol, '(ENV)' if 'MIGASFREE_CLIENT_PROTOCOL' in os.environ else '')
+        )
         if self.migas_port:
-            print('\t%s: %s %s' % (
-                _('Port'),
-                self.migas_port,
-                '(ENV)' if 'MIGASFREE_CLIENT_PORT' in os.environ else ''
-            ))
-        print('\t%s: %s %s' % (
-            _('Auto update packages'),
-            self.migas_auto_update_packages,
-            '(ENV)' if 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Manage devices'),
-            self.migas_manage_devices,
-            '(ENV)' if 'MIGASFREE_CLIENT_MANAGE_DEVICES' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Upload hardware'),
-            self.migas_upload_hardware,
-            '(ENV)' if 'MIGASFREE_CLIENT_UPLOAD_HARDWARE' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Proxy'),
-            self.migas_proxy,
-            '(ENV)' if 'MIGASFREE_CLIENT_PROXY' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Package Proxy Cache'),
-            self.migas_package_proxy_cache,
-            '(ENV)' if 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Debug'),
-            self._debug,
-            '(ENV)' if 'MIGASFREE_CLIENT_DEBUG' in os.environ else ''
-        ))
-        print('\t%s: %s %s' % (
-            _('Computer name'),
-            self.migas_computer_name,
-            '(ENV)' if 'MIGASFREE_CLIENT_COMPUTER_NAME' in os.environ else ''
-        ))
+            print(
+                '\t%s: %s %s' % (_('Port'), self.migas_port, '(ENV)' if 'MIGASFREE_CLIENT_PORT' in os.environ else '')
+            )
+        print(
+            '\t%s: %s %s'
+            % (
+                _('Auto update packages'),
+                self.migas_auto_update_packages,
+                '(ENV)' if 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES' in os.environ else '',
+            )
+        )
+        print(
+            '\t%s: %s %s'
+            % (
+                _('Manage devices'),
+                self.migas_manage_devices,
+                '(ENV)' if 'MIGASFREE_CLIENT_MANAGE_DEVICES' in os.environ else '',
+            )
+        )
+        print(
+            '\t%s: %s %s'
+            % (
+                _('Upload hardware'),
+                self.migas_upload_hardware,
+                '(ENV)' if 'MIGASFREE_CLIENT_UPLOAD_HARDWARE' in os.environ else '',
+            )
+        )
+        print('\t%s: %s %s' % (_('Proxy'), self.migas_proxy, '(ENV)' if 'MIGASFREE_CLIENT_PROXY' in os.environ else ''))
+        print(
+            '\t%s: %s %s'
+            % (
+                _('Package Proxy Cache'),
+                self.migas_package_proxy_cache,
+                '(ENV)' if 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE' in os.environ else '',
+            )
+        )
+        print('\t%s: %s %s' % (_('Debug'), self._debug, '(ENV)' if 'MIGASFREE_CLIENT_DEBUG' in os.environ else ''))
+        print(
+            '\t%s: %s %s'
+            % (
+                _('Computer name'),
+                self.migas_computer_name,
+                '(ENV)' if 'MIGASFREE_CLIENT_COMPUTER_NAME' in os.environ else '',
+            )
+        )
 
     def _show_running_options(self):
         print()
         print(_('Running options:'))
-        print('\t%s: %s' % (
-            _('migasfree server version'), self._server_info.get('version', _('None')))
-        )
+        print('\t%s: %s' % (_('migasfree server version'), self._server_info.get('version', _('None'))))
         print('\t%s: %s' % (_('SSL certificate'), self.migas_ssl_cert))
-        if self.migas_ssl_cert is not None \
-                and not isinstance(self.migas_ssl_cert, bool) \
-                and not os.path.exists(self.migas_ssl_cert):
-            print(
-                '\t\t%s: %s' % (
-                    _('Warning'),
-                    _('Certificate does not exist and authentication is not guaranteed')
-                )
-            )
+        if (
+            self.migas_ssl_cert is not None
+            and not isinstance(self.migas_ssl_cert, bool)
+            and not os.path.exists(self.migas_ssl_cert)
+        ):
+            print('\t\t%s: %s' % (_('Warning'), _('Certificate does not exist and authentication is not guaranteed')))
         print('\t%s: %s' % (_('PMS'), self.pms))
         if self.pms:
             print('\t%s: %s' % (_('Architecture'), self.pms.get_system_architecture()))
@@ -686,11 +605,7 @@ class MigasFreeCommand():
         if not self._error_file_descriptor:
             self._error_file_descriptor = open(self.ERROR_FILE, _mode, encoding='utf8')
 
-        _text = '{}\n{}\n{}\n\n'.format(
-            '-' * 20,
-            time.strftime("%Y-%m-%d %H:%M:%S"),
-            str(msg)
-        )
+        _text = '{}\n{}\n{}\n\n'.format('-' * 20, time.strftime('%Y-%m-%d %H:%M:%S'), str(msg))
         _text = bytes(_text, encoding='utf8')
 
         self._error_file_descriptor.write(_text)
