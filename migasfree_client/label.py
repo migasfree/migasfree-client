@@ -123,11 +123,7 @@ class MigasFreeLabel(MigasFreeCommand):
         logger.debug('Getting label')
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_label']),
-                data={
-                    'id': self._computer_id
-                },
-                debug=self._debug
+                url=self.api_endpoint(self.URLS['get_label']), data={'id': self._computer_id}, debug=self._debug
             )
 
         logger.debug('Response get_label: %s', response)
