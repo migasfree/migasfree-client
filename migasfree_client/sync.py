@@ -127,12 +127,7 @@ class MigasFreeSync(MigasFreeCommand):
         filename = tempfile.mkstemp()[1]
         utils.write_file(filename, code)
 
-        allowed_languages = [
-            'python',
-            'perl',
-            'php',
-            'ruby'
-        ]
+        allowed_languages = ['python', 'perl', 'php', 'ruby']
         if utils.is_linux():
             allowed_languages.append('bash')
         if utils.is_windows():
@@ -169,42 +164,36 @@ class MigasFreeSync(MigasFreeCommand):
             'fqdn': socket.getfqdn(),
             'ip_address': network.get_network_info()['ip'],
             'sync_user': self._graphic_user,
-            'sync_fullname': utils.get_user_info(
-                self._graphic_user
-            )['fullname'],
-            'sync_attributes': {}
+            'sync_fullname': utils.get_user_info(self._graphic_user)['fullname'],
+            'sync_attributes': {},
         }
 
         # properties converted in attributes
         self._show_message(_('Evaluating attributes...'))
         with self.console.status(''):
             for item in properties:
-                ret, response['sync_attributes'][item['prefix']], error = \
-                    self._eval_code(item['prefix'], item['language'], item['code'])
-                info = f"{item['prefix']}: {response['sync_attributes'][item['prefix']]}"
+                ret, response['sync_attributes'][item['prefix']], error = self._eval_code(
+                    item['prefix'], item['language'], item['code']
+                )
+                info = f'{item["prefix"]}: {response["sync_attributes"][item["prefix"]]}'
                 if ret == 0 and response['sync_attributes'][item['prefix']].strip() != '':
                     self.operation_ok(info)
                 else:
                     if error:
-                        info = f"{item['prefix']}: {error}"
+                        info = f'{item["prefix"]}: {error}'
                         self.operation_failed(info)
-                        self._write_error(
-                            _('Error: property %s without value') % item['prefix']
-                        )
+                        self._write_error(_('Error: property %s without value') % item['prefix'])
 
         return response
 
     def _eval_faults(self, fault_definitions):
-        response = {
-            'id': self._computer_id,
-            'faults': {}
-        }
+        response = {'id': self._computer_id, 'faults': {}}
 
         self._show_message(_('Executing faults...'))
         with self.console.status(''):
             for item in fault_definitions:
                 ret, result, error = self._eval_code(item['name'], item['language'], item['code'])
-                info = f"{item['name']}: {result}"
+                info = f'{item["name"]}: {result}'
                 if ret == 0:
                     if result:
                         # only send faults with output!!!
@@ -213,7 +202,7 @@ class MigasFreeSync(MigasFreeCommand):
                     else:
                         self.operation_ok(info)
                 else:
-                    self.operation_failed(f"{item['name']}: {error}")
+                    self.operation_failed(f'{item["name"]}: {error}')
 
         return response
 
@@ -224,7 +213,7 @@ class MigasFreeSync(MigasFreeCommand):
             url=self.api_endpoint(self.URLS['get_repositories_keys']),
             safe=False,
             exit_on_error=False,
-            debug=self._debug
+            debug=self._debug,
         )
         logger.debug('Response get_repos_key: %s', response)
 
@@ -260,11 +249,7 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Getting properties...'))
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_properties']),
-                data={
-                    'id': self._computer_id
-                },
-                debug=self._debug
+                url=self.api_endpoint(self.URLS['get_properties']), data={'id': self._computer_id}, debug=self._debug
             )
             logger.debug('Response get_properties: %s', response)
 
@@ -284,11 +269,9 @@ class MigasFreeSync(MigasFreeCommand):
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['get_fault_definitions']),
-                data={
-                    'id': self._computer_id
-                },
+                data={'id': self._computer_id},
                 debug=self._debug,
-                exit_on_error=False
+                exit_on_error=False,
             )
             logger.debug('Response get_fault_definitions: %s', response)
 
@@ -315,11 +298,9 @@ class MigasFreeSync(MigasFreeCommand):
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['get_repositories']),
-                data={
-                    'id': self._computer_id
-                },
+                data={'id': self._computer_id},
                 exit_on_error=False,
-                debug=self._debug
+                debug=self._debug,
             )
             logger.debug('Response get_repositories: %s', response)
 
@@ -343,11 +324,9 @@ class MigasFreeSync(MigasFreeCommand):
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['get_mandatory_packages']),
-                data={
-                    'id': self._computer_id
-                },
+                data={'id': self._computer_id},
                 exit_on_error=False,
-                debug=self._debug
+                debug=self._debug,
             )
             logger.debug('Response get_mandatory_packages: %s', response)
 
@@ -379,11 +358,9 @@ class MigasFreeSync(MigasFreeCommand):
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['get_devices']),
-                data={
-                    'id': self._computer_id
-                },
+                data={'id': self._computer_id},
                 exit_on_error=False,
-                debug=self._debug
+                debug=self._debug,
             )
             logger.debug('Response get_devices: %s', response)
 
@@ -408,11 +385,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_traits']),
-                data={
-                    'id': self._computer_id
-                },
-                debug=self._debug
+                url=self.api_endpoint(self.URLS['get_traits']), data={'id': self._computer_id}, debug=self._debug
             )
             logger.debug('Response get_traits: %s', response)
 
@@ -431,14 +404,10 @@ class MigasFreeSync(MigasFreeCommand):
 
         # if have been managed packages manually
         # information is uploaded to server
-        if os.path.isfile(settings.SOFTWARE_FILE) \
-                and os.stat(settings.SOFTWARE_FILE).st_size:
+        if os.path.isfile(settings.SOFTWARE_FILE) and os.stat(settings.SOFTWARE_FILE).st_size:
             diff_software = utils.compare_lists(
-                open(
-                    settings.SOFTWARE_FILE,
-                    encoding='utf_8'
-                ).read().splitlines(),  # not readlines!!!
-                software
+                open(settings.SOFTWARE_FILE, encoding='utf_8').read().splitlines(),  # not readlines!!!
+                software,
             )
 
             if diff_software:
@@ -454,8 +423,7 @@ class MigasFreeSync(MigasFreeCommand):
         """
         if there are old errors, upload them to server
         """
-        if os.path.isfile(self.ERROR_FILE) \
-                and os.stat(self.ERROR_FILE).st_size:
+        if os.path.isfile(self.ERROR_FILE) and os.stat(self.ERROR_FILE).st_size:
             if not self._computer_id:
                 self.get_computer_id()
 
@@ -463,11 +431,8 @@ class MigasFreeSync(MigasFreeCommand):
             with self.console.status(''):
                 response = self._url_request.run(
                     url=self.api_endpoint(self.URLS['upload_errors']),
-                    data={
-                        'id': self._computer_id,
-                        'description': utils.read_file(self.ERROR_FILE, 'r')
-                    },
-                    debug=self._debug
+                    data={'id': self._computer_id, 'description': utils.read_file(self.ERROR_FILE, 'r')},
+                    debug=self._debug,
                 )
                 logger.debug('Response upload_old_errors: %s', response)
 
@@ -488,11 +453,7 @@ class MigasFreeSync(MigasFreeCommand):
         if self.migas_package_proxy_cache:
             server = f'{self.migas_package_proxy_cache}/{server}'
 
-        ret = self.pms.create_repos(
-            self.migas_protocol,
-            server,
-            repos
-        )
+        ret = self.pms.create_repos(self.migas_protocol, server, repos)
 
         if ret:
             self.operation_ok()
@@ -580,7 +541,7 @@ class MigasFreeSync(MigasFreeCommand):
                     'id': self._computer_id,
                 },
                 exit_on_error=False,
-                debug=self._debug
+                debug=self._debug,
             )
             logger.debug('Response hardware_capture_is_required: %s', response)
 
@@ -616,7 +577,7 @@ class MigasFreeSync(MigasFreeCommand):
             hardware = json.loads(output)
         except ValueError as e:
             self._show_message(_('Parsing hardware information...'))
-            msg = f"{_('Hardware information')}: {str(e)}"
+            msg = f'{_("Hardware information")}: {str(e)}'
             self.operation_failed(msg)
             logger.error(msg)
             self._write_error(msg)
@@ -627,12 +588,9 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Sending hardware information...'))
         response = self._url_request.run(
             url=self.api_endpoint(self.URLS['upload_hardware']),
-            data={
-                'id': self._computer_id,
-                'hardware': hardware
-            },
+            data={'id': self._computer_id, 'hardware': hardware},
             exit_on_error=False,
-            debug=self._debug
+            debug=self._debug,
         )
         logger.debug('Response upload_hardware: %s', response)
 
@@ -654,11 +612,8 @@ class MigasFreeSync(MigasFreeCommand):
             with self.console.status(''):
                 self._url_request.run(
                     url=self.api_endpoint(self.URLS['upload_errors']),
-                    data={
-                        'id': self._computer_id,
-                        'description': utils.read_file(self.ERROR_FILE, 'r')
-                    },
-                    debug=self._debug
+                    data={'id': self._computer_id, 'description': utils.read_file(self.ERROR_FILE, 'r')},
+                    debug=self._debug,
                 )
             self.operation_ok()
 
@@ -674,9 +629,7 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Uploading attributes...'))
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['upload_attributes']),
-                data=attributes,
-                debug=self._debug
+                url=self.api_endpoint(self.URLS['upload_attributes']), data=attributes, debug=self._debug
             )
 
         self.operation_ok()
@@ -693,9 +646,7 @@ class MigasFreeSync(MigasFreeCommand):
             self._show_message(_('Uploading faults...'))
             with self.console.status(''):
                 response = self._url_request.run(
-                    url=self.api_endpoint(self.URLS['upload_faults']),
-                    data=data,
-                    debug=self._debug
+                    url=self.api_endpoint(self.URLS['upload_faults']), data=data, debug=self._debug
                 )
 
             self.operation_ok()
@@ -748,12 +699,8 @@ class MigasFreeSync(MigasFreeCommand):
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['upload_software']),
-                data={
-                    'id': self._computer_id,
-                    'inventory': after,
-                    'history': history
-                },
-                debug=self._debug
+                data={'id': self._computer_id, 'inventory': after, 'history': history},
+                debug=self._debug,
             )
             logger.debug('Response upload_software: %s', response)
 
@@ -777,9 +724,9 @@ class MigasFreeSync(MigasFreeCommand):
                     'id': self._computer_id,
                     'start_date': start_date,
                     'consumer': f'{consumer} {utils.get_mfc_release()}',
-                    'pms_status_ok': self._pms_status_ok
+                    'pms_status_ok': self._pms_status_ok,
                 },
-                debug=self._debug
+                debug=self._debug,
             )
 
         self.operation_ok()
@@ -968,21 +915,23 @@ class MigasFreeSync(MigasFreeCommand):
                     'before': before_prefix_value,
                     'after': after_prefix_value,
                 },
-                indent=settings.JSON_INDENT
-            )
+                indent=settings.JSON_INDENT,
+            ),
         )
 
         utils.write_file(
             settings.EVENTS_ENV_FILE,
-            f"{to_env(before_prefix_value, 'BEFORE_TRAIT_')}{to_env(after_prefix_value, 'TRAIT_')}"
+            f'{to_env(before_prefix_value, "BEFORE_TRAIT_")}{to_env(after_prefix_value, "TRAIT_")}',
         )
 
         # calculate diff
-        diff = list((
-            (key, {'before': before_prefix_value.get(key), 'after': after_prefix_value.get(key)})
-            for key in before_prefix_value
-            if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
-        ))
+        diff = list(
+            (
+                (key, {'before': before_prefix_value.get(key), 'after': after_prefix_value.get(key)})
+                for key in before_prefix_value
+                if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
+            )
+        )
         if not diff:
             return
 
@@ -1034,8 +983,7 @@ class MigasFreeSync(MigasFreeCommand):
             return False
 
         for device in devices['logical']:
-            if 'PRINTER' in device and 'packages' in device['PRINTER'] \
-                    and device['PRINTER']['packages']:
+            if 'PRINTER' in device and 'packages' in device['PRINTER'] and device['PRINTER']['packages']:
                 if not self.install_mandatory_packages(device['PRINTER']['packages']):
                     return False
 
@@ -1105,13 +1053,15 @@ class MigasFreeSync(MigasFreeCommand):
 
         for key, value in logical_devices.items():
             if value.driver is None:
-                _msg = _('Error: no driver defined for device %s. '
-                         'Please, configure capability %s, in the model %s %s, and project %s') % (
+                _msg = _(
+                    'Error: no driver defined for device %s. '
+                    'Please, configure capability %s, in the model %s %s, and project %s'
+                ) % (
                     value.name,
                     value.info.split('__')[2],  # capability
                     value.info.split('__')[0],  # manufacturer
                     value.info.split('__')[1],  # model
-                    self.migas_project
+                    self.migas_project,
                 )
                 self.operation_failed(_msg)
                 logging.error(_msg)
@@ -1131,8 +1081,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         # System default printer
         if devices['default'] != 0 and devices['default'] in logical_devices:
-            _printer_name = logical_devices[devices['default']].name \
-                            or logical_devices[devices['default']].printer_name
+            _printer_name = logical_devices[devices['default']].name or logical_devices[devices['default']].printer_name
             if self.devices_class.get_printer_id(self.devices_class.get_default()) != devices['default']:
                 try:
                     self._show_message(_('Setting default device: %s') % _printer_name)
