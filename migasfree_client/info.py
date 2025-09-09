@@ -45,11 +45,7 @@ class MigasFreeInfo(MigasFreeCommand):
         logger.debug('Getting label')
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_label']),
-                data={
-                    'id': self._computer_id
-                },
-                debug=self._debug
+                url=self.api_endpoint(self.URLS['get_label']), data={'id': self._computer_id}, debug=self._debug
             )
 
         logger.debug('Response get_label: %s', response)
@@ -75,17 +71,10 @@ class MigasFreeInfo(MigasFreeCommand):
                 table.add_column('NAME')
                 table.add_column('SEARCH')
                 table.add_column('UUID')
-                table.add_row(
-                    str(self._computer_id),
-                    info['name'],
-                    info['search'],
-                    info['uuid']
-                )
+                table.add_row(str(self._computer_id), info['name'], info['search'], info['uuid'])
                 self.console.print(table)
             else:
-                print(
-                    f"{self._computer_id}\t{info['name']}\t{info['search']}\t{info['uuid']}"
-                )
+                print(f'{self._computer_id}\t{info["name"]}\t{info["search"]}\t{info["uuid"]}')
         elif key == 'id':
             if not self._quiet:
                 table.add_column('ID')
