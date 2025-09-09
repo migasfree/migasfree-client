@@ -27,8 +27,14 @@ from .command import MigasFreeCommand
 from .settings import ICON_PATH
 from .sync import MigasFreeSync
 from .utils import (
-    ALL_OK, is_linux, is_windows, check_lock_file,
-    execute, remove_file, is_xsession, is_zenity,
+    ALL_OK,
+    is_linux,
+    is_windows,
+    check_lock_file,
+    execute,
+    remove_file,
+    is_xsession,
+    is_zenity,
 )
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -50,18 +56,15 @@ class MigasFreeTags(MigasFreeCommand):
         print('\n' + _('Examples:'))
 
         examples = [
-            (_('Get tags in server (JSON format):'),
-                [f'{self.CMD} tags -g', f'{self.CMD} tags --get']),
-            (_('Communicate tags to server (command line):'),
-                [f'{self.CMD} tags -c tag...', f'{self.CMD} tags --communicate tag...']),
-            (_('Communicate tags to server (with GUI):'),
-                [f'{self.CMD} tags -c', f'{self.CMD} tags --communicate']),
-            (_('Set tags (command line):'),
-                [f'{self.CMD} tags -s tag...', f'{self.CMD} tags --set tag...']),
-            (_('Set tags (with GUI):'),
-                [f'{self.CMD} tags -s', f'{self.CMD} tags --set']),
-            (_('Unsetting all tags (command line):'),
-                [f'{self.CMD} tags -s ""', f'{self.CMD} tags --set ""']),
+            (_('Get tags in server (JSON format):'), [f'{self.CMD} tags -g', f'{self.CMD} tags --get']),
+            (
+                _('Communicate tags to server (command line):'),
+                [f'{self.CMD} tags -c tag...', f'{self.CMD} tags --communicate tag...'],
+            ),
+            (_('Communicate tags to server (with GUI):'), [f'{self.CMD} tags -c', f'{self.CMD} tags --communicate']),
+            (_('Set tags (command line):'), [f'{self.CMD} tags -s tag...', f'{self.CMD} tags --set tag...']),
+            (_('Set tags (with GUI):'), [f'{self.CMD} tags -s', f'{self.CMD} tags --set']),
+            (_('Unsetting all tags (command line):'), [f'{self.CMD} tags -s ""', f'{self.CMD} tags --set ""']),
         ]
         for title, cmds in examples:
             print(f'  {title}')
@@ -72,7 +75,7 @@ class MigasFreeTags(MigasFreeCommand):
     def _show_running_options(self):
         super()._show_running_options()
 
-        print('\t{}: {}'.format(_("Tag list"), self._tags))
+        print('\t{}: {}'.format(_('Tag list'), self._tags))
         print()
 
     def _sanitize(self, tag_list):
@@ -101,10 +104,11 @@ class MigasFreeTags(MigasFreeCommand):
         available_tags = collections.OrderedDict(sorted(available.items()))
 
         # Change tags with gui
-        title = _("Change tags")
-        text = _("Please, select tags for this computer")
+        title = _('Change tags')
+        text = _('Please, select tags for this computer')
         if is_windows() or (is_xsession() and is_zenity()):
-            cmd = 'zenity --title="%s" \
+            cmd = (
+                'zenity --title="%s" \
                 --text="%s" \
                 %s \
                 --window-icon="%s" \
@@ -116,13 +120,9 @@ class MigasFreeTags(MigasFreeCommand):
                 --print-column=2 \
                 --column=" " \
                 --column=TAG \
-                --column=TYPE' % \
-                (
-                    title,
-                    text,
-                    '--separator="\n"' if is_linux() else '',
-                    os.path.join(ICON_PATH, self.ICON)
-                )
+                --column=TYPE'
+                % (title, text, '--separator="\n"' if is_linux() else '', os.path.join(ICON_PATH, self.ICON))
+            )
             if is_linux():
                 cmd += ' 2> /dev/null'
             for key, value in available_tags.items():
@@ -142,7 +142,7 @@ class MigasFreeTags(MigasFreeCommand):
         logger.debug('Change tags command: %s', cmd)
         ret, out, error = execute(cmd, interactive=False)
         if ret == 0:
-            selected_tags = list(filter(None, out.split("\n")))
+            selected_tags = list(filter(None, out.split('\n')))
             logger.debug('Selected tags: %s', selected_tags)
         else:
             # no action chosen -> no change tags
@@ -160,11 +160,7 @@ class MigasFreeTags(MigasFreeCommand):
 
         logger.debug('Getting assigned tags')
         response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_assigned_tags']),
-            data={
-                'id': self._computer_id
-            },
-            debug=self._debug
+            url=self.api_endpoint(self.URLS['get_assigned_tags']), data={'id': self._computer_id}, debug=self._debug
         )
 
         logger.debug('Response get_assigned_tags: %s', response)
@@ -189,7 +185,7 @@ class MigasFreeTags(MigasFreeCommand):
             url=self.api_endpoint(self.URLS['get_available_tags']),
             data={'id': self._computer_id},
             exit_on_error=False,
-            debug=self._debug
+            debug=self._debug,
         )
 
         logger.debug('Response get_available_tags: %s', response)
@@ -215,12 +211,9 @@ class MigasFreeTags(MigasFreeCommand):
         logger.debug('Setting tags: %s', self._tags)
         response = self._url_request.run(
             url=self.api_endpoint(self.URLS['upload_tags']),
-            data={
-                'id': self._computer_id,
-                'tags': self._tags
-            },
+            data={'id': self._computer_id, 'tags': self._tags},
             exit_on_error=False,
-            debug=self._debug
+            debug=self._debug,
         )
 
         logger.debug('Setting tags response: %s', response)
@@ -252,13 +245,13 @@ class MigasFreeTags(MigasFreeCommand):
             software_before = self.pms.query_all()
             software_history = mfs.software_history(software_before)
 
-            mfs.uninstall_packages(rules["remove"])
-            mfs.install_mandatory_packages(rules["preinstall"])
+            mfs.uninstall_packages(rules['remove'])
+            mfs.install_mandatory_packages(rules['preinstall'])
 
             # Update metadata
             mfs.clean_pms_cache()
 
-            mfs.install_mandatory_packages(rules["install"])
+            mfs.install_mandatory_packages(rules['install'])
 
             mfs.upload_software(software_before, software_history)
 
@@ -275,10 +268,7 @@ class MigasFreeTags(MigasFreeCommand):
         if args.get:
             check_lock_file(self.CMD, self.LOCK_FILE)
             try:
-                response = {
-                    'assigned': self.get_assigned_tags(),
-                    'available': self.get_available_tags()
-                }
+                response = {'assigned': self.get_assigned_tags(), 'available': self.get_available_tags()}
             except PermissionError:
                 sys.exit(errno.EPERM)
             except RuntimeError:
