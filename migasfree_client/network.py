@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2022 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -54,14 +54,8 @@ def get_iface_net(iface):
     string get_iface_net(string)
     returns a dotted-quad string
     """
-    iface_address = struct.unpack(
-        '=L',
-        socket.inet_aton(get_iface_address(iface))
-    )[0]
-    iface_mask = struct.unpack(
-        '=L',
-        socket.inet_aton(get_iface_mask(iface))
-    )[0]
+    iface_address = struct.unpack('=L', socket.inet_aton(get_iface_address(iface)))[0]
+    iface_mask = struct.unpack('=L', socket.inet_aton(get_iface_mask(iface)))[0]
 
     return socket.inet_ntoa(struct.pack('=L', iface_address & iface_mask))
 
@@ -71,12 +65,7 @@ def get_iface_cidr(iface):
     int get_iface_cidr(string)
     returns an integer number between 0 and 32
     """
-    bin_str = bin(
-        struct.unpack(
-            '=L',
-            socket.inet_aton(get_iface_mask(iface))
-        )[0]
-    )[2:]
+    bin_str = bin(struct.unpack('=L', socket.inet_aton(get_iface_mask(iface)))[0])[2:]
     cidr = 0
     for c in bin_str:
         if c == '1':
@@ -134,7 +123,7 @@ def get_network_info():
     return {
         'ip': get_iface_address(_ifname),
         'netmask': get_iface_mask(_ifname),
-        'net': f'{get_iface_net(_ifname)}/{get_iface_cidr(_ifname)}'
+        'net': f'{get_iface_net(_ifname)}/{get_iface_cidr(_ifname)}',
     }
 
 
