@@ -247,7 +247,7 @@ class Apt(Pms):
                 logging.error('Generated .sources file not found: %s', sources_path)
                 return ''
 
-            with open(sources_path) as f:
+            with open(sources_path, encoding='utf-8') as f:
                 sources_content = f.read()
 
             return self._adapt_sources(sources_content, server)
