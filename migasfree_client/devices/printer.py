@@ -54,6 +54,7 @@ class Printer:
             cls._entities_[entity] = subclass
             subclass._entity_ = entity
             return subclass
+
         return decorator
 
     def __init__(self, server='', device=None):
@@ -102,23 +103,12 @@ class Printer:
         if 'LOCATION' in self.conn and self.conn['LOCATION']:
             self.location = self.conn['LOCATION']
 
-        self.info = '{}__{}__{}__{}__{}'.format(
-            device['manufacturer'],
-            device['model'],
-            device['capability'],
-            device['name'],
-            int(device['id'])
-        )
+        self.info = f'{device["manufacturer"]}__{device["model"]}__{device["capability"]}__{device["name"]}__{int(device["id"])}'
 
         if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
             self.name = f'{self.conn["NAME"]}__{device["capability"]}__{device["name"]}'
         else:
-            self.name = '{}__{}__{}__{}'.format(
-                device['manufacturer'],
-                device['model'],
-                device['capability'],
-                device['name'],
-            )
+            self.name = f'{device["manufacturer"]}__{device["model"]}__{device["capability"]}__{device["name"]}'
 
         self.logical_id = device['id']
         self.driver = device.get('driver', None)
@@ -140,10 +130,10 @@ class Printer:
 
     def is_changed(self):
         return not (
-            len(self.printer_data) > 0 and
-            self.printer_data['printer-info'] == self.info and
-            self.printer_data['printer-location'] == self.location and
-            self.printer_data['device-uri'] == self.uri
+            len(self.printer_data) > 0
+            and self.printer_data['printer-info'] == self.info
+            and self.printer_data['printer-location'] == self.location
+            and self.printer_data['device-uri'] == self.uri
         )
 
     @staticmethod
