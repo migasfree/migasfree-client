@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2021-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import gettext
 import logging
 
 from .pms import Pms
 from ..utils import execute, write_file, read_file
 
-import gettext
 _ = gettext.gettext
 
 __author__ = 'Jose Antonio Chavarría'
@@ -174,11 +174,9 @@ class Pacman(Pms):
                     key, value = _item.strip().split(':', 1)
                     _pkg_info[key.strip()] = value.strip()
 
-            _result.append('{}_{}_{}.pkg.tar.zst'.format(  # FIXME extension
-                _pkg_info['Name'],
-                _pkg_info['Version'],
-                _pkg_info['Architecture']
-            ))
+            _result.append(
+                f'{_pkg_info["Name"]}_{_pkg_info["Version"]}_{_pkg_info["Architecture"]}.pkg.tar.zst'  # FIXME extension
+            )
 
         return _result
 
@@ -207,7 +205,7 @@ class Pacman(Pms):
         self._include_config()
 
         content = ''.join(
-            f"{repo.get('source_template').format(protocol=protocol, server=server)}" for repo in repositories
+            f'{repo.get("source_template").format(protocol=protocol, server=server)}' for repo in repositories
         )
 
         return write_file(self._repo, content)
