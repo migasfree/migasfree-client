@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2024-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import gettext
 import logging
 
 from .pms import Pms
 from ..utils import execute, write_file
 
-import gettext
 _ = gettext.gettext
 
 __author__ = 'Jose Antonio Chavarría'
@@ -41,11 +41,7 @@ class Wpt(Pms):
 
         self._name = 'wpt'  # Package Management System name
         self._pms = 'wpt'  # Package Management System command
-        self._repo = os.path.join(
-            os.getenv('PROGRAMDATA'),
-            self._name,
-            'sources.list'
-        )  # Repositories file
+        self._repo = os.path.join(os.getenv('PROGRAMDATA'), self._name, 'sources.list')  # Repositories file
         self._mimetype = [
             'application/gzip',
             'application/x-gzip',
@@ -172,7 +168,7 @@ class Wpt(Pms):
         """
 
         content = ''.join(
-            f"{repo.get('source_template').format(protocol=protocol, server=server)}" for repo in repositories
+            f'{repo.get("source_template").format(protocol=protocol, server=server)}' for repo in repositories
         )
 
         return write_file(self._repo, content)
