@@ -59,19 +59,10 @@ class Cupswrapper(Printer):
         try:
             if self.driver:
                 conn.addPrinter(
-                    name=self.name,
-                    filename=self.driver,
-                    info=self.info,
-                    location=self.location,
-                    device=self.uri
+                    name=self.name, filename=self.driver, info=self.info, location=self.location, device=self.uri
                 )
             else:
-                conn.addPrinter(
-                    name=self.name,
-                    info=self.info,
-                    location=self.location,
-                    device=self.uri
-                )
+                conn.addPrinter(name=self.name, info=self.info, location=self.location, device=self.uri)
         except cups.IPPError as e:
             (status, description) = e.args
             print(f'CUPS Error: {status} ({description})')
@@ -168,8 +159,4 @@ class Cupswrapper(Printer):
             raise RuntimeError
 
     def md5_file(self):
-        return os.path.join(
-            DEVICES_PATH,
-            sanitize_path(self.server),
-            f'{self.logical_id}.md5'
-        )
+        return os.path.join(DEVICES_PATH, sanitize_path(self.server), f'{self.logical_id}.md5')
