@@ -79,10 +79,13 @@ def is_linux():
 
 def sanitize_path(value):
     if is_windows():
-        return value.replace('\\', '_').replace('/', '_').replace(
-            ':', '_'
-        ).replace('?', '_').replace('"', '_').replace(
-            '|', '_'
+        return (
+            value.replace('\\', '_')
+            .replace('/', '_')
+            .replace(':', '_')
+            .replace('?', '_')
+            .replace('"', '_')
+            .replace('|', '_')
         )
 
     return value
@@ -132,26 +135,13 @@ def execute(cmd, verbose=False, interactive=True):
                 shell=True,
             )
         else:
-            _process = subprocess.Popen(
-                cmd,
-                shell=True,
-                executable='/bin/bash'
-            )
+            _process = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
     else:
         if is_windows():
-            _process = subprocess.Popen(
-                cmd,
-                shell=True,
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE
-            )
+            _process = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         else:
             _process = subprocess.Popen(
-                cmd,
-                shell=True,
-                executable='/bin/bash',
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE
+                cmd, shell=True, executable='/bin/bash', stderr=subprocess.PIPE, stdout=subprocess.PIPE
             )
 
         if verbose:
@@ -161,10 +151,7 @@ def execute(cmd, verbose=False, interactive=True):
                 fcntl.fcntl(
                     _process.stdout.fileno(),
                     fcntl.F_SETFL,
-                    fcntl.fcntl(
-                        _process.stdout.fileno(),
-                        fcntl.F_GETFL
-                    ) | os.O_NONBLOCK,
+                    fcntl.fcntl(_process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
                 )
 
             while _process.poll() is None:
@@ -205,19 +192,10 @@ def timeout_execute(cmd, timeout=60):
 
     if is_linux():
         _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable='/bin/bash',
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            cmd, shell=True, executable='/bin/bash', stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
     else:
-        _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+        _process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     if timeout > 0:
         _seconds_elapsed = 0
@@ -232,6 +210,7 @@ def timeout_execute(cmd, timeout=60):
                     os.waitpid(-1, os.WNOHANG)
                 else:
                     import psutil
+
                     psutil.Process(_process.pid).kill()
 
                 return 1, '', _('"%s" command expired timeout') % cmd
@@ -264,24 +243,48 @@ def get_hostname():
 def get_graphic_pid():
     """
     list get_graphic_pid(void)
-    Detects Gnome, KDE, Xfce, Xfce4, LXDE, LXQt, Unity, MATE, Cinnamon
+    Detects desktop environment and returns [PID, environment_name] if found
     """
 
     _graphic_environments = [
         'gnome-session-binary',  # Gnome & Unity
-        'gnome-session',         # Gnome
-        'ksmserver',             # KDE
-        'xfce-mcs-manage',       # Xfce
-        'xfce4-session',         # Xfce4
-        'lxsession',             # LXDE
-        'lxqt-session',          # LXQt
-        'mate-session',          # MATE
-        'cinnamon-session',      # Cinnamon
+        'gnome-session',  # Gnome
+        'ksmserver',  # KDE
+        'xfce-mcs-manage',  # Xfce
+        'xfce4-session',  # Xfce4
+        'lxsession',  # LXDE
+        'lxqt-session',  # LXQt
+        'mate-session',  # MATE
+        'cinnamon-session',  # Cinnamon
+        'enlightenment',  # Enlightenment
+        'pantheon',  # Pantheon (elementary OS)
+        'deepin',  # Deepin
+        'budgie-desktop',  # Budgie (Linux Mint)
+        'sway',  # Sway (Wayland)
+        'i3',  # i3 (Tiling WM)
+        'openbox',  # Openbox
+        'awesome',  # Awesome WM
+        'fluxbox',  # Fluxbox
+        'herbstluftwm',  # Herbstluftwm
+        'lumina',  # Lumina (LightDM)
+        'xmonad',  # XMonad
+        'dwm',  # DWM
+        'stumpwm',  # StumpWM
+        'windowmaker',  # WindowMaker
+        'jwm',  # JWM
     ]
+
     for _process in _graphic_environments:
-        _pid = subprocess.getoutput(f'pidof -s {_process}')
-        if _pid:
-            return [_pid, _process]
+        try:
+            # search main process (the oldest one)
+            result = subprocess.run(['pgrep', '-o', _process], capture_output=True, text=True, check=True)
+            _pid = result.stdout.strip()
+            if _pid:
+                return [_pid, _process]
+        except subprocess.CalledProcessError:
+            continue  # process is not in execution
+        except Exception:
+            continue
 
     return [None, None]
 
@@ -349,10 +352,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
     _display = []
     while not _display and timeout > 0:
         # a data line ends in 0 byte, not newline
-        _display = grep(
-            'DISPLAY',
-            open(f'/proc/{pid}/environ', encoding='utf_8').read().split('\0')
-        )
+        _display = grep('DISPLAY', open(f'/proc/{pid}/environ', encoding='utf-8').read().split('\0'))
         if _display:
             _display = _display[0].split('=').pop()
             return _display
@@ -372,13 +372,8 @@ def compare_lists(a, b):
     returns ordered diff list
     """
 
-    _result = list(difflib.unified_diff(a, b, n=0))
     # clean lines... (only package lines are important)
-    # http://docs.python.org/tutorial/controlflow.html#for-statements
-    for _line in _result[:]:
-        if _line.startswith('+++') or _line.startswith('---') \
-                or _line.startswith('@@'):
-            _result.remove(_line)
+    _result = [line for line in difflib.unified_diff(a, b, n=0) if not line.startswith(('+++', '---', '@@'))]
 
     return sorted(_result)
 
@@ -392,11 +387,9 @@ def compare_files(a, b):
     if not os.path.isfile(a) or not os.path.isfile(b):
         return None
 
-    # U - open for input as a text file with universal newline interpretation
-    # http://www.python.org/dev/peps/pep-0278/
-    with open(a, encoding='utf_8') as f:
+    with open(a, encoding='utf-8') as f:
         _list_a = f.readlines()
-    with open(b, encoding='utf_8') as f:
+    with open(b, encoding='utf-8') as f:
         _list_b = f.readlines()
 
     return compare_lists(_list_a, _list_b)
@@ -423,7 +416,7 @@ def get_user_info(user):
         # http://en.wikipedia.org/wiki/Gecos_field
         'fullname': _info[4].split(',', 1)[0],
         'home': _info[5],
-        'shell': _info[6]
+        'shell': _info[6],
     }
 
 
@@ -479,7 +472,7 @@ def remove_file(archive):
         os.remove(archive)
 
 
-def query_yes_no(question, default="yes"):
+def query_yes_no(question, default='yes'):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.
@@ -491,16 +484,13 @@ def query_yes_no(question, default="yes"):
 
     Based in http://code.activestate.com/recipes/577058/
     """
-    valid = {
-        _("yes"): "yes", _("y"): "yes",
-        _("no"): "no", _("n"): "no"
-    }
+    valid = {_('yes'): 'yes', _('y'): 'yes', _('no'): 'no', _('n'): 'no'}
     if default is None:
-        prompt = ' {} '.format(_("[y/n]"))
-    elif default == "yes":
-        prompt = ' {} '.format(_("[Y/n]"))
-    elif default == "no":
-        prompt = ' {} '.format(_("[y/N]"))
+        prompt = ' {} '.format(_('[y/n]'))
+    elif default == 'yes':
+        prompt = ' {} '.format(_('[Y/n]'))
+    elif default == 'no':
+        prompt = ' {} '.format(_('[y/N]'))
     else:
         raise ValueError(f"invalid default answer: '{default}'")
 
@@ -510,7 +500,7 @@ def query_yes_no(question, default="yes"):
         if default is not None and choice == '':
             return default
 
-        if choice in valid.keys():
+        if choice in valid:
             return valid[choice]
 
         print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
@@ -530,29 +520,25 @@ def process_is_active(pid):
 
 
 def check_lock_file(cmd, lock_file):
+    _pid = None
     if os.path.isfile(lock_file):
-        _file = None
-        _pid = None
         try:
-            _file = open(lock_file, encoding='utf_8')
-            _pid = _file.read()
+            with open(lock_file, encoding='utf-8') as _file:
+                _pid = _file.read().strip()
         except IOError:
-            pass
-        finally:
-            if _file is not None:
-                _file.close()
-
-        if not _pid:
             _pid = -1
         else:
-            _pid = int(_pid)
+            if not _pid:
+                _pid = -1
+            else:
+                try:
+                    _pid = int(_pid)
+                except ValueError:
+                    _pid = -1
 
         try:
             if process_is_active(_pid):
-                print(_('Another instance of %(cmd)s is running: %(pid)d') % {
-                    'cmd': cmd,
-                    'pid': int(_pid)
-                })
+                print(_('Another instance of %(cmd)s is running: %(pid)d') % {'cmd': cmd, 'pid': int(_pid)})
                 sys.exit(errno.EPERM)
         except OSError:
             pass
@@ -663,7 +649,7 @@ def get_hardware_uuid():
             _byte_array[12:14],
             _byte_array[14:16],
             _byte_array[16:20],
-            _byte_array[20:32]
+            _byte_array[20:32],
         )
     else:
         # http://stackoverflow.com/questions/10850075/guid-uuid-compatibility-issue-between-net-and-linux
@@ -677,7 +663,7 @@ def get_hardware_uuid():
             _byte_array[14:16],
             _byte_array[12:14],
             _byte_array[16:20],
-            _byte_array[20:32]
+            _byte_array[20:32],
         )
 
     _ms_uuid = _ms_uuid.upper()
@@ -727,10 +713,7 @@ def execute_as_user(args):
 
     if is_linux():
         process = subprocess.Popen(
-            args,
-            preexec_fn=demote(user_info.get('uid'), user_info.get('gid')),
-            cwd=user_info.get('home'),
-            env=env
+            args, preexec_fn=demote(user_info.get('uid'), user_info.get('gid')), cwd=user_info.get('home'), env=env
         )
     else:
         process = subprocess.Popen(args, cwd=user_info.get('home'), env=env)
@@ -762,14 +745,14 @@ def md5sum(archive):
     if not archive:
         return ''
 
-    with open(archive, encoding='utf_8') as handle:
+    with open(archive, encoding='utf-8') as handle:
         _md5 = handle.read().encode()
 
     return hashlib.md5(_md5).hexdigest()
 
 
 def escape_quotes(text):
-    return text.replace('"', '\\\"')
+    return text.replace('"', '\\"')
 
 
 def get_trait(prefix, key=None, state='after'):
@@ -785,10 +768,10 @@ def get_trait(prefix, key=None, state='after'):
             ret = [item.get(key) for item in ret]
         if len(ret) == 1:
             return ret[0]
-        else:
-            return ret
-    else:
-        return None
+
+        return ret
+
+    return None
 
 
 def trait_value_exists(prefix, value, state='after'):
