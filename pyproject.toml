@@ -39,7 +39,7 @@ classifiers = [
 ]
 
 [project.urls]
-homepage = "http://migasfree.org"
+homepage = "https://migasfree.org"
 repository = "https://github.com/migasfree/migasfree-client"
 documentation = "https://fun-with-migasfree.readthedocs.io"
 "Bug Report" = "https://github.com/migasfree/migasfree-client/issues"
