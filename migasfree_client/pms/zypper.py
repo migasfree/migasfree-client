@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -128,7 +128,7 @@ class Zypper(Yum):
         string get_system_architecture(void)
         """
 
-        cmd = f'{self._pm} -q --qf "%%{{arch}}" -f /etc/lsb-release'
+        cmd = f'{self._pm} -q --qf "%{{arch}}" -f /etc/lsb-release'
         logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
