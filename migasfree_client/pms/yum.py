@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,10 +47,7 @@ class Yum(Pms):
         else:
             self._repo = '/etc/yum/repos.d/migasfree.repo'
 
-        self._mimetype = [
-            'application/x-rpm',
-            'application/x-redhat-package-manager'
-        ]
+        self._mimetype = ['application/x-rpm', 'application/x-redhat-package-manager']
 
     def install(self, package):
         """
@@ -178,7 +175,7 @@ class Yum(Pms):
         """
 
         content = ''.join(
-            f"{repo.get('source_template').format(protocol=protocol, server=server, keys_path=KEYS_PATH)}"
+            f'{repo.get("source_template").format(protocol=protocol, server=server, keys_path=KEYS_PATH)}'
             for repo in repositories
         )
 
@@ -199,7 +196,7 @@ class Yum(Pms):
         string get_system_architecture(void)
         """
 
-        cmd = '%s --eval "%%{_arch}"' % self._pm
+        cmd = f'{self._pm} --eval "%{{_arch}}"'
         logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
@@ -211,9 +208,7 @@ class Yum(Pms):
         list available_packages(void)
         """
 
-        cmd = "{} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'".format(
-            self._pms
-        )
+        cmd = f"{self._pms} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'"
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)
