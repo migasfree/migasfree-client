@@ -4,3 +4,4 @@ include AUTHORS INSTALL LICENSE README.md MANIFEST.in migasfree-client.doap requ
 include conf/migasfree.conf
 recursive-include icons *.svg
 recursive-include migasfree_client *.py
+include po/*
