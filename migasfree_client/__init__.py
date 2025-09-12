@@ -32,7 +32,7 @@ __contact__ = 'fun.with@migasfree.org'
 __homepage__ = 'https://github.com/migasfree/migasfree-client/'
 
 # i18n
-DOMAIN = 'migasfree-client'
+DOMAIN = 'migasfree'
 gettext.install(DOMAIN, LOCALE_PATH)
 
 if not os.environ.get('LANG'):
