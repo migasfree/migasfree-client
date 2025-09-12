@@ -25,6 +25,7 @@ __license__ = 'GPLv3'
 # python setup.py build
 # python setup.py sdist
 # python setup.py bdist --format=rpm
+# python setup.py bdist_rpm
 # python setup.py --command-packages=stdeb.command bdist_deb (python-stdeb)
 
 # http://zetcode.com/articles/packageinpython/
@@ -58,16 +59,16 @@ except ImportError:
             return True  # if target not exist, source is newer
 
 PATH = os.path.dirname(os.path.abspath(__file__))
-with open(os.path.join(PATH, 'README.md'), encoding='utf_8') as f:
+with open(os.path.join(PATH, 'README.md'), encoding='utf-8') as f:
     README = f.read()
 VERSION = __import__('migasfree_client').__version__
 
 REQUIRES = filter(
     lambda s: len(s) > 0,
-    open(os.path.join(PATH, 'requirements.txt'), encoding='utf_8').read().split('\n')
+    open(os.path.join(PATH, 'requirements.txt'), encoding='utf-8').read().split('\n')
 )
 
-APP_NAME = 'migasfree-client'
+APP_NAME = 'migasfree_client'
 PO_DIR = 'po'
 MO_DIR = os.path.join('build', 'mo')
 
