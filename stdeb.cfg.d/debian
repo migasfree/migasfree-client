@@ -2,7 +2,7 @@
 
 # http://pypi.python.org/pypi/stdeb/#stdeb-cfg-configuration-file
 
-[migasfree-client]
+[migasfree_client]
 Source = migasfree-client
 Package = migasfree-client
 Package3 = migasfree-client
