@@ -5,7 +5,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "migasfree-client"
+name = "migasfree_client"
 dynamic = ["version", "entry-points"]
 authors = [
   {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
