@@ -69,6 +69,7 @@ REQUIRES = filter(
 )
 
 APP_NAME = 'migasfree_client'
+DOMAIN = 'migasfree'
 PO_DIR = 'po'
 MO_DIR = os.path.join('build', 'mo')
 
@@ -79,7 +80,7 @@ class BuildData(build):
 
         for po in glob.glob(os.path.join(PO_DIR, '*.po')):
             lang = os.path.basename(po[:-3])
-            mo = os.path.join(MO_DIR, lang, f'{APP_NAME}.mo')
+            mo = os.path.join(MO_DIR, lang, f'{DOMAIN}.mo')
 
             directory = os.path.dirname(mo)
             if not os.path.exists(directory):
@@ -103,7 +104,7 @@ class InstallData(install_data):
     def _find_mo_files(self):
         data_files = []
 
-        for mo in glob.glob(os.path.join(MO_DIR, '*', f'{APP_NAME}.mo')):
+        for mo in glob.glob(os.path.join(MO_DIR, '*', f'{DOMAIN}.mo')):
             lang = os.path.basename(os.path.dirname(mo))
             dest = os.path.join('share', 'locale', lang, 'LC_MESSAGES')
             data_files.append((dest, [mo]))
