@@ -47,8 +47,12 @@ documentation = "https://fun-with-migasfree.readthedocs.io"
 [project.scripts]
 migasfree = "migasfree_client.__main__:main"
 
-[tool.setuptools.packages]
-find = {}
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+  "migasfree_client", "migasfree_client.devices", "migasfree_client.pms",
+  "migasfree_client.devices.plugins", "migasfree_client.pms.plugins"
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "migasfree_client.__version__"}
