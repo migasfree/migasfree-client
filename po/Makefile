@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PROJECT = migasfree-client
+PROJECT = migasfree
 
 GETTEXT = /usr/bin/xgettext
 MSGMERGE = /usr/bin/msgmerge
