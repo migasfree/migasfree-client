@@ -21,7 +21,7 @@ import re
 import logging
 import tempfile
 
-from migasfree_client.utils import execute, write_file
+from migasfree_client.utils import execute, write_file, which
 from .pms import Pms
 
 __author__ = 'Jose Antonio Chavarría'
@@ -325,7 +325,7 @@ class Apt(Pms):
                 logging.error('Error in import_server_key with gpg: %s', str(e))
                 return False
 
-        elif shutil.which('apt-key'):
+        elif which('apt-key'):
             self._cmd = 'APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add {0} >/dev/null'.format(file_key)
             logging.debug(self._cmd)
             return execute(self._cmd)[0] == 0
