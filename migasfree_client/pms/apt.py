@@ -274,7 +274,12 @@ class Apt(Pms):
         apt_version = out.strip() if ret == 0 else '2.0'
         logging.debug('Detected APT version: %s', apt_version)
 
-        return tuple(int(x) for x in apt_version.split('.'))
+        # extracts the first three number groups
+        match = re.match(r'(\d+)\.(\d+)(?:\.(\d+))?', apt_version)
+        if not match:
+            return (2, 0)  # for compatibility
+
+        return tuple(int(x) for x in match.groups() if x is not None)
 
     def create_repos(self, protocol, server, repositories):
         """
