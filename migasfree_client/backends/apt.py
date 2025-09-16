@@ -46,20 +46,19 @@ class Apt(Pms):
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'
 
-        self._silent_options = '-o APT::Get::Purge=true -o Dpkg::Options::=--force-confdef' \
-            ' -o Dpkg::Options::=--force-confold -o Debug::pkgProblemResolver=1' \
-            ' --assume-yes --allow-downgrades --allow-change-held-packages' \
+        self._silent_options = (
+            '-o APT::Get::Purge=true -o Dpkg::Options::=--force-confdef'
+            ' -o Dpkg::Options::=--force-confold -o Debug::pkgProblemResolver=1'
+            ' --assume-yes --allow-downgrades --allow-change-held-packages'
             ' --allow-unauthenticated --auto-remove'
+        )
 
     def install(self, package):
         """
         bool install(string package)
         """
 
-        self._cmd = '{0} install -o APT::Get::Purge=true {1}'.format(
-            self._pms,
-            package.strip()
-        )
+        self._cmd = '{0} install -o APT::Get::Purge=true {1}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -89,16 +88,9 @@ class Apt(Pms):
         (bool, string) update_silent(void)
         """
 
-        self._cmd = '{0} {1} dist-upgrade'.format(
-            self._pms,
-            self._silent_options
-        )
+        self._cmd = '{0} {1} dist-upgrade'.format(self._pms, self._silent_options)
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _output, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, _output + _error
 
@@ -117,17 +109,9 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{0} {1} install {2}'.format(
-            self._pms,
-            self._silent_options,
-            ' '.join(package_set)
-        )
+        self._cmd = '{0} {1} install {2}'.format(self._pms, self._silent_options, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _output, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, _output + _error
 
@@ -146,17 +130,9 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{0} {1} purge {2}'.format(
-            self._pms,
-            self._silent_options,
-            ' '.join(package_set)
-        )
+        self._cmd = '{0} {1} purge {2}'.format(self._pms, self._silent_options, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _output, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, _output + _error
 
@@ -165,10 +141,7 @@ class Apt(Pms):
         bool is_installed(string package)
         """
 
-        self._cmd = '{0} --status {1} | grep "Status: install ok installed"'.format(
-            self._pm,
-            package.strip()
-        )
+        self._cmd = '{0} --status {1} | grep "Status: install ok installed"'.format(self._pm, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd, interactive=False)[0] == 0
@@ -194,10 +167,7 @@ class Apt(Pms):
         list format: name_version_architecture.extension
         """
 
-        _, _packages, _ = execute(
-            '{0} --list'.format(self._pm),
-            interactive=False
-        )
+        _, _packages, _ = execute('{0} --list'.format(self._pm), interactive=False)
         if not _packages:
             return []
 
@@ -215,9 +185,7 @@ class Apt(Pms):
         Adds 'Signed-By: <key>' in each block of sources content if not exists (deb822)
         """
 
-        signed_by_line = 'Signed-By: {0}'.format(
-            os.path.join(self._keyring_dir, '{0}.gpg'.format(server))
-        )
+        signed_by_line = 'Signed-By: {0}'.format(os.path.join(self._keyring_dir, '{0}.gpg'.format(server)))
 
         blocks = sources_content.split('\n\n')  # each block separated by empty line
         new_blocks = []
@@ -294,7 +262,12 @@ class Apt(Pms):
         apt_version = out.strip() if ret == 0 else '2.0'
         logging.debug('Detected APT version: %s', apt_version)
 
-        return tuple(int(x) for x in apt_version.split('.'))
+        # extracts the first three number groups
+        match = re.match(r'(\d+)\.(\d+)(?:\.(\d+))?', apt_version)
+        if not match:
+            return (2, 0)  # for compatibility
+
+        return tuple(int(x) for x in match.groups() if x is not None)
 
     def create_repos(self, protocol, server, project, repositories, template=''):
         """
@@ -305,16 +278,9 @@ class Apt(Pms):
         content = ''
         for repo in repositories:
             if 'source_template' in repo:
-                content += repo['source_template'].format(
-                    server=server,
-                    project=project,
-                    protocol=protocol
-                )
+                content += repo['source_template'].format(server=server, project=project, protocol=protocol)
             else:
-                content += 'deb {url} {repo} PKGS\n'.format(
-                    url=base_url,
-                    repo=repo['name']
-                )
+                content += 'deb {url} {repo} PKGS\n'.format(url=base_url, repo=repo['name'])
 
         # Choose format by APT version
         self._repo = os.path.join(self._repo_dir, 'migasfree.list')
