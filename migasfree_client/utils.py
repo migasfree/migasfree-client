@@ -43,6 +43,7 @@ except ImportError:
 from . import network, settings
 
 import gettext
+
 _ = gettext.gettext
 
 __author__ = 'Jose Antonio Chavarría'
@@ -114,28 +115,17 @@ def execute(cmd, verbose=False, interactive=True):
         print(cmd)
 
     if interactive:
-        _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable='/bin/bash'
-        )
+        _process = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
     else:
         _process = subprocess.Popen(
-            cmd,
-            shell=True,
-            executable='/bin/bash',
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE
+            cmd, shell=True, executable='/bin/bash', stderr=subprocess.PIPE, stdout=subprocess.PIPE
         )
 
         if verbose:
             fcntl.fcntl(
                 _process.stdout.fileno(),
                 fcntl.F_SETFL,
-                fcntl.fcntl(
-                    _process.stdout.fileno(),
-                    fcntl.F_GETFL
-                ) | os.O_NONBLOCK,
+                fcntl.fcntl(_process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
             )
 
             while _process.poll() is None:
@@ -164,13 +154,7 @@ def execute(cmd, verbose=False, interactive=True):
 def timeout_execute(cmd, timeout=60):
     # based in http://amix.dk/blog/post/19408
 
-    _process = subprocess.Popen(
-        cmd,
-        shell=True,
-        executable='/bin/bash',
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+    _process = subprocess.Popen(cmd, shell=True, executable='/bin/bash', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if timeout > 0:
         _seconds_elapsed = 0
         _interval = 0.2
@@ -210,14 +194,14 @@ def get_graphic_pid():
 
     _graphic_environments = [
         'gnome-session-binary',  # Gnome & Unity
-        'gnome-session',         # Gnome
-        'ksmserver',             # KDE
-        'xfce-mcs-manage',       # Xfce
-        'xfce4-session',         # Xfce4
-        'lxsession',             # LXDE
-        'lxqt-session',          # LXQt
-        'mate-session',          # MATE
-        'cinnamon-session',      # Cinnamon
+        'gnome-session',  # Gnome
+        'ksmserver',  # KDE
+        'xfce-mcs-manage',  # Xfce
+        'xfce4-session',  # Xfce4
+        'lxsession',  # LXDE
+        'lxqt-session',  # LXQt
+        'mate-session',  # MATE
+        'cinnamon-session',  # Cinnamon
     ]
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof -s {0}'.format(_process))
@@ -273,10 +257,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
     _display = []
     while not _display and timeout > 0:
         # a data line ends in 0 byte, not newline
-        _display = grep(
-            'DISPLAY',
-            open("/proc/{0}/environ".format(pid)).read().split('\0')
-        )
+        _display = grep('DISPLAY', open('/proc/{0}/environ'.format(pid)).read().split('\0'))
         if _display:
             _display = _display[0].split('=').pop()
             return _display
@@ -300,8 +281,7 @@ def compare_lists(a, b):
     # clean lines... (only package lines are important)
     # http://docs.python.org/tutorial/controlflow.html#for-statements
     for _line in _result[:]:
-        if _line.startswith('+++') or _line.startswith('---') \
-                or _line.startswith('@@'):
+        if _line.startswith('+++') or _line.startswith('---') or _line.startswith('@@'):
             _result.remove(_line)
 
     return sorted(_result)
@@ -343,7 +323,7 @@ def get_user_info(user):
         # http://en.wikipedia.org/wiki/Gecos_field
         'fullname': _info[4].split(',', 1)[0],
         'home': _info[5],
-        'shell': _info[6]
+        'shell': _info[6],
     }
 
 
@@ -386,7 +366,7 @@ def remove_file(archive):
         os.remove(archive)
 
 
-def query_yes_no(question, default="yes"):
+def query_yes_no(question, default='yes'):
     """
     based in http://code.activestate.com/recipes/577058/
 
@@ -399,16 +379,13 @@ def query_yes_no(question, default="yes"):
 
     The "answer" return value is one of "yes" or "no".
     """
-    valid = {
-        _("yes"): "yes", _("y"): "yes",
-        _("no"): "no", _("n"): "no"
-    }
+    valid = {_('yes'): 'yes', _('y'): 'yes', _('no'): 'no', _('n'): 'no'}
     if default is None:
-        prompt = ' %s ' % _("[y/n]")
-    elif default == "yes":
-        prompt = ' %s ' % _("[Y/n]")
-    elif default == "no":
-        prompt = ' %s ' % _("[y/N]")
+        prompt = ' %s ' % _('[y/n]')
+    elif default == 'yes':
+        prompt = ' %s ' % _('[Y/n]')
+    elif default == 'no':
+        prompt = ' %s ' % _('[y/N]')
     else:
         raise ValueError("invalid default answer: '%s'" % default)
 
@@ -447,10 +424,7 @@ def check_lock_file(cmd, lock_file):
 
         try:
             if os.getsid(_pid):
-                print(_('Another instance of %(cmd)s is running: %(pid)d') % {
-                    'cmd': cmd,
-                    'pid': int(_pid)
-                })
+                print(_('Another instance of %(cmd)s is running: %(pid)d') % {'cmd': cmd, 'pid': int(_pid)})
                 sys.exit(errno.EPERM)
         except OSError:
             pass
@@ -541,10 +515,7 @@ def get_mfc_computer_name():
 
 def get_smbios_version():
     # issue #33
-    _ret, _smbios, _ = execute(
-        'LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present',
-        interactive=False
-    )
+    _ret, _smbios, _ = execute('LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present', interactive=False)
     if _ret != 0 or _smbios == '' or _smbios is None:
         return 0, 0
 
@@ -553,17 +524,14 @@ def get_smbios_version():
 
 
 def get_uuid_from_mac():
-    return "00000000-0000-0000-0000-{0}".format(network.get_first_mac())
+    return '00000000-0000-0000-0000-{0}'.format(network.get_first_mac())
 
 
 def get_hardware_uuid():
     _uuid_format = '%s%s%s%s-%s%s-%s%s-%s-%s'
 
     # issue #16, issue #28
-    _ret, _uuid, _ = execute(
-        'sudo dmidecode --string system-uuid',
-        interactive=False
-    )
+    _ret, _uuid, _ = execute('sudo dmidecode --string system-uuid', interactive=False)
     _uuid = remove_commented_lines(_uuid)  # issue #75
     _uuid = _uuid.replace('\n', '')
     if _ret != 0 or _uuid == '' or _uuid is None:
@@ -586,7 +554,7 @@ def get_hardware_uuid():
             _byte_array[12:14],
             _byte_array[14:16],
             _byte_array[16:20],
-            _byte_array[20:32]
+            _byte_array[20:32],
         )
     else:
         # http://stackoverflow.com/questions/10850075/guid-uuid-compatibility-issue-between-net-and-linux
@@ -600,7 +568,7 @@ def get_hardware_uuid():
             _byte_array[14:16],
             _byte_array[12:14],
             _byte_array[16:20],
-            _byte_array[20:32]
+            _byte_array[20:32],
         )
 
     _ms_uuid = _ms_uuid.upper()
@@ -647,3 +615,13 @@ def md5sum(archive):
             _md5 = _md5.encode()
 
     return hashlib.md5(_md5).hexdigest()
+
+
+def which(cmd):
+    paths = os.environ.get('PATH', '').split(os.pathsep)
+    for path in paths:
+        full_path = os.path.join(path, cmd)
+        if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+            return full_path
+
+    return None
