@@ -2,7 +2,7 @@
 
 # Permissions: root:root 755
 
-_PYTHON=$(which python3)
+_PYTHON=$(which python3 2> /dev/null)
 python3 -c "import migasfree_client" 2&> /dev/null
 if [ $? -ne 0 ]
 then
