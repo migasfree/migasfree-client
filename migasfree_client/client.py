@@ -687,17 +687,19 @@ class MigasFreeClient(MigasFreeCommand):
             self.operation_ok()
 
         _software_base = self._url_request.run('get_computer_software')
-        _software_base = _software_base.split('\n')
+        if isinstance(_software_base, str):
+            _software_base = _software_base.split('\n')
         logging.debug('Software base: %s', _software_base)
 
-        _diff_software = utils.compare_lists(_software_base, _software_after)
-        _diff_software = '\n'.join(_diff_software)
-        logging.debug('Software base diff: %s', _diff_software)
-        self._url_request.run(
-            'upload_computer_software_base_diff',
-            data=_diff_software
-        )
-        self.operation_ok()
+        if isinstance(_software_base, list):
+            _diff_software = utils.compare_lists(_software_base, _software_after)
+            _diff_software = '\n'.join(_diff_software)
+            logging.debug('Software base diff: %s', _diff_software)
+            self._url_request.run(
+                'upload_computer_software_base_diff',
+                data=_diff_software
+            )
+            self.operation_ok()
 
         if _request.get('hardware_capture') is True:
             self._update_hardware_inventory()
