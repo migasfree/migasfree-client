@@ -256,6 +256,7 @@ def get_graphic_pid():
         'lxqt-session',  # LXQt
         'mate-session',  # MATE
         'cinnamon-session',  # Cinnamon
+        'cinnamon-session-binary',  # Cinnamon
         'enlightenment',  # Enlightenment
         'pantheon',  # Pantheon (elementary OS)
         'deepin',  # Deepin
