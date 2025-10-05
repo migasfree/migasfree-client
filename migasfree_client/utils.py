@@ -189,7 +189,7 @@ def get_hostname():
 def get_graphic_pid():
     """
     list get_graphic_pid(void)
-    Detects Gnome, KDE, Xfce, Xfce4, LXDE, LXQt, Unity, MATE
+    Detects desktop environment and returns [PID, environment_name] if found
     """
 
     _graphic_environments = [
@@ -202,7 +202,25 @@ def get_graphic_pid():
         'lxqt-session',  # LXQt
         'mate-session',  # MATE
         'cinnamon-session',  # Cinnamon
+        'cinnamon-session-binary',  # Cinnamon
+        'enlightenment',  # Enlightenment
+        'pantheon',  # Pantheon (elementary OS)
+        'deepin',  # Deepin
+        'budgie-desktop',  # Budgie (Linux Mint)
+        'sway',  # Sway (Wayland)
+        'i3',  # i3 (Tiling WM)
+        'openbox',  # Openbox
+        'awesome',  # Awesome WM
+        'fluxbox',  # Fluxbox
+        'herbstluftwm',  # Herbstluftwm
+        'lumina',  # Lumina (LightDM)
+        'xmonad',  # XMonad
+        'dwm',  # DWM
+        'stumpwm',  # StumpWM
+        'windowmaker',  # WindowMaker
+        'jwm',  # JWM
     ]
+
     for _process in _graphic_environments:
         _pid = commands.getoutput('pidof -s {0}'.format(_process))
         if _pid:
