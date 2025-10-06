@@ -289,6 +289,8 @@ class Apt(Pms):
         content = ''.join(
             f'{repo.get("source_template").format(protocol=protocol, server=server)}' for repo in repositories
         )
+        if not content:
+            return True
 
         # Choose format by APT version
         self._repo = os.path.join(self._repo_dir, 'migasfree.list')
