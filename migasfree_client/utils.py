@@ -255,8 +255,8 @@ def get_graphic_pid():
         'lxsession',  # LXDE
         'lxqt-session',  # LXQt
         'mate-session',  # MATE
-        'cinnamon-session',  # Cinnamon
         'cinnamon-session-binary',  # Cinnamon
+        'cinnamon-session',  # Cinnamon
         'enlightenment',  # Enlightenment
         'pantheon',  # Pantheon (elementary OS)
         'deepin',  # Deepin
@@ -278,7 +278,7 @@ def get_graphic_pid():
     for _process in _graphic_environments:
         try:
             # search main process (the oldest one)
-            result = subprocess.run(['pgrep', '-o', _process], capture_output=True, text=True, check=True)
+            result = subprocess.run(['pgrep', '-f', _process], capture_output=True, text=True, check=True)
             _pid = result.stdout.strip()
             if _pid:
                 return [_pid, _process]
