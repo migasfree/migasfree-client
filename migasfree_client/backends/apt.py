@@ -282,6 +282,9 @@ class Apt(Pms):
             else:
                 content += 'deb {url} {repo} PKGS\n'.format(url=base_url, repo=repo['name'])
 
+        if not content:
+            return True
+
         # Choose format by APT version
         self._repo = os.path.join(self._repo_dir, 'migasfree.list')
         try:
