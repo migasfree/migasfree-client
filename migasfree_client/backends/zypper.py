@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ class Zypper(Pms):
     def __init__(self):
         Pms.__init__(self)
 
-        self._name = 'zypper'          # Package Management System name
-        self._pm = '/bin/rpm'          # Package Manager command
+        self._name = 'zypper'  # Package Management System name
+        self._pm = '/bin/rpm'  # Package Manager command
         self._pms = '/usr/bin/zypper'  # Package Management System command
         self._repo = '/etc/zypp/repos.d/migasfree.repo'  # Repositories file
 
@@ -44,10 +44,7 @@ class Zypper(Pms):
         bool install(string package)
         """
 
-        self._cmd = '{0} install --no-force-resolution {1}'.format(
-            self._pms,
-            package.strip()
-        )
+        self._cmd = '{0} install --no-force-resolution {1}'.format(self._pms, package.strip())
         logging.debug(self._cmd)
 
         return execute(self._cmd)[0] == 0
@@ -79,21 +76,13 @@ class Zypper(Pms):
 
         self._cmd = '{0} --non-interactive update --no-force-resolution'.format(self._pms)
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _output, _error = execute(self._cmd, interactive=False, verbose=True)
         if _ret != 0:
             return False, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
         self._cmd = '{0} lu -a'.format(self._pms)
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _output, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
@@ -112,16 +101,9 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{0} --non-interactive install --no-force-resolution {1}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        self._cmd = '{0} --non-interactive install --no-force-resolution {1}'.format(self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _output, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
@@ -140,16 +122,9 @@ class Zypper(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{0} --non-interactive remove {1}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        self._cmd = '{0} --non-interactive remove {1}'.format(self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _output, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _output, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, '{0}\n{1}\n{2}'.format(_ret, _output, _error)
 
@@ -200,10 +175,7 @@ class Zypper(Pms):
         for repo in repositories:
             if 'source_template' in repo:
                 content += repo['source_template'].format(
-                    server=server,
-                    project=project,
-                    protocol=protocol,
-                    keys_path=settings.KEYS_PATH
+                    server=server, project=project, protocol=protocol, keys_path=settings.KEYS_PATH
                 )
             else:
                 content += """[{repo}]
@@ -214,6 +186,9 @@ enabled=1
 http_caching=none
 metadata_expire=1
 """.format(url=template.format(server=server, project=project), repo=repo['name'])
+
+        if not content:
+            return True
 
         return write_file(self._repo, content)
 
