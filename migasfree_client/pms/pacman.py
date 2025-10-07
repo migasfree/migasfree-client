@@ -207,6 +207,8 @@ class Pacman(Pms):
         content = ''.join(
             f'{repo.get("source_template").format(protocol=protocol, server=server)}' for repo in repositories
         )
+        if not content:
+            return True
 
         return write_file(self._repo, content)
 
