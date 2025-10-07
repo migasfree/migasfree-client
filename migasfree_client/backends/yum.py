@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-# Copyright (c) 2011-2021 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ class Yum(Pms):
     def __init__(self):
         Pms.__init__(self)
 
-        self._name = 'yum'          # Package Management System name
-        self._pm = '/bin/rpm'       # Package Manager command
+        self._name = 'yum'  # Package Management System name
+        self._pm = '/bin/rpm'  # Package Manager command
         self._pms = '/usr/bin/yum'  # Package Management System command
 
         # Repositories file
@@ -82,11 +82,7 @@ class Yum(Pms):
 
         self._cmd = '{0} --assumeyes update'.format(self._pms)
         logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -105,16 +101,9 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{0} --assumeyes install {1}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        self._cmd = '{0} --assumeyes install {1}'.format(self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -133,16 +122,9 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        self._cmd = '{0} --assumeyes remove {1}'.format(
-            self._pms,
-            ' '.join(package_set)
-        )
+        self._cmd = '{0} --assumeyes remove {1}'.format(self._pms, ' '.join(package_set))
         logging.debug(self._cmd)
-        _ret, _, _error = execute(
-            self._cmd,
-            interactive=False,
-            verbose=True
-        )
+        _ret, _, _error = execute(self._cmd, interactive=False, verbose=True)
 
         return _ret == 0, _error
 
@@ -194,10 +176,7 @@ class Yum(Pms):
         for repo in repositories:
             if 'source_template' in repo:
                 content += repo['source_template'].format(
-                    server=server,
-                    project=project,
-                    protocol=protocol,
-                    keys_path=settings.KEYS_PATH
+                    server=server, project=project, protocol=protocol, keys_path=settings.KEYS_PATH
                 )
             else:
                 content += """[{repo}]
@@ -208,6 +187,9 @@ enabled=1
 http_caching=none
 metadata_expire=1
 """.format(url=template.format(server=server, project=project), repo=repo['name'])
+
+        if not content:
+            return True
 
         return write_file(self._repo, content)
 
@@ -225,9 +207,7 @@ metadata_expire=1
         list available_packages(void)
         """
 
-        self._cmd = "{0} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'".format(
-            self._pms
-        )
+        self._cmd = "{0} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'".format(self._pms)
         logging.debug(self._cmd)
         _ret, _output, _error = execute(self._cmd, interactive=False)
         if _ret == 0:
