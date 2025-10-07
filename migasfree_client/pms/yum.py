@@ -178,6 +178,8 @@ class Yum(Pms):
             f'{repo.get("source_template").format(protocol=protocol, server=server, keys_path=KEYS_PATH)}'
             for repo in repositories
         )
+        if not content:
+            return True
 
         return write_file(self._repo, content)
 
