@@ -278,7 +278,7 @@ def get_graphic_pid():
     for _process in _graphic_environments:
         try:
             # search main process (the oldest one)
-            result = subprocess.run(['pgrep', '-f', _process], capture_output=True, text=True, check=True)
+            result = subprocess.run(['pidof', '-s', _process], capture_output=True, text=True, check=True)
             _pid = result.stdout.strip()
             if _pid:
                 return [_pid, _process]
