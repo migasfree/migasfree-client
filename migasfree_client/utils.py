@@ -203,6 +203,7 @@ def get_graphic_pid():
         'mate-session',  # MATE
         'cinnamon-session',  # Cinnamon
         'cinnamon-session-binary',  # Cinnamon
+        'cosmic-session',  # Cosmic (Pop OS!)
         'enlightenment',  # Enlightenment
         'pantheon',  # Pantheon (elementary OS)
         'deepin',  # Deepin
