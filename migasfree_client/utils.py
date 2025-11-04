@@ -258,6 +258,8 @@ def get_graphic_pid():
         'cinnamon-session-binary',  # Cinnamon
         'cinnamon-session',  # Cinnamon
         'cosmic-session',  # Cosmic (Pop OS!)
+        'cutefish-session',  # Cutefish OS
+        'lingmo-session',  # Lingmo OS
         'enlightenment',  # Enlightenment
         'pantheon',  # Pantheon (elementary OS)
         'deepin',  # Deepin
