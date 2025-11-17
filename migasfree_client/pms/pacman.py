@@ -48,7 +48,6 @@ class Pacman(Pms):
             'application/x-gtar',
         ]
 
-        self._pms_cache = '/usr/bin/paccache'
         self._pms_key = '/usr/bin/pacman-key'
 
     def install(self, package):
@@ -146,7 +145,7 @@ class Pacman(Pms):
         bool clean_all(void)
         """
 
-        cmd = f'{self._pms_cache} --remove'
+        cmd = f'{self._pms} --sync --clean --noconfirm'
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
