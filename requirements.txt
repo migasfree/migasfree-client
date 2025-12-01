@@ -3,3 +3,8 @@ jwcrypto>=0.5.0
 requests>=2.4.3
 requests-toolbelt>=0.5.0
 rich>=9.5
+python-magic; sys_platform != 'win32'
+
+python-magic-bin; sys_platform == 'win32'
+pywin32; sys_platform == 'win32'
+psutil; sys_platform == 'win32'
