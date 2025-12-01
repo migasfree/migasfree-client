@@ -37,6 +37,7 @@ import sys
 import glob
 import subprocess
 import logging
+import re
 
 # set DISTUTILS_DEBUG as environment variable to get debug info
 
@@ -52,20 +53,24 @@ except ImportError:
 try:
     from distutils.dep_util import newer
 except ImportError:
+
     def newer(source, target):
         try:
             return os.path.getmtime(source) > os.path.getmtime(target)
         except OSError:
             return True  # if target not exist, source is newer
 
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(PATH, 'README.md'), encoding='utf-8') as f:
     README = f.read()
-VERSION = __import__('migasfree_client').__version__
+
+
+with open(os.path.join(PATH, 'migasfree_client', '__init__.py'), encoding='utf-8') as f:
+    VERSION = re.search(r"__version__ = '(.*)'", f.read()).group(1)
 
 REQUIRES = filter(
-    lambda s: len(s) > 0,
-    open(os.path.join(PATH, 'requirements.txt'), encoding='utf-8').read().split('\n')
+    lambda s: len(s) > 0, open(os.path.join(PATH, 'requirements.txt'), encoding='utf-8').read().split('\n')
 )
 
 APP_NAME = 'migasfree_client'
@@ -94,8 +99,10 @@ class BuildData(build):
                     if rc != 0:
                         raise Warning(f'msgfmt returned {rc}')
                 except OSError as e:
-                    logging.error("Building gettext files failed.  Try setup.py \
-                        --without-gettext [build|install]")
+                    logging.error(
+                        'Building gettext files failed.  Try setup.py \
+                        --without-gettext [build|install]'
+                    )
                     logging.error('Error: %s', {str(e)})
                     sys.exit(1)
 
@@ -132,11 +139,7 @@ setup(
     install_requires=REQUIRES,
     python_requires='>=3.6.0',
     packages=find_packages(),
-    entry_points={
-        'console_scripts': [
-            'migasfree = migasfree_client.__main__:main'
-        ]
-    },
+    entry_points={'console_scripts': ['migasfree = migasfree_client.__main__:main']},
     cmdclass={
         'build': BuildData,
         'install_data': InstallData,
@@ -144,20 +147,20 @@ setup(
     data_files=[
         (
             'share/icons/hicolor/scalable/apps',
-            [
-                'icons/scalable/migasfree.svg',
-                'icons/scalable/migasfree-server-network.svg'
-            ]
+            ['icons/scalable/migasfree.svg', 'icons/scalable/migasfree-server-network.svg'],
         ),
-        ('share/doc/migasfree-client', [
-            'AUTHORS',
-            'INSTALL',
-            'LICENSE',
-            'MANIFEST.in',
-            'README.md',
-            'migasfree-client.doap',
-            'conf/migasfree.conf'
-        ]),
+        (
+            'share/doc/migasfree-client',
+            [
+                'AUTHORS',
+                'INSTALL',
+                'LICENSE',
+                'MANIFEST.in',
+                'README.md',
+                'migasfree-client.doap',
+                'conf/migasfree.conf',
+            ],
+        ),
     ],
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
