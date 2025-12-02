@@ -1,6 +1,4 @@
-# -*- coding: UTF-8 -*-
-
-# Copyright (c) 2021-2024 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 # import ctypes
 # import getpass
 import win32net
@@ -47,7 +46,7 @@ def getpwnam(name):
         '',  # gid does not exist in Windows
         _fullname,
         _home,
-        _shell
+        _shell,
     ]
 
 
