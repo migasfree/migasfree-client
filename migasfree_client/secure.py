@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,10 +18,9 @@ __license__ = 'GPLv3'
 
 import json
 import logging
-
 from gettext import gettext
 
-from jwcrypto import jwk, jwe, jws
+from jwcrypto import jwe, jwk, jws
 from jwcrypto.common import json_encode
 
 from .utils import read_file
