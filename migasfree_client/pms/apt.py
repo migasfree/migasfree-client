@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,13 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import os
 import re
-import logging
 import tempfile
 
+from ..utils import execute, sanitize_path, write_file
 from .pms import Pms
-from ..utils import execute, write_file, sanitize_path
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
