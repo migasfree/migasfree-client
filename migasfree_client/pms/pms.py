@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -28,7 +26,7 @@ class Pms:
 
     # http://stackoverflow.com/questions/3786762/dynamic-base-class-and-factories
     _entity_ = None
-    _entities_ = {}
+    _entities_ = {}  # noqa: RUF012
 
     @classmethod
     def factory(cls, entity):
