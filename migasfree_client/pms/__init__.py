@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,23 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import inspect
 import importlib
+import inspect
 import pkgutil
+import sys
 
-from .pms import Pms
+from . import plugins
 from .apt import Apt
 from .dnf import Dnf
 from .pacman import Pacman
+from .pms import Pms
 from .wpt import Wpt
 from .yum import Yum
 from .zypper import Zypper
-from . import plugins
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-__all__ = ['Pms', 'Apt', 'Dnf', 'Pacman', 'Wpt', 'Yum', 'Zypper']
+__all__ = ['Apt', 'Dnf', 'Pacman', 'Pms', 'Wpt', 'Yum', 'Zypper']
 
 
 def iter_namespace(ns_pkg):
@@ -43,7 +41,7 @@ def iter_namespace(ns_pkg):
 
 def get_discovered_plugins():
     ret = {}
-    for finder, name, ispkg in iter_namespace(plugins):
+    for _finder, name, _ispkg in iter_namespace(plugins):
         try:
             module = importlib.import_module(name)
             ret[name] = module
@@ -64,7 +62,7 @@ def get_available_pms():
     ]
 
     discovered_plugins = get_discovered_plugins()
-    for module_name, module in discovered_plugins.items():
+    for _module_name, module in discovered_plugins.items():
         for class_name, class_ in inspect.getmembers(module, inspect.isclass):
             if issubclass(class_, Pms) and class_ != Pms:
                 try:
