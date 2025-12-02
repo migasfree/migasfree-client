@@ -13,7 +13,7 @@ authors = [
 maintainers = [
   {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
 ]
-license = { text = "GPLv3" }
+license = "GPL-3.0-or-later"
 description = "Synchronizes a computer from a migasfree server"
 readme = "README.md"
 keywords = ["migasfree", "systems management", "devops"]
