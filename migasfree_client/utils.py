@@ -355,7 +355,7 @@ def get_user_display_graphic(pid, timeout=10, interval=1):
     _display = []
     while not _display and timeout > 0:
         # a data line ends in 0 byte, not newline
-        _display = grep('DISPLAY', open(f'/proc/{pid}/environ', encoding='utf-8').read().split('\0'))
+        _display = grep('DISPLAY', open(f'/proc/{pid}/environ', encoding='utf-8').read().split('\0'))  # noqa: SIM115
         if _display:
             _display = _display[0].split('=').pop()
             return _display
