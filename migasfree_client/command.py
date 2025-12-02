@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2013-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,30 +13,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
 import errno
 import getpass
-import platform
+import gettext
 import logging
 import logging.config
 import logging.handlers
-import time
-import ssl
-import gettext
+import os
+import platform
 import shutil
-import requests
-
-from rich import print
-from rich.console import Console
+import ssl
+import sys
+import time
 from urllib.parse import urljoin
 
-from .network import get_network_info
-from .pms import Pms, get_available_pms
-from .devices import Printer, get_available_devices_classes
-from .url_request import UrlRequest
+import requests
+from rich import print
+from rich.console import Console
 
 from . import settings, utils
+from .devices import Printer, get_available_devices_classes
+from .network import get_network_info
+from .pms import Pms, get_available_pms
+from .url_request import UrlRequest
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -84,7 +81,7 @@ LOGGING_CONF = {
 
 try:
     logging.config.dictConfig(LOGGING_CONF)
-except (IOError, ValueError):
+except (OSError, ValueError):
     print(_('Failed to configure the log file (%s)') % settings.LOG_FILE)
     sys.exit(errno.EACCES)
 
@@ -108,7 +105,7 @@ class MigasFreeCommand:
     Interface class
     """
 
-    URLS = {
+    URLS = {  # noqa: RUF012
         # command API
         'get_server_info': '/api/v1/public/server/info/',
         'get_project_keys': '/api/v1/public/keys/project/',
@@ -597,10 +594,7 @@ class MigasFreeCommand:
             print('\t%s: %s' % (_('Architecture'), self.pms.get_system_architecture()))
 
     def _write_error(self, msg, append=False):
-        if append:
-            _mode = 'a'
-        else:
-            _mode = 'wb'
+        _mode = 'a' if append else 'wb'
 
         if not self._error_file_descriptor:
             self._error_file_descriptor = open(self.ERROR_FILE, _mode, encoding='utf8')
@@ -676,10 +670,7 @@ class MigasFreeCommand:
         sys.exit(utils.ALL_OK)
 
     def cmd_remove_keys(self, args=None):
-        if hasattr(args, 'all') and args.all:
-            keys_path = settings.KEYS_PATH
-        else:
-            keys_path = self._get_keys_path()
+        keys_path = settings.KEYS_PATH if hasattr(args, 'all') and args.all else self._get_keys_path()
 
         if hasattr(args, 'debug') and args.debug:
             print(_('Trying to remove %s directory') % keys_path)
