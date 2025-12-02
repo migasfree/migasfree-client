@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,30 +13,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
-import errno
-import json
-import tempfile
-import socket
-import gettext
-import logging
+import contextlib
 import copy
+import errno
+import gettext
+import json
+import logging
+import os
 
 # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
-
-import requests
-
+import socket
+import sys
+import tempfile
 from collections import defaultdict
 from datetime import datetime
 
+import requests
+
 from . import (
+    network,
     settings,
     utils,
-    network,
 )
-
 from .command import MigasFreeCommand
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -149,10 +146,8 @@ class MigasFreeSync(MigasFreeCommand):
             msg += _('Code "%s" with error: %s') % (code, error)
             self._write_error(msg)
 
-        try:
+        with contextlib.suppress(IOError):
             os.remove(filename)
-        except IOError:
-            pass
 
         return ret, output, error
 
@@ -577,7 +572,7 @@ class MigasFreeSync(MigasFreeCommand):
             hardware = json.loads(output)
         except ValueError as e:
             self._show_message(_('Parsing hardware information...'))
-            msg = f'{_("Hardware information")}: {str(e)}'
+            msg = f'{_("Hardware information")}: {e!s}'
             self.operation_failed(msg)
             logger.error(msg)
             self._write_error(msg)
@@ -859,12 +854,12 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Running events...'))
 
         sentinel = True
-        for key, value in diff:
+        for key, _value in diff:
             event = os.path.join(settings.EVENTS_SYNC_PATH, key)
             if os.path.exists(event):
                 for filename in os.listdir(event):
                     _file = os.path.join(event, filename)
-                    ret, output, error = utils.execute(_file, interactive=False)
+                    ret, _output, error = utils.execute(_file, interactive=False)
                     if ret != 0:
                         sentinel = False
                         msg = _('Error running event %s: %s') % (_file, error)
@@ -886,7 +881,7 @@ class MigasFreeSync(MigasFreeCommand):
 
         def to_env(content, prefix):
             ret = ''
-            for key in content.keys():
+            for key in content:
                 if len(content[key]) == 1:
                     value = utils.escape_quotes(content[key][0])
                     ret += f'{prefix}{key}="{value}"\n'
@@ -925,13 +920,11 @@ class MigasFreeSync(MigasFreeCommand):
         )
 
         # calculate diff
-        diff = list(
-            (
-                (key, {'before': before_prefix_value.get(key), 'after': after_prefix_value.get(key)})
-                for key in before_prefix_value
-                if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
-            )
-        )
+        diff = [
+            (key, {'before': before_prefix_value.get(key), 'after': after_prefix_value.get(key)})
+            for key in before_prefix_value
+            if key not in after_prefix_value or before_prefix_value[key] != after_prefix_value[key]
+        ]
         if not diff:
             return
 
@@ -983,9 +976,13 @@ class MigasFreeSync(MigasFreeCommand):
             return False
 
         for device in devices['logical']:
-            if 'PRINTER' in device and 'packages' in device['PRINTER'] and device['PRINTER']['packages']:
-                if not self.install_mandatory_packages(device['PRINTER']['packages']):
-                    return False
+            if (
+                'PRINTER' in device
+                and 'packages' in device['PRINTER']
+                and device['PRINTER']['packages']
+                and not self.install_mandatory_packages(device['PRINTER']['packages'])
+            ):
+                return False
 
         self._devices_class_selection()
         if not self.devices_class:
@@ -1051,7 +1048,7 @@ class MigasFreeSync(MigasFreeCommand):
                         logging.error(_msg)
                         self._write_error(_msg)
 
-        for key, value in logical_devices.items():
+        for _key, value in logical_devices.items():
             if value.driver is None:
                 _msg = _(
                     'Error: no driver defined for device %s. '
