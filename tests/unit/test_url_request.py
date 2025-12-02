@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """
 Unit tests for migasfree_client.url_request module
 """
 
 import errno
 import json
+from unittest.mock import MagicMock, patch
+
 import requests
 import responses
-from unittest.mock import patch, MagicMock
 
 from migasfree_client.url_request import UrlRequest
 
