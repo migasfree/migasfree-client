@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,9 +15,9 @@
 
 import logging
 
+from ..utils import execute
 from .pms import Pms
 from .yum import Yum
-from ..utils import execute
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
