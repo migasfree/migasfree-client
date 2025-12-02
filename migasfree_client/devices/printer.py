@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2014-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,6 +12,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+from typing import ClassVar
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -36,13 +36,12 @@ class Printer:
     logical_id = 0
     driver = ''
     printer_name = ''
-    printer_data = {}
 
     platform = None
 
     # http://stackoverflow.com/questions/3786762/dynamic-base-class-and-factories
     _entity_ = None
-    _entities_ = {}
+    _entities_: ClassVar[dict] = {}
 
     @classmethod
     def factory(cls, entity):
@@ -59,6 +58,7 @@ class Printer:
 
     def __init__(self, server='', device=None):
         self.server = server
+        self.printer_data = {}
 
         if not device:
             return
@@ -100,10 +100,13 @@ class Printer:
             if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
                 self.uri = f'lpd://{self.conn["IP"]}/{self.conn["PORT"]}'
 
-        if 'LOCATION' in self.conn and self.conn['LOCATION']:
+        if self.conn and self.conn.get('LOCATION'):
             self.location = self.conn['LOCATION']
 
-        self.info = f'{device["manufacturer"]}__{device["model"]}__{device["capability"]}__{device["name"]}__{int(device["id"])}'
+        self.info = (
+            f'{device["manufacturer"]}__{device["model"]}__{device["capability"]}'
+            f'__{device["name"]}__{int(device["id"])}'
+        )
 
         if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
             self.name = f'{self.conn["NAME"]}__{device["capability"]}__{device["name"]}'
