@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,15 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
 import errno
 import gettext
 import logging
+import os
+import sys
 
 from .command import MigasFreeCommand
 from .settings import ICON_PATH, TMP_PATH
-from .utils import ALL_OK, is_windows, is_linux, write_file, execute_as_user
+from .utils import ALL_OK, execute_as_user, is_linux, is_windows, write_file
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
