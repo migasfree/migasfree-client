@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-
 """
 Unit tests for migasfree_client.secure module
 """
 
 import json
-import pytest
 from unittest.mock import patch
 
+import pytest
+from jwcrypto import jwe, jwk, jws
+
 from migasfree_client import secure
-from jwcrypto import jwk, jws, jwe
 
 
 class TestKeyManagement:
@@ -33,18 +32,18 @@ class TestSigningAndVerification:
 
     def test_sign_dict_claims(self, private_key_path):
         """Test signing dictionary claims"""
-        claims = {"user": "test", "action": "login"}
+        claims = {'user': 'test', 'action': 'login'}
         result = secure.sign(claims, private_key_path)
 
         assert isinstance(result, str)
         assert len(result) > 0
         # JWS tokens are serialized as JSON by default in this implementation
-        assert "{" in result
-        assert "signature" in result
+        assert '{' in result
+        assert 'signature' in result
 
     def test_sign_string_claims(self, private_key_path):
         """Test signing string claims"""
-        claims = "test message"
+        claims = 'test message'
         result = secure.sign(claims, private_key_path)
 
         assert isinstance(result, str)
@@ -52,7 +51,7 @@ class TestSigningAndVerification:
 
     def test_verify_valid_signature(self, private_key_path, public_key_path):
         """Test verifying valid signature"""
-        claims = {"user": "test", "data": "important"}
+        claims = {'user': 'test', 'data': 'important'}
         signed = secure.sign(claims, private_key_path)
 
         result = secure.verify(signed, public_key_path)
@@ -63,14 +62,14 @@ class TestSigningAndVerification:
     def test_verify_invalid_signature(self, public_key_path):
         """Test verifying invalid signature raises exception"""
         # Invalid JSON structure
-        invalid_token = "invalid.token"
+        invalid_token = 'invalid.token'
 
         with pytest.raises((jws.InvalidJWSObject, ValueError)):
             secure.verify(invalid_token, public_key_path)
 
     def test_sign_verify_roundtrip(self, private_key_path, public_key_path):
         """Test complete sign and verify cycle"""
-        original_data = {"message": "Hello, World!", "timestamp": 12345}
+        original_data = {'message': 'Hello, World!', 'timestamp': 12345}
 
         # Sign
         signed = secure.sign(original_data, private_key_path)
@@ -87,18 +86,18 @@ class TestEncryptionAndDecryption:
 
     def test_encrypt_claims(self, public_key_path):
         """Test encrypting claims"""
-        claims = {"secret": "data", "value": 42}
+        claims = {'secret': 'data', 'value': 42}
         result = secure.encrypt(claims, public_key_path)
 
         assert isinstance(result, str)
         assert len(result) > 0
         # JWE tokens are serialized as JSON
-        assert "{" in result
-        assert "ciphertext" in result
+        assert '{' in result
+        assert 'ciphertext' in result
 
     def test_decrypt_encrypted_data(self, private_key_path, public_key_path):
         """Test decrypting encrypted data"""
-        claims = {"secret": "confidential", "level": "top"}
+        claims = {'secret': 'confidential', 'level': 'top'}
         encrypted = secure.encrypt(claims, public_key_path)
 
         result = secure.decrypt(encrypted, private_key_path)
@@ -108,14 +107,14 @@ class TestEncryptionAndDecryption:
 
     def test_decrypt_invalid_data(self, private_key_path):
         """Test decrypting invalid data raises exception"""
-        invalid_token = "invalid.encrypted.data.token.here"
+        invalid_token = 'invalid.encrypted.data.token.here'
 
         with pytest.raises(jwe.InvalidJWEData):
             secure.decrypt(invalid_token, private_key_path)
 
     def test_encrypt_decrypt_roundtrip(self, private_key_path, public_key_path):
         """Test complete encrypt and decrypt cycle"""
-        original_data = {"password": "secret123", "user": "admin"}
+        original_data = {'password': 'secret123', 'user': 'admin'}
 
         # Encrypt
         encrypted = secure.encrypt(original_data, public_key_path)
@@ -132,18 +131,18 @@ class TestWrapAndUnwrap:
 
     def test_wrap_data(self, private_key_path, public_key_path):
         """Test wrapping data (sign + encrypt)"""
-        data = {"message": "secure data"}
+        data = {'message': 'secure data'}
         result = secure.wrap(data, private_key_path, public_key_path)
 
         assert isinstance(result, str)
         assert len(result) > 0
         # Should be a JWE token (JSON serialized)
-        assert "{" in result
-        assert "ciphertext" in result
+        assert '{' in result
+        assert 'ciphertext' in result
 
     def test_unwrap_data(self, private_key_path, public_key_path):
         """Test unwrapping data (decrypt + verify)"""
-        original_data = {"important": "information", "id": 123}
+        original_data = {'important': 'information', 'id': 123}
         wrapped = secure.wrap(original_data, private_key_path, public_key_path)
 
         result = secure.unwrap(wrapped, private_key_path, public_key_path)
@@ -153,9 +152,9 @@ class TestWrapAndUnwrap:
     def test_wrap_unwrap_roundtrip(self, private_key_path, public_key_path):
         """Test complete wrap and unwrap cycle"""
         original_data = {
-            "user": "testuser",
-            "permissions": ["read", "write"],
-            "timestamp": 1234567890,
+            'user': 'testuser',
+            'permissions': ['read', 'write'],
+            'timestamp': 1234567890,
         }
 
         # Wrap
@@ -166,29 +165,25 @@ class TestWrapAndUnwrap:
 
         assert unwrapped == original_data
 
-    @patch("migasfree_client.secure.gettext", side_effect=lambda x: x)
-    def test_unwrap_invalid_jwe_data(
-        self, mock_gettext, private_key_path, public_key_path
-    ):
+    @patch('migasfree_client.secure.gettext', side_effect=lambda x: x)
+    def test_unwrap_invalid_jwe_data(self, mock_gettext, private_key_path, public_key_path):
         """Test unwrapping invalid JWE data returns error message"""
-        invalid_data = "not.valid.jwe.data.here"
+        invalid_data = 'not.valid.jwe.data.here'
 
         result = secure.unwrap(invalid_data, private_key_path, public_key_path)
 
         # Should return error message, not raise exception
         assert isinstance(result, str)
-        assert "Invalid" in result
+        assert 'Invalid' in result
 
-    @patch("migasfree_client.secure.gettext", side_effect=lambda x: x)
-    def test_unwrap_invalid_signature(
-        self, mock_gettext, private_key_path, public_key_path
-    ):
+    @patch('migasfree_client.secure.gettext', side_effect=lambda x: x)
+    def test_unwrap_invalid_signature(self, mock_gettext, private_key_path, public_key_path):
         """Test unwrapping data with invalid signature"""
         # Create data with valid encryption but invalid signature
         # We need to manually construct a valid JWE that contains an invalid JWS
 
         # 1. Create a fake JWS (just a dict, not signed properly)
-        fake_jws = {"sign": "invalid_signature", "data": {"message": "test"}}
+        fake_jws = {'sign': 'invalid_signature', 'data': {'message': 'test'}}
 
         # 2. Encrypt this fake JWS
         encrypted = secure.encrypt(fake_jws, public_key_path)
@@ -202,24 +197,24 @@ class TestWrapAndUnwrap:
         # If we pass a string that isn't a valid JWS structure, verify might raise InvalidJWSObject.
         # Let's mock verify to raise InvalidJWSSignature to test the exception handling in unwrap.
 
-        with patch("migasfree_client.secure.verify") as mock_verify:
-            mock_verify.side_effect = jws.InvalidJWSSignature("Invalid signature")
+        with patch('migasfree_client.secure.verify') as mock_verify:
+            mock_verify.side_effect = jws.InvalidJWSSignature('Invalid signature')
             result = secure.unwrap(encrypted, private_key_path, public_key_path)
 
         # Should return error message
         assert isinstance(result, str)
-        assert "Invalid" in result
+        assert 'Invalid' in result
 
     def test_wrap_unwrap_with_complex_data(self, private_key_path, public_key_path):
         """Test wrap/unwrap with complex nested data structures"""
         complex_data = {
-            "user": {
-                "name": "John Doe",
-                "email": "john@example.com",
-                "roles": ["admin", "user"],
+            'user': {
+                'name': 'John Doe',
+                'email': 'john@example.com',
+                'roles': ['admin', 'user'],
             },
-            "metadata": {"created": "2024-01-01", "version": 2},
-            "items": [1, 2, 3, 4, 5],
+            'metadata': {'created': '2024-01-01', 'version': 2},
+            'items': [1, 2, 3, 4, 5],
         }
 
         wrapped = secure.wrap(complex_data, private_key_path, public_key_path)
@@ -250,6 +245,6 @@ class TestEdgeCases:
 
     def test_sign_large_data(self, private_key_path):
         """Test signing large data structure"""
-        large_data = {"items": list(range(1000)), "text": "x" * 10000}
+        large_data = {'items': list(range(1000)), 'text': 'x' * 10000}
         result = secure.sign(large_data, private_key_path)
         assert isinstance(result, str)
