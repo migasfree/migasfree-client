@@ -105,11 +105,10 @@ class MigasFreeTags(MigasFreeCommand):
         title = _('Change tags')
         text = _('Please, select tags for this computer')
         if is_windows() or (is_xsession() and is_zenity()):
-            cmd = (
-                'zenity --title="%s" \
-                --text="%s" \
-                %s \
-                --window-icon="%s" \
+            cmd = 'zenity --title="{}" \
+                --text="{}" \
+                {} \
+                --window-icon="{}" \
                 --list \
                 --width 600 \
                 --height 400 \
@@ -118,8 +117,11 @@ class MigasFreeTags(MigasFreeCommand):
                 --print-column=2 \
                 --column=" " \
                 --column=TAG \
-                --column=TYPE'
-                % (title, text, '--separator="\n"' if is_linux() else '', os.path.join(ICON_PATH, self.ICON))
+                --column=TYPE'.format(
+                title,
+                text,
+                '--separator="\n"' if is_linux() else '',
+                os.path.join(ICON_PATH, self.ICON),
             )
             if is_linux():
                 cmd += ' 2> /dev/null'
