@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,19 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import errno
+import gettext
+import json
+import logging
 import os
 import sys
-import errno
-import json
-import gettext
-import logging
-import requests
 
+import requests
 from requests_toolbelt import MultipartEncoder
 
+from .secure import unwrap, wrap
 from .settings import TMP_PATH
-from .secure import wrap, unwrap
-from .utils import get_mfc_release, build_magic, read_file, write_file
+from .utils import build_magic, get_mfc_release, read_file, write_file
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -47,7 +45,7 @@ class UrlRequest:
 
     _timeout = 60  # seconds
 
-    _ok_codes = [
+    _ok_codes = [  # noqa: RUF012
         requests.codes.ok,
         requests.codes.created,
         requests.codes.moved,
@@ -169,10 +167,7 @@ class UrlRequest:
         if safe and 'msg' in json_response:
             response = unwrap(json_response['msg'], decrypt_key=self._private_key, verify_key=self._public_key)
         else:
-            if isinstance(json_response, dict):
-                response = json_response.get('detail', json_response)
-            else:
-                response = json_response
+            response = json_response.get('detail', json_response) if isinstance(json_response, dict) else json_response
 
         logger.debug('Response text: %s', response)
 
