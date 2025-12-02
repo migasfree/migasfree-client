@@ -401,7 +401,7 @@ class MigasFreeSync(MigasFreeCommand):
         # information is uploaded to server
         if os.path.isfile(settings.SOFTWARE_FILE) and os.stat(settings.SOFTWARE_FILE).st_size:
             diff_software = utils.compare_lists(
-                open(settings.SOFTWARE_FILE, encoding='utf_8').read().splitlines(),  # not readlines!!!
+                open(settings.SOFTWARE_FILE, encoding='utf_8').read().splitlines(),  # not readlines!!!  # noqa: SIM115
                 software,
             )
 
@@ -435,7 +435,7 @@ class MigasFreeSync(MigasFreeCommand):
             os.remove(self.ERROR_FILE)
 
         self._url_request._check_tmp_path()
-        self._error_file_descriptor = open(self.ERROR_FILE, 'wb')
+        self._error_file_descriptor = open(self.ERROR_FILE, 'wb')  # noqa: SIM115
 
     def create_repositories(self):
         self._check_pms()
