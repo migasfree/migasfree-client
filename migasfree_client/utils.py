@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,21 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
-import subprocess
-import time
+import configparser
 import difflib
-import platform
-import json
 import errno
+import gettext
+import hashlib
+import json
+import os
+import platform
 import re
 import select
-import uuid
 import signal
-import gettext
-import configparser
-import hashlib
+import subprocess
+import sys
+import time
+import uuid
+
 import magic
 
 try:
@@ -467,7 +466,7 @@ def write_file(filename, content):
             os.fsync(_file.fileno())
 
         return True
-    except IOError:
+    except OSError:
         return False
 
 
@@ -516,11 +515,7 @@ def process_is_active(pid):
 
     import psutil
 
-    for proc in psutil.process_iter():
-        if proc.pid == pid:
-            return True
-
-    return False
+    return any(proc.pid == pid for proc in psutil.process_iter())
 
 
 def check_lock_file(cmd, lock_file):
@@ -529,7 +524,7 @@ def check_lock_file(cmd, lock_file):
         try:
             with open(lock_file, encoding='utf-8') as _file:
                 _pid = _file.read().strip()
-        except IOError:
+        except OSError:
             _pid = -1
         else:
             if not _pid:
@@ -557,16 +552,10 @@ def get_current_user():
     """
 
     _graphic_pid, _ = get_graphic_pid()
-    if not _graphic_pid:
-        _graphic_user = os.environ.get('USER')
-    else:
-        _graphic_user = get_graphic_user(_graphic_pid)
+    _graphic_user = os.environ.get('USER') if not _graphic_pid else get_graphic_user(_graphic_pid)
 
     _info = get_user_info(_graphic_user)
-    if not _info:
-        _fullname = ''
-    else:
-        _fullname = _info['fullname']
+    _fullname = '' if not _info else _info['fullname']
 
     return f'{_graphic_user}~{_fullname}'
 
