@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,16 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
 import os
 
-try:
+with contextlib.suppress(ImportError):
     import cups
-except ImportError:
-    pass
 
-from ..utils import write_file, md5sum, sanitize_path
 from ..settings import DEVICES_PATH
-
+from ..utils import md5sum, sanitize_path, write_file
 from .printer import Printer
 
 __author__ = 'Jose Antonio Chavarría'
@@ -37,16 +33,16 @@ class Cupswrapper(Printer):
         super().__init__(server, device)
         self.platform = 'linux'  # sys.platform value
 
-        if 'CUPSWRAPPER' in self.conn and self.conn['CUPSWRAPPER']:
+        if self.conn and self.conn.get('CUPSWRAPPER'):
             self.uri = f'{self.conn["CUPSWRAPPER"]}:{self.uri}'
 
     def get_connection(self):
         try:
             return cups.Connection()
-        except RuntimeError:
-            raise RuntimeError
-        except NameError:
-            raise NameError
+        except RuntimeError as e:
+            raise RuntimeError from e
+        except NameError as e:
+            raise NameError from e
 
     def install(self):
         self.remove()
@@ -92,13 +88,13 @@ class Cupswrapper(Printer):
     def delete(name):
         try:
             conn = cups.Connection()
-        except (RuntimeError, NameError):
-            raise RuntimeError
+        except (RuntimeError, NameError) as e:
+            raise RuntimeError from e
 
         try:
             conn.deletePrinter(name)
-        except cups.IPPError:
-            raise RuntimeError
+        except cups.IPPError as e:
+            raise RuntimeError from e
 
     def is_changed(self):
         return super().is_changed() or self.is_driver_changed()
@@ -121,9 +117,8 @@ class Cupswrapper(Printer):
             return 0
 
         printers = conn.getPrinters()
-        if name in printers:
-            if len(printers[name]['printer-info'].split('__')) == 5:
-                return int(printers[name]['printer-info'].split('__')[4])
+        if name in printers and len(printers[name]['printer-info'].split('__')) == 5:
+            return int(printers[name]['printer-info'].split('__')[4])
 
         return 0
 
@@ -135,14 +130,14 @@ class Cupswrapper(Printer):
 
         try:
             return conn.getPrinters()
-        except cups.IPPError:
-            raise RuntimeError
+        except cups.IPPError as e:
+            raise RuntimeError from e
 
     def get_default(self):
         try:
             conn = cups.Connection()
-        except (RuntimeError, NameError):
-            raise RuntimeError
+        except (RuntimeError, NameError) as e:
+            raise RuntimeError from e
 
         return conn.getDefault()
 
@@ -150,13 +145,13 @@ class Cupswrapper(Printer):
     def set_default(name):
         try:
             conn = cups.Connection()
-        except (RuntimeError, NameError):
-            raise RuntimeError
+        except (RuntimeError, NameError) as e:
+            raise RuntimeError from e
 
         try:
             conn.setDefault(name)
-        except (RuntimeError, cups.IPPError):
-            raise RuntimeError
+        except (RuntimeError, cups.IPPError) as e:
+            raise RuntimeError from e
 
     def md5_file(self):
         return os.path.join(DEVICES_PATH, sanitize_path(self.server), f'{self.logical_id}.md5')
