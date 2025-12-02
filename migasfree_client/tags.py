@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2013-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,26 +13,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import collections
+import errno
+import gettext
+import json
+import logging
 import os
 import sys
-import errno
-import collections
-import json
-import gettext
-import logging
 
 from .command import MigasFreeCommand
 from .settings import ICON_PATH
 from .sync import MigasFreeSync
 from .utils import (
     ALL_OK,
-    is_linux,
-    is_windows,
     check_lock_file,
     execute,
-    remove_file,
+    is_linux,
+    is_windows,
     is_xsession,
     is_zenity,
+    remove_file,
 )
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -83,7 +81,7 @@ class MigasFreeTags(MigasFreeCommand):
             for item in tag_list[:]:
                 item = item.replace('"', '')
                 try:
-                    prefix, value = item.split('-', 1)
+                    _prefix, _value = item.split('-', 1)
                 except ValueError:
                     msg = _('Tags must be in "prefix-value" format')
                     self.operation_failed(msg)
@@ -140,7 +138,7 @@ class MigasFreeTags(MigasFreeCommand):
                     cmd += f" '{item}' '{key}' {tag_active}"
 
         logger.debug('Change tags command: %s', cmd)
-        ret, out, error = execute(cmd, interactive=False)
+        ret, out, _error = execute(cmd, interactive=False)
         if ret == 0:
             selected_tags = list(filter(None, out.split('\n')))
             logger.debug('Selected tags: %s', selected_tags)
