@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,16 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
-import getpass
 import errno
+import getpass
 import gettext
 import logging
+import os
+import sys
 
-from .settings import KEYS_PATH
-from .utils import build_magic, check_lock_file, remove_file, sanitize_path, ALL_OK
 from .command import MigasFreeCommand
+from .settings import KEYS_PATH
+from .utils import ALL_OK, build_magic, check_lock_file, remove_file, sanitize_path
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -145,7 +143,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
         self._check_sign_keys(get_computer_id=False)
 
-        for _root, dirs, _files in os.walk(self._directory):
+        for _root, _dirs, _files in os.walk(self._directory):
             for _file in _files:
                 _filename = os.path.join(_root, _file)
 
@@ -181,10 +179,7 @@ class MigasFreeUpload(MigasFreeCommand):
     def _create_repository(self):
         self._show_message(_('Creating repository operation...'))
 
-        if self._file:
-            packageset = self._file
-        else:
-            packageset = self._directory
+        packageset = self._file or self._directory
 
         with self.console.status(''):
             response = self._url_request.run(
