@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 # Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,8 +16,8 @@
 import gettext
 import logging
 
+from ..utils import execute, read_file, write_file
 from .pms import Pms
-from ..utils import execute, write_file, read_file
 
 _ = gettext.gettext
 
