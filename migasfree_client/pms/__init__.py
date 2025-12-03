@@ -19,6 +19,7 @@ import pkgutil
 import sys
 
 from . import plugins
+from .apk import Apk
 from .apt import Apt
 from .dnf import Dnf
 from .pacman import Pacman
@@ -29,7 +30,7 @@ from .zypper import Zypper
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
-__all__ = ['Apt', 'Dnf', 'Pacman', 'Pms', 'Wpt', 'Yum', 'Zypper']
+__all__ = ['Apk', 'Apt', 'Dnf', 'Pacman', 'Pms', 'Wpt', 'Yum', 'Zypper']
 
 
 def iter_namespace(ns_pkg):
@@ -53,6 +54,7 @@ def get_discovered_plugins():
 
 def get_available_pms():
     ret = [
+        ('apk', 'Apk'),
         ('apt', 'Apt'),
         ('dnf', 'Dnf'),
         ('pacman', 'Pacman'),
