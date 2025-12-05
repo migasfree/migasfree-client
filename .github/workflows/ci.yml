@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -39,10 +39,15 @@ jobs:
         run: |
           if [ -d "tests" ]
           then
-            pytest
+            pytest --cov=migasfree_client --cov-report=xml
           else
             echo "No tests directory found, skipping tests."
           fi
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
 
   build:
     runs-on: ubuntu-latest
