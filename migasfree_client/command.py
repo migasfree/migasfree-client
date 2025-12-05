@@ -31,7 +31,7 @@ import requests
 from rich import print
 from rich.console import Console
 
-from . import settings, utils
+from . import mtls, settings, utils
 from .devices import Printer, get_available_devices_classes
 from .network import get_network_info
 from .pms import Pms, get_available_pms
@@ -174,6 +174,8 @@ class MigasFreeCommand:
 
     _computer_id = None
     _error_file_descriptor = None
+    _mtls_cert = None
+    _mtls_key = None
 
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
@@ -260,6 +262,37 @@ class MigasFreeCommand:
             self.migas_protocol, self.migas_server, f':{self.migas_port}' if self.migas_port else ''
         )
 
+    def _init_mtls(self):
+        """Initialize mTLS certificate paths, fetching from server if needed."""
+        self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials()
+
+        if self._mtls_cert and self._mtls_key:
+            logger.info('mTLS credentials found')
+            return
+
+        # Certificates don't exist, try to fetch them automatically
+        logger.info('No mTLS credentials found, attempting to fetch from server...')
+
+        url_request = UrlRequest(
+            debug=self._debug,
+            proxy=self.migas_proxy,
+            cert=self.migas_ssl_cert,
+        )
+
+        result = mtls.fetch_and_install_mtls_certificate(
+            url_request=url_request,
+            server_url=self._url_base,
+            uuid=utils.get_hardware_uuid(),
+            project_name=self.migas_project,
+        )
+
+        if result['success']:
+            self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials()
+            logger.info('mTLS credentials fetched and installed successfully')
+        elif not result.get('not_available'):
+            # Only log warning if it's a real failure, not just endpoint not available
+            logger.warning('Failed to fetch mTLS credentials: %s', result['message'])
+
     def _init_url_request(self):
         keys_path = self._get_keys_path()
         self._url_request = UrlRequest(
@@ -271,12 +304,15 @@ class MigasFreeCommand:
                 'public': os.path.join(keys_path, self.PUBLIC_KEY),
             },
             cert=self.migas_ssl_cert,
+            mtls_cert=self._mtls_cert,
+            mtls_key=self._mtls_key,
         )
 
     def _init_command(self):
         self._ssl_cert()
-        self.pms_selection()
         self._init_url_base()
+        self._init_mtls()
+        self.pms_selection()
         self._init_url_request()
         self.get_server_info()
 
@@ -695,6 +731,20 @@ class MigasFreeCommand:
 
         if hasattr(args, 'quiet') and not args.quiet:
             print(_('Directory %s has been removed') % keys_path)
+
+        sys.exit(utils.ALL_OK)
+
+    def cmd_import_mtls(self, cert_file):
+        """Import mTLS certificate from tar file."""
+        self._show_message(_('Importing mTLS certificate...'))
+
+        result = mtls.import_mtls_certificate(cert_file)
+
+        if result['success']:
+            self.operation_ok(result['message'])
+        else:
+            self.operation_failed(result['message'])
+            sys.exit(errno.EPERM)
 
         sys.exit(utils.ALL_OK)
 
