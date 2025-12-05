@@ -32,16 +32,15 @@ __license__ = 'GPLv3'
 # TODO https://wiki.ubuntu.com/PackagingGuide/Python
 # TODO https://help.ubuntu.com/community/PythonRecipes/DebianPackage
 
-import os
-import sys
 import glob
-import subprocess
 import logging
+import os
 import re
+import subprocess
+import sys
 
 # set DISTUTILS_DEBUG as environment variable to get debug info
-
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 try:
     from setuptools.command.build_py import build_py as build
@@ -69,9 +68,19 @@ with open(os.path.join(PATH, 'README.md'), encoding='utf-8') as f:
 with open(os.path.join(PATH, 'migasfree_client', '__init__.py'), encoding='utf-8') as f:
     VERSION = re.search(r"__version__ = '(.*)'", f.read()).group(1)
 
-REQUIRES = filter(
-    lambda s: len(s) > 0, open(os.path.join(PATH, 'requirements.txt'), encoding='utf-8').read().split('\n')
-)
+
+def get_toml_list(content, key):
+    match = re.search(rf'^{key}\s*=\s*\[(.*?)\]', content, re.DOTALL | re.MULTILINE)
+    if not match:
+        return []
+    return [m.group(1) for m in re.finditer(r'"(.*?)"', match.group(1))]
+
+
+with open(os.path.join(PATH, 'pyproject.toml'), encoding='utf-8') as f:
+    pyproject_content = f.read()
+
+REQUIRES = get_toml_list(pyproject_content, 'dependencies')
+DEV_REQUIRES = get_toml_list(pyproject_content, 'dev')
 
 APP_NAME = 'migasfree_client'
 DOMAIN = 'migasfree'
@@ -137,6 +146,7 @@ setup(
     url='http://www.migasfree.org/',
     platforms=['Linux', 'Windows 10'],
     install_requires=REQUIRES,
+    extras_require={'dev': DEV_REQUIRES},
     python_requires='>=3.6.0',
     packages=find_packages(),
     entry_points={'console_scripts': ['migasfree = migasfree_client.__main__:main']},
