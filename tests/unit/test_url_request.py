@@ -342,3 +342,70 @@ class TestUtilityMethods:
         result = UrlRequest._check_tmp_path()
 
         assert result is False
+
+
+class TestMtlsSupport:
+    """Tests for mTLS client certificate support"""
+
+    def test_init_with_mtls_cert(self):
+        """Test initialization with mTLS certificate paths"""
+        mtls_cert = '/path/to/mtls/cert.pem'
+        mtls_key = '/path/to/mtls/key.pem'
+
+        url_req = UrlRequest(mtls_cert=mtls_cert, mtls_key=mtls_key)
+
+        assert url_req._mtls_cert == mtls_cert
+        assert url_req._mtls_key == mtls_key
+
+    def test_init_with_mtls_cert_only(self):
+        """Test initialization with only mTLS cert (no key)"""
+        mtls_cert = '/path/to/mtls/cert.pem'
+
+        url_req = UrlRequest(mtls_cert=mtls_cert)
+
+        assert url_req._mtls_cert == mtls_cert
+        assert url_req._mtls_key is None
+
+    @responses.activate
+    @patch('requests.post')
+    def test_run_with_mtls_cert(self, mock_post):
+        """Test that requests include mTLS client certificate when configured"""
+        url = 'https://example.com/api/endpoint'
+        mtls_cert = '/path/to/mtls/cert.pem'
+        mtls_key = '/path/to/mtls/key.pem'
+
+        # Mock the response
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'status': 'ok'}
+        mock_post.return_value = mock_response
+
+        url_req = UrlRequest(mtls_cert=mtls_cert, mtls_key=mtls_key)
+        url_req.run(url, safe=False)
+
+        # Verify request was made with cert parameter
+        assert mock_post.called
+        call_kwargs = mock_post.call_args[1]
+        assert 'cert' in call_kwargs
+        assert call_kwargs['cert'] == (mtls_cert, mtls_key)
+
+    @responses.activate
+    @patch('requests.post')
+    def test_run_without_mtls_cert(self, mock_post):
+        """Test that requests without mTLS configured use None for cert"""
+        url = 'https://example.com/api/endpoint'
+
+        # Mock the response
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'status': 'ok'}
+        mock_post.return_value = mock_response
+
+        url_req = UrlRequest()
+        url_req.run(url, safe=False)
+
+        # Verify request was made with cert=None
+        assert mock_post.called
+        call_kwargs = mock_post.call_args[1]
+        assert 'cert' in call_kwargs
+        assert call_kwargs['cert'] is None
