@@ -15,7 +15,7 @@ requires = python3 >= 3.6
            python3-jwcrypto
            python3-requests
            python3-requests-toolbelt
-           python3-cryptography >= 1.7
+           python3-cryptography >= 2.5
            python3-netifaces
            python3-distro
            python3-rich
