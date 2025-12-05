@@ -33,13 +33,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-          pip install .
+          pip install .[dev]
 
       - name: Run tests
         run: |
-          if [ -d "tests" ]; then
+          if [ -d "tests" ]
+          then
             pytest
           else
             echo "No tests directory found, skipping tests."
