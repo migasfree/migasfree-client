@@ -42,6 +42,8 @@ class UrlRequest:
 
     _proxy = ''
     _cert = False
+    _mtls_cert = None
+    _mtls_key = None
 
     _timeout = 60  # seconds
 
@@ -54,7 +56,7 @@ class UrlRequest:
         requests.codes.resume,
     ]
 
-    def __init__(self, debug=False, proxy='', project='', keys=None, cert=False):
+    def __init__(self, debug=False, proxy='', project='', keys=None, cert=False, mtls_cert=None, mtls_key=None):
         if keys is None:
             keys = {}
 
@@ -62,8 +64,13 @@ class UrlRequest:
         self._proxy = proxy
         self._project = project
         self._cert = cert
+        self._mtls_cert = mtls_cert
+        self._mtls_key = mtls_key
 
         logger.info('SSL certificate: %s', self._cert)
+        if self._mtls_cert and self._mtls_key:
+            logger.info('mTLS client certificate: %s', self._mtls_cert)
+            logger.info('mTLS client key: %s', self._mtls_key)
 
         if isinstance(keys, dict):
             self._private_key = keys.get('private')
@@ -82,7 +89,33 @@ class UrlRequest:
 
         return True
 
+    def _build_default_headers(self):
+        """Build default headers for HTTP requests."""
+        return {
+            'user-agent': f'migasfree-client/{get_mfc_release()} {requests.utils.default_user_agent()}',
+            'accept-language': os.getenv('LANGUAGE', os.getenv('LANG', 'en')),
+        }
+
     def run(self, url, data='', upload_files=None, safe=True, exit_on_error=True, debug=False, keys=None):
+        """
+        Make an HTTP POST request with signature/encryption support.
+
+        This method wraps data using the migasfree signature/encryption protocol
+        when safe=True. It also supports file uploads and mTLS client certificates.
+
+        Args:
+            url: The URL to send the request to
+            data: Data to send (will be wrapped if safe=True)
+            upload_files: List of file paths to upload
+            safe: If True, wrap data with signature/encryption
+            exit_on_error: If True, exit the program on error
+            debug: Enable debug mode
+            keys: Optional dict with 'private' and 'public' key paths
+
+        Returns:
+            On success: The unwrapped response data
+            On error: {'error': {'info': str, 'code': int}}
+        """
         if keys is None:
             keys = {}
 
@@ -105,10 +138,7 @@ class UrlRequest:
         if self._public_key:
             logger.info('Public key: %s', self._public_key)
 
-        headers = {
-            'user-agent': f'migasfree-client/{get_mfc_release()} {requests.utils.default_user_agent()}',
-            'accept-language': os.getenv('LANGUAGE', os.getenv('LANG', 'en')),
-        }
+        headers = self._build_default_headers()
         if safe:
             data = json.dumps(
                 {'msg': wrap(data, sign_key=self._private_key, encrypt_key=self._public_key), 'project': self._project}
@@ -149,8 +179,15 @@ class UrlRequest:
         if not url.endswith('/'):
             url += '/'
 
+        cert_param = None
+        if self._mtls_cert and self._mtls_key:
+            cert_param = (self._mtls_cert, self._mtls_key)
+            logger.debug('Using mTLS client certificate')
+
         try:
-            req = requests.post(url, data=data, headers=headers, proxies=proxies, timeout=self._timeout)
+            req = requests.post(
+                url, data=data, headers=headers, proxies=proxies, timeout=self._timeout, cert=cert_param
+            )
         except requests.exceptions.ConnectionError as e:
             logger.error(str(e))
             return {'error': {'info': e, 'code': errno.ECONNREFUSED}}
@@ -162,6 +199,80 @@ class UrlRequest:
             return self._error_response(req, url)
 
         return self._evaluate_response(req.json(), safe)
+
+    def run_simple(self, url, data=None, json_data=None, headers=None, timeout=None, download=False):
+        """
+        Make a simple HTTP POST request without signature/encryption logic.
+
+        This method is useful for public endpoints that don't require
+        the migasfree signature/encryption protocol.
+
+        Args:
+            url: The URL to send the request to
+            data: Form data to send (for application/x-www-form-urlencoded)
+            json_data: JSON data to send (for application/json)
+            headers: Optional additional headers
+            timeout: Request timeout in seconds (default: self._timeout)
+            download: If True, return raw response content for binary downloads
+
+        Returns:
+            dict: On success: {'data': response_data} or {'data': response_data, 'content': bytes}
+                  On error: {'error': {'info': str, 'code': int}}
+        """
+        if timeout is None:
+            timeout = self._timeout
+
+        request_headers = self._build_default_headers()
+        if headers:
+            request_headers.update(headers)
+
+        proxies = None
+        if self._proxy:
+            proxies = {
+                'http': self._proxy,
+                'https': self._proxy,
+            }
+
+        logger.debug('Simple request URL: %s', url)
+        logger.debug('Simple request data: %s', data)
+        logger.debug('Simple request json: %s', json_data)
+
+        try:
+            req = requests.post(
+                url,
+                data=data,
+                json=json_data,
+                headers=request_headers,
+                proxies=proxies,
+                timeout=timeout,
+                verify=self._cert if self._cert else False,
+            )
+
+            # Handle 404 as "not available" (e.g., mTLS service not deployed)
+            if req.status_code == requests.codes.not_found:
+                logger.debug('Endpoint not available (404): %s', url)
+                return {'error': {'info': '', 'code': requests.codes.not_found}}
+
+            if req.status_code in self._ok_codes:
+                if download:
+                    return {'data': None, 'content': req.content}
+                try:
+                    return {'data': req.json()}
+                except ValueError:
+                    return {'data': None, 'content': req.content}
+
+            logger.error('Simple request failed with status %d: %s', req.status_code, req.text)
+            return {'error': {'info': req.text, 'code': req.status_code}}
+
+        except requests.exceptions.ConnectionError as e:
+            logger.error('Connection error: %s', str(e))
+            return {'error': {'info': str(e), 'code': errno.ECONNREFUSED}}
+        except requests.exceptions.Timeout as e:
+            logger.error('Request timeout: %s', str(e))
+            return {'error': {'info': str(e), 'code': errno.ETIMEDOUT}}
+        except Exception as e:
+            logger.error('Request error: %s', str(e))
+            return {'error': {'info': str(e), 'code': errno.EIO}}
 
     def _evaluate_response(self, json_response, safe=True):
         if safe and 'msg' in json_response:
