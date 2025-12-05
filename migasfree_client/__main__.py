@@ -112,6 +112,11 @@ def parse_args(argv):
         '-a', '--all', action='store_true', help=_('Remove client keys from all servers')
     )
 
+    subparser_import_mtls = subparsers.add_parser('import-mtls', help=_('Import mTLS certificate from tar file'))
+    subparser_import_mtls.add_argument(
+        'cert_file', action='store', metavar='FILE', help=_('Certificate tar file to import')
+    )
+
     if len(argv) < 1:
         parser.print_help()
         sys.exit(ALL_OK)
@@ -157,6 +162,10 @@ def main(argv=None):
         from .command import MigasFreeCommand
 
         MigasFreeCommand().cmd_remove_keys(args)
+    elif args.cmd == 'import-mtls':
+        from .command import MigasFreeCommand
+
+        MigasFreeCommand().cmd_import_mtls(args.cert_file)
 
     return ALL_OK
 
