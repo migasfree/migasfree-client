@@ -18,9 +18,7 @@ Thank you for your interest in contributing to Migasfree Client! We welcome cont
 4.  **Install dependencies**:
     ```bash
     pip install --upgrade pip
-    pip install -r requirements.txt
-    pip install -r requirements-dev.txt
-    pip install -e .
+    pip install -e .[dev]
     ```
 
 ## Development Workflow
