@@ -13,7 +13,7 @@ authors = [
 maintainers = [
   {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
 ]
-license = "GPL-3.0-or-later"
+license = {text = "GPL-3.0-or-later"}
 description = "Synchronizes a computer from a migasfree server"
 readme = "README.md"
 keywords = ["migasfree", "systems management", "devops"]
@@ -24,6 +24,7 @@ dependencies = [
     "requests>=2.4.3",
     "requests-toolbelt>=0.5.0",
     "rich>=9.5",
+    "cryptography>=2.5",
     "python-magic; sys_platform != 'win32'",
     "python-magic-bin; sys_platform == 'win32'",
     "psutil; sys_platform == 'win32'",
