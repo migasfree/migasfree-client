@@ -264,7 +264,7 @@ class MigasFreeCommand:
 
     def _init_mtls(self):
         """Initialize mTLS certificate paths, fetching from server if needed."""
-        self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials()
+        self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials(self.migas_server)
 
         if self._mtls_cert and self._mtls_key:
             logger.info('mTLS credentials found')
@@ -281,13 +281,14 @@ class MigasFreeCommand:
 
         result = mtls.fetch_and_install_mtls_certificate(
             url_request=url_request,
+            server=self.migas_server,
             server_url=self._url_base,
             uuid=utils.get_hardware_uuid(),
             project_name=self.migas_project,
         )
 
         if result['success']:
-            self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials()
+            self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials(self.migas_server)
             logger.info('mTLS credentials fetched and installed successfully')
         elif not result.get('not_available'):
             # Only log warning if it's a real failure, not just endpoint not available
