@@ -6,7 +6,7 @@ import os
 import tempfile
 from unittest.mock import MagicMock, patch
 
-from migasfree_client import mtls, settings
+from migasfree_client import mtls
 
 
 class TestImportMtlsCertificate:
@@ -14,7 +14,7 @@ class TestImportMtlsCertificate:
 
     def test_import_nonexistent_file(self):
         """Test importing a file that doesn't exist"""
-        result = mtls.import_mtls_certificate('/nonexistent/file.tar')
+        result = mtls.import_mtls_certificate('/nonexistent/file.tar', 'test.server.com')
 
         assert result['success'] is False
         assert 'not found' in result['message'].lower()
@@ -31,6 +31,9 @@ class TestImportMtlsCertificate:
         mock_tar_open.return_value.__enter__.return_value = mock_tar
         mock_tar.extractall = MagicMock()
 
+        server = 'test.server.com'
+        expected_mtls_path = mtls.get_mtls_path(server)
+
         # Mock os.listdir to return a .p12 file
         with patch('os.listdir', return_value=['certificate.p12']):
             mock_extract.return_value = {'success': True, 'message': 'Extracted'}
@@ -38,10 +41,10 @@ class TestImportMtlsCertificate:
             with patch('tempfile.TemporaryDirectory') as mock_temp:
                 mock_temp.return_value.__enter__.return_value = '/tmp/test'
 
-                result = mtls.import_mtls_certificate('/path/to/cert.tar')
+                result = mtls.import_mtls_certificate('/path/to/cert.tar', server)
 
         # Verify directory creation was attempted
-        mock_makedirs.assert_called_once_with(settings.CERT_PATH, mode=0o755)
+        mock_makedirs.assert_called_once_with(expected_mtls_path, mode=0o755)
         assert result['success'] is True
 
     @patch('migasfree_client.mtls._extract_from_p12')
@@ -56,6 +59,8 @@ class TestImportMtlsCertificate:
         mock_tar_open.return_value.__enter__.return_value = mock_tar
         mock_tar.extractall = MagicMock()
 
+        server = 'test.server.com'
+
         # Mock os.listdir to return a .p12 file
         with patch('os.listdir', return_value=['certificate.p12']):
             mock_extract.return_value = {'success': True, 'message': 'Extracted'}
@@ -63,7 +68,7 @@ class TestImportMtlsCertificate:
             with patch('tempfile.TemporaryDirectory') as mock_temp:
                 mock_temp.return_value.__enter__.return_value = '/tmp/test'
 
-                result = mtls.import_mtls_certificate('/path/to/cert.tar')
+                result = mtls.import_mtls_certificate('/path/to/cert.tar', server)
 
         assert result['success'] is True
         assert 'successfully' in result['message'].lower()
@@ -83,7 +88,7 @@ class TestImportMtlsCertificate:
             with patch('tempfile.TemporaryDirectory') as mock_temp:
                 mock_temp.return_value.__enter__.return_value = '/tmp/test'
 
-                result = mtls.import_mtls_certificate('/path/to/cert.tar')
+                result = mtls.import_mtls_certificate('/path/to/cert.tar', 'test.server.com')
 
         assert result['success'] is False
         assert 'p12' in result['message'].lower()
@@ -137,7 +142,9 @@ class TestExtractFromP12:
 
         try:
             mock_write_file.return_value = True
-            result = mtls._extract_from_p12(p12_file)
+            cert_file = '/tmp/test_cert.pem'
+            key_file = '/tmp/test_key.pem'
+            result = mtls._extract_from_p12(p12_file, cert_file, key_file)
 
             assert result['success'] is True
             assert mock_write_file.call_count == 2  # Once for cert, once for key
@@ -147,7 +154,7 @@ class TestExtractFromP12:
 
     def test_extract_from_p12_nonexistent_file(self):
         """Test extracting from nonexistent p12 file"""
-        result = mtls._extract_from_p12('/nonexistent/file.p12')
+        result = mtls._extract_from_p12('/nonexistent/file.p12', '/tmp/cert.pem', '/tmp/key.pem')
 
         assert result['success'] is False
 
@@ -160,7 +167,7 @@ class TestHasMtlsCertificate:
         """Test when both cert and key files exist"""
         mock_isfile.return_value = True
 
-        result = mtls.has_mtls_certificate()
+        result = mtls.has_mtls_certificate('test.server.com')
 
         assert result is True
         assert mock_isfile.call_count == 2
@@ -170,7 +177,7 @@ class TestHasMtlsCertificate:
         """Test when only cert file exists"""
         mock_isfile.side_effect = [True, False]
 
-        result = mtls.has_mtls_certificate()
+        result = mtls.has_mtls_certificate('test.server.com')
 
         assert result is False
 
@@ -179,7 +186,7 @@ class TestHasMtlsCertificate:
         """Test when only key file exists"""
         mock_isfile.side_effect = [False, True]
 
-        result = mtls.has_mtls_certificate()
+        result = mtls.has_mtls_certificate('test.server.com')
 
         assert result is False
 
@@ -188,7 +195,7 @@ class TestHasMtlsCertificate:
         """Test when neither file exists"""
         mock_isfile.return_value = False
 
-        result = mtls.has_mtls_certificate()
+        result = mtls.has_mtls_certificate('test.server.com')
 
         assert result is False
 
@@ -200,18 +207,19 @@ class TestGetMtlsCredentials:
     def test_credentials_exist(self, mock_has_cert):
         """Test getting credentials when they exist"""
         mock_has_cert.return_value = True
+        server = 'test.server.com'
 
-        cert, key = mtls.get_mtls_credentials()
+        cert, key = mtls.get_mtls_credentials(server)
 
-        assert cert == settings.MTLS_CERT_FILE
-        assert key == settings.MTLS_KEY_FILE
+        assert cert == mtls.get_mtls_cert_file(server)
+        assert key == mtls.get_mtls_key_file(server)
 
     @patch('migasfree_client.mtls.has_mtls_certificate')
     def test_credentials_dont_exist(self, mock_has_cert):
         """Test getting credentials when they don't exist"""
         mock_has_cert.return_value = False
 
-        cert, key = mtls.get_mtls_credentials()
+        cert, key = mtls.get_mtls_credentials('test.server.com')
 
         assert cert is None
         assert key is None
@@ -352,6 +360,7 @@ class TestFetchAndInstallMtlsCertificate:
 
         result = mtls.fetch_and_install_mtls_certificate(
             url_request=mock_url_request,
+            server='test.server.com',
             server_url='https://test.server.com',
             uuid='test-uuid',
             project_name='test-project',
@@ -370,6 +379,7 @@ class TestFetchAndInstallMtlsCertificate:
 
         result = mtls.fetch_and_install_mtls_certificate(
             url_request=mock_url_request,
+            server='test.server.com',
             server_url='https://test.server.com',
             uuid='test-uuid',
             project_name='test-project',
@@ -390,6 +400,7 @@ class TestFetchAndInstallMtlsCertificate:
 
         result = mtls.fetch_and_install_mtls_certificate(
             url_request=mock_url_request,
+            server='test.server.com',
             server_url='https://test.server.com',
             uuid='test-uuid',
             project_name='test-project',
