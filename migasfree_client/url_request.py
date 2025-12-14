@@ -182,7 +182,8 @@ class UrlRequest:
         cert_param = None
         if self._mtls_cert and self._mtls_key:
             cert_param = (self._mtls_cert, self._mtls_key)
-            logger.debug('Using mTLS client certificate')
+            url = url.replace('http://', 'https://')
+            logger.debug('Using mTLS client certificate. Forcing https protocol.')
 
         try:
             req = requests.post(
