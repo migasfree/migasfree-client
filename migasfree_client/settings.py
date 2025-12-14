@@ -29,7 +29,7 @@ if os.environ.get('WINDIR'):
     DOC_PATH = os.path.join(data_path, 'doc')
     KEYS_PATH = os.path.join(APP_DATA_PATH, 'keys')
     DEVICES_PATH = os.path.join(APP_DATA_PATH, 'devices')
-    CERT_PATH = os.path.join(APP_DATA_PATH, 'cert')
+    MTLS_PATH = os.path.join(APP_DATA_PATH, 'mtls')
     TMP_PATH = os.path.join(windir_path, 'temp')
     ICON_PATH = os.path.join(data_path, 'icons', 'hicolor', 'scalable')
     LOCALE_PATH = os.path.join(data_path, 'locale')
@@ -44,7 +44,7 @@ else:
     DOC_PATH = '/usr/share/doc/migasfree-client'
     KEYS_PATH = '/var/migasfree-client/keys'
     DEVICES_PATH = '/var/migasfree-client/devices'
-    CERT_PATH = '/var/migasfree-client/cert'
+    MTLS_PATH = '/var/migasfree-client/mtls'
     TMP_PATH = '/tmp/migasfree-client'
     ICON_PATH = '/usr/share/icons/hicolor/scalable'
     LOCALE_PATH = '/usr/share/locale'
@@ -63,8 +63,6 @@ EVENTS_JSON_FILE = os.path.join(EVENTS_SYNC_PATH, '.json')
 
 CERT_FILE = os.path.join(TMP_PATH, 'cert.pem')
 
-MTLS_CERT_FILE = os.path.join(CERT_PATH, 'cert.pem')
-MTLS_KEY_FILE = os.path.join(CERT_PATH, 'key.pem')
 MTLS_DEFAULT_VALIDITY_DAYS = 7305  # 20 years
 
 JSON_INDENT = 4
