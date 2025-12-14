@@ -34,16 +34,58 @@ _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
 
 
-def import_mtls_certificate(cert_tar_file, password=None):
+def get_mtls_path(server):
+    """
+    Get the mTLS certificate directory path for a specific server.
+
+    Args:
+        server: Server hostname or identifier
+
+    Returns:
+        str: Path to the mTLS directory for this server (MTLS_PATH/server/)
+    """
+    from . import utils
+
+    return os.path.join(settings.MTLS_PATH, utils.sanitize_path(server))
+
+
+def get_mtls_cert_file(server):
+    """
+    Get the mTLS certificate file path for a specific server.
+
+    Args:
+        server: Server hostname or identifier
+
+    Returns:
+        str: Path to the certificate file (MTLS_PATH/server/cert.pem)
+    """
+    return os.path.join(get_mtls_path(server), 'cert.pem')
+
+
+def get_mtls_key_file(server):
+    """
+    Get the mTLS key file path for a specific server.
+
+    Args:
+        server: Server hostname or identifier
+
+    Returns:
+        str: Path to the key file (MTLS_PATH/server/key.pem)
+    """
+    return os.path.join(get_mtls_path(server), 'key.pem')
+
+
+def import_mtls_certificate(cert_tar_file, server, password=None):
     """
     Import mTLS certificate from a tar file.
 
     This function extracts the certificate and key from a tar file containing
     a .p12 (PKCS#12) file, converts them to PEM format, and saves them to
-    the appropriate locations.
+    the appropriate locations for the specified server.
 
     Args:
         cert_tar_file: Path to the certificate tar file
+        server: Server hostname or identifier
         password: Password for the p12 file (if encrypted)
 
     Returns:
@@ -54,10 +96,14 @@ def import_mtls_certificate(cert_tar_file, password=None):
 
     logger.info('Importing mTLS certificate from: %s', cert_tar_file)
 
+    mtls_path = get_mtls_path(server)
+    cert_file = get_mtls_cert_file(server)
+    key_file = get_mtls_key_file(server)
+
     try:
-        if not os.path.exists(settings.CERT_PATH):
-            os.makedirs(settings.CERT_PATH, mode=0o755)
-            logger.info('Created certificate directory: %s', settings.CERT_PATH)
+        if not os.path.exists(mtls_path):
+            os.makedirs(mtls_path, mode=0o755)
+            logger.info('Created certificate directory: %s', mtls_path)
 
         with tempfile.TemporaryDirectory() as temp_dir:
             logger.debug('Extracting tar file to: %s', temp_dir)
@@ -76,7 +122,7 @@ def import_mtls_certificate(cert_tar_file, password=None):
 
                 logger.info('Found p12 file: %s', p12_file)
 
-                result = _extract_from_p12(p12_file, password=password)
+                result = _extract_from_p12(p12_file, cert_file, key_file, password=password)
                 if not result['success']:
                     return result
 
@@ -84,7 +130,7 @@ def import_mtls_certificate(cert_tar_file, password=None):
                 return {
                     'success': True,
                     'message': _('mTLS certificate imported successfully.\nCertificate: %s\nKey: %s')
-                    % (settings.MTLS_CERT_FILE, settings.MTLS_KEY_FILE),
+                    % (cert_file, key_file),
                 }
 
     except tarfile.TarError as e:
@@ -95,12 +141,14 @@ def import_mtls_certificate(cert_tar_file, password=None):
         return {'success': False, 'message': _('Error importing certificate: %s') % str(e)}
 
 
-def _extract_from_p12(p12_file, password=None):
+def _extract_from_p12(p12_file, cert_file, key_file, password=None):
     """
     Extract certificate and private key from a PKCS#12 file.
 
     Args:
         p12_file: Path to the .p12 file
+        cert_file: Path where to save the certificate
+        key_file: Path where to save the private key
         password: Password for the p12 file (if encrypted)
 
     Returns:
@@ -135,12 +183,12 @@ def _extract_from_p12(p12_file, password=None):
             encryption_algorithm=serialization.NoEncryption(),
         )
 
-        utils.write_file(settings.MTLS_CERT_FILE, cert_pem.decode('utf-8'))
-        logger.info('Wrote certificate to: %s', settings.MTLS_CERT_FILE)
+        utils.write_file(cert_file, cert_pem.decode('utf-8'))
+        logger.info('Wrote certificate to: %s', cert_file)
 
-        utils.write_file(settings.MTLS_KEY_FILE, key_pem.decode('utf-8'))
-        os.chmod(settings.MTLS_KEY_FILE, 0o600)  # Secure permissions for private key
-        logger.info('Wrote private key to: %s', settings.MTLS_KEY_FILE)
+        utils.write_file(key_file, key_pem.decode('utf-8'))
+        os.chmod(key_file, 0o600)  # Secure permissions for private key
+        logger.info('Wrote private key to: %s', key_file)
 
         return {'success': True, 'message': _('Certificate and key extracted successfully')}
 
@@ -149,37 +197,46 @@ def _extract_from_p12(p12_file, password=None):
         return {'success': False, 'message': _('Error extracting from p12: %s') % str(e)}
 
 
-def has_mtls_certificate():
+def has_mtls_certificate(server):
     """
-    Check if mTLS certificate and key files exist.
+    Check if mTLS certificate and key files exist for a specific server.
+
+    Args:
+        server: Server hostname or identifier
 
     Returns:
         bool: True if both certificate and key files exist, False otherwise
     """
-    cert_exists = os.path.isfile(settings.MTLS_CERT_FILE)
-    key_exists = os.path.isfile(settings.MTLS_KEY_FILE)
+    cert_file = get_mtls_cert_file(server)
+    key_file = get_mtls_key_file(server)
+
+    cert_exists = os.path.isfile(cert_file)
+    key_exists = os.path.isfile(key_file)
 
     if cert_exists and key_exists:
-        logger.info('mTLS certificate found at: %s', settings.MTLS_CERT_FILE)
+        logger.info('mTLS certificate found at: %s', cert_file)
         return True
 
     if cert_exists and not key_exists:
-        logger.warning('Certificate exists but key is missing at: %s', settings.MTLS_KEY_FILE)
+        logger.warning('Certificate exists but key is missing at: %s', key_file)
     elif key_exists and not cert_exists:
-        logger.warning('Key exists but certificate is missing at: %s', settings.MTLS_CERT_FILE)
+        logger.warning('Key exists but certificate is missing at: %s', cert_file)
 
     return False
 
 
-def get_mtls_credentials():
+def get_mtls_credentials(server):
     """
-    Get the paths to mTLS certificate and key files if they exist.
+    Get the paths to mTLS certificate and key files if they exist for a server.
+
+    Args:
+        server: Server hostname or identifier
 
     Returns:
         tuple: (cert_path, key_path) or (None, None) if files don't exist
     """
-    if has_mtls_certificate():
-        return settings.MTLS_CERT_FILE, settings.MTLS_KEY_FILE
+    if has_mtls_certificate(server):
+        return get_mtls_cert_file(server), get_mtls_key_file(server)
 
     return None, None
 
@@ -288,12 +345,13 @@ def download_mtls_certificate(url_request, server_url, token, output_path):
     return {'success': False, 'file_path': None, 'message': _('No content in response')}
 
 
-def fetch_and_install_mtls_certificate(url_request, server_url, uuid, project_name):
+def fetch_and_install_mtls_certificate(url_request, server, server_url, uuid, project_name):
     """
     Complete workflow: request token, download certificate, and install it.
 
     Args:
         url_request: UrlRequest instance to use for the requests
+        server: Server hostname or identifier (for certificate storage path)
         server_url: Base URL of the migasfree server
         uuid: Computer's hardware UUID
         project_name: Name of the project
@@ -322,7 +380,7 @@ def fetch_and_install_mtls_certificate(url_request, server_url, uuid, project_na
             return {'success': False, 'message': download_result['message']}
 
         # Step 3: Import certificate
-        import_result = import_mtls_certificate(tar_path, password=download_result.get('password'))
+        import_result = import_mtls_certificate(tar_path, server, password=download_result.get('password'))
         return import_result
     finally:
         if os.path.exists(tar_path):
