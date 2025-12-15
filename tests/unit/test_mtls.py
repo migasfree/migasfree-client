@@ -97,7 +97,7 @@ class TestImportMtlsCertificate:
 class TestExtractFromP12:
     """Tests for _extract_from_p12 function"""
 
-    @patch('migasfree_client.utils.write_file')
+    @patch('migasfree_client.mtls.write_file')
     @patch('os.chmod')
     def test_extract_from_p12_success(self, mock_chmod, mock_write_file):
         """Test successful extraction from p12 file"""
@@ -105,7 +105,7 @@ class TestExtractFromP12:
 
         from cryptography import x509
         from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives import hashes, serialization
         from cryptography.hazmat.primitives.asymmetric import rsa
         from cryptography.hazmat.primitives.serialization import pkcs12
         from cryptography.x509.oid import NameOID
@@ -125,9 +125,9 @@ class TestExtractFromP12:
             .issuer_name(issuer)
             .public_key(private_key.public_key())
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.datetime.utcnow())
-            .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=365))
-            .sign(private_key, None, default_backend())
+            .not_valid_before(datetime.datetime.now(datetime.UTC))
+            .not_valid_after(datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=365))
+            .sign(private_key, hashes.SHA256(), default_backend())
         )
 
         # Serialize to PKCS12
@@ -203,26 +203,130 @@ class TestHasMtlsCertificate:
 class TestGetMtlsCredentials:
     """Tests for get_mtls_credentials function"""
 
+    @patch('os.path.isfile', return_value=True)
     @patch('migasfree_client.mtls.has_mtls_certificate')
-    def test_credentials_exist(self, mock_has_cert):
-        """Test getting credentials when they exist"""
+    def test_credentials_exist_with_ca(self, mock_has_cert, mock_isfile):
+        """Test getting credentials when they exist including CA"""
         mock_has_cert.return_value = True
         server = 'test.server.com'
 
-        cert, key = mtls.get_mtls_credentials(server)
+        cert, key, ca = mtls.get_mtls_credentials(server)
 
         assert cert == mtls.get_mtls_cert_file(server)
         assert key == mtls.get_mtls_key_file(server)
+        assert ca == mtls.get_mtls_ca_file(server)
+
+    @patch('os.path.isfile')
+    @patch('migasfree_client.mtls.has_mtls_certificate')
+    def test_credentials_exist_without_ca(self, mock_has_cert, mock_isfile):
+        """Test getting credentials when cert/key exist but CA doesn't"""
+        mock_has_cert.return_value = True
+        # isfile returns False for CA file check
+        mock_isfile.return_value = False
+        server = 'test.server.com'
+
+        cert, key, ca = mtls.get_mtls_credentials(server)
+
+        assert cert == mtls.get_mtls_cert_file(server)
+        assert key == mtls.get_mtls_key_file(server)
+        assert ca is None
 
     @patch('migasfree_client.mtls.has_mtls_certificate')
     def test_credentials_dont_exist(self, mock_has_cert):
         """Test getting credentials when they don't exist"""
         mock_has_cert.return_value = False
 
-        cert, key = mtls.get_mtls_credentials('test.server.com')
+        cert, key, ca = mtls.get_mtls_credentials('test.server.com')
 
         assert cert is None
         assert key is None
+        assert ca is None
+
+
+class TestGetMtlsCaFile:
+    """Tests for get_mtls_ca_file function"""
+
+    def test_returns_correct_path(self):
+        """Test that get_mtls_ca_file returns the correct path"""
+        server = 'test.server.com'
+
+        result = mtls.get_mtls_ca_file(server)
+
+        assert result.endswith('/ca.pem')
+        assert 'test.server.com' in result
+
+
+class TestDownloadCaCertificate:
+    """Tests for download_ca_certificate function"""
+
+    @patch('migasfree_client.mtls.write_file')
+    @patch('os.makedirs')
+    @patch('os.path.exists', return_value=False)
+    @patch('requests.get')
+    def test_download_ca_success(self, mock_get, mock_exists, mock_makedirs, mock_write_file):
+        """Test successful CA certificate download"""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.text = '-----BEGIN CERTIFICATE-----\ntest CA content\n-----END CERTIFICATE-----'
+        mock_get.return_value = mock_response
+        mock_write_file.return_value = True
+
+        result = mtls.download_ca_certificate(
+            server_url='https://test.server.com',
+            server='test.server.com',
+        )
+
+        assert result['success'] is True
+        assert result['ca_file'] is not None
+        mock_get.assert_called_once()
+        mock_write_file.assert_called_once()
+
+    @patch('requests.get')
+    def test_download_ca_not_found(self, mock_get):
+        """Test CA certificate download when endpoint returns 404"""
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_get.return_value = mock_response
+
+        result = mtls.download_ca_certificate(
+            server_url='https://test.server.com',
+            server='test.server.com',
+        )
+
+        assert result['success'] is False
+        assert result.get('not_available') is True
+        assert result['ca_file'] is None
+
+    @patch('requests.get')
+    def test_download_ca_server_error(self, mock_get):
+        """Test CA certificate download with server error"""
+        mock_response = MagicMock()
+        mock_response.status_code = 500
+        mock_response.text = 'Internal Server Error'
+        mock_get.return_value = mock_response
+
+        result = mtls.download_ca_certificate(
+            server_url='https://test.server.com',
+            server='test.server.com',
+        )
+
+        assert result['success'] is False
+        assert result['ca_file'] is None
+
+    @patch('requests.get')
+    def test_download_ca_connection_error(self, mock_get):
+        """Test CA certificate download with connection error"""
+        import requests as requests_lib
+
+        mock_get.side_effect = requests_lib.exceptions.ConnectionError('Connection refused')
+
+        result = mtls.download_ca_certificate(
+            server_url='https://test.server.com',
+            server='test.server.com',
+        )
+
+        assert result['success'] is False
+        assert result['ca_file'] is None
 
 
 class TestRequestMtlsToken:
@@ -304,7 +408,7 @@ class TestRequestMtlsToken:
 class TestDownloadMtlsCertificate:
     """Tests for download_mtls_certificate function"""
 
-    @patch('migasfree_client.utils.write_file')
+    @patch('migasfree_client.mtls.write_file')
     def test_download_certificate_success(self, mock_write_file):
         """Test successful certificate download"""
         mock_url_request = MagicMock()
@@ -348,13 +452,17 @@ class TestFetchAndInstallMtlsCertificate:
 
     @patch('migasfree_client.mtls.import_mtls_certificate')
     @patch('migasfree_client.mtls.download_mtls_certificate')
+    @patch('migasfree_client.mtls.download_ca_certificate')
     @patch('migasfree_client.mtls.request_mtls_token')
     @patch('os.path.exists', return_value=True)
     @patch('os.unlink')
-    def test_fetch_and_install_success(self, mock_unlink, mock_exists, mock_request, mock_download, mock_import):
+    def test_fetch_and_install_success(
+        self, mock_unlink, mock_exists, mock_request, mock_ca_download, mock_download, mock_import
+    ):
         """Test successful fetch and install workflow"""
         mock_url_request = MagicMock()
         mock_request.return_value = {'success': True, 'token': 'test-token', 'message': 'OK'}
+        mock_ca_download.return_value = {'success': True, 'ca_file': '/tmp/ca.pem', 'message': 'OK'}
         mock_download.return_value = {'success': True, 'file_path': '/tmp/cert.tar', 'message': 'OK'}
         mock_import.return_value = {'success': True, 'message': 'Imported'}
 
@@ -368,6 +476,7 @@ class TestFetchAndInstallMtlsCertificate:
 
         assert result['success'] is True
         mock_request.assert_called_once()
+        mock_ca_download.assert_called_once()
         mock_download.assert_called_once()
         mock_import.assert_called_once()
 
@@ -388,14 +497,18 @@ class TestFetchAndInstallMtlsCertificate:
         assert result['success'] is False
         assert 'Connection error' in result['message']
 
+    @patch('migasfree_client.mtls.download_ca_certificate')
     @patch('migasfree_client.mtls.download_mtls_certificate')
     @patch('migasfree_client.mtls.request_mtls_token')
     @patch('os.path.exists', return_value=True)
     @patch('os.unlink')
-    def test_fetch_and_install_download_failure(self, mock_unlink, mock_exists, mock_request, mock_download):
+    def test_fetch_and_install_download_failure(
+        self, mock_unlink, mock_exists, mock_request, mock_download, mock_ca_download
+    ):
         """Test fetch and install with download failure"""
         mock_url_request = MagicMock()
         mock_request.return_value = {'success': True, 'token': 'test-token', 'message': 'OK'}
+        mock_ca_download.return_value = {'success': True, 'ca_file': '/tmp/ca.pem', 'message': 'OK'}
         mock_download.return_value = {'success': False, 'file_path': None, 'message': 'Download failed'}
 
         result = mtls.fetch_and_install_mtls_certificate(
@@ -408,3 +521,31 @@ class TestFetchAndInstallMtlsCertificate:
 
         assert result['success'] is False
         assert 'Download failed' in result['message']
+
+    @patch('migasfree_client.mtls.import_mtls_certificate')
+    @patch('migasfree_client.mtls.download_mtls_certificate')
+    @patch('migasfree_client.mtls.download_ca_certificate')
+    @patch('migasfree_client.mtls.request_mtls_token')
+    @patch('os.path.exists', return_value=True)
+    @patch('os.unlink')
+    def test_fetch_and_install_continues_without_ca(
+        self, mock_unlink, mock_exists, mock_request, mock_ca_download, mock_download, mock_import
+    ):
+        """Test fetch and install continues even if CA download fails"""
+        mock_url_request = MagicMock()
+        mock_request.return_value = {'success': True, 'token': 'test-token', 'message': 'OK'}
+        mock_ca_download.return_value = {'success': False, 'ca_file': None, 'message': 'CA not available'}
+        mock_download.return_value = {'success': True, 'file_path': '/tmp/cert.tar', 'message': 'OK'}
+        mock_import.return_value = {'success': True, 'message': 'Imported'}
+
+        result = mtls.fetch_and_install_mtls_certificate(
+            url_request=mock_url_request,
+            server='test.server.com',
+            server_url='https://test.server.com',
+            uuid='test-uuid',
+            project_name='test-project',
+        )
+
+        # Should still succeed even if CA download failed
+        assert result['success'] is True
+        mock_import.assert_called_once()
