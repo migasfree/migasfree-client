@@ -25,7 +25,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import pkcs12
 
-from . import settings, utils
+from .settings import MTLS_DEFAULT_VALIDITY_DAYS, MTLS_PATH
+from .utils import read_file, sanitize_path, write_file
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -44,9 +45,7 @@ def get_mtls_path(server):
     Returns:
         str: Path to the mTLS directory for this server (MTLS_PATH/server/)
     """
-    from . import utils
-
-    return os.path.join(settings.MTLS_PATH, utils.sanitize_path(server))
+    return os.path.join(MTLS_PATH, sanitize_path(server))
 
 
 def get_mtls_cert_file(server):
@@ -73,6 +72,19 @@ def get_mtls_key_file(server):
         str: Path to the key file (MTLS_PATH/server/key.pem)
     """
     return os.path.join(get_mtls_path(server), 'key.pem')
+
+
+def get_mtls_ca_file(server):
+    """
+    Get the CA certificate file path for a specific server.
+
+    Args:
+        server: Server hostname or identifier
+
+    Returns:
+        str: Path to the CA certificate file (MTLS_PATH/server/ca.pem)
+    """
+    return os.path.join(get_mtls_path(server), 'ca.pem')
 
 
 def import_mtls_certificate(cert_tar_file, server, password=None):
@@ -183,10 +195,10 @@ def _extract_from_p12(p12_file, cert_file, key_file, password=None):
             encryption_algorithm=serialization.NoEncryption(),
         )
 
-        utils.write_file(cert_file, cert_pem.decode('utf-8'))
+        write_file(cert_file, cert_pem.decode('utf-8'))
         logger.info('Wrote certificate to: %s', cert_file)
 
-        utils.write_file(key_file, key_pem.decode('utf-8'))
+        write_file(key_file, key_pem.decode('utf-8'))
         os.chmod(key_file, 0o600)  # Secure permissions for private key
         logger.info('Wrote private key to: %s', key_file)
 
@@ -195,6 +207,94 @@ def _extract_from_p12(p12_file, cert_file, key_file, password=None):
     except Exception as e:
         logger.error('Error extracting from p12: %s', str(e))
         return {'success': False, 'message': _('Error extracting from p12: %s') % str(e)}
+
+
+def download_ca_certificate(server_url, server):
+    """
+    Download the CA certificate from the server and update if changed.
+
+    This certificate is needed to verify the server identity when making
+    mTLS requests. The download must use verify=False because we don't
+    have the CA certificate yet (or need to check for updates).
+
+    If the CA certificate already exists locally, it will only be updated
+    if the remote certificate is different.
+
+    Args:
+        server_url: Base URL of the migasfree server
+        server: Server hostname or identifier (for certificate storage path)
+
+    Returns:
+        dict: {'success': bool, 'message': str, 'ca_file': str or None, 'updated': bool}
+    """
+    endpoint = f'{server_url}/manager/v1/public/ca'
+
+    logger.info('Checking CA certificate from: %s', endpoint)
+
+    try:
+        # Must use verify=False because we don't have the CA cert yet
+        # Suppress the InsecureRequestWarning since this is intentional
+        import warnings
+
+        import urllib3
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=urllib3.exceptions.InsecureRequestWarning)
+            response = requests.get(endpoint, verify=False, timeout=30)
+
+        if response.status_code == requests.codes.not_found:
+            logger.debug('CA certificate endpoint not available (404): %s', endpoint)
+            return {'success': False, 'message': '', 'ca_file': None, 'not_available': True, 'updated': False}
+
+        if response.status_code not in [requests.codes.ok]:
+            logger.error('Failed to download CA certificate: %d', response.status_code)
+            return {
+                'success': False,
+                'message': _('Failed to download CA certificate: %s') % response.text,
+                'ca_file': None,
+                'updated': False,
+            }
+
+        # Get paths
+        mtls_path = get_mtls_path(server)
+        ca_file = get_mtls_ca_file(server)
+        remote_ca_content = response.text
+
+        # Check if local CA exists and compare
+        if os.path.isfile(ca_file):
+            local_ca_content = read_file(ca_file)
+            if local_ca_content == remote_ca_content:
+                logger.info('CA certificate is up to date')
+                return {
+                    'success': True,
+                    'message': _('CA certificate is up to date'),
+                    'ca_file': ca_file,
+                    'updated': False,
+                }
+            else:
+                logger.info('CA certificate has changed, updating...')
+
+        # Save the CA certificate
+        if not os.path.exists(mtls_path):
+            os.makedirs(mtls_path, mode=0o755)
+            logger.info('Created certificate directory: %s', mtls_path)
+
+        write_file(ca_file, remote_ca_content)
+        logger.info('CA certificate saved to: %s', ca_file)
+
+        return {
+            'success': True,
+            'message': _('CA certificate downloaded successfully'),
+            'ca_file': ca_file,
+            'updated': True,
+        }
+
+    except requests.exceptions.ConnectionError as e:
+        logger.error('Connection error downloading CA certificate: %s', str(e))
+        return {'success': False, 'message': str(e), 'ca_file': None, 'updated': False}
+    except Exception as e:
+        logger.error('Error downloading CA certificate: %s', str(e))
+        return {'success': False, 'message': str(e), 'ca_file': None, 'updated': False}
 
 
 def has_mtls_certificate(server):
@@ -227,18 +327,20 @@ def has_mtls_certificate(server):
 
 def get_mtls_credentials(server):
     """
-    Get the paths to mTLS certificate and key files if they exist for a server.
+    Get the paths to mTLS certificate, key, and CA files if they exist for a server.
 
     Args:
         server: Server hostname or identifier
 
     Returns:
-        tuple: (cert_path, key_path) or (None, None) if files don't exist
+        tuple: (cert_path, key_path, ca_path) or (None, None, None) if files don't exist
     """
     if has_mtls_certificate(server):
-        return get_mtls_cert_file(server), get_mtls_key_file(server)
+        ca_file = get_mtls_ca_file(server)
+        ca_path = ca_file if os.path.isfile(ca_file) else None
+        return get_mtls_cert_file(server), get_mtls_key_file(server), ca_path
 
-    return None, None
+    return None, None, None
 
 
 def request_mtls_token(url_request, server_url, uuid, project_name, validity_days=None):
@@ -256,7 +358,7 @@ def request_mtls_token(url_request, server_url, uuid, project_name, validity_day
         dict: {'success': bool, 'token': str or None, 'message': str}
     """
     if validity_days is None:
-        validity_days = settings.MTLS_DEFAULT_VALIDITY_DAYS
+        validity_days = MTLS_DEFAULT_VALIDITY_DAYS
 
     endpoint = f'{server_url}/manager/v1/public/mtls/computer-tokens'
     payload = {
@@ -333,7 +435,7 @@ def download_mtls_certificate(url_request, server_url, token, output_path):
 
     content = result.get('content')
     if content:
-        utils.write_file(output_path, content)
+        write_file(output_path, content)
         logger.info('Certificate downloaded to: %s', output_path)
         return {
             'success': True,
@@ -347,7 +449,7 @@ def download_mtls_certificate(url_request, server_url, token, output_path):
 
 def fetch_and_install_mtls_certificate(url_request, server, server_url, uuid, project_name):
     """
-    Complete workflow: request token, download certificate, and install it.
+    Complete workflow: request token, download certificate, download CA, and install.
 
     Args:
         url_request: UrlRequest instance to use for the requests
@@ -370,7 +472,13 @@ def fetch_and_install_mtls_certificate(url_request, server, server_url, uuid, pr
             'not_available': token_result.get('not_available', False),
         }
 
-    # Step 2: Download certificate
+    # Step 2: Download CA certificate
+    ca_result = download_ca_certificate(server_url, server)
+    if not ca_result['success'] and not ca_result.get('not_available'):
+        logger.warning('Failed to download CA certificate: %s', ca_result['message'])
+        # Continue anyway, CA might not be required
+
+    # Step 3: Download mTLS certificate
     with tempfile.NamedTemporaryFile(suffix='.tar', delete=False) as tmp_file:
         tar_path = tmp_file.name
 
@@ -379,7 +487,7 @@ def fetch_and_install_mtls_certificate(url_request, server, server_url, uuid, pr
         if not download_result['success']:
             return {'success': False, 'message': download_result['message']}
 
-        # Step 3: Import certificate
+        # Step 4: Import certificate
         import_result = import_mtls_certificate(tar_path, server, password=download_result.get('password'))
         return import_result
     finally:
