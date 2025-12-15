@@ -44,6 +44,7 @@ class UrlRequest:
     _cert = False
     _mtls_cert = None
     _mtls_key = None
+    _ca_cert = None
 
     _timeout = 60  # seconds
 
@@ -56,7 +57,9 @@ class UrlRequest:
         requests.codes.resume,
     ]
 
-    def __init__(self, debug=False, proxy='', project='', keys=None, cert=False, mtls_cert=None, mtls_key=None):
+    def __init__(
+        self, debug=False, proxy='', project='', keys=None, cert=False, mtls_cert=None, mtls_key=None, ca_cert=None
+    ):
         if keys is None:
             keys = {}
 
@@ -66,11 +69,14 @@ class UrlRequest:
         self._cert = cert
         self._mtls_cert = mtls_cert
         self._mtls_key = mtls_key
+        self._ca_cert = ca_cert
 
         logger.info('SSL certificate: %s', self._cert)
         if self._mtls_cert and self._mtls_key:
             logger.info('mTLS client certificate: %s', self._mtls_cert)
             logger.info('mTLS client key: %s', self._mtls_key)
+            if self._ca_cert:
+                logger.info('CA certificate for verification: %s', self._ca_cert)
 
         if isinstance(keys, dict):
             self._private_key = keys.get('private')
@@ -180,14 +186,22 @@ class UrlRequest:
             url += '/'
 
         cert_param = None
+        verify_param = False
         if self._mtls_cert and self._mtls_key:
             cert_param = (self._mtls_cert, self._mtls_key)
+            verify_param = self._ca_cert if self._ca_cert else False
             url = url.replace('http://', 'https://')
             logger.debug('Using mTLS client certificate. Forcing https protocol.')
 
         try:
             req = requests.post(
-                url, data=data, headers=headers, proxies=proxies, timeout=self._timeout, cert=cert_param
+                url,
+                data=data,
+                headers=headers,
+                proxies=proxies,
+                timeout=self._timeout,
+                cert=cert_param,
+                verify=verify_param,
             )
         except requests.exceptions.ConnectionError as e:
             logger.error(str(e))
