@@ -267,21 +267,33 @@ class MigasFreeCommand:
         """Initialize mTLS certificate paths, fetching from server if needed."""
         self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
 
-        # Always check if CA certificate needs to be downloaded or updated
         if self._mtls_cert and self._mtls_key:
-            logger.info('mTLS credentials found, checking CA certificate...')
-            ca_result = mtls.download_ca_certificate(self._url_base, self.migas_server)
-            if ca_result['success']:
-                self._ca_cert = ca_result['ca_file']
-                if ca_result.get('updated'):
-                    logger.info('CA certificate updated successfully')
-            elif not ca_result.get('not_available'):
-                logger.warning('Failed to check/download CA certificate: %s', ca_result['message'])
-
-            logger.info('mTLS credentials ready')
+            self._update_ca_certificate()
+            self._enable_mtls()
             return
 
-        # Certificates don't exist, try to fetch them automatically
+        self._fetch_mtls_from_server()
+
+    def _update_ca_certificate(self):
+        """Check and update CA certificate from server."""
+        logger.info('Checking CA certificate...')
+        ca_result = mtls.download_ca_certificate(self._url_base, self.migas_server)
+
+        if ca_result['success']:
+            self._ca_cert = ca_result['ca_file']
+            if ca_result.get('updated'):
+                logger.info('CA certificate updated')
+        elif not ca_result.get('not_available'):
+            logger.warning('Failed to download CA certificate: %s', ca_result['message'])
+
+    def _enable_mtls(self):
+        """Enable mTLS mode: force https protocol and update URL base."""
+        self.migas_protocol = 'https'
+        self._init_url_base()
+        logger.info('mTLS enabled, protocol: https')
+
+    def _fetch_mtls_from_server(self):
+        """Attempt to fetch mTLS certificates from server."""
         logger.info('No mTLS credentials found, attempting to fetch from server...')
 
         url_request = UrlRequest(
@@ -300,9 +312,9 @@ class MigasFreeCommand:
 
         if result['success']:
             self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
-            logger.info('mTLS credentials fetched and installed successfully')
+            self._enable_mtls()
+            logger.info('mTLS credentials installed successfully')
         elif not result.get('not_available'):
-            # Only log warning if it's a real failure, not just endpoint not available
             logger.warning('Failed to fetch mTLS credentials: %s', result['message'])
 
     def _init_url_request(self):
