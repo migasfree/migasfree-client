@@ -176,6 +176,7 @@ class MigasFreeCommand:
     _error_file_descriptor = None
     _mtls_cert = None
     _mtls_key = None
+    _ca_cert = None
 
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
@@ -264,10 +265,20 @@ class MigasFreeCommand:
 
     def _init_mtls(self):
         """Initialize mTLS certificate paths, fetching from server if needed."""
-        self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials(self.migas_server)
+        self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
 
+        # Always check if CA certificate needs to be downloaded or updated
         if self._mtls_cert and self._mtls_key:
-            logger.info('mTLS credentials found')
+            logger.info('mTLS credentials found, checking CA certificate...')
+            ca_result = mtls.download_ca_certificate(self._url_base, self.migas_server)
+            if ca_result['success']:
+                self._ca_cert = ca_result['ca_file']
+                if ca_result.get('updated'):
+                    logger.info('CA certificate updated successfully')
+            elif not ca_result.get('not_available'):
+                logger.warning('Failed to check/download CA certificate: %s', ca_result['message'])
+
+            logger.info('mTLS credentials ready')
             return
 
         # Certificates don't exist, try to fetch them automatically
@@ -288,7 +299,7 @@ class MigasFreeCommand:
         )
 
         if result['success']:
-            self._mtls_cert, self._mtls_key = mtls.get_mtls_credentials(self.migas_server)
+            self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
             logger.info('mTLS credentials fetched and installed successfully')
         elif not result.get('not_available'):
             # Only log warning if it's a real failure, not just endpoint not available
@@ -307,6 +318,7 @@ class MigasFreeCommand:
             cert=self.migas_ssl_cert,
             mtls_cert=self._mtls_cert,
             mtls_key=self._mtls_key,
+            ca_cert=self._ca_cert,
         )
 
     def _init_command(self):
