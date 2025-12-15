@@ -1,11 +1,19 @@
 #!/bin/bash
 
+# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+#
+# Script to create distribution packages (.deb, .rpm)
+
+set -e
+
 function create_package
 {
     if [ -f stdeb.cfg ]
     then
+        echo "Creating Debian package..."
         python3 setup.py --command-packages=stdeb.command bdist_deb
     else
+        echo "Creating RPM package..."
         python3 setup.py bdist_rpm
     fi
 }
@@ -36,10 +44,14 @@ function get_distro
 ##############
 
 cd ..
-if [ -z "$(get_distro)" ]
+
+DISTRO=$(get_distro)
+if [ -z "$DISTRO" ]
 then
     echo "Computer distro is not available. Aborting package creation."
     exit 1
 fi
 
+echo "Detected distro: $DISTRO"
 create_package
+echo "Package creation completed."
