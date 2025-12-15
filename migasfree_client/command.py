@@ -321,6 +321,44 @@ class MigasFreeCommand:
             ca_cert=self._ca_cert,
         )
 
+    def _fetch_mtls_certificates(self):
+        """Fetch mTLS and CA certificates from server."""
+        # Download CA certificate
+        ca_result = mtls.download_ca_certificate(self._url_base, self.migas_server)
+        if ca_result['success']:
+            self._ca_cert = ca_result['ca_file']
+            if ca_result.get('updated'):
+                self.operation_ok(_('CA certificate downloaded'))
+            else:
+                self.operation_ok(_('CA certificate is up to date'))
+        elif ca_result.get('not_available'):
+            logger.info('CA certificate endpoint not available')
+        else:
+            self.operation_failed(_('Failed to download CA certificate: %s') % ca_result['message'])
+
+        # Download mTLS certificates
+        url_request = UrlRequest(
+            debug=self._debug,
+            proxy=self.migas_proxy,
+            cert=self.migas_ssl_cert,
+        )
+
+        result = mtls.fetch_and_install_mtls_certificate(
+            url_request=url_request,
+            server=self.migas_server,
+            server_url=self._url_base,
+            uuid=utils.get_hardware_uuid(),
+            project_name=self.migas_project,
+        )
+
+        if result['success']:
+            self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
+            self.operation_ok(_('mTLS certificates downloaded'))
+        elif result.get('not_available'):
+            logger.info('mTLS endpoint not available')
+        else:
+            self.operation_failed(_('Failed to download mTLS certificates: %s') % result['message'])
+
     def _init_command(self):
         self._ssl_cert()
         self._init_url_base()
@@ -481,6 +519,9 @@ class MigasFreeCommand:
             self._save_computer(user, password)
 
         self.operation_ok(_('Computer registered at server'))
+
+        self._show_message(_('Fetching mTLS certificates...'))
+        self._fetch_mtls_certificates()
 
     def _save_computer(self, user, password):
         response = self._url_request.run(
