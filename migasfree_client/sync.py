@@ -16,17 +16,17 @@
 import contextlib
 import copy
 import errno
+import functools
 import gettext
 import json
 import logging
 import os
-
-# http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 import signal
 import socket
 import sys
 import tempfile
 from collections import defaultdict
+from contextlib import contextmanager
 from datetime import datetime
 
 import requests
@@ -44,6 +44,26 @@ __all__ = ['MigasFreeSync']
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
+
+
+@contextmanager
+def lock_file_context(cmd, lock_file):
+    """Context manager for lock file handling."""
+    utils.check_lock_file(cmd, lock_file)
+    try:
+        yield
+    finally:
+        utils.remove_file(lock_file)
+
+
+def require_computer_id(method):
+    """Decorator to ensure computer_id is set before method execution."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if not self._computer_id:
+            self.get_computer_id()
+        return method(self, *args, **kwargs)
+    return wrapper
 
 
 class MigasFreeSync(MigasFreeCommand):
@@ -237,14 +257,14 @@ class MigasFreeSync(MigasFreeCommand):
 
         return True
 
+    @require_computer_id
     def get_properties(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         self._show_message(_('Getting properties...'))
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_properties']), data={'id': self._computer_id}, debug=self._debug
+                url=self.api_endpoint(self.URLS['get_properties']),
+                data={'id': self._computer_id},
+                debug=self._debug,
             )
             logger.debug('Response get_properties: %s', response)
 
@@ -253,13 +273,10 @@ class MigasFreeSync(MigasFreeCommand):
             sys.exit(errno.ENODATA)
 
         self.operation_ok()
-
         return response
 
+    @require_computer_id
     def get_fault_definitions(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         self._show_message(_('Getting fault definitions...'))
         with self.console.status(''):
             response = self._url_request.run(
@@ -274,18 +291,14 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return ''
-
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
         self.operation_ok()
-
         return response
 
+    @require_computer_id
     def get_repositories(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         if not self.get_repos_key():
             sys.exit(errno.EPERM)
 
@@ -303,18 +316,14 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return []
-
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
         self.operation_ok()
-
         return response
 
+    @require_computer_id
     def get_mandatory_packages(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         self._show_message(_('Getting mandatory packages...'))
         with self.console.status(''):
             response = self._url_request.run(
@@ -329,25 +338,15 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return None
-
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
         self.operation_ok()
-
         return response
 
+    @require_computer_id
     def get_devices(self):
-        """
-        response: {
-            "logical": [{}, ...],
-            "default": int
-        }
-        """
-
-        if not self._computer_id:
-            self.get_computer_id()
-
+        """Get assigned devices. Returns {'logical': [...], 'default': int}."""
         self._show_message(_('Getting devices...'))
 
         with self.console.status(''):
@@ -363,24 +362,22 @@ class MigasFreeSync(MigasFreeCommand):
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_ok()
                 return None
-
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
         self.operation_ok()
-
         return response
 
+    @require_computer_id
     def get_traits(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         if not self._quiet:
             self._show_message(_('Getting traits...'))
 
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_traits']), data={'id': self._computer_id}, debug=self._debug
+                url=self.api_endpoint(self.URLS['get_traits']),
+                data={'id': self._computer_id},
+                debug=self._debug,
             )
             logger.debug('Response get_traits: %s', response)
 
@@ -525,16 +522,12 @@ class MigasFreeSync(MigasFreeCommand):
 
         return ret
 
+    @require_computer_id
     def hardware_capture_is_required(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['get_hardware_required']),
-                data={
-                    'id': self._computer_id,
-                },
+                data={'id': self._computer_id},
                 exit_on_error=False,
                 debug=self._debug,
             )
@@ -546,11 +539,9 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response.get('capture', False)
 
+    @require_computer_id
     def update_hardware_inventory(self):
-        hardware = json.loads('{}')  # default value
-
-        if not self._computer_id:
-            self.get_computer_id()
+        hardware = {}
 
         self._show_message(_('Capturing hardware information...'))
         cmd = 'LC_ALL=C lshw -json'
@@ -634,7 +625,7 @@ class MigasFreeSync(MigasFreeCommand):
 
     def upload_faults(self):
         response = self.get_fault_definitions()
-        if len(response) > 0:
+        if response:
             data = self._eval_faults(response)
             logger.debug('Faults to send: %s', data)
 
@@ -659,11 +650,9 @@ class MigasFreeSync(MigasFreeCommand):
         if 'install' in response:
             self.install_mandatory_packages(response['install'])
 
+    @require_computer_id
     def upload_software(self, before, history):
         self._check_pms()
-
-        if not self._computer_id:
-            self.get_computer_id()
 
         after = self.pms.query_all()
         utils.write_file(settings.SOFTWARE_FILE, '\n'.join(after))
@@ -1109,13 +1098,11 @@ class MigasFreeSync(MigasFreeCommand):
                 self.migas_auto_update_packages = True
 
             if args.devices:
-                utils.check_lock_file(self.CMD, self.LOCK_FILE)
-                self.cmd_devices()
-                utils.remove_file(self.LOCK_FILE)
+                with lock_file_context(self.CMD, self.LOCK_FILE):
+                    self.cmd_devices()
             elif args.software:
-                utils.check_lock_file(self.CMD, self.LOCK_FILE)
-                self.cmd_software()
-                utils.remove_file(self.LOCK_FILE)
+                with lock_file_context(self.CMD, self.LOCK_FILE):
+                    self.cmd_software()
             elif args.hardware:
                 self.cmd_hardware()
             elif args.attributes:
@@ -1123,25 +1110,28 @@ class MigasFreeSync(MigasFreeCommand):
             elif args.faults:
                 self.cmd_faults()
             else:
-                utils.check_lock_file(self.CMD, self.LOCK_FILE)
-                self.cmd_synchronize()
-                utils.remove_file(self.LOCK_FILE)
+                with lock_file_context(self.CMD, self.LOCK_FILE):
+                    self.cmd_synchronize()
 
             if not self._pms_status_ok:
                 sys.exit(errno.EPROTO)
+
         elif args.cmd == 'register':
             self.cmd_register_computer(args.user)
+
         elif args.cmd == 'search':
             self.cmd_search(' '.join(args.pattern))
+
         elif args.cmd == 'install':
-            utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self.cmd_install_package(' '.join(args.pkg_install))
-            utils.remove_file(self.LOCK_FILE)
+            with lock_file_context(self.CMD, self.LOCK_FILE):
+                self.cmd_install_package(' '.join(args.pkg_install))
+
         elif args.cmd == 'purge':
-            utils.check_lock_file(self.CMD, self.LOCK_FILE)
-            self.cmd_remove_package(' '.join(args.pkg_purge))
-            utils.remove_file(self.LOCK_FILE)
+            with lock_file_context(self.CMD, self.LOCK_FILE):
+                self.cmd_remove_package(' '.join(args.pkg_purge))
+
         elif args.cmd == 'traits':
             self.cmd_traits(args.prefix, args.traits_key)
 
         sys.exit(utils.ALL_OK)
+
