@@ -35,41 +35,40 @@ logger = logging.getLogger('migasfree_client')
 
 
 class UrlRequest:
-    _debug = False
+    __slots__ = (
+        '_debug', '_safe', '_exit_on_error', '_proxy', '_cert',
+        '_mtls_cert', '_mtls_key', '_ca_cert', '_timeout',
+        '_private_key', '_public_key', '_project',
+    )
 
-    _safe = True
-    _exit_on_error = True
-
-    _proxy = ''
-    _cert = False
-    _mtls_cert = None
-    _mtls_key = None
-    _ca_cert = None
-
-    _timeout = 60  # seconds
-
-    _ok_codes = [  # noqa: RUF012
+    _ok_codes = frozenset([
         requests.codes.ok,
         requests.codes.created,
         requests.codes.moved,
         requests.codes.found,
         requests.codes.temporary_redirect,
         requests.codes.resume,
-    ]
+    ])
 
     def __init__(
-        self, debug=False, proxy='', project='', keys=None, cert=False, mtls_cert=None, mtls_key=None, ca_cert=None
+        self, debug=False, proxy='', project='', keys=None, cert=False,
+        mtls_cert=None, mtls_key=None, ca_cert=None, timeout=60,
     ):
         if keys is None:
             keys = {}
 
         self._debug = debug
+        self._safe = True
+        self._exit_on_error = True
         self._proxy = proxy
         self._project = project
         self._cert = cert
         self._mtls_cert = mtls_cert
         self._mtls_key = mtls_key
         self._ca_cert = ca_cert
+        self._timeout = timeout
+        self._private_key = keys.get('private')
+        self._public_key = keys.get('public')
 
         logger.info('SSL certificate: %s', self._cert)
         if self._mtls_cert and self._mtls_key:
@@ -77,10 +76,6 @@ class UrlRequest:
             logger.info('mTLS client key: %s', self._mtls_key)
             if self._ca_cert:
                 logger.info('CA certificate for verification: %s', self._ca_cert)
-
-        if isinstance(keys, dict):
-            self._private_key = keys.get('private')
-            self._public_key = keys.get('public')
 
         if self._proxy:
             logger.info('Proxy selected: %s', self._proxy)
@@ -152,28 +147,7 @@ class UrlRequest:
             headers['content-type'] = 'application/json'
 
         if upload_files:
-            my_magic = build_magic()
-
-            files = []
-            for _file in upload_files:
-                content = read_file(_file)
-
-                tmp_file = os.path.join(TMP_PATH, os.path.basename(_file))
-                write_file(tmp_file, content[0:1023])  # only header
-                mime = my_magic.file(tmp_file)
-                os.remove(tmp_file)
-
-                files.append(('file', (_file, content, mime)))
-
-            logger.debug('URL upload files: %s', files)
-            # http://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request
-            if safe:
-                data = json.loads(data)
-
-            fields = data
-            fields.update(dict(files))
-            data = MultipartEncoder(fields=fields)
-            headers['content-type'] = data.content_type
+            data, headers = self._prepare_upload_files(upload_files, data, safe, headers)
 
         proxies = None
         if self._proxy:
@@ -202,16 +176,44 @@ class UrlRequest:
                 verify=verify_param,
             )
         except requests.exceptions.ConnectionError as e:
-            logger.error(str(e))
-            return {'error': {'info': e, 'code': errno.ECONNREFUSED}}
-        except requests.exceptions.ReadTimeout as e:
-            logger.error(str(e))
-            return {'error': {'info': e, 'code': errno.ETIMEDOUT}}
+            logger.error('Connection error: %s', e)
+            return {'error': {'info': str(e), 'code': errno.ECONNREFUSED}}
+        except requests.exceptions.Timeout as e:
+            logger.error('Request timeout: %s', e)
+            return {'error': {'info': str(e), 'code': errno.ETIMEDOUT}}
+        except requests.exceptions.RequestException as e:
+            logger.error('Request error: %s', e)
+            return {'error': {'info': str(e), 'code': errno.EIO}}
 
         if req.status_code not in self._ok_codes:
             return self._error_response(req, url)
 
         return self._evaluate_response(req.json(), safe)
+
+    def _prepare_upload_files(self, upload_files, data, safe, headers):
+        """Prepare files for multipart upload."""
+        my_magic = build_magic()
+        files = []
+
+        for _file in upload_files:
+            content = read_file(_file)
+            tmp_file = os.path.join(TMP_PATH, os.path.basename(_file))
+            write_file(tmp_file, content[0:1023])  # only header
+            mime = my_magic.file(tmp_file)
+            os.remove(tmp_file)
+            files.append(('file', (_file, content, mime)))
+
+        logger.debug('URL upload files: %s', files)
+
+        if safe:
+            data = json.loads(data)
+
+        fields = data
+        fields.update(dict(files))
+        data = MultipartEncoder(fields=fields)
+        headers['content-type'] = data.content_type
+
+        return data, headers
 
     def run_simple(self, url, data=None, json_data=None, headers=None, timeout=None, download=False):
         """
@@ -298,12 +300,12 @@ class UrlRequest:
         return response
 
     def _error_response(self, request, url):
-        logger.error('url_request server error response code: %s', str(request.status_code))
-        logger.error('url_request server error response info: %s', str(request.text))
+        logger.error('url_request server error response code: %s', request.status_code)
+        logger.error('url_request server error response info: %s', request.text)
 
-        info = request.text
-        if 'json' in request.headers['content-type']:
-            info = self._evaluate_response(request.json())
+        content_type = request.headers.get('content-type', '')
+        is_json = 'json' in content_type
+        info = self._evaluate_response(request.json()) if is_json else request.text
 
         if self._debug:
             print(_('HTTP error code: %s') % request.status_code)
@@ -317,21 +319,19 @@ class UrlRequest:
 
                 return {'error': {'info': msg, 'code': errno.EPERM}}
 
-            extension = 'txt' if 'json' in request.headers['content-type'] else 'html'
+            extension = 'txt' if is_json else 'html'
             _file = os.path.join(
                 TMP_PATH,
-                'response.{}.{}.{}'.format(
-                    request.status_code, url.replace('/', '.').replace(':', '.').rstrip('.'), extension
-                ),
+                f'response.{request.status_code}.{url.replace("/", ".").replace(":", ".").rstrip(".")}.{extension}',
             )
             write_file(_file, str(info))
             print(_file)
 
         if self._exit_on_error:
-            if 'html' not in request.headers['content-type']:
-                print(_('Error: %s') % str(info))
+            if 'html' not in content_type:
+                print(_('Error: %s') % info)
             else:
-                print(_('Status code: %s') % str(request.status_code))
+                print(_('Status code: %s') % request.status_code)
             sys.exit(errno.EACCES)
 
         return {'error': {'info': str(info), 'code': request.status_code}}
