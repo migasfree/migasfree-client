@@ -13,10 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import contextlib
 import copy
 import errno
-import functools
 import gettext
 import json
 import logging
@@ -26,7 +24,6 @@ import socket
 import sys
 import tempfile
 from collections import defaultdict
-from contextlib import contextmanager
 from datetime import datetime
 
 import requests
@@ -36,7 +33,7 @@ from . import (
     settings,
     utils,
 )
-from .command import MigasFreeCommand
+from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -44,26 +41,6 @@ __all__ = ['MigasFreeSync']
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
-
-
-@contextmanager
-def lock_file_context(cmd, lock_file):
-    """Context manager for lock file handling."""
-    utils.check_lock_file(cmd, lock_file)
-    try:
-        yield
-    finally:
-        utils.remove_file(lock_file)
-
-
-def require_computer_id(method):
-    """Decorator to ensure computer_id is set before method execution."""
-    @functools.wraps(method)
-    def wrapper(self, *args, **kwargs):
-        if not self._computer_id:
-            self.get_computer_id()
-        return method(self, *args, **kwargs)
-    return wrapper
 
 
 class MigasFreeSync(MigasFreeCommand):
@@ -718,10 +695,8 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response
 
+    @require_sign_keys
     def cmd_synchronize(self):
-        if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
-
         start_date = datetime.now().isoformat()
         self._show_message(_('Connecting to migasfree server...'))
 
@@ -823,10 +798,8 @@ class MigasFreeSync(MigasFreeCommand):
 
         return traits
 
+    @require_sign_keys
     def cmd_traits(self, prefix, key):
-        if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
-
         traits = self._traits(show=False)
         self.end_of_transmission()
 
