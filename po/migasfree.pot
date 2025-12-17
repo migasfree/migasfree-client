@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-17 17:20+0100\n"
+"POT-Creation-Date: 2025-12-17 17:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,11 +192,11 @@ msgstr ""
 msgid "CA certificate downloaded"
 msgstr ""
 
-#: ../migasfree_client/command.py:381
+#: ../migasfree_client/command.py:381 ../migasfree_client/mtls.py:270
 msgid "CA certificate is up to date"
 msgstr ""
 
-#: ../migasfree_client/command.py:385
+#: ../migasfree_client/command.py:385 ../migasfree_client/mtls.py:253
 #, python-format
 msgid "Failed to download CA certificate: %s"
 msgstr ""
@@ -396,6 +396,85 @@ msgstr ""
 
 #: ../migasfree_client/command.py:898
 msgid "Importing mTLS certificate..."
+msgstr ""
+
+#: ../migasfree_client/mtls.py:107
+#, python-format
+msgid "Certificate file not found: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:133
+msgid "No .p12 file found in tar archive"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:144
+#, python-format
+msgid ""
+"mTLS certificate imported successfully.\n"
+"Certificate: %s\n"
+"Key: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:150
+#, python-format
+msgid "Error extracting tar file: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:153
+#, python-format
+msgid "Error importing certificate: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:182
+#, python-format
+msgid "Failed to load p12 file: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:186
+msgid "No certificate found in p12 file"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:189
+msgid "No private key found in p12 file"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:205
+msgid "Certificate and key extracted successfully"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:209
+#, python-format
+msgid "Error extracting from p12: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:287
+msgid "CA certificate downloaded successfully"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:387
+#, python-format
+msgid "Token request failed: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:393
+msgid "Token obtained successfully"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:395
+msgid "No token in server response"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:433
+#, python-format
+msgid "Download failed: %s"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:443
+msgid "Certificate downloaded successfully"
+msgstr ""
+
+#: ../migasfree_client/mtls.py:447
+msgid "No content in response"
 msgstr ""
 
 #: ../migasfree_client/secure.py:127

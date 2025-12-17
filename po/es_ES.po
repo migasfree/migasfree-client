@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-17 17:20+0100\n"
+"POT-Creation-Date: 2025-12-17 17:27+0100\n"
 "PO-Revision-Date: 2025-09-04 13:01+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
@@ -192,11 +192,11 @@ msgstr "Error obteniendo el certificado del servidor: %s"
 msgid "CA certificate downloaded"
 msgstr "Certificado CA descargado"
 
-#: ../migasfree_client/command.py:381
+#: ../migasfree_client/command.py:381 ../migasfree_client/mtls.py:270
 msgid "CA certificate is up to date"
 msgstr "El certificado CA está actualizado"
 
-#: ../migasfree_client/command.py:385
+#: ../migasfree_client/command.py:385 ../migasfree_client/mtls.py:253
 #, python-format
 msgid "Failed to download CA certificate: %s"
 msgstr "Error al descargar el certificado CA: %s"
@@ -397,6 +397,88 @@ msgstr "El directorio %s ha sido borrado"
 #: ../migasfree_client/command.py:898
 msgid "Importing mTLS certificate..."
 msgstr "Importando certificado mTLS..."
+
+#: ../migasfree_client/mtls.py:107
+#, python-format
+msgid "Certificate file not found: %s"
+msgstr "Fichero de certificado no encontrado: %s"
+
+#: ../migasfree_client/mtls.py:133
+msgid "No .p12 file found in tar archive"
+msgstr "No se encontró ningún fichero .p12 en el archivo tar"
+
+#: ../migasfree_client/mtls.py:144
+#, python-format
+msgid ""
+"mTLS certificate imported successfully.\n"
+"Certificate: %s\n"
+"Key: %s"
+msgstr ""
+"Certificado mTLS importado correctamente.\n"
+"Certificado: %s\n"
+"Clave: %s"
+
+#: ../migasfree_client/mtls.py:150
+#, python-format
+msgid "Error extracting tar file: %s"
+msgstr "Error extrayendo el fichero tar: %s"
+
+#: ../migasfree_client/mtls.py:153
+#, python-format
+msgid "Error importing certificate: %s"
+msgstr "Error importando el certificado: %s"
+
+#: ../migasfree_client/mtls.py:182
+#, python-format
+msgid "Failed to load p12 file: %s"
+msgstr "Error cargando el fichero p12: %s"
+
+#: ../migasfree_client/mtls.py:186
+msgid "No certificate found in p12 file"
+msgstr "No se encontró ningún certificado en el fichero p12"
+
+#: ../migasfree_client/mtls.py:189
+msgid "No private key found in p12 file"
+msgstr "No se encontró ninguna clave privada en el fichero p12"
+
+#: ../migasfree_client/mtls.py:205
+msgid "Certificate and key extracted successfully"
+msgstr "Certificado y clave extraídos correctamente"
+
+#: ../migasfree_client/mtls.py:209
+#, python-format
+msgid "Error extracting from p12: %s"
+msgstr "Error extrayendo del fichero p12: %s"
+
+#: ../migasfree_client/mtls.py:287
+msgid "CA certificate downloaded successfully"
+msgstr "Certificado CA descargado correctamente"
+
+#: ../migasfree_client/mtls.py:387
+#, python-format
+msgid "Token request failed: %s"
+msgstr "Error en la solicitud del token: %s"
+
+#: ../migasfree_client/mtls.py:393
+msgid "Token obtained successfully"
+msgstr "Token obtenido correctamente"
+
+#: ../migasfree_client/mtls.py:395
+msgid "No token in server response"
+msgstr "No hay token en la respuesta del servidor"
+
+#: ../migasfree_client/mtls.py:433
+#, python-format
+msgid "Download failed: %s"
+msgstr "Error en la descarga: %s"
+
+#: ../migasfree_client/mtls.py:443
+msgid "Certificate downloaded successfully"
+msgstr "Certificado descargado correctamente"
+
+#: ../migasfree_client/mtls.py:447
+msgid "No content in response"
+msgstr "Sin contenido en la respuesta"
 
 #: ../migasfree_client/secure.py:127
 msgid "Invalid Data"
