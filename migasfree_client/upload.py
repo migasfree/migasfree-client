@@ -20,9 +20,9 @@ import logging
 import os
 import sys
 
-from .command import MigasFreeCommand
+from .command import MigasFreeCommand, lock_file_context
 from .settings import KEYS_PATH
-from .utils import ALL_OK, build_magic, check_lock_file, remove_file, sanitize_path
+from .utils import ALL_OK, build_magic, sanitize_path
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -229,11 +229,11 @@ class MigasFreeUpload(MigasFreeCommand):
         if not self._quiet:
             self._show_running_options()
 
-        check_lock_file(self.CMD, self.LOCK_FILE)
-        if self._file:
-            self._upload_file()
-        else:
-            self._upload_set()
-        remove_file(self.LOCK_FILE)
+        with lock_file_context(self.CMD, self.LOCK_FILE):
+            if self._file:
+                self._upload_file()
+            else:
+                self._upload_set()
 
         sys.exit(ALL_OK)  # no error
+
