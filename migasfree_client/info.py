@@ -20,7 +20,7 @@ import sys
 
 from rich.table import Table
 
-from .command import MigasFreeCommand
+from .command import MigasFreeCommand, require_computer_id, require_sign_keys
 from .utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -36,14 +36,14 @@ class MigasFreeInfo(MigasFreeCommand):
         self._check_user_is_root()
         super().__init__()
 
+    @require_computer_id
     def get_label(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         logger.debug('Getting label')
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_label']), data={'id': self._computer_id}, debug=self._debug
+                url=self.api_endpoint(self.URLS['get_label']),
+                data={'id': self._computer_id},
+                debug=self._debug,
             )
 
         logger.debug('Response get_label: %s', response)
@@ -56,10 +56,8 @@ class MigasFreeInfo(MigasFreeCommand):
 
         return response
 
+    @require_sign_keys
     def _show_info(self, key=None):
-        if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
-
         info = self.get_label()
         table = Table(show_header=True, header_style='bold')
 
