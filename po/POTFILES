@@ -1,6 +1,7 @@
 ../migasfree_client/__main__.py
 ../migasfree_client/command.py
 ../migasfree_client/label.py
+../migasfree_client/mtls.py
 ../migasfree_client/secure.py
 ../migasfree_client/sync.py
 ../migasfree_client/tags.py
