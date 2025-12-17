@@ -153,42 +153,15 @@ class MigasFreeTags(MigasFreeCommand):
     @require_computer_id
     def get_assigned_tags(self):
         logger.debug('Getting assigned tags')
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_assigned_tags']),
-            data={'id': self._computer_id},
-            debug=self._debug,
-        )
-
-        logger.debug('Response get_assigned_tags: %s', response)
-        if self._debug:
-            self.console.log(f'Response: {response}')
-
-        if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        return response
+        response = self._api_call('get_assigned_tags', {'id': self._computer_id})
+        return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
     @require_computer_id
     def get_available_tags(self):
         logger.debug('Getting available tags')
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['get_available_tags']),
-            data={'id': self._computer_id},
-            exit_on_error=False,
-            debug=self._debug,
-        )
-
-        logger.debug('Response get_available_tags: %s', response)
-        if self._debug:
-            self.console.log(f'Response: {response}')
-
-        if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        return response
+        response = self._api_call('get_available_tags', {'id': self._computer_id}, exit_on_error=False)
+        return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
     def set_tags(self):
@@ -199,16 +172,11 @@ class MigasFreeTags(MigasFreeCommand):
             )
 
         logger.debug('Setting tags: %s', self._tags)
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['upload_tags']),
-            data={'id': self._computer_id, 'tags': self._tags},
+        response = self._api_call(
+            'upload_tags',
+            {'id': self._computer_id, 'tags': self._tags},
             exit_on_error=False,
-            debug=self._debug,
         )
-
-        logger.debug('Setting tags response: %s', response)
-        if self._debug:
-            self.console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
