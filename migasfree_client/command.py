@@ -13,7 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
 import errno
+import functools
 import getpass
 import gettext
 import logging
@@ -98,6 +100,36 @@ def set_debug_log_level():
     LOGGING_CONF['handlers']['file']['level'] = 'DEBUG'
     LOGGING_CONF['loggers']['root']['level'] = 'DEBUG'
     logging.config.dictConfig(LOGGING_CONF)
+
+
+def require_sign_keys(method):
+    """Decorator to ensure sign keys are valid before method execution."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if not self._check_sign_keys():
+            sys.exit(errno.EPERM)
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+def require_computer_id(method):
+    """Decorator to ensure computer_id is set before method execution."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if not self._computer_id:
+            self.get_computer_id()
+        return method(self, *args, **kwargs)
+    return wrapper
+
+
+@contextlib.contextmanager
+def lock_file_context(cmd, lock_file):
+    """Context manager for lock file handling."""
+    utils.check_lock_file(cmd, lock_file)
+    try:
+        yield
+    finally:
+        utils.remove_file(lock_file)
 
 
 class MigasFreeCommand:
