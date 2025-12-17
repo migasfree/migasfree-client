@@ -802,6 +802,53 @@ class MigasFreeCommand:
         if utils.is_windows():
             console.style = ''
 
+    def _handle_response(self, response, success_msg=True):
+        """Handle API response with standard error checking."""
+        if 'error' in response:
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+        if success_msg:
+            self.operation_ok()
+        return response
+
+    def _handle_response_with_default(self, response, default=None):
+        """Handle API response returning default on not_found error."""
+        if 'error' in response:
+            if response['error']['code'] == requests.codes.not_found:
+                self.operation_ok()
+                return default
+            self.operation_failed(response['error']['info'])
+            sys.exit(errno.ENODATA)
+        self.operation_ok()
+        return response
+
+    def _api_call(self, url_key, data=None, exit_on_error=True, log_name=None, safe=True, keys=None, upload_files=None, message=None):
+        """Make API call with console status and logging."""
+        if message:
+            self._show_message(message)
+
+        with self.console.status(''):
+            response = self._url_request.run(
+                url=self.api_endpoint(self.URLS[url_key]),
+                data=data or {},
+                debug=self._debug,
+                exit_on_error=exit_on_error,
+                safe=safe,
+                keys=keys,
+                upload_files=upload_files,
+            )
+        logger.debug('Response %s: %s', log_name or url_key, response)
+        if self._debug:
+            self.console.log(f'Response: {response}')
+
+        return response
+
+    def _report_error(self, msg):
+        """Report error to console, logger and error file."""
+        self.operation_failed(msg)
+        logger.error(msg)
+        self._write_error(msg)
+
     def cmd_version(self, args=None):
         if hasattr(args, 'quiet') and args.quiet:
             print(utils.get_mfc_release())
