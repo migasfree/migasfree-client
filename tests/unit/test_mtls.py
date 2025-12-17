@@ -84,7 +84,7 @@ class TestImportMtlsCertificate:
         mock_tar.extractall = MagicMock()
 
         # Mock os.listdir to return no .p12 file
-        with patch('os.listdir', return_value=['readme.txt', 'other.file']):
+        with patch('os.listdir', return_value=['readme.txt', 'other.file']):  # noqa: SIM117
             with patch('tempfile.TemporaryDirectory') as mock_temp:
                 mock_temp.return_value.__enter__.return_value = '/tmp/test'
 
