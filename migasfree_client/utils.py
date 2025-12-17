@@ -277,19 +277,41 @@ def get_graphic_pid():
         'jwm',  # JWM
     ]
 
-    for _process in _graphic_environments:
-        try:
-            # search main process (the oldest one)
-            result = subprocess.run(['pidof', '-s', _process], capture_output=True, text=True, check=True)
-            _pid = result.stdout.strip()
-            if _pid:
-                return [_pid, _process]
-        except subprocess.CalledProcessError:
-            continue  # process is not in execution
-        except Exception:
+    oldest_match = None
+    oldest_starttime = float('inf')
+    for pid in os.listdir('/proc'):
+        if not pid.isdigit():
             continue
 
-    return [None, None]
+        try:
+            # Read full command line (better than comm which is truncated to 15 chars)
+            with open(f'/proc/{pid}/cmdline', 'r') as f:
+                cmdline = f.read()
+            
+            # Get executable name from cmdline
+            exe_name = os.path.basename(cmdline.split('\x00')[0])
+            # Check if matches any graphic environment
+            matching_env = None
+            for env in _graphic_environments:
+                if env == exe_name or exe_name.startswith(env):
+                    matching_env = env
+                    break
+            
+            if not matching_env:
+                continue
+
+            # Get process start time to find oldest
+            with open(f'/proc/{pid}/stat', 'r') as f:
+                stat = f.read().split()
+                starttime = int(stat[21])
+
+            if starttime < oldest_starttime:
+                oldest_starttime = starttime
+                oldest_match = (pid, matching_env)
+        except (OSError, IOError, IndexError, ValueError):
+            continue
+
+    return list(oldest_match) if oldest_match else [None, None]
 
 
 def get_graphic_user(pid=0):
@@ -340,33 +362,25 @@ def grep(string, list_strings):
     return [elem for elem in list_strings if expr.match(elem)]
 
 
-def get_user_display_graphic(pid, timeout=10, interval=1):
+def get_user_display_graphic(pid):
     """
-    string get_user_display_graphic(
-        string pid,
-        int timeout=10,
-        int interval=1
-    )
+    string get_user_display_graphic(string pid)
+    Returns DISPLAY environment variable from process or default ':0.0'
     """
-
     if is_windows():
         return ''
 
-    _display = []
-    while not _display and timeout > 0:
-        # a data line ends in 0 byte, not newline
-        _display = grep('DISPLAY', open(f'/proc/{pid}/environ', encoding='utf-8').read().split('\0'))  # noqa: SIM115
-        if _display:
-            _display = _display[0].split('=').pop()
-            return _display
+    try:
+        with open(f'/proc/{pid}/environ', encoding='utf-8') as f:
+            environ = f.read().split('\0')
+        
+        for item in environ:
+            if item.startswith('DISPLAY='):
+                return item.split('=', 1)[1]
+    except (OSError, IOError):
+        pass
 
-        time.sleep(interval)
-        timeout -= interval
-
-    if not _display:
-        _display = ':0.0'
-
-    return _display
+    return ':0.0'  # Default display
 
 
 def compare_lists(a, b):
