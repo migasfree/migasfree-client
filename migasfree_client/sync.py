@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import copy
+import contextlib
 import errno
 import gettext
 import json
@@ -236,127 +237,59 @@ class MigasFreeSync(MigasFreeCommand):
 
     @require_computer_id
     def get_properties(self):
-        self._show_message(_('Getting properties...'))
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_properties']),
-                data={'id': self._computer_id},
-                debug=self._debug,
-            )
-            logger.debug('Response get_properties: %s', response)
-
-        if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        self.operation_ok()
-        return response
+        response = self._api_call('get_properties', {'id': self._computer_id}, message=_('Getting properties...'))
+        return self._handle_response(response)
 
     @require_computer_id
     def get_fault_definitions(self):
-        self._show_message(_('Getting fault definitions...'))
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_fault_definitions']),
-                data={'id': self._computer_id},
-                debug=self._debug,
-                exit_on_error=False,
-            )
-            logger.debug('Response get_fault_definitions: %s', response)
-
-        if 'error' in response:
-            if response['error']['code'] == requests.codes.not_found:
-                self.operation_ok()
-                return ''
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        self.operation_ok()
-        return response
+        response = self._api_call(
+            'get_fault_definitions',
+            {'id': self._computer_id},
+            exit_on_error=False,
+            message=_('Getting fault definitions...'),
+        )
+        return self._handle_response_with_default(response, default='')
 
     @require_computer_id
     def get_repositories(self):
         if not self.get_repos_key():
             sys.exit(errno.EPERM)
 
-        self._show_message(_('Getting repositories...'))
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_repositories']),
-                data={'id': self._computer_id},
-                exit_on_error=False,
-                debug=self._debug,
-            )
-            logger.debug('Response get_repositories: %s', response)
-
-        if 'error' in response:
-            if response['error']['code'] == requests.codes.not_found:
-                self.operation_ok()
-                return []
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        self.operation_ok()
-        return response
+        response = self._api_call(
+            'get_repositories',
+            {'id': self._computer_id},
+            exit_on_error=False,
+            message=_('Getting repositories...'),
+        )
+        return self._handle_response_with_default(response, default=[])
 
     @require_computer_id
     def get_mandatory_packages(self):
-        self._show_message(_('Getting mandatory packages...'))
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_mandatory_packages']),
-                data={'id': self._computer_id},
-                exit_on_error=False,
-                debug=self._debug,
-            )
-            logger.debug('Response get_mandatory_packages: %s', response)
-
-        if 'error' in response:
-            if response['error']['code'] == requests.codes.not_found:
-                self.operation_ok()
-                return None
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        self.operation_ok()
-        return response
+        response = self._api_call(
+            'get_mandatory_packages',
+            {'id': self._computer_id},
+            exit_on_error=False,
+            message=_('Getting mandatory packages...'),
+        )
+        return self._handle_response_with_default(response, default=None)
 
     @require_computer_id
     def get_devices(self):
         """Get assigned devices. Returns {'logical': [...], 'default': int}."""
-        self._show_message(_('Getting devices...'))
-
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_devices']),
-                data={'id': self._computer_id},
-                exit_on_error=False,
-                debug=self._debug,
-            )
-            logger.debug('Response get_devices: %s', response)
-
-        if 'error' in response:
-            if response['error']['code'] == requests.codes.not_found:
-                self.operation_ok()
-                return None
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        self.operation_ok()
-        return response
+        response = self._api_call(
+            'get_devices',
+            {'id': self._computer_id},
+            exit_on_error=False,
+            message=_('Getting devices...'),
+        )
+        return self._handle_response_with_default(response, default=None)
 
     @require_computer_id
     def get_traits(self):
         if not self._quiet:
             self._show_message(_('Getting traits...'))
 
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_traits']),
-                data={'id': self._computer_id},
-                debug=self._debug,
-            )
-            logger.debug('Response get_traits: %s', response)
+        response = self._api_call('get_traits', {'id': self._computer_id})
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -428,10 +361,7 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            msg = _('Error creating repositories: %s') % repos
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(_('Error creating repositories: %s') % repos)
 
     def clean_pms_cache(self):
         """
@@ -445,10 +375,7 @@ class MigasFreeSync(MigasFreeCommand):
         if ret:
             self.operation_ok()
         else:
-            msg = _('Error getting repositories metadata')
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(_('Error getting repositories metadata'))
 
     def uninstall_packages(self, packages):
         self._check_pms()
@@ -460,10 +387,7 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            msg = _('Error uninstalling packages: %s') % error
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(_('Error uninstalling packages: %s') % error)
 
     def install_mandatory_packages(self, packages):
         self._check_pms()
@@ -475,10 +399,7 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            msg = _('Error installing packages: %s') % error
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(_('Error installing packages: %s') % error)
 
         return ret
 
@@ -492,10 +413,7 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_ok()
         else:
             self._pms_status_ok = False
-            msg = _('Error updating packages: %s') % error
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(_('Error updating packages: %s') % error)
 
         return ret
 
@@ -530,20 +448,14 @@ class MigasFreeSync(MigasFreeCommand):
         if ret == 0:
             self.operation_ok()
         else:
-            msg = _('lshw command failed: %s') % error
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(_('lshw command failed: %s') % error)
             return
 
         try:
             hardware = json.loads(output)
         except ValueError as e:
             self._show_message(_('Parsing hardware information...'))
-            msg = f'{_("Hardware information")}: {e!s}'
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(f'{_("Hardware information")}: {e!s}')
             return
 
         logger.debug('Hardware inventory: %s', hardware)
@@ -558,10 +470,7 @@ class MigasFreeSync(MigasFreeCommand):
         logger.debug('Response upload_hardware: %s', response)
 
         if 'error' in response:
-            msg = response['error']['info']
-            self.operation_failed(msg)
-            logger.error(msg)
-            self._write_error(msg)
+            self._report_error(response['error']['info'])
             return
 
         self.operation_ok()
@@ -657,21 +566,11 @@ class MigasFreeSync(MigasFreeCommand):
             self.console.print(history)
 
         self._show_message(_('Uploading software...'))
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['upload_software']),
-                data={'id': self._computer_id, 'inventory': after, 'history': history},
-                debug=self._debug,
-            )
-            logger.debug('Response upload_software: %s', response)
-
-        if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        self.operation_ok()
-
-        return response
+        response = self._api_call(
+            'upload_software',
+            {'id': self._computer_id, 'inventory': after, 'history': history},
+        )
+        return self._handle_response(response)
 
     def end_synchronization(self, start_date, consumer=''):
         if not consumer:
@@ -983,11 +882,7 @@ class MigasFreeSync(MigasFreeCommand):
             printers = self.devices_class.get_printers()
         except RuntimeError:
             self._show_message(_('Synchronizing logical devices...'))
-            _msg = _('Error getting printers information')
-            self.operation_failed(_msg)
-            logging.error(_msg)
-            self._write_error(_msg)
-
+            self._report_error(_('Error getting printers information'))
             return False
 
         for printer in printers:
@@ -1005,10 +900,7 @@ class MigasFreeSync(MigasFreeCommand):
                         self.operation_ok()
                         logging.debug('Device removed: %s', printer)
                     except RuntimeError:
-                        _msg = _('Error removing device: %s') % printer
-                        self.operation_failed(_msg)
-                        logging.error(_msg)
-                        self._write_error(_msg)
+                        self._report_error(_('Error removing device: %s') % printer)
 
         for _key, value in logical_devices.items():
             if value.driver is None:
@@ -1022,9 +914,7 @@ class MigasFreeSync(MigasFreeCommand):
                     value.info.split('__')[1],  # model
                     self.migas_project,
                 )
-                self.operation_failed(_msg)
-                logging.error(_msg)
-                self._write_error(_msg)
+                self._report_error(_msg)
                 continue
 
             if value.is_changed():
@@ -1033,10 +923,7 @@ class MigasFreeSync(MigasFreeCommand):
                     self.operation_ok()
                     logging.debug('Device installed: %s', value.name)
                 else:
-                    _msg = _('Error installing device: %s') % value.name
-                    self.operation_failed(_msg)
-                    logging.error(_msg)
-                    self._write_error(_msg)
+                    self._report_error(_('Error installing device: %s') % value.name)
 
         # System default printer
         if devices['default'] != 0 and devices['default'] in logical_devices:
@@ -1047,11 +934,7 @@ class MigasFreeSync(MigasFreeCommand):
                     self.devices_class.set_default(_printer_name)
                     self.operation_ok()
                 except RuntimeError:
-                    _msg = _('Error setting default device: %s') % _printer_name
-                    self.operation_failed(_msg)
-                    logging.error(_msg)
-                    self._write_error(_msg)
-
+                    self._report_error(_('Error setting default device: %s') % _printer_name)
                     return False
 
         return True
