@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import errno
 import gettext
 import logging
 import os
@@ -117,22 +116,8 @@ class MigasFreeLabel(MigasFreeCommand):
     @require_computer_id
     def get_label(self):
         logger.debug('Getting label')
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_label']),
-                data={'id': self._computer_id},
-                debug=self._debug,
-            )
-
-        logger.debug('Response get_label: %s', response)
-        if self._debug:
-            self.console.log(f'Response: {response}')
-
-        if 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        return response
+        response = self._api_call('get_label', {'id': self._computer_id})
+        return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
     def _show_label(self):
