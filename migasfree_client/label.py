@@ -19,7 +19,7 @@ import logging
 import os
 import sys
 
-from .command import MigasFreeCommand
+from .command import MigasFreeCommand, require_computer_id, require_sign_keys
 from .settings import ICON_PATH, TMP_PATH
 from .utils import ALL_OK, execute_as_user, is_linux, is_windows, write_file
 
@@ -114,14 +114,14 @@ class MigasFreeLabel(MigasFreeCommand):
         self._check_user_is_root()
         super().__init__()
 
+    @require_computer_id
     def get_label(self):
-        if not self._computer_id:
-            self.get_computer_id()
-
         logger.debug('Getting label')
         with self.console.status(''):
             response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_label']), data={'id': self._computer_id}, debug=self._debug
+                url=self.api_endpoint(self.URLS['get_label']),
+                data={'id': self._computer_id},
+                debug=self._debug,
             )
 
         logger.debug('Response get_label: %s', response)
@@ -134,10 +134,8 @@ class MigasFreeLabel(MigasFreeCommand):
 
         return response
 
+    @require_sign_keys
     def _show_label(self):
-        if not self._check_sign_keys():
-            sys.exit(errno.EPERM)
-
         info = self.get_label()
 
         app_icon_path = os.path.join(ICON_PATH, self.APP_ICON)
