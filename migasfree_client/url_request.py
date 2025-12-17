@@ -36,23 +36,42 @@ logger = logging.getLogger('migasfree_client')
 
 class UrlRequest:
     __slots__ = (
-        '_debug', '_safe', '_exit_on_error', '_proxy', '_cert',
-        '_mtls_cert', '_mtls_key', '_ca_cert', '_timeout',
-        '_private_key', '_public_key', '_project',
+        '_ca_cert',
+        '_cert',
+        '_debug',
+        '_exit_on_error',
+        '_mtls_cert',
+        '_mtls_key',
+        '_private_key',
+        '_project',
+        '_proxy',
+        '_public_key',
+        '_safe',
+        '_timeout',
     )
 
-    _ok_codes = frozenset([
-        requests.codes.ok,
-        requests.codes.created,
-        requests.codes.moved,
-        requests.codes.found,
-        requests.codes.temporary_redirect,
-        requests.codes.resume,
-    ])
+    _ok_codes = frozenset(
+        [
+            requests.codes.ok,
+            requests.codes.created,
+            requests.codes.moved,
+            requests.codes.found,
+            requests.codes.temporary_redirect,
+            requests.codes.resume,
+        ]
+    )
 
     def __init__(
-        self, debug=False, proxy='', project='', keys=None, cert=False,
-        mtls_cert=None, mtls_key=None, ca_cert=None, timeout=60,
+        self,
+        debug=False,
+        proxy='',
+        project='',
+        keys=None,
+        cert=False,
+        mtls_cert=None,
+        mtls_key=None,
+        ca_cert=None,
+        timeout=60,
     ):
         if keys is None:
             keys = {}
