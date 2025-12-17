@@ -104,21 +104,25 @@ def set_debug_log_level():
 
 def require_sign_keys(method):
     """Decorator to ensure sign keys are valid before method execution."""
+
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         if not self._check_sign_keys():
             sys.exit(errno.EPERM)
         return method(self, *args, **kwargs)
+
     return wrapper
 
 
 def require_computer_id(method):
     """Decorator to ensure computer_id is set before method execution."""
+
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         if not self._computer_id:
             self.get_computer_id()
         return method(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -822,7 +826,17 @@ class MigasFreeCommand:
         self.operation_ok()
         return response
 
-    def _api_call(self, url_key, data=None, exit_on_error=True, log_name=None, safe=True, keys=None, upload_files=None, message=None):
+    def _api_call(
+        self,
+        url_key,
+        data=None,
+        exit_on_error=True,
+        log_name=None,
+        safe=True,
+        keys=None,
+        upload_files=None,
+        message=None,
+    ):
         """Make API call with console status and logging."""
         if message:
             self._show_message(message)
