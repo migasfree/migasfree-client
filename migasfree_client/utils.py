@@ -285,9 +285,9 @@ def get_graphic_pid():
 
         try:
             # Read full command line (better than comm which is truncated to 15 chars)
-            with open(f'/proc/{pid}/cmdline', 'r') as f:
+            with open(f'/proc/{pid}/cmdline') as f:
                 cmdline = f.read()
-            
+
             # Get executable name from cmdline
             exe_name = os.path.basename(cmdline.split('\x00')[0])
             # Check if matches any graphic environment
@@ -296,19 +296,19 @@ def get_graphic_pid():
                 if env == exe_name or exe_name.startswith(env):
                     matching_env = env
                     break
-            
+
             if not matching_env:
                 continue
 
             # Get process start time to find oldest
-            with open(f'/proc/{pid}/stat', 'r') as f:
+            with open(f'/proc/{pid}/stat') as f:
                 stat = f.read().split()
                 starttime = int(stat[21])
 
             if starttime < oldest_starttime:
                 oldest_starttime = starttime
                 oldest_match = (pid, matching_env)
-        except (OSError, IOError, IndexError, ValueError):
+        except (OSError, IndexError, ValueError):
             continue
 
     return list(oldest_match) if oldest_match else [None, None]
@@ -373,11 +373,11 @@ def get_user_display_graphic(pid):
     try:
         with open(f'/proc/{pid}/environ', encoding='utf-8') as f:
             environ = f.read().split('\0')
-        
+
         for item in environ:
             if item.startswith('DISPLAY='):
                 return item.split('=', 1)[1]
-    except (OSError, IOError):
+    except OSError:
         pass
 
     return ':0.0'  # Default display
