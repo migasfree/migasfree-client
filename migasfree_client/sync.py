@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 import contextlib
+import copy
 import errno
 import gettext
 import json
@@ -26,8 +26,6 @@ import sys
 import tempfile
 from collections import defaultdict
 from datetime import datetime
-
-import requests
 
 from . import (
     network,
@@ -990,4 +988,3 @@ class MigasFreeSync(MigasFreeCommand):
             self.cmd_traits(args.prefix, args.traits_key)
 
         sys.exit(utils.ALL_OK)
-
