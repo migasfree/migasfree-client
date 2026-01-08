@@ -822,18 +822,16 @@ class MigasFreeSync(MigasFreeCommand):
 
         return ret
 
-    def sync_logical_devices(self):
-        devices = self.get_devices()
-        if not devices:
-            return False
+    def _is_migasfree_printer(self, printer_info):
+        """Check if printer info follows migasfree format (5 parts separated by __)."""
+        return len(printer_info.split('__')) == 5
 
-        if not self.migas_manage_devices:
-            _msg = _('Assigned device(s) but client does not manage devices')
-            logging.error(_msg)
-            self._write_error(_msg)
+    def _get_printer_logical_id(self, printer_info):
+        """Extract logical_id from migasfree printer info format."""
+        return int(printer_info.split('__')[4])
 
-            return False
-
+    def _install_device_packages(self, devices):
+        """Install required packages for devices. Returns False if installation fails."""
         for device in devices['logical']:
             if (
                 'PRINTER' in device
@@ -842,20 +840,16 @@ class MigasFreeSync(MigasFreeCommand):
                 and not self.install_mandatory_packages(device['PRINTER']['packages'])
             ):
                 return False
+        return True
 
+    def _init_devices_class(self):
+        """Initialize device class and validate connection. Returns False on error."""
         self._devices_class_selection()
         if not self.devices_class:
             _msg = _('A class was not detected to manage the devices')
             logging.error(_msg)
             self._write_error(_msg)
-
             return False
-
-        logical_devices = {}  # key is id field
-        for device in devices['logical']:
-            if 'PRINTER' in device:
-                dev = self.devices_class.load_device(device['PRINTER'])
-                logical_devices[int(dev.logical_id)] = copy.deepcopy(dev)
 
         try:
             self.devices_class.get_connection()
@@ -865,7 +859,6 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
-
             return False
         except NameError:
             self._show_message(_('Synchronizing logical devices...'))
@@ -873,8 +866,116 @@ class MigasFreeSync(MigasFreeCommand):
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
-
             return False
+
+        return True
+
+    def _build_logical_devices_map(self, devices):
+        """Build dictionary of logical devices keyed by id."""
+        logical_devices = {}
+        for device in devices['logical']:
+            if 'PRINTER' in device:
+                dev = self.devices_class.load_device(device['PRINTER'])
+                logical_devices[int(dev.logical_id)] = copy.deepcopy(dev)
+        return logical_devices
+
+    def _sync_existing_printers(self, printers, logical_devices):
+        """Sync existing printers: relate to logical devices or remove orphans."""
+        for printer in printers:
+            printer_info = printers[printer]['printer-info']
+            if not self._is_migasfree_printer(printer_info):
+                continue
+
+            key = self._get_printer_logical_id(printer_info)
+            if key in logical_devices:
+                logical_devices[key].printer_name = printer
+                logical_devices[key].printer_data = printers[printer]
+            else:
+                self._remove_orphan_printer(printer)
+
+    def _remove_orphan_printer(self, printer):
+        """Remove a printer that is no longer in logical devices."""
+        try:
+            self._show_message(_('Removing device: %s') % printer)
+            self.devices_class.delete(printer)
+            self.operation_ok()
+            logging.debug('Device removed: %s', printer)
+        except RuntimeError:
+            self._report_error(_('Error removing device: %s') % printer)
+
+    def _install_changed_devices(self, logical_devices):
+        """Install devices that have changed configuration."""
+        for _key, value in logical_devices.items():
+            if value.driver is None:
+                self._report_missing_driver_error(value)
+                continue
+
+            if value.is_changed():
+                self._install_device(value)
+
+    def _report_missing_driver_error(self, device):
+        """Report error for device with missing driver."""
+        _msg = _(
+            'Error: no driver defined for device %s. '
+            'Please, configure capability %s, in the model %s %s, and project %s'
+        ) % (
+            device.name,
+            device.info.split('__')[2],  # capability
+            device.info.split('__')[0],  # manufacturer
+            device.info.split('__')[1],  # model
+            self.migas_project,
+        )
+        self._report_error(_msg)
+
+    def _install_device(self, device):
+        """Install a single device."""
+        self._show_message(_('Installing device: %s') % device.name)
+        if device.install():
+            self.operation_ok()
+            logging.debug('Device installed: %s', device.name)
+        else:
+            self._report_error(_('Error installing device: %s') % device.name)
+
+    def _set_default_printer(self, devices, logical_devices):
+        """Set system default printer if specified. Returns False on error."""
+        if devices['default'] == 0 or devices['default'] not in logical_devices:
+            return True
+
+        device = logical_devices[devices['default']]
+        _printer_name = device.name or device.printer_name
+
+        if self.devices_class.get_printer_id(self.devices_class.get_default()) == devices['default']:
+            return True  # Already set as default
+
+        try:
+            self._show_message(_('Setting default device: %s') % _printer_name)
+            self.devices_class.set_default(_printer_name)
+            self.operation_ok()
+        except RuntimeError:
+            self._report_error(_('Error setting default device: %s') % _printer_name)
+            return False
+
+        return True
+
+    def sync_logical_devices(self):
+        """Synchronize logical devices from server with local printers."""
+        devices = self.get_devices()
+        if not devices:
+            return False
+
+        if not self.migas_manage_devices:
+            _msg = _('Assigned device(s) but client does not manage devices')
+            logging.error(_msg)
+            self._write_error(_msg)
+            return False
+
+        if not self._install_device_packages(devices):
+            return False
+
+        if not self._init_devices_class():
+            return False
+
+        logical_devices = self._build_logical_devices_map(devices)
 
         try:
             printers = self.devices_class.get_printers()
@@ -883,59 +984,50 @@ class MigasFreeSync(MigasFreeCommand):
             self._report_error(_('Error getting printers information'))
             return False
 
-        for printer in printers:
-            # check if printer is a migasfree printer (by format)
-            if len(printers[printer]['printer-info'].split('__')) == 5:
-                key = int(printers[printer]['printer-info'].split('__')[4])
-                if key in logical_devices:
-                    # relate real devices with logical ones by id
-                    logical_devices[key].printer_name = printer
-                    logical_devices[key].printer_data = printers[printer]
-                else:
-                    try:
-                        self._show_message(_('Removing device: %s') % printer)
-                        self.devices_class.delete(printer)
-                        self.operation_ok()
-                        logging.debug('Device removed: %s', printer)
-                    except RuntimeError:
-                        self._report_error(_('Error removing device: %s') % printer)
+        self._sync_existing_printers(printers, logical_devices)
+        self._install_changed_devices(logical_devices)
 
-        for _key, value in logical_devices.items():
-            if value.driver is None:
-                _msg = _(
-                    'Error: no driver defined for device %s. '
-                    'Please, configure capability %s, in the model %s %s, and project %s'
-                ) % (
-                    value.name,
-                    value.info.split('__')[2],  # capability
-                    value.info.split('__')[0],  # manufacturer
-                    value.info.split('__')[1],  # model
-                    self.migas_project,
-                )
-                self._report_error(_msg)
-                continue
+        return self._set_default_printer(devices, logical_devices)
 
-            if value.is_changed():
-                self._show_message(_('Installing device: %s') % value.name)
-                if value.install():
-                    self.operation_ok()
-                    logging.debug('Device installed: %s', value.name)
-                else:
-                    self._report_error(_('Error installing device: %s') % value.name)
+    def _handle_sync_command(self, args):
+        if args.force_upgrade:
+            self.migas_auto_update_packages = True
 
-        # System default printer
-        if devices['default'] != 0 and devices['default'] in logical_devices:
-            _printer_name = logical_devices[devices['default']].name or logical_devices[devices['default']].printer_name
-            if self.devices_class.get_printer_id(self.devices_class.get_default()) != devices['default']:
-                try:
-                    self._show_message(_('Setting default device: %s') % _printer_name)
-                    self.devices_class.set_default(_printer_name)
-                    self.operation_ok()
-                except RuntimeError:
-                    self._report_error(_('Error setting default device: %s') % _printer_name)
-                    return False
+        if args.devices:
+            with lock_file_context(self.CMD, self.LOCK_FILE):
+                self.cmd_devices()
+        elif args.software:
+            with lock_file_context(self.CMD, self.LOCK_FILE):
+                self.cmd_software()
+        elif args.hardware:
+            self.cmd_hardware()
+        elif args.attributes:
+            self.cmd_attributes()
+        elif args.faults:
+            self.cmd_faults()
+        else:
+            with lock_file_context(self.CMD, self.LOCK_FILE):
+                self.cmd_synchronize()
 
-        return True
+        if not self._pms_status_ok:
+            sys.exit(errno.EPROTO)
+
+    def _handle_register_command(self, args):
+        self.cmd_register_computer(args.user)
+
+    def _handle_search_command(self, args):
+        self.cmd_search(' '.join(args.pattern))
+
+    def _handle_install_command(self, args):
+        with lock_file_context(self.CMD, self.LOCK_FILE):
+            self.cmd_install_package(' '.join(args.pkg_install))
+
+    def _handle_purge_command(self, args):
+        with lock_file_context(self.CMD, self.LOCK_FILE):
+            self.cmd_remove_package(' '.join(args.pkg_purge))
+
+    def _handle_traits_command(self, args):
+        self.cmd_traits(args.prefix, args.traits_key)
 
     def run(self, args=None):
         super().run(args)
@@ -947,44 +1039,17 @@ class MigasFreeSync(MigasFreeCommand):
             self._usage_examples()
             sys.exit(utils.ALL_OK)
 
-        if args.cmd == 'sync':
-            if args.force_upgrade:
-                self.migas_auto_update_packages = True
+        command_handlers = {
+            'sync': self._handle_sync_command,
+            'register': self._handle_register_command,
+            'search': self._handle_search_command,
+            'install': self._handle_install_command,
+            'purge': self._handle_purge_command,
+            'traits': self._handle_traits_command,
+        }
 
-            if args.devices:
-                with lock_file_context(self.CMD, self.LOCK_FILE):
-                    self.cmd_devices()
-            elif args.software:
-                with lock_file_context(self.CMD, self.LOCK_FILE):
-                    self.cmd_software()
-            elif args.hardware:
-                self.cmd_hardware()
-            elif args.attributes:
-                self.cmd_attributes()
-            elif args.faults:
-                self.cmd_faults()
-            else:
-                with lock_file_context(self.CMD, self.LOCK_FILE):
-                    self.cmd_synchronize()
-
-            if not self._pms_status_ok:
-                sys.exit(errno.EPROTO)
-
-        elif args.cmd == 'register':
-            self.cmd_register_computer(args.user)
-
-        elif args.cmd == 'search':
-            self.cmd_search(' '.join(args.pattern))
-
-        elif args.cmd == 'install':
-            with lock_file_context(self.CMD, self.LOCK_FILE):
-                self.cmd_install_package(' '.join(args.pkg_install))
-
-        elif args.cmd == 'purge':
-            with lock_file_context(self.CMD, self.LOCK_FILE):
-                self.cmd_remove_package(' '.join(args.pkg_purge))
-
-        elif args.cmd == 'traits':
-            self.cmd_traits(args.prefix, args.traits_key)
+        handler = command_handlers.get(args.cmd)
+        if handler:
+            handler(args)
 
         sys.exit(utils.ALL_OK)
