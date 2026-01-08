@@ -65,40 +65,70 @@ class Printer:
 
         self.load_device(device)
 
+    def _is_valid_port(self, port_value):
+        """Check if a port value is valid (not empty or 'undefined')."""
+        return port_value and port_value != 'undefined'
+
+    def _get_port(self, default='0'):
+        """Get port from connection, returning default if invalid."""
+        port_value = self.conn.get('PORT', '')
+        return port_value if self._is_valid_port(port_value) else default
+
+    def _load_tcp(self, conn_data):
+        """Load TCP/IP socket connection."""
+        self.conn = conn_data
+        self.port = self._get_port(default='9100')
+        if all(key in self.conn for key in ('IP', 'PORT', 'LOCATION')):
+            self.uri = f'socket://{self.conn["IP"]}:{self.port}'
+
+    def _load_lpt(self, conn_data):
+        """Load parallel port (LPT) connection."""
+        self.conn = conn_data
+        self.port = self._get_port(default='0')
+        self.uri = f'parallel:/dev/lp{self.port}'
+
+    def _load_usb(self, conn_data):
+        """Load USB connection."""
+        self.conn = conn_data
+        self.port = self._get_port(default='0')
+        self.uri = f'parallel:/dev/usb/lp{self.port}'
+
+    def _load_srl(self, conn_data):
+        """Load serial port connection."""
+        self.conn = conn_data
+        self.port = self._get_port(default='0')
+        self.uri = f'serial:/dev/ttyS{self.port}'
+
+    def _load_lpd(self, conn_data):
+        """Load LPD (Line Printer Daemon) connection."""
+        self.conn = conn_data
+        if all(key in self.conn for key in ('IP', 'PORT', 'LOCATION')):
+            self.uri = f'lpd://{self.conn["IP"]}/{self.conn["PORT"]}'
+
+    def _load_connection(self, device):
+        """Load connection data based on device type."""
+        connection_handlers = {
+            'TCP': self._load_tcp,
+            'LPT': self._load_lpt,
+            'USB': self._load_usb,
+            'SRL': self._load_srl,
+            'LPD': self._load_lpd,
+        }
+        for conn_type, handler in connection_handlers.items():
+            if conn_type in device:
+                handler(device[conn_type])
+                break
+
+    def _build_device_name(self, device):
+        """Build device name from connection NAME or device metadata."""
+        conn_name = self.conn.get('NAME', '') if self.conn else ''
+        if self._is_valid_port(conn_name):  # Reuse validation logic
+            return f'{conn_name}__{device["capability"]}__{device["name"]}'
+        return f'{device["manufacturer"]}__{device["model"]}__{device["capability"]}__{device["name"]}'
+
     def load_device(self, device):
-        if 'TCP' in device:
-            self.conn = device['TCP']
-            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
-                self.port = self.conn['PORT']
-            else:
-                self.port = '9100'
-            if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = f'socket://{self.conn["IP"]}:{self.port}'
-        elif 'LPT' in device:
-            self.conn = device['LPT']
-            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
-                self.port = self.conn['PORT']
-            else:
-                self.port = '0'
-            self.uri = f'parallel:/dev/lp{self.port}'
-        elif 'USB' in device:
-            self.conn = device['USB']
-            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
-                self.port = self.conn['PORT']
-            else:
-                self.port = '0'
-            self.uri = f'parallel:/dev/usb/lp{self.port}'
-        elif 'SRL' in device:
-            self.conn = device['SRL']
-            if 'PORT' in self.conn and not (self.conn['PORT'] == 'undefined' or self.conn['PORT'] == ''):
-                self.port = self.conn['PORT']
-            else:
-                self.port = '0'
-            self.uri = f'serial:/dev/ttyS{self.port}'
-        elif 'LPD' in device:
-            self.conn = device['LPD']
-            if 'IP' in self.conn and 'PORT' in self.conn and 'LOCATION' in self.conn:
-                self.uri = f'lpd://{self.conn["IP"]}/{self.conn["PORT"]}'
+        """Load device configuration from device dictionary."""
+        self._load_connection(device)
 
         if self.conn and self.conn.get('LOCATION'):
             self.location = self.conn['LOCATION']
@@ -108,11 +138,7 @@ class Printer:
             f'__{device["name"]}__{int(device["id"])}'
         )
 
-        if 'NAME' in self.conn and not (self.conn['NAME'] == 'undefined' or self.conn['NAME'] == ''):
-            self.name = f'{self.conn["NAME"]}__{device["capability"]}__{device["name"]}'
-        else:
-            self.name = f'{device["manufacturer"]}__{device["model"]}__{device["capability"]}__{device["name"]}'
-
+        self.name = self._build_device_name(device)
         self.logical_id = device['id']
         self.driver = device.get('driver', None)
 
