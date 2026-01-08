@@ -17,7 +17,7 @@ class TestImportMtlsCertificate:
         result = mtls.import_mtls_certificate('/nonexistent/file.tar', 'test.server.com')
 
         assert result['success'] is False
-        assert 'not found' in result['message'].lower()
+        assert '/nonexistent/file.tar' in result['message']
 
     @patch('migasfree_client.mtls._extract_from_p12')
     @patch('os.makedirs')
