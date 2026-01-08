@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -114,120 +114,154 @@ def remove_commented_lines(text):
     return '\n'.join(result)
 
 
-def execute(cmd, verbose=False, interactive=True):
-    """
-    (int, string, string) execute(
-        string cmd,
-        bool verbose=False,
-        bool interactive=True
-    )
-    """
-    _output_buffer = ''
+def _bytes_to_str(data):
+    """Convert bytes to string with UTF-8 encoding, fallback to str() on error."""
+    if data is None:
+        return ''
+    if isinstance(data, bytes) and not isinstance(data, str):
+        try:
+            return str(data, encoding='utf8')
+        except UnicodeDecodeError:
+            return str(data)
+    return data
 
+
+def _create_subprocess(cmd, capture_output=True):
+    """Create a subprocess with platform-specific settings.
+
+    Args:
+        cmd: Command string to execute
+        capture_output: If True, capture stdout/stderr; if False, let them inherit
+
+    Returns:
+        subprocess.Popen instance
+    """
+    common_args = {'shell': True}
+
+    if is_linux():
+        common_args['executable'] = '/bin/bash'
+
+    if capture_output:
+        common_args['stdout'] = subprocess.PIPE
+        common_args['stderr'] = subprocess.PIPE
+
+    return subprocess.Popen(cmd, **common_args)
+
+
+def _stream_output_nonblocking(process):
+    """Stream process output in non-blocking mode (Linux only).
+
+    Returns:
+        Collected output as string
+    """
+    output_buffer = ''
+
+    if is_windows():
+        # Non-blocking streaming not supported on Windows in this manner
+        while process.poll() is None:
+            try:
+                readx = select.select([process.stdout.fileno()], [], [])[0]
+            except OSError:
+                readx = None
+
+            if readx:
+                chunk = process.stdout.read()
+                chunk = _bytes_to_str(chunk)
+                if chunk and chunk != '\n':
+                    print(chunk)
+                output_buffer = f'{output_buffer}{chunk}'
+    else:
+        import fcntl
+
+        fcntl.fcntl(
+            process.stdout.fileno(),
+            fcntl.F_SETFL,
+            fcntl.fcntl(process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
+        )
+
+        while process.poll() is None:
+            try:
+                readx = select.select([process.stdout.fileno()], [], [])[0]
+            except OSError:
+                readx = None
+
+            if readx:
+                chunk = process.stdout.read()
+                chunk = _bytes_to_str(chunk)
+                if chunk and chunk != '\n':
+                    print(chunk)
+                output_buffer = f'{output_buffer}{chunk}'
+
+    return output_buffer
+
+
+def execute(cmd, verbose=False, interactive=True):
+    """Execute a shell command.
+
+    Args:
+        cmd: Command string to execute
+        verbose: If True, print command and output
+        interactive: If True, let output inherit to terminal; if False, capture it
+
+    Returns:
+        Tuple of (returncode, stdout, stderr)
+    """
     if verbose:
         print(cmd)
 
-    if interactive:
-        if is_windows():
-            _process = subprocess.Popen(
-                cmd,
-                shell=True,
-            )
-        else:
-            _process = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
+    process = _create_subprocess(cmd, capture_output=not interactive)
+    output_buffer = ''
+
+    if not interactive and verbose:
+        output_buffer = _stream_output_nonblocking(process)
+
+    output, error = process.communicate()
+
+    output = output_buffer if not interactive and output_buffer else _bytes_to_str(output)
+
+    error = _bytes_to_str(error)
+
+    return process.returncode, output, error
+
+
+def _kill_process(process):
+    """Kill a process in a platform-specific way."""
+    if is_linux():
+        os.kill(process.pid, signal.SIGKILL)
+        os.waitpid(-1, os.WNOHANG)
     else:
-        if is_windows():
-            _process = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        else:
-            _process = subprocess.Popen(
-                cmd, shell=True, executable='/bin/bash', stderr=subprocess.PIPE, stdout=subprocess.PIPE
-            )
+        import psutil
 
-        if verbose:
-            if not is_windows():
-                import fcntl
-
-                fcntl.fcntl(
-                    _process.stdout.fileno(),
-                    fcntl.F_SETFL,
-                    fcntl.fcntl(_process.stdout.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK,
-                )
-
-            while _process.poll() is None:
-                try:
-                    readx = select.select([_process.stdout.fileno()], [], [])[0]
-                except OSError:
-                    readx = None
-
-                if readx:
-                    chunk = _process.stdout.read()
-                    if isinstance(chunk, bytes) and not isinstance(chunk, str):
-                        chunk = str(chunk, encoding='utf8')
-                    if chunk and chunk != '\n':
-                        print(chunk)
-                    _output_buffer = f'{_output_buffer}{chunk}'
-
-    _output, _error = _process.communicate()
-
-    if not interactive and _output_buffer:
-        _output = _output_buffer
-
-    if isinstance(_output, bytes) and not isinstance(_output, str):
-        try:
-            _output = str(_output, encoding='utf8')
-        except UnicodeDecodeError:
-            _output = str(_output)
-    if isinstance(_error, bytes) and not isinstance(_error, str):
-        try:
-            _error = str(_error, encoding='utf8')
-        except UnicodeDecodeError:
-            _error = str(_error)
-
-    return _process.returncode, _output, _error
+        psutil.Process(process.pid).kill()
 
 
 def timeout_execute(cmd, timeout=60):
-    # based in http://amix.dk/blog/post/19408
+    """Execute a command with a timeout.
 
-    if is_linux():
-        _process = subprocess.Popen(
-            cmd, shell=True, executable='/bin/bash', stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-    else:
-        _process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    Args:
+        cmd: Command string to execute
+        timeout: Maximum execution time in seconds (0 for no timeout)
+
+    Returns:
+        Tuple of (returncode, stdout, stderr)
+    """
+    process = _create_subprocess(cmd, capture_output=True)
 
     if timeout > 0:
-        _seconds_elapsed = 0
-        _interval = 0.2
-        while _process.poll() is None:
-            time.sleep(_interval)
-            _seconds_elapsed += _interval
+        interval = 0.2
+        seconds_elapsed = 0
 
-            if _seconds_elapsed > timeout:
-                if is_linux():
-                    os.kill(_process.pid, signal.SIGKILL)
-                    os.waitpid(-1, os.WNOHANG)
-                else:
-                    import psutil
+        while process.poll() is None:
+            time.sleep(interval)
+            seconds_elapsed += interval
 
-                    psutil.Process(_process.pid).kill()
-
+            if seconds_elapsed > timeout:
+                _kill_process(process)
                 return 1, '', _('"%s" command expired timeout') % cmd
 
-    _output, _error = _process.communicate()
+    output, error = process.communicate()
 
-    if isinstance(_output, bytes) and not isinstance(_output, str):
-        try:
-            _output = str(_output, encoding='utf8')
-        except UnicodeDecodeError:
-            _output = str(_output)
-    if isinstance(_error, bytes) and not isinstance(_error, str):
-        try:
-            _error = str(_error, encoding='utf8')
-        except UnicodeDecodeError:
-            _error = str(_error)
-
-    return _process.returncode, _output, _error
+    return process.returncode, _bytes_to_str(output), _bytes_to_str(error)
 
 
 def get_hostname():
