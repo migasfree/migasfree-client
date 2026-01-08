@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -484,10 +484,51 @@ class MigasFreeCommand:
 
         return False
 
+    def _handle_keys_error(self, response, exit_on_error):
+        """Handle error response from keys API call. Returns True if error was handled."""
+        if not (isinstance(response, dict) and 'error' in response):
+            return False
+
+        error = response['error']
+        if isinstance(error, dict) and 'code' in error:
+            self.operation_failed(error['info'])
+            logger.error(error['info'])
+            if exit_on_error:
+                sys.exit(error['code'])
+        else:
+            self.operation_failed(error)
+            logger.error(error)
+            if exit_on_error:
+                sys.exit(errno.EPERM)
+
+        return True
+
+    def _get_key_filename(self, original_name):
+        """Map server key filename to local key filename."""
+        key_mapping = {
+            'migasfree-server.pub': self.PUBLIC_KEY,
+            'migasfree-client.pri': self.PRIVATE_KEY,
+            'migasfree-packager.pri': self.PRIVATE_KEY,
+        }
+        return key_mapping.get(original_name, original_name)
+
+    def _write_key_file(self, filename, content):
+        """Write a key file and handle errors."""
+        path_file = os.path.join(self._get_keys_path(), filename)
+        logger.debug('Trying writing file: %s', path_file)
+
+        if utils.write_file(path_file, str(content)):
+            print(_('Key %s created!') % path_file)
+            return True
+
+        msg = _('Error writing key file!!!')
+        self.operation_failed(msg)
+        logger.error(msg)
+        sys.exit(errno.ENOENT)
+
     def _save_sign_keys(self, user, password):
         exit_on_error = user != self.auto_register_user
 
-        # API keys
         response = self._url_request.run(
             url=self.api_endpoint(self.auto_register_end_point),
             data={
@@ -504,44 +545,15 @@ class MigasFreeCommand:
         )
         logger.debug('Response _save_sign_keys: %s', response)
 
-        if isinstance(response, dict) and 'error' in response:
-            if 'code' in response['error']:
-                self.operation_failed(response['error']['info'])
-                logger.error(response['error']['info'])
-                if exit_on_error:
-                    sys.exit(response['error']['code'])
-
-                return False
-
-            self.operation_failed(response['error'])
-            logger.error(response['error'])
-            if exit_on_error:
-                sys.exit(errno.EPERM)
-
+        if self._handle_keys_error(response, exit_on_error):
             return False
 
         if not self._check_path(self._get_keys_path()):
             sys.exit(errno.ENOTDIR)
 
-        for _file, content in list(response.items()):
-            if _file == 'migasfree-server.pub':
-                _file = self.PUBLIC_KEY
-            if _file == 'migasfree-client.pri':
-                _file = self.PRIVATE_KEY
-            if _file == 'migasfree-packager.pri':
-                _file = self.PRIVATE_KEY
-
-            path_file = os.path.join(self._get_keys_path(), _file)
-            logger.debug('Trying writing file: %s', path_file)
-
-            ret = utils.write_file(path_file, str(content))
-            if ret:
-                print(_('Key %s created!') % path_file)
-            else:
-                msg = _('Error writing key file!!!')
-                self.operation_failed(msg)
-                logger.error(msg)
-                sys.exit(errno.ENOENT)
+        for original_name, content in list(response.items()):
+            filename = self._get_key_filename(original_name)
+            self._write_key_file(filename, content)
 
         return True
 
@@ -652,74 +664,30 @@ class MigasFreeCommand:
         logger.debug('Response end_of_transmission: %s', response)
 
     def _show_config_options(self):
-        conf_file = ''
-        if os.path.isfile(settings.CONF_FILE):
-            conf_file = settings.CONF_FILE
+        conf_file = settings.CONF_FILE if os.path.isfile(settings.CONF_FILE) else ''
 
         print()
         print(_('Config options: %s') % conf_file)
-        print(
-            '\t{}: {} {}'.format(
-                _('Project'), self.migas_project, '(ENV)' if 'MIGASFREE_CLIENT_PROJECT' in os.environ else ''
-            )
-        )
-        print(
-            '\t{}: {} {}'.format(
-                _('Server'), self.migas_server, '(ENV)' if 'MIGASFREE_CLIENT_SERVER' in os.environ else ''
-            )
-        )
-        print(
-            '\t{}: {} {}'.format(
-                _('Protocol'), self.migas_protocol, '(ENV)' if 'MIGASFREE_CLIENT_PROTOCOL' in os.environ else ''
-            )
-        )
-        if self.migas_port:
-            print(
-                '\t{}: {} {}'.format(
-                    _('Port'), self.migas_port, '(ENV)' if 'MIGASFREE_CLIENT_PORT' in os.environ else ''
-                )
-            )
-        print(
-            '\t{}: {} {}'.format(
-                _('Auto update packages'),
-                self.migas_auto_update_packages,
-                '(ENV)' if 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES' in os.environ else '',
-            )
-        )
-        print(
-            '\t{}: {} {}'.format(
-                _('Manage devices'),
-                self.migas_manage_devices,
-                '(ENV)' if 'MIGASFREE_CLIENT_MANAGE_DEVICES' in os.environ else '',
-            )
-        )
-        print(
-            '\t{}: {} {}'.format(
-                _('Upload hardware'),
-                self.migas_upload_hardware,
-                '(ENV)' if 'MIGASFREE_CLIENT_UPLOAD_HARDWARE' in os.environ else '',
-            )
-        )
-        print(
-            '\t{}: {} {}'.format(
-                _('Proxy'), self.migas_proxy, '(ENV)' if 'MIGASFREE_CLIENT_PROXY' in os.environ else ''
-            )
-        )
-        print(
-            '\t{}: {} {}'.format(
-                _('Package Proxy Cache'),
-                self.migas_package_proxy_cache,
-                '(ENV)' if 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE' in os.environ else '',
-            )
-        )
-        print('\t{}: {} {}'.format(_('Debug'), self._debug, '(ENV)' if 'MIGASFREE_CLIENT_DEBUG' in os.environ else ''))
-        print(
-            '\t{}: {} {}'.format(
-                _('Computer name'),
-                self.migas_computer_name,
-                '(ENV)' if 'MIGASFREE_CLIENT_COMPUTER_NAME' in os.environ else '',
-            )
-        )
+
+        # Config options: (label, value, env_var_name, show_if_truthy)
+        config_options = [
+            (_('Project'), self.migas_project, 'MIGASFREE_CLIENT_PROJECT', True),
+            (_('Server'), self.migas_server, 'MIGASFREE_CLIENT_SERVER', True),
+            (_('Protocol'), self.migas_protocol, 'MIGASFREE_CLIENT_PROTOCOL', True),
+            (_('Port'), self.migas_port, 'MIGASFREE_CLIENT_PORT', bool(self.migas_port)),
+            (_('Auto update packages'), self.migas_auto_update_packages, 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', True),
+            (_('Manage devices'), self.migas_manage_devices, 'MIGASFREE_CLIENT_MANAGE_DEVICES', True),
+            (_('Upload hardware'), self.migas_upload_hardware, 'MIGASFREE_CLIENT_UPLOAD_HARDWARE', True),
+            (_('Proxy'), self.migas_proxy, 'MIGASFREE_CLIENT_PROXY', True),
+            (_('Package Proxy Cache'), self.migas_package_proxy_cache, 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE', True),
+            (_('Debug'), self._debug, 'MIGASFREE_CLIENT_DEBUG', True),
+            (_('Computer name'), self.migas_computer_name, 'MIGASFREE_CLIENT_COMPUTER_NAME', True),
+        ]
+
+        for label, value, env_var, show in config_options:
+            if show:
+                env_indicator = '(ENV)' if env_var in os.environ else ''
+                print(f'\t{label}: {value} {env_indicator}')
 
     def _show_running_options(self):
         print()
@@ -872,23 +840,27 @@ class MigasFreeCommand:
         sys.exit(utils.ALL_OK)
 
     def cmd_remove_keys(self, args=None):
-        keys_path = settings.KEYS_PATH if hasattr(args, 'all') and args.all else self._get_keys_path()
+        is_all = getattr(args, 'all', False)
+        is_debug = getattr(args, 'debug', False)
+        is_quiet = getattr(args, 'quiet', True)
 
-        if hasattr(args, 'debug') and args.debug:
+        keys_path = settings.KEYS_PATH if is_all else self._get_keys_path()
+
+        if is_debug:
             print(_('Trying to remove %s directory') % keys_path)
 
         try:
             shutil.rmtree(keys_path)
         except shutil.Error:
-            if hasattr(args, 'quiet') and not args.quiet:
+            if not is_quiet:
                 print(_('An error occurred while deleting directory %s') % keys_path)
             sys.exit(errno.EPERM)
         except FileNotFoundError:
-            if hasattr(args, 'quiet') and not args.quiet:
+            if not is_quiet:
                 print(_('No such directory %s') % keys_path)
             sys.exit(errno.EACCES)
 
-        if hasattr(args, 'quiet') and not args.quiet:
+        if not is_quiet:
             print(_('Directory %s has been removed') % keys_path)
 
         sys.exit(utils.ALL_OK)
