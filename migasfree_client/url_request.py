@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -116,6 +116,66 @@ class UrlRequest:
             'accept-language': os.getenv('LANGUAGE', os.getenv('LANG', 'en')),
         }
 
+    def _setup_request_keys(self, keys):
+        """Setup encryption keys from the provided dict."""
+        if 'private' in keys:
+            self._private_key = keys.get('private')
+        if 'public' in keys:
+            self._public_key = keys.get('public')
+
+    def _log_request_info(self, url, data, safe, exit_on_error):
+        """Log request information for debugging."""
+        logger.debug('URL: %s', url)
+        logger.debug('URL data: %s', data)
+        logger.debug('Safe request: %s', safe)
+        logger.debug('Exit on error: %s', exit_on_error)
+
+        if self._private_key:
+            logger.info('Private key: %s', self._private_key)
+        if self._public_key:
+            logger.info('Public key: %s', self._public_key)
+
+    def _build_proxies(self):
+        """Build proxy configuration dict if proxy is set."""
+        if not self._proxy:
+            return None
+        return {'http': self._proxy, 'https': self._proxy}
+
+    def _build_mtls_params(self):
+        """Build mTLS certificate and verify parameters."""
+        if self._mtls_cert and self._mtls_key:
+            cert_param = (self._mtls_cert, self._mtls_key)
+            verify_param = self._ca_cert if self._ca_cert else False
+            return cert_param, verify_param
+        return None, False
+
+    def _execute_post(self, url, data, headers, proxies, cert_param, verify_param):
+        """Execute POST request and handle connection errors.
+
+        Returns:
+            On success: requests.Response object
+            On error: dict with 'error' key
+        """
+        try:
+            return requests.post(
+                url,
+                data=data,
+                headers=headers,
+                proxies=proxies,
+                timeout=self._timeout,
+                cert=cert_param,
+                verify=verify_param,
+            )
+        except requests.exceptions.ConnectionError as e:
+            logger.error('Connection error: %s', e)
+            return {'error': {'info': str(e), 'code': errno.ECONNREFUSED}}
+        except requests.exceptions.Timeout as e:
+            logger.error('Request timeout: %s', e)
+            return {'error': {'info': str(e), 'code': errno.ETIMEDOUT}}
+        except requests.exceptions.RequestException as e:
+            logger.error('Request error: %s', e)
+            return {'error': {'info': str(e), 'code': errno.EIO}}
+
     def run(self, url, data='', upload_files=None, safe=True, exit_on_error=True, debug=False, keys=None):
         """
         Make an HTTP POST request with signature/encryption support.
@@ -136,27 +196,13 @@ class UrlRequest:
             On success: The unwrapped response data
             On error: {'error': {'info': str, 'code': int}}
         """
-        if keys is None:
-            keys = {}
-
         self._debug = debug
-
         self._exit_on_error = exit_on_error
-        if 'private' in keys:
-            self._private_key = keys.get('private')
-        if 'public' in keys:
-            self._public_key = keys.get('public')
 
-        logger.debug('URL: %s', url)
-        logger.debug('URL data: %s', data)
-        logger.debug('Safe request: %s', safe)
-        logger.debug('Exit on error: %s', exit_on_error)
+        if keys:
+            self._setup_request_keys(keys)
 
-        if self._private_key:
-            logger.info('Private key: %s', self._private_key)
-
-        if self._public_key:
-            logger.info('Public key: %s', self._public_key)
+        self._log_request_info(url, data, safe, exit_on_error)
 
         headers = self._build_default_headers()
         if safe:
@@ -168,42 +214,18 @@ class UrlRequest:
         if upload_files:
             data, headers = self._prepare_upload_files(upload_files, data, safe, headers)
 
-        proxies = None
-        if self._proxy:
-            proxies = {
-                'http': self._proxy,
-                'https': self._proxy,
-            }
+        url = url if url.endswith('/') else url + '/'
 
-        if not url.endswith('/'):
-            url += '/'
+        proxies = self._build_proxies()
+        cert_param, verify_param = self._build_mtls_params()
 
-        cert_param = None
-        verify_param = False
-        if self._mtls_cert and self._mtls_key:
-            cert_param = (self._mtls_cert, self._mtls_key)
-            verify_param = self._ca_cert if self._ca_cert else False
+        result = self._execute_post(url, data, headers, proxies, cert_param, verify_param)
 
-        try:
-            req = requests.post(
-                url,
-                data=data,
-                headers=headers,
-                proxies=proxies,
-                timeout=self._timeout,
-                cert=cert_param,
-                verify=verify_param,
-            )
-        except requests.exceptions.ConnectionError as e:
-            logger.error('Connection error: %s', e)
-            return {'error': {'info': str(e), 'code': errno.ECONNREFUSED}}
-        except requests.exceptions.Timeout as e:
-            logger.error('Request timeout: %s', e)
-            return {'error': {'info': str(e), 'code': errno.ETIMEDOUT}}
-        except requests.exceptions.RequestException as e:
-            logger.error('Request error: %s', e)
-            return {'error': {'info': str(e), 'code': errno.EIO}}
+        # Check if _execute_post returned an error dict
+        if isinstance(result, dict) and 'error' in result:
+            return result
 
+        req = result
         if req.status_code not in self._ok_codes:
             return self._error_response(req, url)
 
@@ -234,6 +256,28 @@ class UrlRequest:
 
         return data, headers
 
+    def _process_simple_response(self, req, download):
+        """Process response from run_simple request.
+
+        Returns:
+            dict with 'data'/'content' on success, or 'error' on failure
+        """
+        # Handle 404 as "not available" (e.g., mTLS service not deployed)
+        if req.status_code == requests.codes.not_found:
+            logger.debug('Endpoint not available (404)')
+            return {'error': {'info': '', 'code': requests.codes.not_found}}
+
+        if req.status_code in self._ok_codes:
+            if download:
+                return {'data': None, 'content': req.content}
+            try:
+                return {'data': req.json()}
+            except ValueError:
+                return {'data': None, 'content': req.content}
+
+        logger.error('Simple request failed with status %d: %s', req.status_code, req.text)
+        return {'error': {'info': req.text, 'code': req.status_code}}
+
     def run_simple(self, url, data=None, json_data=None, headers=None, timeout=None, download=False):
         """
         Make a simple HTTP POST request without signature/encryption logic.
@@ -253,19 +297,13 @@ class UrlRequest:
             dict: On success: {'data': response_data} or {'data': response_data, 'content': bytes}
                   On error: {'error': {'info': str, 'code': int}}
         """
-        if timeout is None:
-            timeout = self._timeout
+        timeout = timeout if timeout is not None else self._timeout
 
         request_headers = self._build_default_headers()
         if headers:
             request_headers.update(headers)
 
-        proxies = None
-        if self._proxy:
-            proxies = {
-                'http': self._proxy,
-                'https': self._proxy,
-            }
+        proxies = self._build_proxies()
 
         logger.debug('Simple request URL: %s', url)
         logger.debug('Simple request data: %s', data)
@@ -281,22 +319,7 @@ class UrlRequest:
                 timeout=timeout,
                 verify=self._cert if self._cert else False,
             )
-
-            # Handle 404 as "not available" (e.g., mTLS service not deployed)
-            if req.status_code == requests.codes.not_found:
-                logger.debug('Endpoint not available (404): %s', url)
-                return {'error': {'info': '', 'code': requests.codes.not_found}}
-
-            if req.status_code in self._ok_codes:
-                if download:
-                    return {'data': None, 'content': req.content}
-                try:
-                    return {'data': req.json()}
-                except ValueError:
-                    return {'data': None, 'content': req.content}
-
-            logger.error('Simple request failed with status %d: %s', req.status_code, req.text)
-            return {'error': {'info': req.text, 'code': req.status_code}}
+            return self._process_simple_response(req, download)
 
         except requests.exceptions.ConnectionError as e:
             logger.error('Connection error: %s', str(e))
