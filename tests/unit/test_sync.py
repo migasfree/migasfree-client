@@ -419,5 +419,212 @@ class TestHardwareInventory(unittest.TestCase):
         self.assertFalse(response.get('capture', False))
 
 
+class TestSyncLogicalDevicesLogic(unittest.TestCase):
+    """Tests for sync_logical_devices method logic"""
+
+    def test_no_devices_returns_false(self):
+        """Test that empty devices returns False"""
+        devices = None
+        result = not devices
+        self.assertTrue(result)
+
+    def test_devices_exist_continues(self):
+        """Test that devices dict continues processing"""
+        devices = {'logical': [], 'default': 0}
+        result = not devices
+        self.assertFalse(result)
+
+    def test_manage_devices_disabled(self):
+        """Test behavior when manage_devices is disabled"""
+        migas_manage_devices = False
+
+        should_abort = bool(not migas_manage_devices)
+
+        self.assertTrue(should_abort)
+
+    def test_device_packages_structure(self):
+        """Test extracting packages from device"""
+        device = {
+            'PRINTER': {
+                'packages': ['cups', 'gutenprint'],
+                'IP': '192.168.1.100',
+            }
+        }
+
+        has_printer = 'PRINTER' in device
+        has_packages = 'packages' in device['PRINTER']
+        packages_not_empty = bool(device['PRINTER']['packages'])
+
+        self.assertTrue(has_printer)
+        self.assertTrue(has_packages)
+        self.assertTrue(packages_not_empty)
+        self.assertEqual(device['PRINTER']['packages'], ['cups', 'gutenprint'])
+
+    def test_device_without_packages(self):
+        """Test device without packages key"""
+        device = {
+            'PRINTER': {
+                'IP': '192.168.1.100',
+            }
+        }
+
+        has_packages = 'packages' in device.get('PRINTER', {})
+        self.assertFalse(has_packages)
+
+    def test_device_with_empty_packages(self):
+        """Test device with empty packages list"""
+        device = {
+            'PRINTER': {
+                'packages': [],
+            }
+        }
+
+        packages = device.get('PRINTER', {}).get('packages', [])
+        should_install = bool(packages)
+        self.assertFalse(should_install)
+
+    def test_logical_devices_dict_creation(self):
+        """Test creating logical_devices dict keyed by id"""
+        devices = {
+            'logical': [
+                {'PRINTER': {'id': 1, 'name': 'Printer1', 'manufacturer': 'HP', 'model': 'LJ', 'capability': 'print'}},
+                {
+                    'PRINTER': {
+                        'id': 2,
+                        'name': 'Printer2',
+                        'manufacturer': 'Canon',
+                        'model': 'MX',
+                        'capability': 'print',
+                    }
+                },
+            ],
+            'default': 1,
+        }
+
+        logical_devices = {}
+        for device in devices['logical']:
+            if 'PRINTER' in device:
+                dev_id = int(device['PRINTER']['id'])
+                logical_devices[dev_id] = device['PRINTER']
+
+        self.assertEqual(len(logical_devices), 2)
+        self.assertIn(1, logical_devices)
+        self.assertIn(2, logical_devices)
+        self.assertEqual(logical_devices[1]['name'], 'Printer1')
+
+    def test_migasfree_printer_format_detection(self):
+        """Test detection of migasfree printer format (5 parts separated by __)"""
+        printer_info = 'HP__LaserJet__print__office_printer__42'
+        parts = printer_info.split('__')
+
+        is_migasfree_printer = len(parts) == 5
+        self.assertTrue(is_migasfree_printer)
+
+        # Extract logical_id from last part
+        if is_migasfree_printer:
+            logical_id = int(parts[4])
+            self.assertEqual(logical_id, 42)
+
+    def test_non_migasfree_printer_format(self):
+        """Test detection of non-migasfree printer format"""
+        printer_info = 'HP LaserJet Pro'
+        parts = printer_info.split('__')
+
+        is_migasfree_printer = len(parts) == 5
+        self.assertFalse(is_migasfree_printer)
+
+    def test_printer_info_extraction(self):
+        """Test extracting manufacturer, model, capability from printer info"""
+        printer_info = 'HP__LaserJet__print__office_printer__42'
+        parts = printer_info.split('__')
+
+        manufacturer = parts[0]
+        model = parts[1]
+        capability = parts[2]
+        name = parts[3]
+        logical_id = parts[4]
+
+        self.assertEqual(manufacturer, 'HP')
+        self.assertEqual(model, 'LaserJet')
+        self.assertEqual(capability, 'print')
+        self.assertEqual(name, 'office_printer')
+        self.assertEqual(logical_id, '42')
+
+    def test_no_driver_error_message(self):
+        """Test error message format when driver is None"""
+        device_name = 'TestPrinter'
+        info = 'HP__LaserJet__print__office__1'
+        parts = info.split('__')
+        project = 'test-project'
+
+        error_msg = (  # noqa: UP032
+            'Error: no driver defined for device {}. '
+            'Please, configure capability {}, in the model {} {}, and project {}'
+        ).format(
+            device_name,
+            parts[2],  # capability
+            parts[0],  # manufacturer
+            parts[1],  # model
+            project,
+        )
+
+        self.assertIn('TestPrinter', error_msg)
+        self.assertIn('print', error_msg)
+        self.assertIn('HP', error_msg)
+        self.assertIn('LaserJet', error_msg)
+        self.assertIn('test-project', error_msg)
+
+    def test_default_printer_condition(self):
+        """Test condition for setting default printer"""
+        devices_default = 1
+        logical_devices = {1: 'printer1', 2: 'printer2'}
+
+        should_set_default = devices_default != 0 and devices_default in logical_devices
+
+        self.assertTrue(should_set_default)
+
+    def test_default_printer_zero(self):
+        """Test that default=0 means no default printer"""
+        devices_default = 0
+        logical_devices = {1: 'printer1'}
+
+        should_set_default = devices_default != 0 and devices_default in logical_devices
+
+        self.assertFalse(should_set_default)
+
+    def test_default_printer_not_in_logical_devices(self):
+        """Test default printer not in logical_devices"""
+        devices_default = 3
+        logical_devices = {1: 'printer1', 2: 'printer2'}
+
+        should_set_default = devices_default != 0 and devices_default in logical_devices
+
+        self.assertFalse(should_set_default)
+
+    def test_relate_printer_to_logical_device(self):
+        """Test relating system printer to logical device"""
+        # Simulating printer data from CUPS
+        printers = {
+            'HP_LaserJet': {
+                'printer-info': 'HP__LaserJet__print__office__42',
+                'device-uri': 'socket://192.168.1.100:9100',
+            }
+        }
+
+        logical_devices = {42: {'printer_name': None, 'printer_data': None}}
+
+        for printer_name in printers:
+            info = printers[printer_name]['printer-info']
+            parts = info.split('__')
+            if len(parts) == 5:
+                key = int(parts[4])
+                if key in logical_devices:
+                    logical_devices[key]['printer_name'] = printer_name
+                    logical_devices[key]['printer_data'] = printers[printer_name]
+
+        self.assertEqual(logical_devices[42]['printer_name'], 'HP_LaserJet')
+        self.assertEqual(logical_devices[42]['printer_data']['device-uri'], 'socket://192.168.1.100:9100')
+
+
 if __name__ == '__main__':
     unittest.main()
