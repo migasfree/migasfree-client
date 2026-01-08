@@ -152,6 +152,9 @@ class Pacman(Pms):
         """
         ordered list query_all(void)
         list format: name_version_architecture.extension
+
+        Note: Extension is standardized to .pkg.tar.zst (pacman default since 2020).
+        This format is used as a package identifier, not the actual filename.
         """
 
         cmd = f'{self._pms} --query --info'
@@ -171,9 +174,8 @@ class Pacman(Pms):
                     key, value = _item.strip().split(':', 1)
                     _pkg_info[key.strip()] = value.strip()
 
-            _result.append(
-                f'{_pkg_info["Name"]}_{_pkg_info["Version"]}_{_pkg_info["Architecture"]}.pkg.tar.zst'  # FIXME extension
-            )
+            # Extension standardized to .pkg.tar.zst (pacman default)
+            _result.append(f'{_pkg_info["Name"]}_{_pkg_info["Version"]}_{_pkg_info["Architecture"]}.pkg.tar.zst')
 
         return _result
 
