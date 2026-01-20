@@ -20,9 +20,16 @@
 # All configuration is in pyproject.toml.
 # This file handles translation building and installation.
 
+import configparser
 import glob
 import os
 import subprocess
+
+# Patch for stdeb compatibility with Python 3.12 (SafeConfigParser removed)
+if not hasattr(configparser, 'SafeConfigParser'):
+    configparser.SafeConfigParser = configparser.ConfigParser
+if not hasattr(configparser.ConfigParser, 'readfp'):
+    configparser.ConfigParser.readfp = configparser.ConfigParser.read_file
 
 from setuptools import setup
 from setuptools.command.build_py import build_py
