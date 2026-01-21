@@ -165,6 +165,7 @@ class MigasFreeCommand:
         'upload_software': '/api/v1/safe/computers/software/',
         'upload_devices_changes': '/api/v1/safe/computers/devices/changes/',
         'upload_sync': '/api/v1/safe/synchronizations/',
+        'upload_sync_availability': '/manager/v1/public/synchronizations/availability/',
         #
         # label API
         'get_label': '/api/v1/safe/computers/label/',

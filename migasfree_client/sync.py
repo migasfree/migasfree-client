@@ -28,6 +28,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from . import (
+    availability,
     network,
     settings,
     utils,
@@ -596,6 +597,15 @@ class MigasFreeSync(MigasFreeCommand):
     def cmd_synchronize(self):
         start_date = datetime.now().isoformat()
         self._show_message(_('Connecting to migasfree server...'))
+
+        available, _retry_after = availability.check_availability(
+            self._url_request, self.api_endpoint(self.URLS['get_sync_availability']), self._computer_id
+        )
+        if not available:
+            msg = _('Server is saturated. Synchronization will be queued and performed via migasfree-agent service.')
+            self._show_message(msg)
+            logger.warning(msg)
+            sys.exit(errno.EAGAIN)
 
         self.upload_old_errors()
         self._execute_path(settings.PRE_SYNC_PATH)
