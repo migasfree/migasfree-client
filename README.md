@@ -1,49 +1,86 @@
-# Description
+# migasfree-client
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/)
 [![GitHub issues](https://img.shields.io/github/issues/migasfree/migasfree-client)](https://github.com/migasfree/migasfree-client/issues)
 
-'migasfree' is a very simple, but effective, systems management system. Actually, it is used in `Ayuntamiento de Zaragoza` (Spain) by initial authors in the project **migration to open source software for desktops**. They use [AZLinux distribution](http://zaragozaciudad.net/azlinux), which is based on [Debian](https://www.debian.org/).
+A systems management client that synchronizes computers with a [migasfree server](https://github.com/migasfree/migasfree) for centralized software deployment, hardware/software inventory, and device management.
 
-You can learn about systems management systems at:
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Commands](#commands)
+- [mTLS Authentication](#mtls-authentication)
+- [Troubleshooting](#troubleshooting)
+- [Documentation](#documentation)
+- [License](#license)
+
+## Quick Start
+
+```bash
+# Install
+pip install migasfree-client
+
+# Configure
+sudo nano /etc/migasfree.conf
+# Set: Server = your-migasfree-server.example.com
+
+# Register
+sudo migasfree register -u admin
+
+# Synchronize
+sudo migasfree sync
+```
+
+## Features
+
+- **Software Deployment** - Install, update, and remove packages centrally
+- **Hardware Inventory** - Automatic hardware information capture
+- **Software Inventory** - Track all installed packages
+- **Device Management** - Configure printers and peripherals
+- **Fault Monitoring** - Centralized error and fault reporting
+- **Cross-Platform** - Linux (Debian, Fedora, openSUSE, Arch, Alpine) and Windows 10+
+- **Secure Communication** - mTLS, JWS signing, and JWE encryption
+
+## About migasfree
+
+migasfree is a systems management system used in production at `Ayuntamiento de Zaragoza` (Spain) for managing thousands of desktops running [AZLinux](http://zaragozaciudad.net/azlinux) (Debian-based).
+
+Learn more about systems management:
 
 - [Systems management](http://en.wikipedia.org/wiki/Systems_management)
 - [List of systems management systems](http://en.wikipedia.org/wiki/List_of_systems_management_systems)
 
-# License
+## Requirements
 
-migasfree is free software, released under GNU GPL v3 (see LICENSE file for details).
-
-# Authors
-
-See AUTHORS file.
-
-# Requirements
-
-- a Linux distribution (Fedora, openSUSE, Ubuntu, ...) or Windows >= 10
-- Python >= 3.6 (see requirements.txt file)
-- lshw >= B.02.15 (or [LsHw Windows Emulator](https://github.com/migasfree/lshw-windows-emulator) in Windows platform)
+- Linux distribution (Fedora, openSUSE, Ubuntu, Debian, Arch, Alpine) or Windows >= 10
+- Python >= 3.6
+- lshw >= B.02.15 (or [LsHw Windows Emulator](https://github.com/migasfree/lshw-windows-emulator) for Windows)
 - dmidecode
-- Extra requirements in Windows platform:
-  - python-magic-bin
-  - pysam-win
-  - pywin32
-  - psutil
 
-# Features (migasfree suite)
+**Additional Windows requirements:**
 
-- Web administration
-- Multiuser
-- Multiversion (you can have desktops with differents versions and/or distributions of GNU/Linux)
-- Automated Data Capture (you do not worry about adding hostnames, users, IPs, devices, etc. to server)
-- Centralized system errors
-- Centralized system faults
-- Hardware inventory
-- Software inventory
-- System queries from the admin site
+- python-magic-bin
+- pywin32
+- psutil
 
-# Commands
+## Installation
+
+```bash
+# From PyPI
+pip install migasfree-client
+
+# Verify installation
+migasfree version
+```
+
+See [INSTALL](INSTALL) for distribution-specific instructions.
+
+## Commands
 
 The `migasfree` command provides several subcommands:
 
@@ -78,7 +115,7 @@ The `migasfree` command provides several subcommands:
 - `-d, --debug`: Enable debug mode
 - `-q, --quiet`: Enable silent mode (no verbose output)
 
-# Configuration
+## Configuration
 
 The configuration file is located at:
 
@@ -112,7 +149,7 @@ You can override the configuration file path using the `MIGASFREE_CONF` environm
 | `Project`  | Default project for uploads     |
 | `Store`    | Default store for uploads       |
 
-# mTLS Authentication
+## mTLS Authentication
 
 migasfree-client supports mutual TLS (mTLS) authentication for secure client-server communication.
 
@@ -131,7 +168,7 @@ migasfree import-mtls /path/to/certificate.tar
 
 The mTLS certificates are automatically fetched during computer registration if the server supports mTLS.
 
-# Behaviour
+## How It Works
 
 How can you change the software configuration of machines with migasfree?
 
@@ -143,7 +180,7 @@ A repository in migasfree server defines the packages that should be installed, 
 
 All changes of configuration in the clients are made through packages. Therefore it is necessary that you know how create packages in order to change the configuration of the machines that you want administrate. You can consider hiring a professional, this is the hard work, you were warned!
 
-# Use
+## Example Use Case
 
 For example: You want change the Firefox homepage in all PCs in a range of IPs.
 
@@ -155,8 +192,42 @@ For example: You want change the Firefox homepage in all PCs in a range of IPs.
 
 4. _Voilà!_ When a user opens a graphic session and his IP is in range, migasfree client install the package.
 
-# Documentation
+## Troubleshooting
 
-[Fun with migasfree](http://fun-with-migasfree.readthedocs.org/) (spanish)
+**Enable debug mode:**
 
-_That's all folks!!!_
+```bash
+sudo migasfree sync -d
+```
+
+**Common issues:**
+
+| Problem                  | Solution                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| "Connection refused"     | Check `Server` setting and network connectivity                                |
+| "401 Unauthorized"       | Re-register: `sudo migasfree remove-keys && sudo migasfree register -u admin`  |
+| "SSL certificate error"  | Install CA certificate or check system time                                    |
+| "Project not found"      | Set `Project` in config or ask admin to create it                              |
+
+For detailed troubleshooting, see the [Troubleshooting Guide](docs/how-to/troubleshooting.md).
+
+## Documentation
+
+- **Full Documentation**: [docs/](docs/) directory
+- **Getting Started**: [docs/getting-started.md](docs/getting-started.md)
+- **CLI Reference**: [docs/reference/cli.md](docs/reference/cli.md)
+- **Configuration**: [docs/reference/configuration.md](docs/reference/configuration.md)
+- **Architecture**: [docs/explanation/architecture.md](docs/explanation/architecture.md)
+- **External**: [Fun with migasfree](http://fun-with-migasfree.readthedocs.org/) (Spanish)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## License
+
+migasfree-client is free software released under the [GNU GPL v3](LICENSE).
+
+## Authors
+
+See [AUTHORS](AUTHORS) file.
