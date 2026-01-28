@@ -1,0 +1,34 @@
+name: RPM Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build_rpm:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Build Dependencies
+        run: |
+          dnf install -y python3-devel python3-setuptools python3-pip rpm-build gettext git
+
+      - name: Build RPM
+        run: |
+          python3 setup.py bdist_rpm
+
+      - name: Verify RPM
+        run: |
+          rpm -qp dist/migasfree-client-*.noarch.rpm --info
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: dist/migasfree-client-*.noarch.rpm
