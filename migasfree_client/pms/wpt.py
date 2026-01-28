@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2024-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ import gettext
 import logging
 import os
 
-from ..utils import execute, write_file
+from ..utils import execute, write_file_if_changed
 from .pms import Pms
 
 _ = gettext.gettext
@@ -171,7 +171,7 @@ class Wpt(Pms):
         if not content:
             return True
 
-        return write_file(self._repo, content)
+        return write_file_if_changed(self._repo, content)
 
     def import_server_key(self, file_key):
         """

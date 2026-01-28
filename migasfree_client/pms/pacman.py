@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 import gettext
 import logging
 
-from ..utils import execute, read_file, write_file
+from ..utils import execute, read_file, write_file_if_changed
 from .pms import Pms
 
 _ = gettext.gettext
@@ -192,7 +192,7 @@ class Pacman(Pms):
         index = [i for i, s in enumerate(config) if substring in s]
         if index[0]:
             config.insert(index[0], line)
-            write_file(self._config, '\n'.join(config))
+            write_file_if_changed(self._config, '\n'.join(config))
         else:
             print(_('Add manually "%s" to file %s inside "options" section as last option') % (line, self._config))
 
@@ -209,7 +209,7 @@ class Pacman(Pms):
         if not content:
             return True
 
-        return write_file(self._repo, content)
+        return write_file_if_changed(self._repo, content)
 
     def import_server_key(self, file_key):
         """

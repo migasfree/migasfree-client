@@ -531,6 +531,29 @@ def write_file(filename, content):
         return False
 
 
+def write_file_if_changed(filename, content):
+    """
+    bool write_file_if_changed(string filename, string content)
+    Writes file only if content is different from existing file content.
+    Returns True if written, False if not changed or error.
+    """
+    if os.path.exists(filename):
+        try:
+            current_content = read_file(filename)
+            # handle encoding like write_file does
+            try:
+                c_content = content.encode('utf-8')
+            except AttributeError:
+                c_content = content
+
+            if current_content == c_content:
+                return False
+        except OSError:
+            pass
+
+    return write_file(filename, content)
+
+
 def remove_file(archive):
     if os.path.isfile(archive):
         os.remove(archive)

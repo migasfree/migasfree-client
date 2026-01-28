@@ -4,7 +4,7 @@ Unit tests for migasfree_client.utils module
 
 import os
 import sys
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -715,3 +715,102 @@ class TestPathSanitization:
         path = '..\\..\\windows\\system32'
         result = utils.sanitize_path(path)
         assert '..' not in result
+
+
+class TestIdempotency:
+    """Tests for SYS-001: System Idempotency"""
+
+    def test_write_file_if_changed_writes_when_new(self):
+        """Test write_file_if_changed writes if file does not exist"""
+        with patch('os.path.exists', return_value=False), patch(
+            'migasfree_client.utils.write_file', return_value=True
+        ) as mock_write:
+            ret = utils.write_file_if_changed('/tmp/new.txt', 'content')
+
+            assert ret is True
+            mock_write.assert_called_once_with('/tmp/new.txt', 'content')
+
+    def test_write_file_if_changed_skips_identical(self):
+        """Test write_file_if_changed returns False if content is identical"""
+        content = 'same content'
+        try:
+            # Py3 encoding behavior in mocks can be tricky, so we mock read_file directly
+            with patch('os.path.exists', return_value=True), patch(
+                'migasfree_client.utils.read_file', return_value=content.encode('utf-8')
+            ), patch('migasfree_client.utils.write_file') as mock_write:
+                ret = utils.write_file_if_changed('/tmp/exist.txt', content)
+
+                assert ret is False
+                mock_write.assert_not_called()
+        except Exception as e:
+            pytest.fail(f'Test failed with: {e}')
+
+    def test_write_file_if_changed_writes_different(self):
+        """Test write_file_if_changed writes if content matches but is different"""
+        old_content = 'old content'.encode('utf-8')
+        new_content = 'new content'
+
+        with patch('os.path.exists', return_value=True), patch(
+            'migasfree_client.utils.read_file', return_value=old_content
+        ), patch('migasfree_client.utils.write_file', return_value=True) as mock_write:
+            ret = utils.write_file_if_changed('/tmp/exist.txt', new_content)
+
+            assert ret is True
+            mock_write.assert_called_once_with('/tmp/exist.txt', new_content)
+
+    def test_apt_create_repos_is_idempotent(self):
+        """Test Apt.create_repos uses write_file_if_changed"""
+        from migasfree_client.pms.apt import Apt
+
+        apt = Apt()
+        repositories = [{'source_template': 'deb http://{server}/debian/ stable main'}]
+        apt._get_pms_version = MagicMock(return_value=(2, 0))
+
+        with patch('migasfree_client.pms.apt.write_file_if_changed') as mock_write:
+            apt.create_repos('http', 'server.com', repositories)
+            mock_write.assert_called_once()
+            args, _ = mock_write.call_args
+            assert args[0].endswith('migasfree.list')
+
+    def test_yum_create_repos_is_idempotent(self):
+        """Test Yum.create_repos uses write_file_if_changed"""
+        from migasfree_client.pms.yum import Yum
+
+        pms = Yum()
+        repositories = [{'source_template': '[migasfree]\nbaseurl=http://{server}/repo\n'}]
+
+        with patch('migasfree_client.pms.yum.write_file_if_changed') as mock_write:
+            pms.create_repos('http', 'server.com', repositories)
+            mock_write.assert_called_once()
+            args, _ = mock_write.call_args
+            assert 'migasfree.repo' in args[0]
+
+    def test_pacman_create_repos_is_idempotent(self):
+        """Test Pacman.create_repos uses write_file_if_changed"""
+        from migasfree_client.pms.pacman import Pacman
+
+        pms = Pacman()
+        # Mocking _include_config to avoid real file reads/writes
+        pms._include_config = MagicMock()
+        repositories = [{'source_template': 'Server = http://{server}/arch/$repo/os/$arch'}]
+
+        with patch('migasfree_client.pms.pacman.write_file_if_changed') as mock_write:
+            pms.create_repos('http', 'server.com', repositories)
+            mock_write.assert_called_once()
+            args, _ = mock_write.call_args
+            assert args[0].endswith('migasfree.list')
+
+    def test_wpt_create_repos_is_idempotent(self):
+        """Test Wpt.create_repos uses write_file_if_changed"""
+        from migasfree_client.pms.wpt import Wpt
+
+        # Mock PROGRAMDATA env var for Wpt init
+        with patch.dict(os.environ, {'PROGRAMDATA': '/tmp'}):
+            pms = Wpt()
+            repositories = [{'source_template': 'deb http://{server}/win stable main'}]
+
+            with patch('migasfree_client.pms.wpt.write_file_if_changed') as mock_write:
+                pms.create_repos('http', 'server.com', repositories)
+                mock_write.assert_called_once()
+                args, _ = mock_write.call_args
+                assert args[0].endswith('sources.list')
