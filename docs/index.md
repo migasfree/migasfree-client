@@ -93,6 +93,13 @@ This documentation follows the [Diátaxis framework](https://diataxis.fr/):
 - **Documentation**: [Fun with migasfree](https://fun-with-migasfree.readthedocs.org/) (Spanish)
 - **Source Code**: [GitHub Repository](https://github.com/migasfree/migasfree-client)
 
+## Contributing
+
+We welcome contributions! Please see:
+
+- [Development Guidelines](../CONTRIBUTING.md)
+- [Documentation Guidelines](contributing_docs.md)
+
 ## License
 
 migasfree-client is free software released under the [GNU GPL v3](../LICENSE).
