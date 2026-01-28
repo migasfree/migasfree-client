@@ -22,15 +22,14 @@ jobs:
       - name: Build RPM
         run: |
           python3 setup.py bdist_rpm
-          mkdir -p dist_rpm
-          find build -name "migasfree_client-*.noarch.rpm" -exec cp {} dist_rpm/ \;
 
       - name: Verify RPM
         run: |
-          rpm -qp dist_rpm/*.rpm --info
+          ls -R dist/ || true
+          rpm -qp dist/migasfree_client-*.noarch.rpm --info
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: rpm-package
-          path: dist_rpm/*.rpm
+          path: dist/migasfree_client-*.noarch.rpm
