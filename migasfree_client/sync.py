@@ -599,7 +599,7 @@ class MigasFreeSync(MigasFreeCommand):
         self._show_message(_('Connecting to migasfree server...'))
 
         available, _retry_after = availability.check_availability(
-            self._url_request, self.api_endpoint(self.URLS['get_sync_availability']), self._computer_id
+            self._url_request, self.api_endpoint(self.URLS['upload_sync_availability']), self._computer_id
         )
         if not available:
             msg = _('Server is saturated. Synchronization will be queued and performed via migasfree-agent service.')
