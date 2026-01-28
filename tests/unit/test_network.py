@@ -151,7 +151,9 @@ class TestMACAddress:
     @patch('netifaces.ifaddresses')
     def test_get_mac(self, mock_ifaddresses):
         """Test getting MAC address of interface"""
-        mock_ifaddresses.return_value = {17: [{'addr': '00:11:22:33:44:55'}]}
+        import netifaces
+
+        mock_ifaddresses.return_value = {netifaces.AF_LINK: [{'addr': '00:11:22:33:44:55'}]}
         result = network.get_mac('eth0')
         assert result == '00:11:22:33:44:55'
 

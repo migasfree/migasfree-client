@@ -257,7 +257,11 @@ class TestApt(unittest.TestCase):
     def test_adapt_sources_replaces_empty_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com\nSigned-By:'
         result = self.apt._adapt_sources(sources_content, 'server.example.com')
-        self.assertIn('Signed-By: /etc/apt/trusted.gpg.d/server.example.com.gpg', result)
+        import os
+
+        expected_path = os.path.join('/etc/apt/trusted.gpg.d', 'server.example.com.gpg')
+        expected = f'Types: deb\nURIs: http://example.com\nSigned-By: {expected_path}'
+        assert result == expected
 
     def test_adapt_sources_preserves_existing_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com\nSigned-By: /path/to/key.gpg'

@@ -252,7 +252,7 @@ class TestGetMtlsCaFile:
 
         result = mtls.get_mtls_ca_file(server)
 
-        assert result.endswith('/ca.pem')
+        assert result.endswith(os.path.join(os.sep, 'ca.pem'))
         assert 'test.server.com' in result
 
 
