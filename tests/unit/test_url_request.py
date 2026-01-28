@@ -149,8 +149,8 @@ class TestErrorHandling:
         url = 'http://example.com/api/endpoint'
 
         # responses library doesn't directly support timeout simulation
-        # We'll mock the requests.post to raise ReadTimeout
-        with patch('requests.post') as mock_post:
+        # We'll mock the requests.Session.post to raise ReadTimeout
+        with patch('requests.Session.post') as mock_post:
             from requests.exceptions import ReadTimeout
 
             mock_post.side_effect = ReadTimeout('Request timed out')
@@ -160,6 +160,8 @@ class TestErrorHandling:
 
             assert 'error' in result
             assert result['error']['code'] == errno.ETIMEDOUT
+
+    # ... (skipping other tests)
 
     @responses.activate
     def test_run_http_404_error(self):
@@ -367,7 +369,7 @@ class TestMtlsSupport:
         assert url_req._mtls_key is None
 
     @responses.activate
-    @patch('requests.post')
+    @patch('requests.Session.post')
     def test_run_with_mtls_cert(self, mock_post):
         """Test that requests include mTLS client certificate when configured"""
         url = 'https://example.com/api/endpoint'
@@ -390,7 +392,7 @@ class TestMtlsSupport:
         assert call_kwargs['cert'] == (mtls_cert, mtls_key)
 
     @responses.activate
-    @patch('requests.post')
+    @patch('requests.Session.post')
     def test_run_without_mtls_cert(self, mock_post):
         """Test that requests without mTLS configured use None for cert"""
         url = 'https://example.com/api/endpoint'

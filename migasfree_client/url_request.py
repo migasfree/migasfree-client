@@ -21,6 +21,8 @@ import os
 import sys
 
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from requests_toolbelt import MultipartEncoder
 
 from .secure import unwrap, wrap
@@ -48,6 +50,7 @@ class UrlRequest:
         '_public_key',
         '_safe',
         '_timeout',
+        'session',
     )
 
     _ok_codes = frozenset(
@@ -88,6 +91,13 @@ class UrlRequest:
         self._timeout = timeout
         self._private_key = keys.get('private')
         self._public_key = keys.get('public')
+
+        # Initialize session with exponential backoff retry
+        self.session = requests.Session()
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504], raise_on_status=False)
+        adapter = HTTPAdapter(max_retries=retries)
+        self.session.mount('https://', adapter)
+        self.session.mount('http://', adapter)
 
         logger.info('SSL certificate: %s', self._cert)
         if self._mtls_cert and self._mtls_key:
@@ -149,6 +159,7 @@ class UrlRequest:
             return cert_param, verify_param
         return None, False
 
+    # ... existing methods _check_tmp_path, _build_default_headers, _setup_request_keys, _log_request_info, _build_proxies, _build_mtls_params ...
     def _execute_post(self, url, data, headers, proxies, cert_param, verify_param):
         """Execute POST request and handle connection errors.
 
@@ -157,7 +168,7 @@ class UrlRequest:
             On error: dict with 'error' key
         """
         try:
-            return requests.post(
+            return self.session.post(
                 url,
                 data=data,
                 headers=headers,
@@ -310,7 +321,7 @@ class UrlRequest:
         logger.debug('Simple request json: %s', json_data)
 
         try:
-            req = requests.post(
+            req = self.session.post(
                 url,
                 data=data,
                 json=json_data,
