@@ -25,10 +25,10 @@ jobs:
 
       - name: Verify RPM
         run: |
-          rpm -qp dist/migasfree-client-*.noarch.rpm --info
+          rpm -qp build/bdist*/rpm/RPMS/noarch/migasfree_client-*.noarch.rpm --info
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: rpm-package
-          path: dist/migasfree-client-*.noarch.rpm
+          path: build/bdist*/rpm/RPMS/noarch/migasfree_client-*.noarch.rpm
