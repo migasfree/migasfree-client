@@ -77,6 +77,19 @@ def is_linux():
 
 
 def sanitize_path(value):
+    """
+    Sanitize a path to prevent directory traversal and remove invalid characters.
+    """
+    # Remove directory traversal sequences
+    value = value.replace('..', '')
+
+    # Normalize slashes to current OS
+    value = os.path.normpath(value)
+
+    # Remove leading separators to prevent absolute paths
+    while value.startswith(os.sep):
+        value = value[1:]
+
     if is_windows():
         return (
             value.replace('\\', '_')

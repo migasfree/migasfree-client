@@ -72,10 +72,10 @@ class TestPlatformDetection:
 
     @patch('migasfree_client.utils.is_windows', return_value=False)
     def test_sanitize_path_linux(self, mock_is_windows):
-        """Test sanitize_path on Linux keeps path unchanged"""
+        """Test sanitize_path on Linux removes leading slash to prevent absolute paths"""
         path = '/path/to/file.txt'
         result = utils.sanitize_path(path)
-        assert result == path
+        assert result == 'path/to/file.txt'
 
 
 class TestFileOperations:
@@ -689,3 +689,29 @@ class TestKillProcess:
 
         time.sleep(0.1)
         assert process.poll() is not None  # Now terminated
+
+
+class TestPathSanitization:
+    """Tests for path sanitization to prevent directory traversal"""
+
+    @patch('sys.platform', 'linux')
+    @patch('migasfree_client.utils.is_windows', return_value=False)
+    def test_sanitize_path_traversal_linux(self, mock_is_windows):
+        """Test sanitize_path removes traversal characters on Linux"""
+        # Intent: prevent climbing up directories
+        path = '../../etc/passwd'
+        result = utils.sanitize_path(path)
+
+        # Current implementation just returns value on Linux, so this assertion
+        # EXPECTS FAIL if we want it sanitized. But since I am writing the test
+        # to prove the vulnerability (or the need for fix), I will assert the SAFE state.
+        assert '..' not in result
+        assert result != '../../etc/passwd'
+
+    @patch('sys.platform', 'win32')
+    @patch('migasfree_client.utils.is_windows', return_value=True)
+    def test_sanitize_path_traversal_windows(self, mock_is_windows):
+        """Test sanitize_path removes traversal characters on Windows"""
+        path = '..\\..\\windows\\system32'
+        result = utils.sanitize_path(path)
+        assert '..' not in result
