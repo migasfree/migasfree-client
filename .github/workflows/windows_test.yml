@@ -2,9 +2,9 @@ name: Windows Tests
 
 on:
   push:
-    branches: [master]
+    branches: [master, REST-API]
   pull_request:
-    branches: [master]
+    branches: [master, REST-API]
 
 jobs:
   test_windows:

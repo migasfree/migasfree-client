@@ -2,9 +2,9 @@ name: RPM Build
 
 on:
   push:
-    branches: [master]
+    branches: [master, REST-API]
   pull_request:
-    branches: [master]
+    branches: [master, REST-API]
 
 jobs:
   build_rpm:
