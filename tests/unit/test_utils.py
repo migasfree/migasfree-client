@@ -750,7 +750,7 @@ class TestIdempotency:
 
     def test_write_file_if_changed_writes_different(self):
         """Test write_file_if_changed writes if content matches but is different"""
-        old_content = 'old content'.encode('utf-8')
+        old_content = b'old content'
         new_content = 'new content'
 
         with patch('os.path.exists', return_value=True), patch(
@@ -856,7 +856,6 @@ class TestGetGraphicPid:
     @patch('migasfree_client.utils.is_windows', return_value=True)
     def test_get_graphic_pid_windows_proc_not_accessed(self, mock_is_windows):
         """Test that /proc is NOT accessed on Windows"""
-        with patch('os.listdir') as mock_listdir:
-            with patch('psutil.process_iter', return_value=[]):
-                utils.get_graphic_pid()
-                mock_listdir.assert_not_called()
+        with patch('os.listdir') as mock_listdir, patch('psutil.process_iter', return_value=[]):
+            utils.get_graphic_pid()
+            mock_listdir.assert_not_called()
