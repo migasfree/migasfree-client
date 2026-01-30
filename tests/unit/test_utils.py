@@ -73,9 +73,12 @@ class TestPlatformDetection:
     @patch('migasfree_client.utils.is_windows', return_value=False)
     def test_sanitize_path_linux(self, mock_is_windows):
         """Test sanitize_path on Linux removes leading slash to prevent absolute paths"""
-        path = '/path/to/file.txt'
-        result = utils.sanitize_path(path)
-        assert result == 'path/to/file.txt'
+        import posixpath
+
+        with patch('os.path.normpath', side_effect=posixpath.normpath), patch('os.sep', '/'):
+            path = '/path/to/file.txt'
+            result = utils.sanitize_path(path)
+            assert result == 'path/to/file.txt'
 
 
 class TestFileOperations:
