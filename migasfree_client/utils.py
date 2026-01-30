@@ -292,6 +292,17 @@ def get_graphic_pid():
     Detects desktop environment and returns [PID, environment_name] if found
     """
 
+    if is_windows():
+        import psutil
+
+        for proc in psutil.process_iter():
+            try:
+                if proc.name().lower() == 'explorer.exe':
+                    return [proc.pid, proc.name()]
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return [None, None]
+
     _graphic_environments = [
         'gnome-session-binary',  # Gnome & Unity
         'gnome-session',  # Gnome

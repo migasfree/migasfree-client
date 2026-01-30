@@ -814,3 +814,46 @@ class TestIdempotency:
                 mock_write.assert_called_once()
                 args, _ = mock_write.call_args
                 assert args[0].endswith('sources.list')
+
+
+class TestGetGraphicPid:
+    @patch('migasfree_client.utils.is_windows', return_value=False)
+    def test_get_graphic_pid_linux(self, mock_is_windows):
+        """Test get_graphic_pid on Linux (existing behavior)"""
+        # We can't easily mock /proc completely, so we just check it doesn't crash
+        # and returns a list. The actual logic reads /proc which is fine on Linux.
+        # If we really want to test logic we'd need to mock os.listdir and open.
+        # For now, let's just ensure it calls the linux path.
+        with patch('os.listdir') as mock_listdir:
+            mock_listdir.return_value = []
+            pid, name = utils.get_graphic_pid()
+            assert pid is None
+            assert name is None
+
+    @patch('migasfree_client.utils.is_windows', return_value=True)
+    def test_get_graphic_pid_windows_explorer_running(self, mock_is_windows):
+        """Test get_graphic_pid on Windows with explorer.exe running"""
+        mock_process = MagicMock()
+        mock_process.name.return_value = 'explorer.exe'
+        mock_process.pid = 1234
+
+        with patch('psutil.process_iter', return_value=[mock_process]):
+            pid, name = utils.get_graphic_pid()
+            assert pid == 1234
+            assert name == 'explorer.exe'
+
+    @patch('migasfree_client.utils.is_windows', return_value=True)
+    def test_get_graphic_pid_windows_no_explorer(self, mock_is_windows):
+        """Test get_graphic_pid on Windows with no explorer.exe"""
+        with patch('psutil.process_iter', return_value=[]):
+            pid, name = utils.get_graphic_pid()
+            assert pid is None
+            assert name is None
+
+    @patch('migasfree_client.utils.is_windows', return_value=True)
+    def test_get_graphic_pid_windows_proc_not_accessed(self, mock_is_windows):
+        """Test that /proc is NOT accessed on Windows"""
+        with patch('os.listdir') as mock_listdir:
+            with patch('psutil.process_iter', return_value=[]):
+                utils.get_graphic_pid()
+                mock_listdir.assert_not_called()
