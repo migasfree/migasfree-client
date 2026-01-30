@@ -226,14 +226,14 @@ class TestApt(unittest.TestCase):
         result = self.apt.available_packages()
         self.assertEqual(result, [])
 
-    @patch('migasfree_client.pms.apt.write_file')
+    @patch('migasfree_client.pms.apt.write_file_if_changed')
     @patch('migasfree_client.pms.apt.execute')
     def test_create_repos_empty(self, mock_execute, mock_write_file):
         result = self.apt.create_repos('https', 'server.example.com', [])
         self.assertTrue(result)
         mock_write_file.assert_not_called()
 
-    @patch('migasfree_client.pms.apt.write_file')
+    @patch('migasfree_client.pms.apt.write_file_if_changed')
     @patch('migasfree_client.pms.apt.execute')
     def test_create_repos_apt2(self, mock_execute, mock_write_file):
         mock_execute.return_value = (0, '2.4.11', '')

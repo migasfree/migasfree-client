@@ -220,13 +220,13 @@ class TestDnf(unittest.TestCase):
         result = self.dnf.available_packages()
         self.assertEqual(result, [])
 
-    @patch('migasfree_client.pms.yum.write_file')
+    @patch('migasfree_client.pms.yum.write_file_if_changed')
     def test_create_repos_empty(self, mock_write_file):
         result = self.dnf.create_repos('https', 'server.example.com', [])
         self.assertTrue(result)
         mock_write_file.assert_not_called()
 
-    @patch('migasfree_client.pms.yum.write_file')
+    @patch('migasfree_client.pms.yum.write_file_if_changed')
     def test_create_repos(self, mock_write_file):
         mock_write_file.return_value = True
 
