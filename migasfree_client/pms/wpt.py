@@ -158,7 +158,7 @@ class Wpt(Pms):
         if not packages:
             return []
 
-        return [f'{item.strip()}.tar.gz' for item in packages]
+        return [f'{item.strip()}.tar.gz' for item in packages.splitlines()]
 
     def create_repos(self, protocol, server, repositories):
         """
