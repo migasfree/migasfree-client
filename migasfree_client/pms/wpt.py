@@ -176,9 +176,13 @@ class Wpt(Pms):
     def import_server_key(self, file_key):
         """
         bool import_server_key(string file_key)
+        Imports the server's GPG public key for package verification.
         """
 
-        return True  # TODO
+        cmd = f'{self._pms} import-key "{file_key}"'
+        logger.debug(cmd)
+
+        return execute(cmd, interactive=False)[0] == 0
 
     def get_system_architecture(self):
         """
