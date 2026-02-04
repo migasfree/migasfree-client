@@ -70,19 +70,19 @@ migasfree_client/
 
 ```text
 ┌────────────────────────────────────────────────────────────────┐
-│                        CLI Entry Point                          │
-│                         (__main__.py)                           │
+│                        CLI Entry Point                         │
+│                         (__main__.py)                          │
 └───────────────────────────────┬────────────────────────────────┘
                                 │
                                 ▼
 ┌────────────────────────────────────────────────────────────────┐
-│                      Command Base Class                         │
-│                        (command.py)                             │
+│                      Command Base Class                        │
+│                        (command.py)                            │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │  - Configuration loading                                  │  │
-│  │  - Logging setup                                          │  │
-│  │  - mTLS initialization                                    │  │
-│  │  - PMS detection                                          │  │
+│  │  - Configuration loading                                 │  │
+│  │  - Logging setup                                         │  │
+│  │  - mTLS initialization                                   │  │
+│  │  - PMS detection                                         │  │
 │  └──────────────────────────────────────────────────────────┘  │
 └───────────────────────────────┬────────────────────────────────┘
                                 │
@@ -95,13 +95,13 @@ migasfree_client/
         │
         ▼
 ┌────────────────────────────────────────────────────────────────┐
-│                      URL Request Layer                          │
-│                      (url_request.py)                           │
+│                      URL Request Layer                         │
+│                      (url_request.py)                          │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │  - HTTP POST requests with retries                        │  │
-│  │  - Request signing/encryption                             │  │
-│  │  - Response verification/decryption                       │  │
-│  │  - mTLS client certificates                               │  │
+│  │  - HTTP POST requests with retries                       │  │
+│  │  - Request signing/encryption                            │  │
+│  │  - Response verification/decryption                      │  │
+│  │  - mTLS client certificates                              │  │
 │  └──────────────────────────────────────────────────────────┘  │
 └───────────────────────────────┬────────────────────────────────┘
                                 │
@@ -121,53 +121,24 @@ migasfree_client/
 
 The `sync` command performs a series of operations in a specific order:
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                     SYNCHRONIZATION FLOW                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  0. AVAILABILITY CHECK (NEW)                                     │
-│     └→ Check if migasfree-agent service is running              │
-│     └→ If running: query server availability endpoint           │
-│     └→ If server saturated (429): wait and retry later          │
-│     └→ If service not running: proceed with sync                │
-│                                                                  │
-│  1. CONNECT                                                      │
-│     └→ Verify server connectivity                               │
-│     └→ Establish mTLS session (if available)                    │
-│                                                                  │
-│  2. ATTRIBUTES                                                   │
-│     └→ Collect local attributes (hostname, IP, user, etc.)     │
-│     └→ Execute server-defined attribute formulas                │
-│     └→ Upload attributes to server                              │
-│                                                                  │
-│  3. FAULTS                                                       │
-│     └→ Execute server-defined fault detection scripts           │
-│     └→ Report any faults to server                              │
-│                                                                  │
-│  4. REPOSITORIES                                                 │
-│     └→ Receive repository configuration from server             │
-│     └→ Create/update local repository files                     │
-│     └→ Refresh package cache                                    │
-│                                                                  │
-│  5. PACKAGES                                                     │
-│     └→ Install mandatory packages                               │
-│     └→ Remove prohibited packages                               │
-│     └→ Upgrade available packages (if enabled)                  │
-│                                                                  │
-│  6. SOFTWARE INVENTORY                                           │
-│     └→ Query installed packages                                 │
-│     └→ Upload inventory to server                               │
-│                                                                  │
-│  7. HARDWARE INVENTORY                                           │
-│     └→ Collect hardware information                             │
-│     └→ Upload inventory to server                               │
-│                                                                  │
-│  8. DEVICES                                                      │
-│     └→ Receive device configurations (printers, etc.)           │
-│     └→ Apply device settings                                    │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant Client as MigasFreeSync
+    participant Server as Migasfree Server
+    participant PMS as Package Manager
+
+    Client->>Server: Check Availability
+    Client->>Server: Upload Attributes & Faults
+    Client->>PMS: Query Installed Software (BEFORE)
+    Client->>Client: Create Repositories
+    Client->>PMS: Sync Packages (Install/Remove)
+    Client->>PMS: Query Installed Software (AFTER)
+    Client->>Server: Upload Software Inventory
+    alt Hardware Capture Required
+        Client->>Client: lshw (JSON)
+        Client->>Server: Upload Hardware
+    end
+    Client->>Server: End Synchronization
 ```
 
 ### Server Availability Check
@@ -202,31 +173,31 @@ migasfree-client uses multiple security layers:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                     SECURITY LAYERS                              │
+│                     SECURITY LAYERS                             │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │  Layer 1: Transport Security (TLS)                              │
 │  ─────────────────────────────────                              │
 │  • HTTPS encryption for all communications                      │
 │  • Server certificate validation                                │
-│                                                                  │
+│                                                                 │
 │  Layer 2: Mutual TLS (mTLS)                                     │
 │  ─────────────────────────────                                  │
 │  • Client certificate authentication                            │
 │  • Each computer has unique certificate                         │
 │  • Certificates managed by administrator                        │
-│                                                                  │
+│                                                                 │
 │  Layer 3: Message Signing                                       │
 │  ────────────────────────                                       │
 │  • JWS (JSON Web Signature) for request integrity               │
 │  • RSA key pairs (server.pub + project.pri)                     │
 │  • Prevents message tampering                                   │
-│                                                                  │
+│                                                                 │
 │  Layer 4: Message Encryption                                    │
 │  ─────────────────────────────                                  │
 │  • JWE (JSON Web Encryption) for sensitive data                 │
 │  • Protects passwords and sensitive payloads                    │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -305,21 +276,21 @@ class PMS:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                    CONFIGURATION PRECEDENCE                      │
+│                    CONFIGURATION PRECEDENCE                     │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │  1. Environment Variables        (Highest Priority)             │
-│     └→ MIGASFREE_CLIENT_SERVER, etc.                           │
-│                                                                  │
+│     └→ MIGASFREE_CLIENT_SERVER, etc.                            │
+│                                                                 │
 │  2. Command Line Arguments                                      │
-│     └→ --debug, --pms, etc.                                    │
-│                                                                  │
+│     └→ --debug, --pms, etc.                                     │
+│                                                                 │
 │  3. Configuration File                                          │
-│     └→ /etc/migasfree.conf                                     │
-│                                                                  │
+│     └→ /etc/migasfree.conf                                      │
+│                                                                 │
 │  4. Default Values               (Lowest Priority)              │
-│     └→ Hardcoded in settings.py                                │
-│                                                                  │
+│     └→ Hardcoded in settings.py                                 │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
