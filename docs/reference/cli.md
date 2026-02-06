@@ -191,6 +191,93 @@ sudo migasfree purge apache2
 
 ---
 
+### traits
+
+Retrieves computer traits from the server.
+
+```bash
+migasfree traits [PREFIX] [KEY]
+```
+
+**Arguments:**
+
+| Argument | Description                                                                      |
+| -------- | -------------------------------------------------------------------------------- |
+| `PREFIX` | (Optional) Filter traits by prefix                                               |
+| `KEY`    | (Optional) Extract individual value (id, description, name, value, prefix, sort) |
+
+**Examples:**
+
+```bash
+# List all traits
+migasfree traits
+
+# Filter traits by 'OS' prefix
+migasfree traits OS
+
+# Get value of 'OS' trait
+migasfree traits OS value
+```
+
+---
+
+### tags
+
+Manages computer tags on the server.
+
+```bash
+migasfree tags {-g | -s TAG [TAG...] | -c TAG [TAG...]}
+```
+
+**Options:**
+
+| Option               | Description                                |
+| -------------------- | ------------------------------------------ |
+| `-g`, `--get`        | Get current tags from server (JSON format) |
+| `-s`, `--set`        | Set tags on server (replaces existing tags)|
+| `-c`, `--communicate`| Communicate tags to server (add tags)      |
+
+**Examples:**
+
+```bash
+# Get tags
+migasfree tags -g
+
+# Set specific tags
+migasfree tags -s production webserver
+
+# Add tags to existing ones
+migasfree tags -c branch-office
+```
+
+---
+
+### info
+
+Retrieves basic computer information from the server registry.
+
+```bash
+migasfree info [KEY]
+```
+
+**Arguments:**
+
+| Argument | Description                                   |
+| -------- | --------------------------------------------- |
+| `KEY`    | (Optional) Extract: id, uuid, name, or search |
+
+**Examples:**
+
+```bash
+# Show all info
+migasfree info
+
+# Show only server-side id
+migasfree info id
+```
+
+---
+
 ### label
 
 Displays the computer's identification label. Useful for asset management and troubleshooting.
