@@ -43,7 +43,7 @@ sudo migasfree sync
 - **Software Inventory** - Track all installed packages
 - **Device Management** - Configure printers and peripherals
 - **Fault Monitoring** - Centralized error and fault reporting
-- **Cross-Platform** - Linux (Debian, Fedora, openSUSE, Arch, Alpine) and Windows 10+
+- **Cross-Platform** - Linux (Debian, Ubuntu, Fedora, openSUSE, Arch, Alpine) and Windows 10+
 - **Secure Communication** - mTLS, JWS signing, and JWE encryption
 
 ## About migasfree
@@ -218,6 +218,7 @@ For detailed troubleshooting, see the [Troubleshooting Guide](docs/how-to/troubl
 - **CLI Reference**: [docs/reference/cli.md](docs/reference/cli.md)
 - **Configuration**: [docs/reference/configuration.md](docs/reference/configuration.md)
 - **Architecture**: [docs/explanation/architecture.md](docs/explanation/architecture.md)
+- **ADR**: [Architecture Decision Records](docs/adr/)
 - **External**: [Fun with migasfree](http://fun-with-migasfree.readthedocs.org/) (Spanish)
 
 ## Contributing

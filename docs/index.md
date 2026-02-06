@@ -11,6 +11,7 @@ Welcome to the migasfree-client documentation. This guide will help you install,
 | [How-To Guides](how-to/)              | Task-oriented instructions     |
 | [Reference](reference/)               | Technical specifications       |
 | [Explanation](explanation/)           | Background and concepts        |
+| [Architecture Decisions](adr/)        | Historical design context      |
 
 ## What is migasfree-client?
 
