@@ -6,21 +6,17 @@ This document explains the internal architecture of migasfree-client and how it 
 
 migasfree is a systems management solution consisting of two main components:
 
-```text
-┌─────────────────┐                    ┌─────────────────┐
-│                 │    HTTPS/mTLS      │                 │
-│  migasfree      │◄──────────────────►│  migasfree      │
-│  client         │    REST API        │  server         │
-│                 │                    │                 │
-└─────────────────┘                    └─────────────────┘
-        │                                      │
-        │ Local                                │ Database
-        ▼                                      ▼
-┌─────────────────┐                    ┌─────────────────┐
-│  Package        │                    │  PostgreSQL     │
-│  Manager        │                    │  + Storage      │
-│  (apt/dnf/...)  │                    │                 │
-└─────────────────┘                    └─────────────────┘
+```mermaid
+graph TD
+    subgraph Client System
+        C[migasfree-client] --> PM[Package Manager<br/>apt/dnf/pacman/...]
+    end
+    
+    subgraph Server Infrastructure
+        S[migasfree-server] --> DB[(PostgreSQL<br/>+ Storage)]
+    end
+    
+    C <-->|HTTPS/mTLS<br/>REST API| S
 ```
 
 ### Client Responsibilities
@@ -68,53 +64,25 @@ migasfree_client/
 
 ### Component Diagram
 
-```text
-┌────────────────────────────────────────────────────────────────┐
-│                        CLI Entry Point                         │
-│                         (__main__.py)                          │
-└───────────────────────────────┬────────────────────────────────┘
-                                │
-                                ▼
-┌────────────────────────────────────────────────────────────────┐
-│                      Command Base Class                        │
-│                        (command.py)                            │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  - Configuration loading                                 │  │
-│  │  - Logging setup                                         │  │
-│  │  - mTLS initialization                                   │  │
-│  │  - PMS detection                                         │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└───────────────────────────────┬────────────────────────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        ▼                       ▼                       ▼
-┌───────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Sync Command │     │ Register Command│     │ Upload Command  │
-│   (sync.py)   │     │   (sync.py)     │     │  (upload.py)    │
-└───────┬───────┘     └─────────────────┘     └─────────────────┘
-        │
-        ▼
-┌────────────────────────────────────────────────────────────────┐
-│                      URL Request Layer                         │
-│                      (url_request.py)                          │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  - HTTP POST requests with retries                       │  │
-│  │  - Request signing/encryption                            │  │
-│  │  - Response verification/decryption                      │  │
-│  │  - mTLS client certificates                              │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└───────────────────────────────┬────────────────────────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        ▼                       ▼                       ▼
-┌───────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│    Secure     │     │     mTLS        │     │      PMS        │
-│  (secure.py)  │     │   (mtls.py)     │     │  (pms/*.py)     │
-│               │     │                 │     │                 │
-│  • Sign/Verify│     │  • Certificates │     │  • apt/dnf/yum  │
-│  • Encrypt    │     │  • Key import   │     │  • zypper/pacman│
-│  • Decrypt    │     │  • CA download  │     │  • apk/wpt      │
-└───────────────┘     └─────────────────┘     └─────────────────┘
+```mermaid
+flowchart TD
+    CLI[CLI Entry Point<br/>__main__.py] --> CMD[Command Base Class<br/>command.py]
+    
+    subgraph Core Features
+        CMD --> SYNC[Sync Command<br/>sync.py]
+        CMD --> REG[Register Command<br/>sync.py]
+        CMD --> UPLL[Upload Command<br/>upload.py]
+    end
+    
+    SYNC --> URL[URL Request Layer<br/>url_request.py]
+    REG --> URL
+    UPLL --> URL
+    
+    subgraph Low Level Modules
+        URL --> SEC[Secure<br/>secure.py]
+        URL --> MTLS[mTLS<br/>mtls.py]
+        URL --> PMS[PMS<br/>pms/*.py]
+    end
 ```
 
 ## Synchronization Flow
@@ -171,34 +139,18 @@ new sync requests. This prevents overwhelming the server during peak loads.
 
 migasfree-client uses multiple security layers:
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                     SECURITY LAYERS                             │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Layer 1: Transport Security (TLS)                              │
-│  ─────────────────────────────────                              │
-│  • HTTPS encryption for all communications                      │
-│  • Server certificate validation                                │
-│                                                                 │
-│  Layer 2: Mutual TLS (mTLS)                                     │
-│  ─────────────────────────────                                  │
-│  • Client certificate authentication                            │
-│  • Each computer has unique certificate                         │
-│  • Certificates managed by administrator                        │
-│                                                                 │
-│  Layer 3: Message Signing                                       │
-│  ────────────────────────                                       │
-│  • JWS (JSON Web Signature) for request integrity               │
-│  • RSA key pairs (server.pub + project.pri)                     │
-│  • Prevents message tampering                                   │
-│                                                                 │
-│  Layer 4: Message Encryption                                    │
-│  ─────────────────────────────                                  │
-│  • JWE (JSON Web Encryption) for sensitive data                 │
-│  • Protects passwords and sensitive payloads                    │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    L1[Layer 1: Transport Security<br/>HTTPS Encryption] --> L2[Layer 2: Mutual TLS<br/>mTLS Certs]
+    L2 --> L3[Layer 3: Message Signing<br/>JWS Integrity]
+    L3 --> L4[Layer 4: Message Encryption<br/>JWE Sensitive Data]
+    
+    subgraph Protection
+        L1 --- P1[Server Validation]
+        L2 --- P2[Client Auth]
+        L3 --- P3[Anti-Tampering]
+        L4 --- P4[Privacy]
+    end
 ```
 
 ### Key Storage
