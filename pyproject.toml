@@ -85,6 +85,7 @@ dev = [
     "responses>=0.23.0",
     "freezegun>=1.2.2",
     "psutil",
+    "ruff",
 ]
 
 [tool.pytest.ini_options]
