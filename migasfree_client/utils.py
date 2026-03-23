@@ -139,7 +139,7 @@ def _bytes_to_str(data):
     return data
 
 
-def _create_subprocess(cmd, capture_output=True):
+def _create_subprocess(cmd, capture_output=True, **kwargs):
     """Create a subprocess with platform-specific settings.
 
     Args:
@@ -150,7 +150,7 @@ def _create_subprocess(cmd, capture_output=True):
         subprocess.Popen instance
     """
     is_shell = isinstance(cmd, str)
-    common_args = {'shell': is_shell}
+    common_args: dict = {'shell': is_shell}
 
     if is_linux() and is_shell:
         common_args['executable'] = '/bin/bash'
@@ -158,6 +158,9 @@ def _create_subprocess(cmd, capture_output=True):
     if capture_output:
         common_args['stdout'] = subprocess.PIPE
         common_args['stderr'] = subprocess.PIPE
+
+    if kwargs:
+        common_args.update(kwargs)
 
     return subprocess.Popen(cmd, **common_args)
 
@@ -209,7 +212,7 @@ def _stream_output_nonblocking(process):
     return output_buffer
 
 
-def execute(cmd, verbose=False, interactive=True):
+def execute(cmd, verbose=False, interactive=True, **kwargs):
     """Execute a shell command.
 
     Args:
@@ -223,7 +226,7 @@ def execute(cmd, verbose=False, interactive=True):
     if verbose:
         print(cmd)
 
-    process = _create_subprocess(cmd, capture_output=not interactive)
+    process = _create_subprocess(cmd, capture_output=not interactive, **kwargs)
     output_buffer = ''
 
     if not interactive and verbose:
@@ -249,7 +252,7 @@ def _kill_process(process):
         psutil.Process(process.pid).kill()
 
 
-def timeout_execute(cmd, timeout=60):
+def timeout_execute(cmd, timeout=60, **kwargs):
     """Execute a command with a timeout.
 
     Args:
@@ -259,7 +262,7 @@ def timeout_execute(cmd, timeout=60):
     Returns:
         Tuple of (returncode, stdout, stderr)
     """
-    process = _create_subprocess(cmd, capture_output=True)
+    process = _create_subprocess(cmd, capture_output=True, **kwargs)
 
     if timeout > 0:
         interval = 0.2

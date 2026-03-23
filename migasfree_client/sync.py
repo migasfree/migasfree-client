@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -130,9 +130,9 @@ class MigasFreeSync(MigasFreeCommand):
         if lang in allowed_languages:
             if lang == 'python' and utils.is_linux():
                 lang = 'python3'
-            cmd = f'{lang} {filename}'
+            cmd = [lang, filename]
         else:
-            cmd = ':'  # gracefully degradation
+            cmd = [':']  # gracefully degradation
 
         ret, output, error = utils.timeout_execute(cmd)
         logger.debug('Executed command: %s', cmd)
@@ -438,11 +438,15 @@ class MigasFreeSync(MigasFreeCommand):
         hardware = {}
 
         self._show_message(_('Capturing hardware information...'))
-        cmd = 'LC_ALL=C lshw -json'
+        env = os.environ.copy()
+        if not utils.is_windows():
+            env['LC_ALL'] = 'C'
+        cmd = ['lshw', '-json']
         if utils.is_windows():
-            cmd = 'lshw --json'
+            cmd = ['lshw', '--json']
+            env = None
         with self.console.status(''):
-            ret, output, error = utils.execute(cmd, interactive=False)
+            ret, output, error = utils.execute(cmd, interactive=False, env=env)
 
         if ret == 0:
             self.operation_ok()
@@ -728,7 +732,7 @@ class MigasFreeSync(MigasFreeCommand):
             if os.path.exists(event):
                 for filename in os.listdir(event):
                     _file = os.path.join(event, filename)
-                    ret, _output, error = utils.execute(_file, interactive=False)
+                    ret, _output, error = utils.execute([_file], interactive=False)
                     if ret != 0:
                         sentinel = False
                         msg = _('Error running event %s: %s') % (_file, error)

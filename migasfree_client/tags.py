@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2013-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,39 +103,37 @@ class MigasFreeTags(MigasFreeCommand):
         title = _('Change tags')
         text = _('Please, select tags for this computer')
         if is_windows() or (is_xsession() and is_zenity()):
-            cmd = 'zenity --title="{}" \
-                --text="{}" \
-                {} \
-                --window-icon="{}" \
-                --list \
-                --width 600 \
-                --height 400 \
-                --checklist \
-                --multiple \
-                --print-column=2 \
-                --column=" " \
-                --column=TAG \
-                --column=TYPE'.format(
-                title,
-                text,
-                '--separator="\n"' if is_linux() else '',
-                os.path.join(ICON_PATH, self.ICON),
-            )
+            cmd = ['zenity', f'--title={title}', f'--text={text}']
             if is_linux():
-                cmd += ' 2> /dev/null'
+                cmd.append('--separator=\n')
+            cmd.extend(
+                [
+                    f'--window-icon={os.path.join(ICON_PATH, self.ICON)}',
+                    '--list',
+                    '--width',
+                    '600',
+                    '--height',
+                    '400',
+                    '--checklist',
+                    '--multiple',
+                    '--print-column=2',
+                    '--column= ',
+                    '--column=TAG',
+                    '--column=TYPE',
+                ]
+            )
             for key, value in available_tags.items():
                 value.sort()
                 for item in value:
-                    tag_active = item in assigned
-                    cmd += f' "{tag_active}" "{item}" "{key}"'
+                    tag_active = str(item in assigned)
+                    cmd.extend([tag_active, item, key])
         else:
-            cmd = f"dialog --backtitle '{title}' \
-                --separate-output --stdout --checklist '{text}' 0 0 8"
+            cmd = ['dialog', '--backtitle', title, '--separate-output', '--stdout', '--checklist', text, '0', '0', '8']
             for key, value in available_tags.items():
                 value.sort()
                 for item in value:
                     tag_active = 'on' if item in assigned else 'off'
-                    cmd += f" '{item}' '{key}' {tag_active}"
+                    cmd.extend([item, key, tag_active])
 
         logger.debug('Change tags command: %s', cmd)
         ret, out, _error = execute(cmd, interactive=False)
