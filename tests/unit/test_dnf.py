@@ -32,13 +32,13 @@ class TestDnf(unittest.TestCase):
     def test_install(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.dnf.install('package'))
-        mock_execute.assert_called_with('/usr/bin/dnf install package')
+        mock_execute.assert_called_with(['/usr/bin/dnf', 'install', 'package'])
 
     @patch('migasfree_client.pms.yum.execute')
     def test_install_with_whitespace(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.dnf.install('  package  '))
-        mock_execute.assert_called_with('/usr/bin/dnf install package')
+        mock_execute.assert_called_with(['/usr/bin/dnf', 'install', 'package'])
 
     @patch('migasfree_client.pms.yum.execute')
     def test_install_failure(self, mock_execute):
@@ -49,7 +49,7 @@ class TestDnf(unittest.TestCase):
     def test_remove(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.dnf.remove('package'))
-        mock_execute.assert_called_with('/usr/bin/dnf remove package')
+        mock_execute.assert_called_with(['/usr/bin/dnf', 'remove', 'package'])
 
     @patch('migasfree_client.pms.yum.execute')
     def test_remove_failure(self, mock_execute):
@@ -60,7 +60,7 @@ class TestDnf(unittest.TestCase):
     def test_search(self, mock_execute):
         mock_execute.return_value = (0, 'package - description', '')
         self.assertTrue(self.dnf.search('pattern'))
-        mock_execute.assert_called_with('/usr/bin/dnf search pattern')
+        mock_execute.assert_called_with(['/usr/bin/dnf', 'search', 'pattern'])
 
     @patch('migasfree_client.pms.yum.execute')
     def test_search_not_found(self, mock_execute):
@@ -72,7 +72,8 @@ class TestDnf(unittest.TestCase):
         mock_execute.return_value = (0, 'output', '')
         ret, _ = self.dnf.update_silent()
         self.assertTrue(ret)
-        self.assertIn('--assumeyes update', mock_execute.call_args[0][0])
+        self.assertIn('update', mock_execute.call_args[0][0])
+        self.assertIn('--assumeyes', mock_execute.call_args[0][0])
 
     @patch('migasfree_client.pms.yum.execute')
     def test_update_silent_failure(self, mock_execute):

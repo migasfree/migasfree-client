@@ -16,6 +16,7 @@
 import logging
 import os
 import re
+import shlex
 import tempfile
 
 from ..utils import execute, sanitize_path, write_file, write_file_if_changed
@@ -38,7 +39,7 @@ class Apt(Pms):
 
         self._name = 'apt'  # Package Management System name
         self._pm = '/usr/bin/dpkg'  # Package Manager command
-        self._pms = 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get'  # Package Management System command
+        self._pms = ['env', 'DEBIAN_FRONTEND=noninteractive', '/usr/bin/apt-get']  # Package Management System command
         self._repo_dir = '/etc/apt/sources.list.d'  # Repositories path
         self._keyring_dir = '/etc/apt/trusted.gpg.d'
 
@@ -50,22 +51,28 @@ class Apt(Pms):
         self._pms_search = '/usr/bin/apt-cache'
         self._pms_query = '/usr/bin/dpkg-query'
 
-        self._silent_options = (
-            '-o APT::Get::Purge=true '
-            '-o Dpkg::Options::=--force-confdef '
-            '-o Dpkg::Options::=--force-confold '
-            '-o Debug::pkgProblemResolver=1 '
-            '--assume-yes --allow-downgrades '
-            '--allow-change-held-packages '
-            '--allow-unauthenticated --auto-remove'
-        )
+        self._silent_options = [
+            '-o',
+            'APT::Get::Purge=true',
+            '-o',
+            'Dpkg::Options::=--force-confdef',
+            '-o',
+            'Dpkg::Options::=--force-confold',
+            '-o',
+            'Debug::pkgProblemResolver=1',
+            '--assume-yes',
+            '--allow-downgrades',
+            '--allow-change-held-packages',
+            '--allow-unauthenticated',
+            '--auto-remove',
+        ]
 
     def install(self, package):
         """
         bool install(string package)
         """
 
-        cmd = f'{self._pms} install -o APT::Get::Purge=true {package.strip()}'
+        cmd = [*self._pms, 'install', '-o', 'APT::Get::Purge=true', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -75,7 +82,7 @@ class Apt(Pms):
         bool remove(string package)
         """
 
-        cmd = f'{self._pms} purge {package.strip()}'
+        cmd = [*self._pms, 'purge', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -85,7 +92,7 @@ class Apt(Pms):
         bool search(string pattern)
         """
 
-        cmd = f'{self._pms_search} search {pattern.strip()}'
+        cmd = [self._pms_search, 'search', pattern.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -95,7 +102,7 @@ class Apt(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = f'{self._pms} {self._silent_options} dist-upgrade'
+        cmd = [*self._pms, *self._silent_options, 'dist-upgrade']
         logger.debug(cmd)
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
@@ -114,7 +121,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} {self._silent_options} install {" ".join(package_set)}'
+        cmd = [*self._pms, *self._silent_options, 'install', *package_set]
         logger.debug(cmd)
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
@@ -133,7 +140,7 @@ class Apt(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} {self._silent_options} purge {" ".join(package_set)}'
+        cmd = [*self._pms, *self._silent_options, 'purge', *package_set]
         logger.debug(cmd)
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
@@ -145,7 +152,7 @@ class Apt(Pms):
         bool is_installed(string package)
         """
 
-        cmd = f'{self._pm} --status {package.strip()} | grep "Status: install ok installed"'
+        cmd = f'{self._pm} --status {shlex.quote(package.strip())} | grep "Status: install ok installed"'
         logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -155,12 +162,12 @@ class Apt(Pms):
         bool clean_all(void)
         """
 
-        cmd = f'{self._pms} clean'
+        cmd = [*self._pms, 'clean']
         logger.debug(cmd)
 
         if execute(cmd)[0] == 0:
-            execute('rm --recursive --force /var/lib/apt/lists')
-            cmd = f'{self._pms} -o Acquire::Languages=none --assume-yes update'
+            execute(['rm', '--recursive', '--force', '/var/lib/apt/lists'])
+            cmd = [*self._pms, '-o', 'Acquire::Languages=none', '--assume-yes', 'update']
             logger.debug(cmd)
 
             return execute(cmd)[0] == 0
@@ -173,7 +180,7 @@ class Apt(Pms):
         list format: name_version_architecture.extension
         """
 
-        cmd = f'{self._pm} --list'
+        cmd = [self._pm, '--list']
         logger.debug(cmd)
 
         packages = execute(cmd, interactive=False)[1].strip().splitlines()
@@ -267,7 +274,7 @@ class Apt(Pms):
         Detects APT version (if fails, default to 2.x for compatibility)
         """
 
-        cmd = f"{self._pms} --version | head -n1 | awk '{{print $2}}'"
+        cmd = f"{self._pms[2]} --version | head -n1 | awk '{{print $2}}'"
         ret, out, _ = execute(cmd, interactive=False)
         apt_version = out.strip() if ret == 0 else '2.0'
         logging.debug('Detected APT version: %s', apt_version)
@@ -311,7 +318,7 @@ class Apt(Pms):
 
         name = os.path.basename(file_key)
         key_target = os.path.join(self._keyring_dir, f'{name}.gpg')
-        cmd = f'gpg --output {key_target} --dearmor --yes {file_key} > /dev/null'
+        cmd = ['gpg', '--output', key_target, '--dearmor', '--yes', file_key]
         logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -333,7 +340,7 @@ class Apt(Pms):
         list available_packages(void)
         """
 
-        cmd = f'{self._pms_search} pkgnames'
+        cmd = [self._pms_search, 'pkgnames']
         logger.debug(cmd)
 
         ret, output, _ = execute(cmd, interactive=False)

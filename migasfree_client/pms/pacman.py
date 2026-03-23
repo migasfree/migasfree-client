@@ -37,7 +37,7 @@ class Pacman(Pms):
         super().__init__()
 
         self._name = 'pacman'  # Package Management System name
-        self._pms = 'LC_ALL=C /usr/bin/pacman'  # Package Management System command
+        self._pms = ['env', 'LC_ALL=C', '/usr/bin/pacman']  # Package Management System command
         self._repo = '/etc/pacman.d/migasfree.list'  # Repositories file
         self._config = '/etc/pacman.conf'
         self._mimetype = [
@@ -53,7 +53,7 @@ class Pacman(Pms):
         bool install(string package)
         """
 
-        cmd = f'{self._pms} --sync --needed {package.strip()}'
+        cmd = [*self._pms, '--sync', '--needed', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -63,7 +63,7 @@ class Pacman(Pms):
         bool remove(string package)
         """
 
-        cmd = f'{self._pms} --remove --recursive {package.strip()}'
+        cmd = [*self._pms, '--remove', '--recursive', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -73,7 +73,7 @@ class Pacman(Pms):
         bool search(string pattern)
         """
 
-        cmd = f'{self._pms} --sync --search {pattern.strip()}'
+        cmd = [*self._pms, '--sync', '--search', pattern.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -83,7 +83,7 @@ class Pacman(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = f'{self._pms} --sync --refresh -uu --noconfirm'
+        cmd = [*self._pms, '--sync', '--refresh', '-uu', '--noconfirm']
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -102,7 +102,7 @@ class Pacman(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --sync --needed --noconfirm {" ".join(package_set)}'
+        cmd = [*self._pms, '--sync', '--needed', '--noconfirm', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -121,7 +121,7 @@ class Pacman(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --remove --recursive --noconfirm {" ".join(package_set)}'
+        cmd = [*self._pms, '--remove', '--recursive', '--noconfirm', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -133,7 +133,7 @@ class Pacman(Pms):
         bool is_installed(string package)
         """
 
-        cmd = f'{self._pms} --query {package.strip()}'
+        cmd = [*self._pms, '--query', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -143,7 +143,7 @@ class Pacman(Pms):
         bool clean_all(void)
         """
 
-        cmd = f'{self._pms} --sync --clean --noconfirm'
+        cmd = [*self._pms, '--sync', '--clean', '--noconfirm']
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -157,7 +157,7 @@ class Pacman(Pms):
         This format is used as a package identifier, not the actual filename.
         """
 
-        cmd = f'{self._pms} --query --info'
+        cmd = [*self._pms, '--query', '--info']
         logger.debug(cmd)
 
         _, _packages, _ = execute(cmd, interactive=False)
@@ -217,7 +217,7 @@ class Pacman(Pms):
         TODO test
         """
 
-        cmd = f'{self._pms_key} --add {file_key} > /dev/null'
+        cmd = [self._pms_key, '--add', file_key]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -227,7 +227,7 @@ class Pacman(Pms):
         string get_system_architecture(void)
         """
 
-        cmd = 'uname -m'
+        cmd = ['uname', '-m']
         logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
@@ -239,7 +239,7 @@ class Pacman(Pms):
         list available_packages(void)
         """
 
-        cmd = f'{self._pms} --sync --search --quiet'
+        cmd = [*self._pms, '--sync', '--search', '--quiet']
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)

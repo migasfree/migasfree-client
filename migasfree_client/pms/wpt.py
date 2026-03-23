@@ -50,7 +50,7 @@ class Wpt(Pms):
         bool install(string package)
         """
 
-        cmd = f'{self._pms} install {package.strip()}'
+        cmd = [self._pms, 'install', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -60,7 +60,7 @@ class Wpt(Pms):
         bool remove(string package)
         """
 
-        cmd = f'{self._pms} remove {package.strip()}'
+        cmd = [self._pms, 'remove', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -70,7 +70,7 @@ class Wpt(Pms):
         bool search(string pattern)
         """
 
-        cmd = f'{self._pms} search "{pattern.strip()}"'
+        cmd = [self._pms, 'search', pattern.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -80,7 +80,7 @@ class Wpt(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = f'{self._pms} upgrade'
+        cmd = [self._pms, 'upgrade']
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -99,7 +99,7 @@ class Wpt(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --assume-yes install {" ".join(package_set)}'
+        cmd = [self._pms, '--assume-yes', 'install', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -118,7 +118,7 @@ class Wpt(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --assume-yes remove {" ".join(package_set)}'
+        cmd = [self._pms, '--assume-yes', 'remove', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -130,7 +130,7 @@ class Wpt(Pms):
         bool is_installed(string package)
         """
 
-        cmd = f'{self._pms} status --is-installed {package.strip()}'
+        cmd = [self._pms, 'status', '--is-installed', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -140,7 +140,7 @@ class Wpt(Pms):
         bool clean_all(void)
         """
 
-        cmd = f'{self._pms} clean'
+        cmd = [self._pms, 'clean']
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -151,7 +151,7 @@ class Wpt(Pms):
         list format: name_version_architecture.extension
         """
 
-        cmd = f'{self._pms} --quiet list --all --summary'
+        cmd = [self._pms, '--quiet', 'list', '--all', '--summary']
         logger.debug(cmd)
 
         _, packages, _ = execute(cmd, interactive=False)
@@ -179,7 +179,7 @@ class Wpt(Pms):
         Imports the server's GPG public key for package verification.
         """
 
-        cmd = f'{self._pms} import-key "{file_key}"'
+        cmd = [self._pms, 'import-key', file_key]
         logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -196,7 +196,7 @@ class Wpt(Pms):
         list available_packages(void)
         """
 
-        cmd = f'{self._pms} --quiet search --summary'
+        cmd = [self._pms, '--quiet', 'search', '--summary']
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)

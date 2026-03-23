@@ -27,19 +27,19 @@ class TestApk(unittest.TestCase):
     def test_install(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apk.install('package'))
-        mock_execute.assert_called_with('/sbin/apk add package')
+        mock_execute.assert_called_with(['/sbin/apk', 'add', 'package'])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_remove(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apk.remove('package'))
-        mock_execute.assert_called_with('/sbin/apk del package')
+        mock_execute.assert_called_with(['/sbin/apk', 'del', 'package'])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_search(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apk.search('pattern'))
-        mock_execute.assert_called_with('/sbin/apk search pattern')
+        mock_execute.assert_called_with(['/sbin/apk', 'search', 'pattern'])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_update_silent(self, mock_execute):
@@ -55,7 +55,7 @@ class TestApk(unittest.TestCase):
             mock_execute.return_value = (0, '', '')
             ret, _error = self.apk.install_silent(['package'])
             self.assertTrue(ret)
-            mock_execute.assert_called_with('/sbin/apk add package', interactive=False, verbose=True)
+            mock_execute.assert_called_with(['/sbin/apk', 'add', 'package'], interactive=False, verbose=True)
 
     @patch('migasfree_client.pms.apk.execute')
     def test_remove_silent(self, mock_execute):
@@ -64,19 +64,19 @@ class TestApk(unittest.TestCase):
             mock_execute.return_value = (0, '', '')
             ret, _error = self.apk.remove_silent(['package'])
             self.assertTrue(ret)
-            mock_execute.assert_called_with('/sbin/apk del package', interactive=False, verbose=True)
+            mock_execute.assert_called_with(['/sbin/apk', 'del', 'package'], interactive=False, verbose=True)
 
     @patch('migasfree_client.pms.apk.execute')
     def test_is_installed(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apk.is_installed('package'))
-        mock_execute.assert_called_with('/sbin/apk info -e package', interactive=False)
+        mock_execute.assert_called_with(['/sbin/apk', 'info', '-e', 'package'], interactive=False)
 
     @patch('migasfree_client.pms.apk.execute')
     def test_clean_all(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apk.clean_all())
-        mock_execute.assert_called_with('/sbin/apk cache clean')
+        mock_execute.assert_called_with(['/sbin/apk', 'cache', 'clean'])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_query_all(self, mock_execute):
@@ -92,7 +92,7 @@ class TestApk(unittest.TestCase):
         mock_execute.return_value = (0, 'pkg1\npkg2', '')
         result = self.apk.available_packages()
         self.assertEqual(result, ['pkg1', 'pkg2'])
-        mock_execute.assert_called_with('/sbin/apk search -q', interactive=False)
+        mock_execute.assert_called_with(['/sbin/apk', 'search', '-q'], interactive=False)
 
     @patch('migasfree_client.pms.apk.os.path.exists')
     def test_create_repos(self, mock_exists):
@@ -116,10 +116,10 @@ class TestApk(unittest.TestCase):
     def test_import_server_key(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apk.import_server_key('key.pub'))
-        mock_execute.assert_called_with('cp key.pub /etc/apk/keys/')
+        mock_execute.assert_called_with(['cp', 'key.pub', '/etc/apk/keys/'])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_get_system_architecture(self, mock_execute):
         mock_execute.return_value = (0, 'x86_64\n', '')
         self.assertEqual(self.apk.get_system_architecture(), 'x86_64')
-        mock_execute.assert_called_with('/sbin/apk --print-arch', interactive=False)
+        mock_execute.assert_called_with(['/sbin/apk', '--print-arch'], interactive=False)

@@ -47,7 +47,7 @@ class Apk(Pms):
         bool install(string package)
         """
 
-        cmd = f'{self._pms} add {package.strip()}'
+        cmd = [self._pms, 'add', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -57,7 +57,7 @@ class Apk(Pms):
         bool remove(string package)
         """
 
-        cmd = f'{self._pms} del {package.strip()}'
+        cmd = [self._pms, 'del', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -67,7 +67,7 @@ class Apk(Pms):
         bool search(string pattern)
         """
 
-        cmd = f'{self._pms} search {pattern.strip()}'
+        cmd = [self._pms, 'search', pattern.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -77,13 +77,13 @@ class Apk(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = f'{self._pms} update'
+        cmd = [self._pms, 'update']
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         if _ret == 0:
-            cmd = f'{self._pms} upgrade'
+            cmd = [self._pms, 'upgrade']
             logger.debug(cmd)
             _ret, _, _error_upgrade = execute(cmd, interactive=False, verbose=True)
             if _error_upgrade:
@@ -103,7 +103,7 @@ class Apk(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} add {" ".join(package_set)}'
+        cmd = [self._pms, 'add', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -122,7 +122,7 @@ class Apk(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} del {" ".join(package_set)}'
+        cmd = [self._pms, 'del', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -134,7 +134,7 @@ class Apk(Pms):
         bool is_installed(string package)
         """
 
-        cmd = f'{self._pms} info -e {package.strip()}'
+        cmd = [self._pms, 'info', '-e', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -144,7 +144,7 @@ class Apk(Pms):
         bool clean_all(void)
         """
 
-        cmd = f'{self._pms} cache clean'
+        cmd = [self._pms, 'cache', 'clean']
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -155,7 +155,7 @@ class Apk(Pms):
         list format: name_version_architecture.extension
         """
 
-        cmd = f'{self._pms} info -v'
+        cmd = [self._pms, 'info', '-v']
         logger.debug(cmd)
 
         _, _packages, _ = execute(cmd, interactive=False)
@@ -200,7 +200,7 @@ class Apk(Pms):
         bool import_server_key(string file_key)
         """
 
-        cmd = f'cp {file_key} /etc/apk/keys/'
+        cmd = ['cp', file_key, '/etc/apk/keys/']
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -210,7 +210,7 @@ class Apk(Pms):
         string get_system_architecture(void)
         """
 
-        cmd = f'{self._pms} --print-arch'
+        cmd = [self._pms, '--print-arch']
         logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
@@ -222,7 +222,7 @@ class Apk(Pms):
         list available_packages(void)
         """
 
-        cmd = f'{self._pms} search -q'
+        cmd = [self._pms, 'search', '-q']
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False)

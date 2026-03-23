@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class Zypper(Yum):
         bool install(string package)
         """
 
-        cmd = f'{self._pms} install --no-force-resolution {package.strip()}'
+        cmd = [self._pms, 'install', '--no-force-resolution', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -53,14 +53,14 @@ class Zypper(Yum):
         (bool, string) update_silent(void)
         """
 
-        cmd = f'{self._pms} --non-interactive update --no-force-resolution'
+        cmd = [self._pms, '--non-interactive', 'update', '--no-force-resolution']
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
         if _ret != 0:
             return False, f'{_ret}\n{_output}\n{_error}'
 
-        cmd = f'{self._pms} lu -a'
+        cmd = [self._pms, 'lu', '-a']
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
@@ -79,7 +79,7 @@ class Zypper(Yum):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --non-interactive install --no-force-resolution {" ".join(package_set)}'
+        cmd = [self._pms, '--non-interactive', 'install', '--no-force-resolution', *package_set]
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
@@ -98,7 +98,7 @@ class Zypper(Yum):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --non-interactive remove {" ".join(package_set)}'
+        cmd = [self._pms, '--non-interactive', 'remove', *package_set]
         logger.debug(cmd)
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
@@ -110,11 +110,11 @@ class Zypper(Yum):
         bool clean_all(void)
         """
 
-        cmd = f'{self._pms} clean --all'
+        cmd = [self._pms, 'clean', '--all']
         logger.debug(cmd)
 
         if execute(cmd)[0] == 0:
-            cmd = f'{self._pms} --non-interactive refresh'
+            cmd = [self._pms, '--non-interactive', 'refresh']
             logger.debug(cmd)
 
             return execute(cmd)[0] == 0
@@ -126,7 +126,7 @@ class Zypper(Yum):
         string get_system_architecture(void)
         """
 
-        cmd = f'{self._pm} -q --qf "%{{arch}}" -f /etc/lsb-release'
+        cmd = [self._pm, '-q', '--qf', '%{arch}', '-f', '/etc/lsb-release']
         logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)

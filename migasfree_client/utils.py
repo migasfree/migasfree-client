@@ -143,15 +143,16 @@ def _create_subprocess(cmd, capture_output=True):
     """Create a subprocess with platform-specific settings.
 
     Args:
-        cmd: Command string to execute
+        cmd: Command string or list to execute. Using a list forces shell=False for safety.
         capture_output: If True, capture stdout/stderr; if False, let them inherit
 
     Returns:
         subprocess.Popen instance
     """
-    common_args = {'shell': True}
+    is_shell = isinstance(cmd, str)
+    common_args = {'shell': is_shell}
 
-    if is_linux():
+    if is_linux() and is_shell:
         common_args['executable'] = '/bin/bash'
 
     if capture_output:
@@ -212,7 +213,7 @@ def execute(cmd, verbose=False, interactive=True):
     """Execute a shell command.
 
     Args:
-        cmd: Command string to execute
+        cmd: Command string or list to execute. Using a list forces shell=False for safety.
         verbose: If True, print command and output
         interactive: If True, let output inherit to terminal; if False, capture it
 
@@ -252,7 +253,7 @@ def timeout_execute(cmd, timeout=60):
     """Execute a command with a timeout.
 
     Args:
-        cmd: Command string to execute
+        cmd: Command string or list to execute. Using a list forces shell=False for safety.
         timeout: Maximum execution time in seconds (0 for no timeout)
 
     Returns:
@@ -721,9 +722,9 @@ def get_uuid_from_mac():
 def get_hardware_uuid():
     _uuid_format = '%s%s%s%s-%s%s-%s%s-%s-%s'
 
-    _cmd = 'sudo dmidecode --string system-uuid'
+    _cmd = ['sudo', 'dmidecode', '--string', 'system-uuid']
     if is_windows():
-        _cmd = 'dmidecode --string system-uuid'
+        _cmd = ['dmidecode', '--string', 'system-uuid']
 
     _ret, _uuid, _ = execute(_cmd, interactive=False)
     _uuid = remove_commented_lines(_uuid)
@@ -787,7 +788,7 @@ def is_xsession():
 
 
 def is_zenity():
-    _ret, _, _ = execute('which zenity', interactive=False)
+    _ret, _, _ = execute(['which', 'zenity'], interactive=False)
 
     return _ret == 0
 

@@ -26,7 +26,7 @@ class TestApt(unittest.TestCase):
     def test_init(self):
         self.assertEqual(self.apt._name, 'apt')
         self.assertEqual(self.apt._pm, '/usr/bin/dpkg')
-        self.assertEqual(self.apt._pms, 'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get')
+        self.assertEqual(self.apt._pms, ['env', 'DEBIAN_FRONTEND=noninteractive', '/usr/bin/apt-get'])
         self.assertEqual(self.apt._repo_dir, '/etc/apt/sources.list.d')
         self.assertEqual(self.apt._keyring_dir, '/etc/apt/trusted.gpg.d')
 
@@ -35,7 +35,15 @@ class TestApt(unittest.TestCase):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apt.install('package'))
         mock_execute.assert_called_with(
-            'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -o APT::Get::Purge=true package'
+            [
+                'env',
+                'DEBIAN_FRONTEND=noninteractive',
+                '/usr/bin/apt-get',
+                'install',
+                '-o',
+                'APT::Get::Purge=true',
+                'package',
+            ]
         )
 
     @patch('migasfree_client.pms.apt.execute')
@@ -43,7 +51,15 @@ class TestApt(unittest.TestCase):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apt.install('  package  '))
         mock_execute.assert_called_with(
-            'DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -o APT::Get::Purge=true package'
+            [
+                'env',
+                'DEBIAN_FRONTEND=noninteractive',
+                '/usr/bin/apt-get',
+                'install',
+                '-o',
+                'APT::Get::Purge=true',
+                'package',
+            ]
         )
 
     @patch('migasfree_client.pms.apt.execute')
@@ -55,7 +71,9 @@ class TestApt(unittest.TestCase):
     def test_remove(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apt.remove('package'))
-        mock_execute.assert_called_with('DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get purge package')
+        mock_execute.assert_called_with(
+            ['env', 'DEBIAN_FRONTEND=noninteractive', '/usr/bin/apt-get', 'purge', 'package']
+        )
 
     @patch('migasfree_client.pms.apt.execute')
     def test_remove_failure(self, mock_execute):
@@ -66,7 +84,7 @@ class TestApt(unittest.TestCase):
     def test_search(self, mock_execute):
         mock_execute.return_value = (0, 'package - description', '')
         self.assertTrue(self.apt.search('pattern'))
-        mock_execute.assert_called_with('/usr/bin/apt-cache search pattern')
+        mock_execute.assert_called_with(['/usr/bin/apt-cache', 'search', 'pattern'])
 
     @patch('migasfree_client.pms.apt.execute')
     def test_search_not_found(self, mock_execute):
@@ -218,7 +236,7 @@ class TestApt(unittest.TestCase):
         mock_execute.return_value = (0, 'vim\nbash\ngit', '')
         result = self.apt.available_packages()
         self.assertEqual(result, ['bash', 'git', 'vim'])  # sorted
-        mock_execute.assert_called_with('/usr/bin/apt-cache pkgnames', interactive=False)
+        mock_execute.assert_called_with(['/usr/bin/apt-cache', 'pkgnames'], interactive=False)
 
     @patch('migasfree_client.pms.apt.execute')
     def test_available_packages_failure(self, mock_execute):

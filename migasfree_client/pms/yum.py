@@ -52,7 +52,7 @@ class Yum(Pms):
         bool install(string package)
         """
 
-        cmd = f'{self._pms} install {package.strip()}'
+        cmd = [self._pms, 'install', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -62,7 +62,7 @@ class Yum(Pms):
         bool remove(string package)
         """
 
-        cmd = f'{self._pms} remove {package.strip()}'
+        cmd = [self._pms, 'remove', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -72,7 +72,7 @@ class Yum(Pms):
         bool search(string pattern)
         """
 
-        cmd = f'{self._pms} search {pattern.strip()}'
+        cmd = [self._pms, 'search', pattern.strip()]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -82,7 +82,7 @@ class Yum(Pms):
         (bool, string) update_silent(void)
         """
 
-        cmd = f'{self._pms} --assumeyes update'
+        cmd = [self._pms, '--assumeyes', 'update']
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -101,7 +101,7 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --assumeyes install {" ".join(package_set)}'
+        cmd = [self._pms, '--assumeyes', 'install', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -120,7 +120,7 @@ class Yum(Pms):
         if not package_set:
             return True, None
 
-        cmd = f'{self._pms} --assumeyes remove {" ".join(package_set)}'
+        cmd = [self._pms, '--assumeyes', 'remove', *package_set]
         logger.debug(cmd)
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
@@ -132,7 +132,7 @@ class Yum(Pms):
         bool is_installed(string package)
         """
 
-        cmd = f'{self._pm} -q {package.strip()}'
+        cmd = [self._pm, '-q', package.strip()]
         logger.debug(cmd)
 
         return execute(cmd, interactive=False)[0] == 0
@@ -142,11 +142,11 @@ class Yum(Pms):
         bool clean_all(void)
         """
 
-        cmd = f'{self._pms} clean all'
+        cmd = [self._pms, 'clean', 'all']
         logger.debug(cmd)
 
         if execute(cmd)[0] == 0:
-            cmd = f'{self._pms} --assumeyes check-update'
+            cmd = [self._pms, '--assumeyes', 'check-update']
             logger.debug(cmd)
             ret, _, _ = execute(cmd)
 
@@ -160,7 +160,7 @@ class Yum(Pms):
         list format: name_version_architecture.extension
         """
 
-        cmd = f'{self._pm} --queryformat "%{{NAME}}_%{{VERSION}}-%{{RELEASE}}_%{{ARCH}}.rpm\n" -qa'
+        cmd = [self._pm, '--queryformat', '%{NAME}_%{VERSION}-%{RELEASE}_%{ARCH}.rpm\n', '-qa']
         logger.debug(cmd)
 
         _ret, _output, _ = execute(cmd, interactive=False)
@@ -186,7 +186,7 @@ class Yum(Pms):
         bool import_server_key(string file_key)
         """
 
-        cmd = f'{self._pm} --import {file_key} > /dev/null'
+        cmd = [self._pm, '--import', file_key]
         logger.debug(cmd)
 
         return execute(cmd)[0] == 0
@@ -196,7 +196,7 @@ class Yum(Pms):
         string get_system_architecture(void)
         """
 
-        cmd = f'{self._pm} --eval "%{{_arch}}"'
+        cmd = [self._pm, '--eval', '%{_arch}']
         logger.debug(cmd)
 
         _ret, _arch, _ = execute(cmd, interactive=False)
