@@ -87,7 +87,27 @@ flowchart TD
 
 ## Synchronization Flow
 
-The `sync` command performs a series of operations in a specific order:
+The `sync` command performs a series of operations in a strict, sequential order. Unlike old graphical representations that implied parallel execution, the actual logic executes step-by-step to guarantee integrity.
+
+### High-level Flowchart
+
+```mermaid
+flowchart TD
+    Start([Start Sync]) --> Avail{Server Available?}
+    Avail -- No --> EndQueue([Queue for later])
+    Avail -- Yes --> Attr[1. Upload Attributes & Faults]
+    Attr --> PMS[2. Package Manager<br>Update Repos & Sync Packages]
+    PMS --> SoftInv[3. Upload Software Inventory]
+    SoftInv --> HwCheck{Hardware Capture<br>Required?}
+    HwCheck -- Yes --> HwInv[4. Upload Hardware Inventory]
+    HwCheck -- No --> Devices[5. Configure Logical Devices<br>e.g. Printers]
+    HwInv --> Devices
+    Devices --> Post[6. Traits, Events & Execution Errors]
+    Post --> EndSync[7. End Synchronization]
+    EndSync --> Finish([Sync Successful])
+```
+
+### Detailed Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -98,14 +118,17 @@ sequenceDiagram
     Client->>Server: Check Availability
     Client->>Server: Upload Attributes & Faults
     Client->>PMS: Query Installed Software (BEFORE)
-    Client->>Client: Create Repositories
-    Client->>PMS: Sync Packages (Install/Remove)
+    Client->>Client: Create Repositories & Clean Cache
+    Client->>PMS: Sync Packages (Mandatory & Updates)
     Client->>PMS: Query Installed Software (AFTER)
-    Client->>Server: Upload Software Inventory
+    Client->>Server: Upload Software Inventory (Diff)
     alt Hardware Capture Required
         Client->>Client: lshw (JSON)
         Client->>Server: Upload Hardware
     end
+    Client->>Server: Sync Logical Devices (Printers)
+    Client->>Server: Execute Traits & Events
+    Client->>Server: Upload Execution Errors
     Client->>Server: End Synchronization
 ```
 
