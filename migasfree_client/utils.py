@@ -396,7 +396,17 @@ def get_graphic_user(pid=0):
         if not pid:
             return ''
 
-    _user = subprocess.getoutput(f'ps hp {pid} -o euser')
+    try:
+        _proc = subprocess.run(
+            ['ps', 'hp', str(pid), '-o', 'euser'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,  # noqa: UP021
+            check=False,
+        )
+        _user = _proc.stdout.strip()
+    except OSError:
+        _user = ''
     if _user.isdigit():
         # ps command not always show username (show uid if len(username) > 8)
         _user_info = get_user_info(_user)

@@ -249,4 +249,3 @@ class MigasFreeTags(MigasFreeCommand):
             self.end_of_transmission()
 
         sys.exit(ALL_OK)
-

@@ -236,4 +236,3 @@ class MigasFreeUpload(MigasFreeCommand):
                 self._upload_set()
 
         sys.exit(ALL_OK)  # no error
-
