@@ -222,7 +222,7 @@ def execute(cmd, verbose=False, interactive=True, **kwargs):
         Tuple of (returncode, stdout, stderr)
     """
     if verbose:
-        print(cmd)
+        print(' '.join(cmd) if isinstance(cmd, (list, tuple)) else cmd)
 
     process = _create_subprocess(cmd, capture_output=not interactive, **kwargs)
     output_buffer = ''
