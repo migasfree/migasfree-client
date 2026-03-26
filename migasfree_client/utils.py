@@ -43,8 +43,6 @@ __license__ = 'GPLv3'
 
 _ = gettext.gettext
 
-# TODO http://docs.python.org/library/unittest.html
-
 ALL_OK = 0 if sys.platform == 'win32' else os.EX_OK
 
 
