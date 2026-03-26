@@ -73,7 +73,7 @@ class Apt(Pms):
         """
 
         cmd = [*self._pms, 'install', '-o', 'APT::Get::Purge=true', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -83,7 +83,7 @@ class Apt(Pms):
         """
 
         cmd = [*self._pms, 'purge', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -93,7 +93,7 @@ class Apt(Pms):
         """
 
         cmd = [self._pms_search, 'search', pattern.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -103,7 +103,7 @@ class Apt(Pms):
         """
 
         cmd = [*self._pms, *self._silent_options, 'dist-upgrade']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
 
@@ -122,7 +122,7 @@ class Apt(Pms):
             return True, None
 
         cmd = [*self._pms, *self._silent_options, 'install', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
 
@@ -141,7 +141,7 @@ class Apt(Pms):
             return True, None
 
         cmd = [*self._pms, *self._silent_options, 'purge', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
 
@@ -163,12 +163,12 @@ class Apt(Pms):
         """
 
         cmd = [*self._pms, 'clean']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         if execute(cmd)[0] == 0:
             execute(['rm', '--recursive', '--force', '/var/lib/apt/lists'])
             cmd = [*self._pms, '-o', 'Acquire::Languages=none', '--assume-yes', 'update']
-            logger.debug(cmd)
+            logger.debug(' '.join(cmd))
 
             return execute(cmd)[0] == 0
 
@@ -181,7 +181,7 @@ class Apt(Pms):
         """
 
         cmd = [self._pm, '--list']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         packages = execute(cmd, interactive=False)[1].strip().splitlines()
         if not packages:
@@ -319,7 +319,7 @@ class Apt(Pms):
         name = os.path.basename(file_key)
         key_target = os.path.join(self._keyring_dir, f'{name}.gpg')
         cmd = ['gpg', '--output', key_target, '--dearmor', '--yes', file_key]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -341,7 +341,7 @@ class Apt(Pms):
         """
 
         cmd = [self._pms_search, 'pkgnames']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         ret, output, _ = execute(cmd, interactive=False)
 

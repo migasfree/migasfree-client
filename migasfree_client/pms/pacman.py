@@ -54,7 +54,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--sync', '--needed', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -64,7 +64,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--remove', '--recursive', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -74,7 +74,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--sync', '--search', pattern.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -84,7 +84,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--sync', '--refresh', '-uu', '--noconfirm']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -103,7 +103,7 @@ class Pacman(Pms):
             return True, None
 
         cmd = [*self._pms, '--sync', '--needed', '--noconfirm', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -122,7 +122,7 @@ class Pacman(Pms):
             return True, None
 
         cmd = [*self._pms, '--remove', '--recursive', '--noconfirm', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -134,7 +134,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--query', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -144,7 +144,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--sync', '--clean', '--noconfirm']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -158,7 +158,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--query', '--info']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _, _packages, _ = execute(cmd, interactive=False)
         if not _packages:
@@ -218,7 +218,7 @@ class Pacman(Pms):
         """
 
         cmd = [self._pms_key, '--add', file_key]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -228,7 +228,7 @@ class Pacman(Pms):
         """
 
         cmd = ['uname', '-m']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
@@ -240,7 +240,7 @@ class Pacman(Pms):
         """
 
         cmd = [*self._pms, '--sync', '--search', '--quiet']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False)
 

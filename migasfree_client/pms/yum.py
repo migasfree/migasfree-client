@@ -53,7 +53,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pms, 'install', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -63,7 +63,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pms, 'remove', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -73,7 +73,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pms, 'search', pattern.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -83,7 +83,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pms, '--assumeyes', 'update']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -102,7 +102,7 @@ class Yum(Pms):
             return True, None
 
         cmd = [self._pms, '--assumeyes', 'install', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -121,7 +121,7 @@ class Yum(Pms):
             return True, None
 
         cmd = [self._pms, '--assumeyes', 'remove', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -133,7 +133,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pm, '-q', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -143,11 +143,11 @@ class Yum(Pms):
         """
 
         cmd = [self._pms, 'clean', 'all']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         if execute(cmd)[0] == 0:
             cmd = [self._pms, '--assumeyes', 'check-update']
-            logger.debug(cmd)
+            logger.debug(' '.join(cmd))
             ret, _, _ = execute(cmd)
 
             return ret in (0, 100)
@@ -161,7 +161,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pm, '--queryformat', '%{NAME}_%{VERSION}-%{RELEASE}_%{ARCH}.rpm\n', '-qa']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _ = execute(cmd, interactive=False)
 
@@ -187,7 +187,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pm, '--import', file_key]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -197,7 +197,7 @@ class Yum(Pms):
         """
 
         cmd = [self._pm, '--eval', '%{_arch}']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 

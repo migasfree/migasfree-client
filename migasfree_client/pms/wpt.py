@@ -51,7 +51,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, 'install', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -61,7 +61,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, 'remove', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -71,7 +71,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, 'search', pattern.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -81,7 +81,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, 'upgrade']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -100,7 +100,7 @@ class Wpt(Pms):
             return True, None
 
         cmd = [self._pms, '--assume-yes', 'install', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -119,7 +119,7 @@ class Wpt(Pms):
             return True, None
 
         cmd = [self._pms, '--assume-yes', 'remove', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -131,7 +131,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, 'status', '--is-installed', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -141,7 +141,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, 'clean']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -152,7 +152,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, '--quiet', 'list', '--all', '--summary']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _, packages, _ = execute(cmd, interactive=False)
         if not packages:
@@ -180,7 +180,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, 'import-key', file_key]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -197,7 +197,7 @@ class Wpt(Pms):
         """
 
         cmd = [self._pms, '--quiet', 'search', '--summary']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False)
 

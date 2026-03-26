@@ -44,7 +44,7 @@ class Zypper(Yum):
         """
 
         cmd = [self._pms, 'install', '--no-force-resolution', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -54,14 +54,14 @@ class Zypper(Yum):
         """
 
         cmd = [self._pms, '--non-interactive', 'update', '--no-force-resolution']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
         if _ret != 0:
             return False, f'{_ret}\n{_output}\n{_error}'
 
         cmd = [self._pms, 'lu', '-a']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -80,7 +80,7 @@ class Zypper(Yum):
             return True, None
 
         cmd = [self._pms, '--non-interactive', 'install', '--no-force-resolution', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -99,7 +99,7 @@ class Zypper(Yum):
             return True, None
 
         cmd = [self._pms, '--non-interactive', 'remove', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -111,11 +111,11 @@ class Zypper(Yum):
         """
 
         cmd = [self._pms, 'clean', '--all']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         if execute(cmd)[0] == 0:
             cmd = [self._pms, '--non-interactive', 'refresh']
-            logger.debug(cmd)
+            logger.debug(' '.join(cmd))
 
             return execute(cmd)[0] == 0
 
@@ -127,7 +127,7 @@ class Zypper(Yum):
         """
 
         cmd = [self._pm, '-q', '--qf', '%{arch}', '-f', '/etc/lsb-release']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 

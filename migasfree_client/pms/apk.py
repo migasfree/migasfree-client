@@ -48,7 +48,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'add', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -58,7 +58,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'del', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -68,7 +68,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'search', pattern.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -78,13 +78,13 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'update']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
         if _ret == 0:
             cmd = [self._pms, 'upgrade']
-            logger.debug(cmd)
+            logger.debug(' '.join(cmd))
             _ret, _, _error_upgrade = execute(cmd, interactive=False, verbose=True)
             if _error_upgrade:
                 _error = f'{_error}\n{_error_upgrade}' if _error else _error_upgrade
@@ -104,7 +104,7 @@ class Apk(Pms):
             return True, None
 
         cmd = [self._pms, 'add', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -123,7 +123,7 @@ class Apk(Pms):
             return True, None
 
         cmd = [self._pms, 'del', *package_set]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
@@ -135,7 +135,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'info', '-e', package.strip()]
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd, interactive=False)[0] == 0
 
@@ -145,7 +145,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'cache', 'clean']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -156,7 +156,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'info', '-v']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _, _packages, _ = execute(cmd, interactive=False)
         if not _packages:
@@ -201,7 +201,7 @@ class Apk(Pms):
         """
 
         cmd = ['cp', file_key, '/etc/apk/keys/']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == 0
 
@@ -211,7 +211,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, '--print-arch']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
@@ -223,7 +223,7 @@ class Apk(Pms):
         """
 
         cmd = [self._pms, 'search', '-q']
-        logger.debug(cmd)
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False)
 
