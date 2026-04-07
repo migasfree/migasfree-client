@@ -137,7 +137,7 @@ def _bytes_to_str(data):
     return data
 
 
-def _create_subprocess(cmd, capture_output=True, **kwargs):
+def _create_subprocess(cmd, capture_output=True, input_data=None, **kwargs):
     """Create a subprocess with platform-specific settings.
 
     Args:
@@ -156,6 +156,9 @@ def _create_subprocess(cmd, capture_output=True, **kwargs):
     if capture_output:
         common_args['stdout'] = subprocess.PIPE
         common_args['stderr'] = subprocess.PIPE
+
+    if input_data is not None:
+        common_args['stdin'] = subprocess.PIPE
 
     if kwargs:
         common_args.update(kwargs)
@@ -210,13 +213,14 @@ def _stream_output_nonblocking(process):
     return output_buffer
 
 
-def execute(cmd, verbose=False, interactive=True, **kwargs):
+def execute(cmd, verbose=False, interactive=True, input_data=None, **kwargs):
     """Execute a shell command.
 
     Args:
         cmd: Command string or list to execute. Using a list forces shell=False for safety.
         verbose: If True, print command and output
         interactive: If True, let output inherit to terminal; if False, capture it
+        input_data: Optional string to send to stdin
 
     Returns:
         Tuple of (returncode, stdout, stderr)
@@ -224,13 +228,16 @@ def execute(cmd, verbose=False, interactive=True, **kwargs):
     if verbose:
         print(' '.join(cmd) if isinstance(cmd, (list, tuple)) else cmd)
 
-    process = _create_subprocess(cmd, capture_output=not interactive, **kwargs)
+    process = _create_subprocess(cmd, capture_output=not interactive, input_data=input_data, **kwargs)
     output_buffer = ''
 
     if not interactive and verbose:
         output_buffer = _stream_output_nonblocking(process)
 
-    output, error = process.communicate()
+    if input_data and isinstance(input_data, str):
+        input_data = input_data.encode('utf-8')
+
+    output, error = process.communicate(input=input_data)
 
     output = output_buffer if not interactive and output_buffer else _bytes_to_str(output)
 

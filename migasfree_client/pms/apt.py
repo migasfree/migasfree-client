@@ -16,7 +16,6 @@
 import logging
 import os
 import re
-import shlex
 import tempfile
 
 from ..utils import execute, sanitize_path, write_file, write_file_if_changed
@@ -28,6 +27,22 @@ __license__ = 'GPLv3'
 logger = logging.getLogger('migasfree_client')
 
 
+def invalidate_installed_cache(func):
+    """
+    Decorator to invalidate the installed packages cache if the method is successful.
+    """
+
+    def wrapper(self, *args, **kwargs):
+        res = func(self, *args, **kwargs)
+        # If returns (bool, str) or just bool, check the success
+        success = res[0] if isinstance(res, tuple) else res
+        if success:
+            self._installed_cache = None
+        return res
+
+    return wrapper
+
+
 @Pms.register('Apt')
 class Apt(Pms):
     """
@@ -36,12 +51,16 @@ class Apt(Pms):
 
     def __init__(self):
         super().__init__()
+        self._installed_cache = None
 
         self._name = 'apt'  # Package Management System name
         self._pm = '/usr/bin/dpkg'  # Package Manager command
         self._pms = ['env', 'DEBIAN_FRONTEND=noninteractive', '/usr/bin/apt-get']  # Package Management System command
         self._repo_dir = '/etc/apt/sources.list.d'  # Repositories path
         self._keyring_dir = '/etc/apt/trusted.gpg.d'
+
+        self._repo_list = 'migasfree.list'
+        self._repo_sources = 'migasfree.sources'
 
         self._mimetype = [
             'application/x-debian-package',
@@ -67,6 +86,7 @@ class Apt(Pms):
             '--auto-remove',
         ]
 
+    @invalidate_installed_cache
     def install(self, package):
         """
         bool install(string package)
@@ -77,6 +97,7 @@ class Apt(Pms):
 
         return execute(cmd)[0] == 0
 
+    @invalidate_installed_cache
     def remove(self, package):
         """
         bool remove(string package)
@@ -97,6 +118,7 @@ class Apt(Pms):
 
         return execute(cmd)[0] == 0
 
+    @invalidate_installed_cache
     def update_silent(self):
         """
         (bool, string) update_silent(void)
@@ -109,54 +131,66 @@ class Apt(Pms):
 
         return ret == 0, f'{output}{error}'
 
-    def install_silent(self, package_set):
+    @invalidate_installed_cache
+    def _execute_silent(self, action, package_set):
         """
-        (bool, string) install_silent(list package_set)
+        (bool, string) _execute_silent(string action, list package_set)
+        Common logic for install_silent and remove_silent
         """
 
         if not isinstance(package_set, list):
             return False, f'package_set is not a list: {package_set}'
 
-        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
+        # Performance Optimization: Get all installed packages once to avoid N+1 processes
+        installed = self._get_installed_packages()
+
+        if action == 'install':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() not in installed]
+        elif action == 'purge':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() in installed]
+
         if not package_set:
             return True, None
 
-        cmd = [*self._pms, *self._silent_options, 'install', *package_set]
+        cmd = [*self._pms, *self._silent_options, action, *package_set]
         logger.debug(' '.join(cmd))
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
 
         return ret == 0, f'{output}{error}'
+
+    def _get_installed_packages(self):
+        """
+        set _get_installed_packages(void)
+        """
+
+        if self._installed_cache is None:
+            self._installed_cache = {pkg.split('_')[0] for pkg in self.query_all()}
+
+        return self._installed_cache
+
+    def install_silent(self, package_set):
+        """
+        (bool, string) install_silent(list package_set)
+        """
+
+        return self._execute_silent('install', package_set)
 
     def remove_silent(self, package_set):
         """
         (bool, string) remove_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [*self._pms, *self._silent_options, 'purge', *package_set]
-        logger.debug(' '.join(cmd))
-
-        ret, output, error = execute(cmd, interactive=False, verbose=True)
-
-        return ret == 0, f'{output}{error}'
+        return self._execute_silent('purge', package_set)
 
     def is_installed(self, package):
         """
         bool is_installed(string package)
         """
 
-        cmd = f'{self._pm} --status {shlex.quote(package.strip())} | grep "Status: install ok installed"'
-        logger.debug(cmd)
+        return package.strip() in self._get_installed_packages()
 
-        return execute(cmd, interactive=False)[0] == 0
-
+    @invalidate_installed_cache
     def clean_all(self):
         """
         bool clean_all(void)
@@ -166,7 +200,10 @@ class Apt(Pms):
         logger.debug(' '.join(cmd))
 
         if execute(cmd)[0] == 0:
-            execute(['rm', '--recursive', '--force', '/var/lib/apt/lists'])
+            cmd = ['rm', '--recursive', '--force', '/var/lib/apt/lists']
+            logger.debug(' '.join(cmd))
+            execute(cmd)
+
             cmd = [*self._pms, '-o', 'Acquire::Languages=none', '--assume-yes', 'update']
             logger.debug(' '.join(cmd))
 
@@ -226,28 +263,29 @@ class Apt(Pms):
 
     def _convert_list_to_sources(self, list_content, server):
         """
-        Converts formated content .list to .sources format using 'apt modernize-sources'
+        Converts formatted content .list to .sources format using 'apt modernize-sources'
 
         Returns .sources content as string, or None if it fails
         """
 
-        # Create temp file .list at _repo_dir
-        fd, list_path = tempfile.mkstemp(prefix='tmp_repo_', suffix='.list', dir=self._repo_dir)
-        os.close(fd)
+        # Security Hardening: Use TemporaryDirectory for safer cleanup
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            list_path = os.path.join(tmp_dir, self._repo_list)
 
-        try:
             if not write_file(list_path, list_content):
                 logging.error('Error writing temp file %s', list_path)
                 return ''
 
-            cmd = f'yes | /usr/bin/apt modernize-sources {list_path}'
-            logging.debug(cmd)
-            ret, _, err = execute(cmd, interactive=False)
+            # apt modernize-sources converts <file>.list to <file>.sources
+            # and creates a .list.bak
+            cmd = ['/usr/bin/apt', 'modernize-sources', list_path]
+            logging.debug(' '.join(cmd))
+            ret, _, err = execute(cmd, interactive=False, input_data='y\n')
             if ret != 0:
                 logging.error('apt modernize-sources failed: %s', str(err))
                 return ''
 
-            sources_path = list_path[:-5] + '.sources'
+            sources_path = os.path.join(tmp_dir, self._repo_sources)
             if not os.path.isfile(sources_path):
                 logging.error('Generated .sources file not found: %s', sources_path)
                 return ''
@@ -257,32 +295,24 @@ class Apt(Pms):
 
             return self._adapt_sources(sources_content, server)
 
-        finally:  # Cleaning temp files
-            if os.path.isfile(list_path):
-                os.remove(list_path)
-
-            sources_path = list_path[:-5] + '.sources'
-            if os.path.isfile(sources_path):
-                os.remove(sources_path)
-
-            backup_path = list_path + '.bak'
-            if os.path.isfile(backup_path):
-                os.remove(backup_path)
-
     def _get_pms_version(self):
         """
         Detects APT version (if fails, default to 2.x for compatibility)
         """
 
-        cmd = f"{self._pms[2]} --version | head -n1 | awk '{{print $2}}'"
-        ret, out, _ = execute(cmd, interactive=False)
-        apt_version = out.strip() if ret == 0 else '2.0'
-        logging.debug('Detected APT version: %s', apt_version)
+        # Shell Reduction: Use Python regex instead of awk/pipes
+        cmd = [self._pms[2], '--version']
+        ret, output, _ = execute(cmd, interactive=False)
 
-        # extracts the first three number groups
-        match = re.match(r'(\d+)\.(\d+)(?:\.(\d+))?', apt_version)
+        if ret != 0 or not output:
+            return (2, 0)
+
+        # Expected format: "apt 2.9.21 (amd64)"
+        match = re.search(r'apt\s+(\d+)\.(\d+)(?:\.(\d+))?', output)
         if not match:
-            return (2, 0)  # for compatibility
+            return (2, 0)
+
+        logging.debug('Detected APT version: %s', match.group(0))
 
         return tuple(int(x) for x in match.groups() if x is not None)
 
@@ -298,14 +328,18 @@ class Apt(Pms):
             return True
 
         # Choose format by APT version
-        self._repo = os.path.join(self._repo_dir, 'migasfree.list')
+        self._repo = os.path.join(self._repo_dir, self._repo_list)
         try:
             apt_version = self._get_pms_version()
             if apt_version[0] >= 3:
-                content = self._convert_list_to_sources(content, server)
-                self._repo = os.path.join(self._repo_dir, 'migasfree.sources')
-        except Exception:
-            pass
+                sources_content = self._convert_list_to_sources(content, server)
+                if sources_content:
+                    content = sources_content
+                    self._repo = os.path.join(self._repo_dir, self._repo_sources)
+                else:
+                    logging.warning('Failed to convert repos to .sources format, falling back to .list')
+        except (AttributeError, ValueError, IndexError) as e:
+            logging.debug('Error detecting APT version or converting sources: %s', str(e))
 
         logging.debug('Creating repos: %s', self._repo)
 
@@ -328,12 +362,22 @@ class Apt(Pms):
         string get_system_architecture(void)
         """
 
-        cmd = f'echo "$({self._pm} --print-architecture) $({self._pm} --print-foreign-architectures)"'
-        logger.debug(cmd)
-
+        # Shell Reduction: Avoid subshell-based echo
+        cmd = [self._pm, '--print-architecture']
+        logger.debug(' '.join(cmd))
         ret, arch, _ = execute(cmd, interactive=False)
 
-        return arch.strip() if ret == 0 else ''
+        cmd = [self._pm, '--print-foreign-architectures']
+        logger.debug(' '.join(cmd))
+        _, foreign_arch, _ = execute(cmd, interactive=False)
+
+        if ret != 0:
+            return ''
+
+        result = f'{arch.strip()} {foreign_arch.strip()}'.strip()
+        logger.debug('System architecture: %s', result)
+
+        return result
 
     def available_packages(self):
         """

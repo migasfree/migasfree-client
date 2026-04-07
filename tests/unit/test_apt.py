@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ class TestApt(unittest.TestCase):
 
     @patch('migasfree_client.pms.apt.execute')
     def test_install_silent(self, mock_execute):
-        with patch.object(self.apt, 'is_installed', return_value=False):
+        with patch.object(self.apt, 'query_all', return_value=[]):
             mock_execute.return_value = (0, 'output', '')
             ret, _ = self.apt.install_silent(['package1', 'package2'])
             self.assertTrue(ret)
@@ -118,7 +118,7 @@ class TestApt(unittest.TestCase):
 
     @patch('migasfree_client.pms.apt.execute')
     def test_install_silent_already_installed(self, mock_execute):
-        with patch.object(self.apt, 'is_installed', return_value=True):
+        with patch.object(self.apt, 'query_all', return_value=['package_1.0_amd64.deb']):
             ret, error = self.apt.install_silent(['package'])
             self.assertTrue(ret)
             self.assertIsNone(error)
@@ -131,7 +131,7 @@ class TestApt(unittest.TestCase):
 
     @patch('migasfree_client.pms.apt.execute')
     def test_remove_silent(self, mock_execute):
-        with patch.object(self.apt, 'is_installed', return_value=True):
+        with patch.object(self.apt, 'query_all', return_value=['package1_1.0_amd64.deb', 'package2_2.0_i386.deb']):
             mock_execute.return_value = (0, 'output', '')
             ret, _ = self.apt.remove_silent(['package1', 'package2'])
             self.assertTrue(ret)
@@ -141,7 +141,7 @@ class TestApt(unittest.TestCase):
 
     @patch('migasfree_client.pms.apt.execute')
     def test_remove_silent_not_installed(self, mock_execute):
-        with patch.object(self.apt, 'is_installed', return_value=False):
+        with patch.object(self.apt, 'query_all', return_value=[]):
             ret, error = self.apt.remove_silent(['package'])
             self.assertTrue(ret)
             self.assertIsNone(error)
@@ -152,16 +152,14 @@ class TestApt(unittest.TestCase):
         self.assertFalse(ret)
         self.assertIn('not a list', error)
 
-    @patch('migasfree_client.pms.apt.execute')
-    def test_is_installed_true(self, mock_execute):
-        mock_execute.return_value = (0, 'Status: install ok installed', '')
+    @patch.object(Apt, 'query_all')
+    def test_is_installed_true(self, mock_query_all):
+        mock_query_all.return_value = ['package_1.0_amd64.deb']
         self.assertTrue(self.apt.is_installed('package'))
-        self.assertIn('--status', mock_execute.call_args[0][0])
-        self.assertIn('package', mock_execute.call_args[0][0])
 
-    @patch('migasfree_client.pms.apt.execute')
-    def test_is_installed_false(self, mock_execute):
-        mock_execute.return_value = (1, '', '')
+    @patch.object(Apt, 'query_all')
+    def test_is_installed_false(self, mock_query_all):
+        mock_query_all.return_value = []
         self.assertFalse(self.apt.is_installed('package'))
 
     @patch('migasfree_client.pms.apt.execute')
@@ -221,7 +219,10 @@ class TestApt(unittest.TestCase):
 
     @patch('migasfree_client.pms.apt.execute')
     def test_get_system_architecture(self, mock_execute):
-        mock_execute.return_value = (0, 'amd64 i386', '')
+        mock_execute.side_effect = [
+            (0, 'amd64\n', ''),
+            (0, 'i386\n', ''),
+        ]
         result = self.apt.get_system_architecture()
         self.assertEqual(result, 'amd64 i386')
 
@@ -288,13 +289,13 @@ class TestApt(unittest.TestCase):
 
     @patch('migasfree_client.pms.apt.execute')
     def test_get_pms_version_success(self, mock_execute):
-        mock_execute.return_value = (0, '2.4.11', '')
+        mock_execute.return_value = (0, 'apt 2.4.11 (amd64)', '')
         result = self.apt._get_pms_version()
         self.assertEqual(result, (2, 4, 11))
 
     @patch('migasfree_client.pms.apt.execute')
     def test_get_pms_version_apt3(self, mock_execute):
-        mock_execute.return_value = (0, '3.0.0', '')
+        mock_execute.return_value = (0, 'apt 3.0.0 (amd64)', '')
         result = self.apt._get_pms_version()
         self.assertEqual(result, (3, 0, 0))
 
@@ -312,9 +313,48 @@ class TestApt(unittest.TestCase):
 
     @patch('migasfree_client.pms.apt.execute')
     def test_get_pms_version_two_parts(self, mock_execute):
-        mock_execute.return_value = (0, '2.4', '')
+        mock_execute.return_value = (0, 'apt 2.4 (amd64)', '')
         result = self.apt._get_pms_version()
         self.assertEqual(result, (2, 4))
+
+    @patch('migasfree_client.pms.apt.write_file')
+    @patch('migasfree_client.pms.apt.write_file_if_changed')
+    @patch('migasfree_client.pms.apt.execute')
+    def test_create_repos_apt3(self, mock_execute, mock_write_file_if_changed, mock_write_file):
+        mock_execute.side_effect = [
+            (0, 'apt 3.0.0 (amd64)', ''),  # _get_pms_version
+            (0, 'Converted content', ''),  # modernize-sources
+        ]
+        mock_write_file_if_changed.return_value = True
+        mock_write_file.return_value = True
+
+        repos = [{'source_template': 'deb {protocol}://{server}/repo stable main'}]
+        with patch('os.path.isfile', return_value=True), patch(
+            'builtins.open', unittest.mock.mock_open(read_data='Converted content')
+        ):
+            result = self.apt.create_repos('https', 'server.example.com', repos)
+
+        self.assertTrue(result)
+        # Check modernize-sources call
+        modernize_call = mock_execute.call_args_list[1]
+        self.assertEqual(modernize_call[0][0][0:2], ['/usr/bin/apt', 'modernize-sources'])
+        self.assertEqual(modernize_call[1].get('input_data'), 'y\n')
+
+    @patch('migasfree_client.pms.apt.execute')
+    def test_install_invalidates_cache(self, mock_execute):
+        mock_execute.return_value = (0, '', '')
+        self.apt._installed_cache = {'some_package'}
+
+        self.apt.install('new_package')
+        self.assertIsNone(self.apt._installed_cache)
+
+    @patch('migasfree_client.pms.apt.execute')
+    def test_remove_invalidates_cache(self, mock_execute):
+        mock_execute.return_value = (0, '', '')
+        self.apt._installed_cache = {'package'}
+
+        self.apt.remove('package')
+        self.assertIsNone(self.apt._installed_cache)
 
 
 if __name__ == '__main__':
