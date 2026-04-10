@@ -1,0 +1,13 @@
+/deb_dist/
+/dist/
+/migasfree_client.egg-info/
+/MANIFEST
+/migasfree?client-*.tar.gz
+/stdeb.cfg
+/build/
+/venv/
+/migasfree_client/devices/plugins/azw.py
+/migasfree_client/pms/plugins/giman.py
+*.pyc
+/.coverage
+.agent/
