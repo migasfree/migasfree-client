@@ -17,8 +17,8 @@ import logging
 import os
 
 from ..settings import KEYS_PATH
-from ..utils import execute, write_file_if_changed
-from .pms import Pms
+from ..utils import ALL_OK, execute, write_file_if_changed
+from .pms import Pms, invalidate_installed_cache
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
@@ -47,6 +47,7 @@ class Yum(Pms):
 
         self._mimetype = ['application/x-rpm', 'application/x-redhat-package-manager']
 
+    @invalidate_installed_cache
     def install(self, package):
         """
         bool install(string package)
@@ -55,8 +56,9 @@ class Yum(Pms):
         cmd = [self._pms, 'install', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
+    @invalidate_installed_cache
     def remove(self, package):
         """
         bool remove(string package)
@@ -65,7 +67,7 @@ class Yum(Pms):
         cmd = [self._pms, 'remove', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def search(self, pattern):
         """
@@ -75,8 +77,9 @@ class Yum(Pms):
         cmd = [self._pms, 'search', pattern.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
+    @invalidate_installed_cache
     def update_silent(self):
         """
         (bool, string) update_silent(void)
@@ -87,55 +90,65 @@ class Yum(Pms):
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
-        return _ret == 0, _error
+        return _ret == ALL_OK, _error
+
+    def _get_installed_packages(self):
+        """
+        set _get_installed_packages(void)
+        """
+
+        if self._installed_cache is None:
+            self._installed_cache = {pkg.split('_')[0] for pkg in self.query_all()}
+
+        return self._installed_cache
+
+    @invalidate_installed_cache
+    def _execute_silent(self, action, package_set):
+        """
+        (bool, string) _execute_silent(string action, list package_set)
+        Common logic for install_silent and remove_silent
+        """
+
+        if not isinstance(package_set, list):
+            return False, f'package_set is not a list: {package_set}'
+
+        installed = self._get_installed_packages()
+
+        if action == 'install':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() not in installed]
+        elif action == 'remove':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() in installed]
+
+        if not package_set:
+            return True, None
+
+        cmd = [self._pms, '--assumeyes', action, *package_set]
+        logger.debug(' '.join(cmd))
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
+
+        return _ret == ALL_OK, _error
 
     def install_silent(self, package_set):
         """
         (bool, string) install_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, '--assumeyes', 'install', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, _error
+        return self._execute_silent('install', package_set)
 
     def remove_silent(self, package_set):
         """
         (bool, string) remove_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, '--assumeyes', 'remove', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, _error
+        return self._execute_silent('remove', package_set)
 
     def is_installed(self, package):
         """
         bool is_installed(string package)
         """
 
-        cmd = [self._pm, '-q', package.strip()]
-        logger.debug(' '.join(cmd))
-
-        return execute(cmd, interactive=False)[0] == 0
+        return package.strip() in self._get_installed_packages()
 
     def clean_all(self):
         """
@@ -145,12 +158,12 @@ class Yum(Pms):
         cmd = [self._pms, 'clean', 'all']
         logger.debug(' '.join(cmd))
 
-        if execute(cmd)[0] == 0:
+        if execute(cmd)[0] == ALL_OK:
             cmd = [self._pms, '--assumeyes', 'check-update']
             logger.debug(' '.join(cmd))
             ret, _, _ = execute(cmd)
 
-            return ret in (0, 100)
+            return ret in (ALL_OK, 100)
 
         return False
 
@@ -165,7 +178,7 @@ class Yum(Pms):
 
         _ret, _output, _ = execute(cmd, interactive=False)
 
-        return sorted(_output.strip().splitlines()) if _ret == 0 else []
+        return sorted(_output.strip().splitlines()) if _ret == ALL_OK else []
 
     def create_repos(self, protocol, server, repositories):
         """
@@ -189,7 +202,7 @@ class Yum(Pms):
         cmd = [self._pm, '--import', file_key]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def get_system_architecture(self):
         """
@@ -201,16 +214,31 @@ class Yum(Pms):
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
-        return _arch.strip() if _ret == 0 else ''
+        return _arch.strip() if _ret == ALL_OK else ''
 
     def available_packages(self):
         """
         list available_packages(void)
         """
 
-        cmd = f"{self._pms} --quiet list available | awk -F. '{{print $1}}' | grep -v '^ ' | sed '1d'"
-        logger.debug(cmd)
+        cmd = [self._pms, '--quiet', 'list', 'available']
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False)
+        if _ret != ALL_OK:
+            return []
 
-        return sorted(_output.strip().splitlines()) if _ret == 0 else []
+        # Parse output: "package.architecture version repository"
+        # We only need the package name
+        result = []
+        for line in _output.strip().splitlines():
+            line = line.strip()
+            if not line or line.startswith('Available Packages'):
+                continue
+            # package.architecture
+            pkg_part = line.split()[0]
+            # remove .architecture if present
+            pkg_name = pkg_part.split('.')[0]
+            result.append(pkg_name)
+
+        return sorted(set(result))

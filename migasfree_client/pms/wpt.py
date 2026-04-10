@@ -17,8 +17,8 @@ import gettext
 import logging
 import os
 
-from ..utils import execute, write_file_if_changed
-from .pms import Pms
+from ..utils import ALL_OK, execute, write_file_if_changed
+from .pms import Pms, invalidate_installed_cache
 
 _ = gettext.gettext
 
@@ -39,12 +39,14 @@ class Wpt(Pms):
 
         self._name = 'wpt'  # Package Management System name
         self._pms = 'wpt'  # Package Management System command
-        self._repo = os.path.join(os.getenv('PROGRAMDATA'), self._name, 'sources.list')  # Repositories file
+        program_data = os.getenv('PROGRAMDATA', 'C:\\ProgramData')
+        self._repo = os.path.join(program_data, self._name, 'sources.list')  # Repositories file
         self._mimetype = [
             'application/gzip',
             'application/x-gzip',
         ]
 
+    @invalidate_installed_cache
     def install(self, package):
         """
         bool install(string package)
@@ -53,8 +55,9 @@ class Wpt(Pms):
         cmd = [self._pms, 'install', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
+    @invalidate_installed_cache
     def remove(self, package):
         """
         bool remove(string package)
@@ -63,7 +66,7 @@ class Wpt(Pms):
         cmd = [self._pms, 'remove', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def search(self, pattern):
         """
@@ -73,8 +76,9 @@ class Wpt(Pms):
         cmd = [self._pms, 'search', pattern.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
+    @invalidate_installed_cache
     def update_silent(self):
         """
         (bool, string) update_silent(void)
@@ -85,56 +89,67 @@ class Wpt(Pms):
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
-        return _ret == 0, _error
+        return _ret == ALL_OK, _error
+
+    @invalidate_installed_cache
+    def _execute_silent(self, action, package_set):
+        """
+        (bool, string) _execute_silent(string action, list package_set)
+        Common logic for install_silent and remove_silent
+        """
+
+        if not isinstance(package_set, list):
+            return False, f'package_set is not a list: {package_set}'
+
+        installed = self._get_installed_packages()
+
+        if action == 'install':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() not in installed]
+        elif action == 'remove':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() in installed]
+
+        if not package_set:
+            return True, None
+
+        cmd = [self._pms, '--assume-yes', action, *package_set]
+        logger.debug(' '.join(cmd))
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
+
+        return _ret == ALL_OK, _error
 
     def install_silent(self, package_set):
         """
         (bool, string) install_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, '--assume-yes', 'install', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, _error
+        return self._execute_silent('install', package_set)
 
     def remove_silent(self, package_set):
         """
         (bool, string) remove_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, '--assume-yes', 'remove', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, _error
+        return self._execute_silent('remove', package_set)
 
     def is_installed(self, package):
         """
         bool is_installed(string package)
         """
 
-        cmd = [self._pms, 'status', '--is-installed', package.strip()]
-        logger.debug(' '.join(cmd))
+        return package.strip() in self._get_installed_packages()
 
-        return execute(cmd, interactive=False)[0] == 0
+    def _get_installed_packages(self):
+        """
+        set _get_installed_packages(void)
+        """
 
+        if self._installed_cache is None:
+            self._installed_cache = {pkg.split('_')[0] for pkg in self.query_all()}
+
+        return self._installed_cache
+
+    @invalidate_installed_cache
     def clean_all(self):
         """
         bool clean_all(void)
@@ -143,7 +158,7 @@ class Wpt(Pms):
         cmd = [self._pms, 'clean']
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def query_all(self):
         """
@@ -154,8 +169,8 @@ class Wpt(Pms):
         cmd = [self._pms, '--quiet', 'list', '--all', '--summary']
         logger.debug(' '.join(cmd))
 
-        _, packages, _ = execute(cmd, interactive=False)
-        if not packages:
+        _ret, packages, _ = execute(cmd, interactive=False)
+        if _ret != ALL_OK or not packages:
             return []
 
         return [f'{item.strip()}.tar.gz' for item in packages.splitlines()]
@@ -173,6 +188,7 @@ class Wpt(Pms):
 
         return write_file_if_changed(self._repo, content)
 
+    @invalidate_installed_cache
     def import_server_key(self, file_key):
         """
         bool import_server_key(string file_key)
@@ -182,7 +198,7 @@ class Wpt(Pms):
         cmd = [self._pms, 'import-key', file_key]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd, interactive=False)[0] == 0
+        return execute(cmd, interactive=False)[0] == ALL_OK
 
     def get_system_architecture(self):
         """
@@ -201,4 +217,4 @@ class Wpt(Pms):
 
         _ret, _output, _error = execute(cmd, interactive=False)
 
-        return sorted(_output.strip().splitlines()) if _ret == 0 else []
+        return sorted(_output.strip().splitlines()) if _ret == ALL_OK else []

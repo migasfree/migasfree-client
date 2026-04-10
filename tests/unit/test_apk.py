@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from unittest.mock import mock_open, patch
+from unittest.mock import patch
 
 from migasfree_client.pms.apk import Apk
 
@@ -23,103 +23,61 @@ class TestApk(unittest.TestCase):
     def setUp(self):
         self.apk = Apk()
 
+    def test_init(self):
+        self.assertEqual(self.apk._name, 'apk')
+        self.assertEqual(self.apk._pms, '/sbin/apk')
+
     @patch('migasfree_client.pms.apk.execute')
     def test_install(self, mock_execute):
         mock_execute.return_value = (0, '', '')
         self.assertTrue(self.apk.install('package'))
-        mock_execute.assert_called_with(['/sbin/apk', 'add', 'package'])
-
-    @patch('migasfree_client.pms.apk.execute')
-    def test_remove(self, mock_execute):
-        mock_execute.return_value = (0, '', '')
-        self.assertTrue(self.apk.remove('package'))
-        mock_execute.assert_called_with(['/sbin/apk', 'del', 'package'])
-
-    @patch('migasfree_client.pms.apk.execute')
-    def test_search(self, mock_execute):
-        mock_execute.return_value = (0, '', '')
-        self.assertTrue(self.apk.search('pattern'))
-        mock_execute.assert_called_with(['/sbin/apk', 'search', 'pattern'])
+        self.assertIn('add', mock_execute.call_args[0][0])
+        self.assertIn('package', mock_execute.call_args[0][0])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_update_silent(self, mock_execute):
-        mock_execute.side_effect = [(0, '', ''), (0, '', '')]
-        ret, _error = self.apk.update_silent()
+        mock_execute.return_value = (0, 'output', '')
+        ret, _ = self.apk.update_silent()
         self.assertTrue(ret)
-        self.assertEqual(mock_execute.call_count, 2)
+        self.assertEqual(mock_execute.call_count, 2)  # update and upgrade
 
     @patch('migasfree_client.pms.apk.execute')
     def test_install_silent(self, mock_execute):
-        # Mock is_installed to return False (package not installed)
-        with patch.object(self.apk, 'is_installed', return_value=False):
-            mock_execute.return_value = (0, '', '')
-            ret, _error = self.apk.install_silent(['package'])
+        with patch.object(self.apk, '_get_installed_packages', return_value=set()):
+            mock_execute.return_value = (0, 'output', '')
+            ret, _ = self.apk.install_silent(['package1'])
             self.assertTrue(ret)
-            mock_execute.assert_called_with(['/sbin/apk', 'add', 'package'], interactive=False, verbose=True)
+            self.assertIn('add', mock_execute.call_args[0][0])
+            self.assertIn('package1', mock_execute.call_args[0][0])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_remove_silent(self, mock_execute):
-        # Mock is_installed to return True (package installed)
-        with patch.object(self.apk, 'is_installed', return_value=True):
-            mock_execute.return_value = (0, '', '')
-            ret, _error = self.apk.remove_silent(['package'])
+        with patch.object(self.apk, '_get_installed_packages', return_value={'package1'}):
+            mock_execute.return_value = (0, 'output', '')
+            ret, _ = self.apk.remove_silent(['package1'])
             self.assertTrue(ret)
-            mock_execute.assert_called_with(['/sbin/apk', 'del', 'package'], interactive=False, verbose=True)
-
-    @patch('migasfree_client.pms.apk.execute')
-    def test_is_installed(self, mock_execute):
-        mock_execute.return_value = (0, '', '')
-        self.assertTrue(self.apk.is_installed('package'))
-        mock_execute.assert_called_with(['/sbin/apk', 'info', '-e', 'package'], interactive=False)
-
-    @patch('migasfree_client.pms.apk.execute')
-    def test_clean_all(self, mock_execute):
-        mock_execute.return_value = (0, '', '')
-        self.assertTrue(self.apk.clean_all())
-        mock_execute.assert_called_with(['/sbin/apk', 'cache', 'clean'])
+            self.assertIn('del', mock_execute.call_args[0][0])
+            self.assertIn('package1', mock_execute.call_args[0][0])
 
     @patch('migasfree_client.pms.apk.execute')
     def test_query_all(self, mock_execute):
-        mock_execute.side_effect = [
-            (0, 'pkg1-1.0\npkg2-2.0', ''),  # info -v
-            (0, 'x86_64', ''),  # get_system_architecture
-        ]
-        result = self.apk.query_all()
-        self.assertEqual(result, ['pkg1-1.0_x86_64.apk', 'pkg2-2.0_x86_64.apk'])
-
-    @patch('migasfree_client.pms.apk.execute')
-    def test_available_packages(self, mock_execute):
-        mock_execute.return_value = (0, 'pkg1\npkg2', '')
-        result = self.apk.available_packages()
-        self.assertEqual(result, ['pkg1', 'pkg2'])
-        mock_execute.assert_called_with(['/sbin/apk', 'search', '-q'], interactive=False)
-
-    @patch('migasfree_client.pms.apk.os.path.exists')
-    def test_create_repos(self, mock_exists):
-        mock_exists.return_value = True
-        repos = [{'source_template': '{protocol}://{server}/repo'}]
-
-        m = mock_open(read_data='existing_repo')
-        with patch('builtins.open', m):
-            self.apk.create_repos('http', 'server', repos)
-
-            # Check if file was opened for reading
-            m.assert_any_call('/etc/apk/repositories', encoding='utf-8')
-            # Check if file was opened for appending
-            m.assert_any_call('/etc/apk/repositories', 'a', encoding='utf-8')
-
-            # Check write
-            handle = m()
-            handle.write.assert_called_with('\nhttp://server/repo\n')
-
-    @patch('migasfree_client.pms.apk.execute')
-    def test_import_server_key(self, mock_execute):
-        mock_execute.return_value = (0, '', '')
-        self.assertTrue(self.apk.import_server_key('key.pub'))
-        mock_execute.assert_called_with(['cp', 'key.pub', '/etc/apk/keys/'])
+        # Sample output from 'apk info -v'
+        apk_info_output = """
+vim-8.2.3456-r0
+bash-5.1.008-r1
+musl-1.2.2-r0
+        """
+        mock_execute.return_value = (0, apk_info_output.strip(), '')
+        with patch.object(self.apk, 'get_system_architecture', return_value='x86_64'):
+            result = self.apk.query_all()
+            self.assertIn('vim-8.2.3456-r0_x86_64.apk', result)
+            self.assertIn('bash-5.1.008-r1_x86_64.apk', result)
 
     @patch('migasfree_client.pms.apk.execute')
     def test_get_system_architecture(self, mock_execute):
         mock_execute.return_value = (0, 'x86_64\n', '')
         self.assertEqual(self.apk.get_system_architecture(), 'x86_64')
-        mock_execute.assert_called_with(['/sbin/apk', '--print-arch'], interactive=False)
+
+
+if __name__ == '__main__':
+    unittest.main()

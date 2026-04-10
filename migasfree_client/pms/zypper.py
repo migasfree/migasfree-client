@@ -15,8 +15,8 @@
 
 import logging
 
-from ..utils import execute
-from .pms import Pms
+from ..utils import ALL_OK, execute
+from .pms import Pms, invalidate_installed_cache
 from .yum import Yum
 
 __author__ = 'Jose Antonio Chavarría'
@@ -38,6 +38,7 @@ class Zypper(Yum):
         self._pms = '/usr/bin/zypper'  # Package Management System command
         self._repo = '/etc/zypp/repos.d/migasfree.repo'  # Repositories file
 
+    @invalidate_installed_cache
     def install(self, package):
         """
         bool install(string package)
@@ -46,8 +47,8 @@ class Zypper(Yum):
         cmd = [self._pms, 'install', '--no-force-resolution', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
-
+        return execute(cmd)[0] == ALL_OK
+    @invalidate_installed_cache
     def update_silent(self):
         """
         (bool, string) update_silent(void)
@@ -57,7 +58,7 @@ class Zypper(Yum):
         logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
-        if _ret != 0:
+        if _ret != ALL_OK:
             return False, f'{_ret}\n{_output}\n{_error}'
 
         cmd = [self._pms, 'lu', '-a']
@@ -65,46 +66,54 @@ class Zypper(Yum):
 
         _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
 
-        return _ret == 0, f'{_ret}\n{_output}\n{_error}'
+        return _ret == ALL_OK, f'{_ret}\n{_output}\n{_error}'
+
+    @invalidate_installed_cache
+    def _execute_silent(self, action, package_set):
+        """
+        (bool, string) _execute_silent(string action, list package_set)
+        Common logic for install_silent and remove_silent
+        """
+
+        if not isinstance(package_set, list):
+            return False, f'package_set is not a list: {package_set}'
+
+        installed = self._get_installed_packages()
+
+        if action == 'install':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() not in installed]
+        elif action == 'remove':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() in installed]
+
+        if not package_set:
+            return True, None
+
+        cmd = [self._pms, '--non-interactive', action]
+        if action == 'install':
+            cmd.append('--no-force-resolution')
+        cmd.extend(package_set)
+
+        logger.debug(' '.join(cmd))
+
+        _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
+
+        return _ret == ALL_OK, f'{_ret}\n{_output}\n{_error}'
 
     def install_silent(self, package_set):
         """
         (bool, string) install_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, '--non-interactive', 'install', '--no-force-resolution', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, f'{_ret}\n{_output}\n{_error}'
+        return self._execute_silent('install', package_set)
 
     def remove_silent(self, package_set):
         """
         (bool, string) remove_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
+        return self._execute_silent('remove', package_set)
 
-        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, '--non-interactive', 'remove', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _output, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, f'{_ret}\n{_output}\n{_error}'
-
+    @invalidate_installed_cache
     def clean_all(self):
         """
         bool clean_all(void)
@@ -113,11 +122,11 @@ class Zypper(Yum):
         cmd = [self._pms, 'clean', '--all']
         logger.debug(' '.join(cmd))
 
-        if execute(cmd)[0] == 0:
+        if execute(cmd)[0] == ALL_OK:
             cmd = [self._pms, '--non-interactive', 'refresh']
             logger.debug(' '.join(cmd))
 
-            return execute(cmd)[0] == 0
+            return execute(cmd)[0] == ALL_OK
 
         return False
 
@@ -131,16 +140,33 @@ class Zypper(Yum):
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
-        return _arch.strip() if _ret == 0 else ''
+        return _arch.strip() if _ret == ALL_OK else ''
 
     def available_packages(self):
         """
         list available_packages(void)
         """
 
-        cmd = f"{self._pms} pa | awk -F'|' '{{print $3}}'"
-        logger.debug(cmd)
+        cmd = [self._pms, 'pa']
+        logger.debug(' '.join(cmd))
 
         _ret, _output, _error = execute(cmd, interactive=False)
+        if _ret != ALL_OK:
+            return []
 
-        return sorted(_output.strip().splitlines()) if _ret == 0 else []
+        # Parse output: " [i+] | repository | package_name | version | architecture"
+        # We only need the package name
+        result = []
+        for line in _output.strip().splitlines():
+            line = line.strip()
+            # Skip headers or empty lines
+            if not line or '|' not in line or line.startswith('S |'):
+                continue
+
+            parts = line.split('|')
+            if len(parts) >= 3:
+                # Column 2 is package name
+                pkg_name = parts[2].strip()
+                result.append(pkg_name)
+
+        return sorted(set(result))

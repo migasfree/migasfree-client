@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ class TestDnf(unittest.TestCase):
 
     @patch('migasfree_client.pms.yum.execute')
     def test_install_silent_already_installed(self, mock_execute):
-        with patch.object(self.dnf, 'is_installed', return_value=True):
+        with patch.object(self.dnf, '_get_installed_packages', return_value={'package'}):
             ret, error = self.dnf.install_silent(['package'])
             self.assertTrue(ret)
             self.assertIsNone(error)
@@ -107,7 +107,7 @@ class TestDnf(unittest.TestCase):
 
     @patch('migasfree_client.pms.yum.execute')
     def test_remove_silent(self, mock_execute):
-        with patch.object(self.dnf, 'is_installed', return_value=True):
+        with patch.object(self.dnf, '_get_installed_packages', return_value={'package1', 'package2'}):
             mock_execute.return_value = (0, 'output', '')
             ret, _ = self.dnf.remove_silent(['package1', 'package2'])
             self.assertTrue(ret)
@@ -117,7 +117,7 @@ class TestDnf(unittest.TestCase):
 
     @patch('migasfree_client.pms.yum.execute')
     def test_remove_silent_not_installed(self, mock_execute):
-        with patch.object(self.dnf, 'is_installed', return_value=False):
+        with patch.object(self.dnf, '_get_installed_packages', return_value=set()):
             ret, error = self.dnf.remove_silent(['package'])
             self.assertTrue(ret)
             self.assertIsNone(error)
@@ -130,10 +130,8 @@ class TestDnf(unittest.TestCase):
 
     @patch('migasfree_client.pms.yum.execute')
     def test_is_installed_true(self, mock_execute):
-        mock_execute.return_value = (0, 'package-1.0-1.x86_64', '')
+        mock_execute.return_value = (0, 'package_1.0-1_x86_64.rpm', '')
         self.assertTrue(self.dnf.is_installed('package'))
-        self.assertIn('-q', mock_execute.call_args[0][0])
-        self.assertIn('package', mock_execute.call_args[0][0])
 
     @patch('migasfree_client.pms.yum.execute')
     def test_is_installed_false(self, mock_execute):

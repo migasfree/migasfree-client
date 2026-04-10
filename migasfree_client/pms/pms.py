@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,22 @@
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
+
+
+def invalidate_installed_cache(func):
+    """
+    Decorator to invalidate the installed packages cache if the method is successful.
+    """
+
+    def wrapper(self, *args, **kwargs):
+        res = func(self, *args, **kwargs)
+        # If returns (bool, str) or just bool, check the success
+        success = res[0] if isinstance(res, tuple) else res
+        if success:
+            self._installed_cache = None
+        return res
+
+    return wrapper
 
 
 class Pms:
@@ -42,6 +58,7 @@ class Pms:
         return decorator
 
     def __init__(self):
+        self._installed_cache = None
         self._name = ''  # Package Management System name
         self._pm = ''  # Package Manager command
         self._pms = ''  # Package Management System command

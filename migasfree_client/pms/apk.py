@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@ import gettext
 import logging
 import os
 
-from ..utils import execute
-from .pms import Pms
+from ..utils import ALL_OK, execute
+from .pms import Pms, invalidate_installed_cache
 
 _ = gettext.gettext
 
@@ -42,6 +42,7 @@ class Apk(Pms):
         self._repo = '/etc/apk/repositories'
         self._mimetype = ['application/vnd.alpine.apk']
 
+    @invalidate_installed_cache
     def install(self, package):
         """
         bool install(string package)
@@ -50,8 +51,9 @@ class Apk(Pms):
         cmd = [self._pms, 'add', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
+    @invalidate_installed_cache
     def remove(self, package):
         """
         bool remove(string package)
@@ -60,7 +62,7 @@ class Apk(Pms):
         cmd = [self._pms, 'del', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def search(self, pattern):
         """
@@ -70,8 +72,9 @@ class Apk(Pms):
         cmd = [self._pms, 'search', pattern.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
+    @invalidate_installed_cache
     def update_silent(self):
         """
         (bool, string) update_silent(void)
@@ -82,63 +85,74 @@ class Apk(Pms):
 
         _ret, _, _error = execute(cmd, interactive=False, verbose=True)
 
-        if _ret == 0:
+        if _ret == ALL_OK:
             cmd = [self._pms, 'upgrade']
             logger.debug(' '.join(cmd))
             _ret, _, _error_upgrade = execute(cmd, interactive=False, verbose=True)
             if _error_upgrade:
                 _error = f'{_error}\n{_error_upgrade}' if _error else _error_upgrade
 
-        return _ret == 0, _error
+        return _ret == ALL_OK, _error
+
+    @invalidate_installed_cache
+    def _execute_silent(self, action, package_set):
+        """
+        (bool, string) _execute_silent(string action, list package_set)
+        Common logic for install_silent and remove_silent
+        """
+
+        if not isinstance(package_set, list):
+            return False, f'package_set is not a list: {package_set}'
+
+        installed = self._get_installed_packages()
+
+        if action == 'add':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() not in installed]
+        elif action == 'del':
+            package_set = [pkg.strip() for pkg in package_set if pkg.strip() in installed]
+
+        if not package_set:
+            return True, None
+
+        cmd = [self._pms, action, *package_set]
+        logger.debug(' '.join(cmd))
+
+        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
+
+        return _ret == ALL_OK, _error
 
     def install_silent(self, package_set):
         """
         (bool, string) install_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if not self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, 'add', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, _error
+        return self._execute_silent('add', package_set)
 
     def remove_silent(self, package_set):
         """
         (bool, string) remove_silent(list package_set)
         """
 
-        if not isinstance(package_set, list):
-            return False, f'package_set is not a list: {package_set}'
-
-        package_set = [pkg for pkg in package_set if self.is_installed(pkg)]
-        if not package_set:
-            return True, None
-
-        cmd = [self._pms, 'del', *package_set]
-        logger.debug(' '.join(cmd))
-
-        _ret, _, _error = execute(cmd, interactive=False, verbose=True)
-
-        return _ret == 0, _error
+        return self._execute_silent('del', package_set)
 
     def is_installed(self, package):
         """
         bool is_installed(string package)
         """
 
-        cmd = [self._pms, 'info', '-e', package.strip()]
-        logger.debug(' '.join(cmd))
+        return package.strip() in self._get_installed_packages()
 
-        return execute(cmd, interactive=False)[0] == 0
+    def _get_installed_packages(self):
+        """
+        set _get_installed_packages(void)
+        """
 
+        if self._installed_cache is None:
+            self._installed_cache = {pkg.split('_')[0] for pkg in self.query_all()}
+
+        return self._installed_cache
+
+    @invalidate_installed_cache
     def clean_all(self):
         """
         bool clean_all(void)
@@ -147,7 +161,7 @@ class Apk(Pms):
         cmd = [self._pms, 'cache', 'clean']
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def query_all(self):
         """
@@ -158,8 +172,8 @@ class Apk(Pms):
         cmd = [self._pms, 'info', '-v']
         logger.debug(' '.join(cmd))
 
-        _, _packages, _ = execute(cmd, interactive=False)
-        if not _packages:
+        _ret, _packages, _ = execute(cmd, interactive=False)
+        if _ret != ALL_OK or not _packages:
             return []
 
         arch = self.get_system_architecture()
@@ -195,6 +209,7 @@ class Apk(Pms):
 
         return True
 
+    @invalidate_installed_cache
     def import_server_key(self, file_key):
         """
         bool import_server_key(string file_key)
@@ -203,7 +218,7 @@ class Apk(Pms):
         cmd = ['cp', file_key, '/etc/apk/keys/']
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def get_system_architecture(self):
         """
@@ -215,7 +230,7 @@ class Apk(Pms):
 
         _ret, _arch, _ = execute(cmd, interactive=False)
 
-        return _arch.strip() if _ret == 0 else ''
+        return _arch.strip() if _ret == ALL_OK else ''
 
     def available_packages(self):
         """
@@ -227,4 +242,4 @@ class Apk(Pms):
 
         _ret, _output, _error = execute(cmd, interactive=False)
 
-        return sorted(_output.strip().splitlines()) if _ret == 0 else []
+        return sorted(_output.strip().splitlines()) if _ret == ALL_OK else []

@@ -18,29 +18,13 @@ import os
 import re
 import tempfile
 
-from ..utils import execute, sanitize_path, write_file, write_file_if_changed
-from .pms import Pms
+from ..utils import ALL_OK, execute, sanitize_path, write_file, write_file_if_changed
+from .pms import Pms, invalidate_installed_cache
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 logger = logging.getLogger('migasfree_client')
-
-
-def invalidate_installed_cache(func):
-    """
-    Decorator to invalidate the installed packages cache if the method is successful.
-    """
-
-    def wrapper(self, *args, **kwargs):
-        res = func(self, *args, **kwargs)
-        # If returns (bool, str) or just bool, check the success
-        success = res[0] if isinstance(res, tuple) else res
-        if success:
-            self._installed_cache = None
-        return res
-
-    return wrapper
 
 
 @Pms.register('Apt')
@@ -51,7 +35,6 @@ class Apt(Pms):
 
     def __init__(self):
         super().__init__()
-        self._installed_cache = None
 
         self._name = 'apt'  # Package Management System name
         self._pm = '/usr/bin/dpkg'  # Package Manager command
@@ -95,7 +78,7 @@ class Apt(Pms):
         cmd = [*self._pms, 'install', '-o', 'APT::Get::Purge=true', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     @invalidate_installed_cache
     def remove(self, package):
@@ -106,7 +89,7 @@ class Apt(Pms):
         cmd = [*self._pms, 'purge', package.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     def search(self, pattern):
         """
@@ -116,7 +99,7 @@ class Apt(Pms):
         cmd = [self._pms_search, 'search', pattern.strip()]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd)[0] == 0
+        return execute(cmd)[0] == ALL_OK
 
     @invalidate_installed_cache
     def update_silent(self):
@@ -129,7 +112,7 @@ class Apt(Pms):
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
 
-        return ret == 0, f'{output}{error}'
+        return ret == ALL_OK, f'{output}{error}'
 
     @invalidate_installed_cache
     def _execute_silent(self, action, package_set):
@@ -157,7 +140,7 @@ class Apt(Pms):
 
         ret, output, error = execute(cmd, interactive=False, verbose=True)
 
-        return ret == 0, f'{output}{error}'
+        return ret == ALL_OK, f'{output}{error}'
 
     def _get_installed_packages(self):
         """
@@ -199,7 +182,7 @@ class Apt(Pms):
         cmd = [*self._pms, 'clean']
         logger.debug(' '.join(cmd))
 
-        if execute(cmd)[0] == 0:
+        if execute(cmd)[0] == ALL_OK:
             cmd = ['rm', '--recursive', '--force', '/var/lib/apt/lists']
             logger.debug(' '.join(cmd))
             execute(cmd)
@@ -207,7 +190,7 @@ class Apt(Pms):
             cmd = [*self._pms, '-o', 'Acquire::Languages=none', '--assume-yes', 'update']
             logger.debug(' '.join(cmd))
 
-            return execute(cmd)[0] == 0
+            return execute(cmd)[0] == ALL_OK
 
         return False
 
@@ -281,7 +264,7 @@ class Apt(Pms):
             cmd = ['/usr/bin/apt', 'modernize-sources', list_path]
             logging.debug(' '.join(cmd))
             ret, _, err = execute(cmd, interactive=False, input_data='y\n')
-            if ret != 0:
+            if ret != ALL_OK:
                 logging.error('apt modernize-sources failed: %s', str(err))
                 return ''
 
@@ -304,7 +287,7 @@ class Apt(Pms):
         cmd = [self._pms[2], '--version']
         ret, output, _ = execute(cmd, interactive=False)
 
-        if ret != 0 or not output:
+        if ret != ALL_OK or not output:
             return (2, 0)
 
         # Expected format: "apt 2.9.21 (amd64)"
@@ -355,7 +338,7 @@ class Apt(Pms):
         cmd = ['gpg', '--output', key_target, '--dearmor', '--yes', file_key]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd, interactive=False)[0] == 0
+        return execute(cmd, interactive=False)[0] == ALL_OK
 
     def get_system_architecture(self):
         """
@@ -371,7 +354,7 @@ class Apt(Pms):
         logger.debug(' '.join(cmd))
         _, foreign_arch, _ = execute(cmd, interactive=False)
 
-        if ret != 0:
+        if ret != ALL_OK:
             return ''
 
         result = f'{arch.strip()} {foreign_arch.strip()}'.strip()
@@ -389,4 +372,4 @@ class Apt(Pms):
 
         ret, output, _ = execute(cmd, interactive=False)
 
-        return sorted(output.strip().splitlines()) if ret == 0 else []
+        return sorted(output.strip().splitlines()) if ret == ALL_OK else []
