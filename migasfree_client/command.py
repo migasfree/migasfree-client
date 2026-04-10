@@ -709,10 +709,10 @@ class MigasFreeCommand:
             self.console.print('\t{}: {}'.format(_('Architecture'), self.pms.get_system_architecture()))
 
     def _write_error(self, msg, append=False):
-        _mode = 'a' if append else 'wb'
+        _mode = 'ab' if append else 'wb'
 
         if not self._error_file_descriptor:
-            self._error_file_descriptor = open(self.ERROR_FILE, _mode, encoding='utf8')  # noqa: SIM115
+            self._error_file_descriptor = open(self.ERROR_FILE, _mode)  # noqa: SIM115
 
         _text = '{}\n{}\n{}\n\n'.format('-' * 20, time.strftime('%Y-%m-%d %H:%M:%S'), str(msg))
         _text = bytes(_text, encoding='utf8')

@@ -18,6 +18,8 @@ Tests for MigasFreeCommand base class functionality.
 """
 
 import errno
+import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -31,11 +33,14 @@ class TestMigasFreeCommandBase(unittest.TestCase):
     @patch('migasfree_client.utils.get_config', return_value={})
     @patch('migasfree_client.command.logging.config.dictConfig')
     def setUp(self, mock_log_config, mock_config, mock_root):
-        with patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), patch(
-            'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
-        ):
+        test_tmp = tempfile.gettempdir()
+        with patch('migasfree_client.settings.TMP_PATH', test_tmp), \
+             patch('migasfree_client.settings.CONF_FILE', os.path.join(test_tmp, 'migasfree.conf')), \
+             patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), \
+             patch('migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'):
             self.cmd = MigasFreeCommand()
             self.cmd._url_base = 'http://localhost'
+            self.cmd._url_request = MagicMock()
             # Initialize missing attributes normally set during _init_command
             self.cmd.migas_ssl_cert = False
             self.cmd._mtls_cert = None
@@ -103,6 +108,35 @@ class TestMigasFreeCommandBase(unittest.TestCase):
         response = {'error': {'info': 'API Error', 'code': 404}}
         self.cmd._handle_response(response)
         mock_exit.assert_called_with(errno.ENODATA)
+
+    def test_get_computer_id_success(self):
+        """Test fetching computer ID from server"""
+        self.cmd._url_request.run.return_value = 999
+        with patch.object(self.cmd, '_get_keys_path', return_value='/tmp'), \
+             patch('os.path.isfile', return_value=True), \
+             patch.object(self.cmd, 'api_endpoint', return_value='http://api'), \
+             patch('migasfree_client.utils.get_hardware_uuid', return_value='uuid'):
+            self.cmd.get_computer_id()
+            self.assertEqual(self.cmd._computer_id, 999)
+
+    @patch('builtins.open', new_callable=unittest.mock.mock_open)
+    def test_write_error(self, mock_open):
+        """Test writing error message to file"""
+        self.cmd.ERROR_FILE = '/tmp/errors'
+        self.cmd._write_error('Some error')
+        mock_open.assert_called_once()
+
+    @patch('os.path.isdir', return_value=True)
+    def test_check_path_exists(self, mock_isdir):
+        """Test check_path returns True if directory exists"""
+        self.assertTrue(self.cmd._check_path('/some/dir'))
+
+    @patch('os.path.isdir', return_value=False)
+    @patch('os.makedirs')
+    def test_check_path_creates(self, mock_makedirs, mock_isdir):
+        """Test check_path creates directory if missing"""
+        self.assertTrue(self.cmd._check_path('/new/dir'))
+        mock_makedirs.assert_called_once()
 
 
 if __name__ == '__main__':
