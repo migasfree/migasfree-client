@@ -121,6 +121,18 @@ def import_mtls_certificate(cert_tar_file, server, password=None):
             logger.debug('Extracting tar file to: %s', temp_dir)
 
             with tarfile.open(cert_tar_file, 'r') as tar:
+
+                def is_within_directory(directory, target):
+                    abs_directory = os.path.abspath(directory)
+                    abs_target = os.path.abspath(target)
+                    prefix = os.path.commonprefix([abs_directory, abs_target])
+                    return prefix == abs_directory
+
+                for member in tar.getmembers():
+                    member_path = os.path.join(temp_dir, member.name)
+                    if not is_within_directory(temp_dir, member_path):
+                        return {'success': False, 'message': _('Possible path traversal attack in tar file')}
+
                 tar.extractall(path=temp_dir)
 
                 p12_file = None

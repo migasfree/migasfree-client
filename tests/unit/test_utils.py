@@ -2,7 +2,9 @@
 Unit tests for migasfree_client.utils module
 """
 
+import contextlib
 import os
+import subprocess
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -679,7 +681,6 @@ class TestKillProcess:
     @pytest.mark.skipif(sys.platform == 'win32', reason='Unix-only test')
     def test_kill_process(self):
         """Test _kill_process terminates a process"""
-        import subprocess
 
         # Start a long-running process
         process = subprocess.Popen(['sleep', '60'])
@@ -687,10 +688,10 @@ class TestKillProcess:
 
         utils._kill_process(process)
 
-        # Give it time to terminate
-        import time
+        # Wait for the process to be cleaned up
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            process.wait(timeout=1)
 
-        time.sleep(0.1)
         assert process.poll() is not None  # Now terminated
 
 
