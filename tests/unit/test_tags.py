@@ -23,7 +23,11 @@ class TestMigasFreeTags(unittest.TestCase):
     @patch('migasfree_client.utils.is_root_user', return_value=True)
     @patch('migasfree_client.utils.get_config', return_value={})
     @patch('migasfree_client.command.logging.config.dictConfig')
-    def setUp(self, mock_log_config, mock_config, mock_root):
+    @patch('migasfree_client.command.UrlRequest')
+    def setUp(self, mock_url_req_class, mock_log_config, mock_config, mock_root):
+        self.mock_url_request = MagicMock()
+        mock_url_req_class.return_value = self.mock_url_request
+
         with patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), patch(
             'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
         ):
@@ -32,10 +36,11 @@ class TestMigasFreeTags(unittest.TestCase):
             self.tags._computer_id = '123'
             self.tags.LOCK_FILE = 'test.lock'
             self.tags.CMD = 'migasfree'
-            # Pre-initialize needed mocks to avoid deco-triggered real init
-            self.tags._url_request = MagicMock()
+            self.tags._url_request = self.mock_url_request
             self.tags._private_key = 'priv'
             self.tags._public_key = 'pub'
+            # Globally mock end_of_transmission to avoid security key reading
+            self.tags.end_of_transmission = MagicMock()
 
     def test_sanitize_valid_tags(self):
         """Test sanitization of valid tag list"""
@@ -113,9 +118,10 @@ class TestMigasFreeTags(unittest.TestCase):
         args.communicate = False
         args.cmd = 'tags'
 
-        with patch.object(self.tags, 'set_tags') as mock_set:
+        with patch.object(self.tags, 'set_tags') as mock_set, patch.object(self.tags, '_apply_rules') as mock_apply:
             self.tags.run(args)
             mock_set.assert_called_once()
+            mock_apply.assert_called_once()
 
     def test_set_tags_success(self):
         """Test set_tags successful flow"""
