@@ -713,10 +713,19 @@ def get_mfc_computer_name():
 
 
 def get_smbios_version():
-    _cmd = 'LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present'
     if is_windows():
-        _cmd = 'dmidecode -t bios | findstr /i SMBIOS | findstr /i present'
+        _ret, _out, _ = execute('wmic bios get smbiosbiosversion', interactive=False)
+        if _ret == 0 and _out:
+            _lines = [line.strip() for line in _out.splitlines() if line.strip()]
+            if len(_lines) > 1:
+                # Value is in second line (first is header SMBIOSBIOSVersion)
+                try:
+                    return tuple(int(x) for x in _lines[1].split('.'))
+                except (ValueError, IndexError):
+                    pass
+        return 0, 0
 
+    _cmd = 'LC_ALL=C sudo dmidecode -t 0 | grep SMBIOS | grep present'
     _ret, _smbios, _ = execute(_cmd, interactive=False)
     if _ret != 0 or _smbios == '' or _smbios is None:
         return 0, 0
@@ -734,14 +743,20 @@ def get_uuid_from_mac():
 def get_hardware_uuid():
     _uuid_format = '%s%s%s%s-%s%s-%s%s-%s-%s'
 
-    _cmd = ['sudo', 'dmidecode', '--string', 'system-uuid']
     if is_windows():
-        _cmd = ['dmidecode', '--string', 'system-uuid']
+        _ret, _out, _ = execute('wmic csproduct get uuid', interactive=False)
+        if _ret == 0 and _out:
+            _lines = [line.strip() for line in _out.splitlines() if line.strip()]
+            _uuid = _lines[1] if len(_lines) > 1 else ''
+        else:
+            _uuid = ''
+    else:
+        _cmd = ['sudo', 'dmidecode', '--string', 'system-uuid']
+        _ret, _uuid, _ = execute(_cmd, interactive=False)
 
-    _ret, _uuid, _ = execute(_cmd, interactive=False)
     _uuid = remove_commented_lines(_uuid)
     _uuid = _uuid.strip()
-    if _ret != 0 or _uuid == '' or _uuid is None:
+    if _uuid == '' or _uuid is None:
         return get_uuid_from_mac()
 
     try:
