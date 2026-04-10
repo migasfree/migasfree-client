@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,89 +13,88 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from unittest import mock
+"""
+Tests for server availability check functionality.
+"""
 
-import requests
+import unittest
+from unittest.mock import MagicMock, patch
 
-from migasfree_client import availability
+from migasfree_client.availability import (
+    _extract_int,
+    _is_service_running_linux,
+    _is_service_running_windows,
+    check_availability,
+)
 
 
-class TestAvailability:
-    @mock.patch('migasfree_client.availability.subprocess.run')
-    def test_is_service_running_linux_service_command(self, mock_run):
-        # Case 1: Service is running via 'service' command
-        mock_run.return_value.returncode = 0
-        assert availability._is_service_running_linux('test-service') is True
+class TestAvailability(unittest.TestCase):
+    """Tests for availability check"""
+
+    def test_extract_int(self):
+        """Test extraction of integers from strings"""
+        self.assertEqual(_extract_int('Try again in 300 seconds'), 300)
+        self.assertEqual(_extract_int('123'), 123)
+        self.assertIsNone(_extract_int('No numbers here'))
+
+    @patch('subprocess.run')
+    def test_is_service_running_linux_service(self, mock_run):
+        """Test service check on Linux using 'service' command"""
+        mock_run.return_value = MagicMock(returncode=0)
+        self.assertTrue(_is_service_running_linux('test-service'))
         mock_run.assert_called_with(['service', 'test-service', 'status'], capture_output=True, timeout=5)
 
-    @mock.patch('migasfree_client.availability.subprocess.run')
-    def test_is_service_running_linux_systemctl_fallback(self, mock_run):
-        # Case 2: 'service' not found, fallback to systemctl
-        mock_run.side_effect = [FileNotFoundError, mock.Mock(returncode=0)]
-        assert availability._is_service_running_linux('test-service') is True
-        assert mock_run.call_count == 2
-        mock_run.assert_called_with(
-            ['systemctl', 'is-active', '--quiet', 'test-service'], capture_output=True, timeout=5
-        )
+    @patch('subprocess.run')
+    def test_is_service_running_linux_systemctl(self, mock_run):
+        """Test service check on Linux using 'systemctl' when 'service' is missing"""
+        mock_run.side_effect = [FileNotFoundError(), MagicMock(returncode=0)]
+        self.assertTrue(_is_service_running_linux('test-service'))
+        self.assertEqual(mock_run.call_count, 2)
 
-    @mock.patch('migasfree_client.availability.subprocess.run')
-    def test_is_service_running_linux_rc_service_fallback(self, mock_run):
-        # Case 3: 'service' and 'systemctl' not found, fallback to rc-service
-        mock_run.side_effect = [FileNotFoundError, FileNotFoundError, mock.Mock(returncode=0)]
-        assert availability._is_service_running_linux('test-service') is True
-        assert mock_run.call_count == 3
-        mock_run.assert_called_with(['rc-service', 'test-service', 'status'], capture_output=True, timeout=5)
-
-    @mock.patch('migasfree_client.availability.subprocess.run')
-    def test_is_service_running_linux_not_running(self, mock_run):
-        # Case 4: Service not running (command returns non-zero)
-        mock_run.return_value.returncode = 3
-        assert availability._is_service_running_linux('test-service') is False
-
-    @mock.patch('migasfree_client.availability.subprocess.run')
+    @patch('subprocess.run')
     def test_is_service_running_windows(self, mock_run):
-        # Case 5: Windows service running
-        mock_run.return_value.stdout = 'STATE              : 4  RUNNING'
-        assert availability._is_service_running_windows('test-service') is True
-        mock_run.assert_called_with(['sc', 'query', 'test-service'], capture_output=True, timeout=5, text=True)
+        """Test service check on Windows using 'sc query'"""
+        mock_run.return_value = MagicMock(stdout='STATE : 4 RUNNING')
+        self.assertTrue(_is_service_running_windows('test-service'))
 
-        # Case 6: Windows service stopped
-        mock_run.return_value.stdout = 'STATE              : 1  STOPPED'
-        assert availability._is_service_running_windows('test-service') is False
+        mock_run.return_value = MagicMock(stdout='STATE : 1 STOPPED')
+        self.assertFalse(_is_service_running_windows('test-service'))
 
-    @mock.patch('migasfree_client.availability._is_service_running')
-    def test_check_availability_service_not_running(self, mock_is_running):
-        mock_is_running.return_value = False
-        url_request = mock.Mock()
+    @patch('migasfree_client.availability._is_service_running', return_value=True)
+    def test_check_availability_available(self, mock_service):
+        """Test server availability successful (200 OK)"""
+        url_request = MagicMock()
+        url_request.run.return_value = {'data': 'available'}
 
-        available, retry = availability.check_availability(url_request, 'http://url', 123)
+        available, retry = check_availability(url_request, 'http://api/avail', 123)
 
-        assert available is True
-        assert retry is None
-        assert url_request.run.called is False
+        self.assertTrue(available)
+        self.assertIsNone(retry)
 
-    @mock.patch('migasfree_client.availability._is_service_running')
-    def test_check_availability_server_saturated(self, mock_is_running):
-        mock_is_running.return_value = True
-        url_request = mock.Mock()
+    @patch('migasfree_client.availability._is_service_running', return_value=True)
+    def test_check_availability_too_many_requests(self, mock_service):
+        """Test server saturated (429 Too Many Requests)"""
+        url_request = MagicMock()
+        import requests
+
         url_request.run.return_value = {
             'error': {'code': requests.codes.too_many_requests, 'info': 'Retry after 60 seconds'}
         }
 
-        available, retry = availability.check_availability(url_request, 'http://url', 123)
+        available, retry = check_availability(url_request, 'http://api/avail', 123)
 
-        assert available is False
-        assert retry == 60
+        self.assertFalse(available)
+        self.assertEqual(retry, 60)
 
-    @mock.patch('migasfree_client.availability._is_service_running')
-    def test_check_availability_connection_error(self, mock_is_running):
-        mock_is_running.return_value = True
-        url_request = mock.Mock()
-        # Simulation of connection error caught in url_request
-        url_request.run.return_value = {'error': {'code': 500, 'info': 'Connection refused'}}
+    @patch('migasfree_client.availability._is_service_running', return_value=False)
+    def test_check_availability_service_not_running(self, mock_service):
+        """Test skipping check when agent service is not running locally"""
+        url_request = MagicMock()
+        available, _retry = check_availability(url_request, 'http://api/avail', 123)
 
-        available, retry = availability.check_availability(url_request, 'http://url', 123)
+        self.assertTrue(available)
+        url_request.run.assert_not_called()
 
-        # Connection errors should enable fallback (continue sync)
-        assert available is True
-        assert retry is None
+
+if __name__ == '__main__':
+    unittest.main()

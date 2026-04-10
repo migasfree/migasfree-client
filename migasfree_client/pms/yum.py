@@ -233,7 +233,7 @@ class Yum(Pms):
         result = []
         for line in _output.strip().splitlines():
             line = line.strip()
-            if not line or line.startswith('Available Packages'):
+            if not line or line.startswith(('Available Packages', 'Loaded plugins', 'Repodata', ' *')):
                 continue
             # package.architecture
             pkg_part = line.split()[0]

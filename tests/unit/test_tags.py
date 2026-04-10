@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,220 +14,103 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-Tests for tag-related functionality.
-
-Since MigasFreeTags has complex initialization requirements (root privileges,
-logging configuration, file permissions), these tests focus on testing the
-core logic directly without importing the class.
+Tests for tag-related functionality using the MigasFreeTags class.
 """
 
-import collections
 import unittest
+from unittest.mock import MagicMock, patch
+
+from migasfree_client.tags import MigasFreeTags
 
 
-class TestTagSanitization(unittest.TestCase):
-    """Tests for tag sanitization logic"""
+class TestMigasFreeTags(unittest.TestCase):
+    """Tests for MigasFreeTags class"""
 
-    def _sanitize_tag(self, tag):
-        """
-        Simulate the sanitization logic from MigasFreeTags._sanitize
+    @patch('migasfree_client.utils.is_root_user', return_value=True)
+    @patch('migasfree_client.utils.get_config', return_value={})
+    @patch('migasfree_client.command.logging.config.dictConfig')
+    def setUp(self, mock_log_config, mock_config, mock_root):
+        with patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), patch(
+            'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
+        ):
+            self.tags = MigasFreeTags()
+            # Prevent network/file interaction by mocking internal init methods
+            self.tags._init_url_request = MagicMock()
+            self.tags._init_mtls = MagicMock()
+            self.tags._url_request = MagicMock()
 
-        Tags must be in 'prefix-value' format where:
-        - prefix: at least one character before the hyphen
-        - value: at least one character after the hyphen
-        """
-        tag = tag.replace('"', '')
-        try:
-            prefix, value = tag.split('-', 1)
-            if not prefix or not value:
-                raise ValueError('Invalid tag format')
-            return True
-        except ValueError:
-            raise ValueError('Tags must be in "prefix-value" format')  # noqa: B904
+    def test_sanitize_valid_tags(self):
+        """Test sanitization of valid tag list"""
+        tag_list = ['LOC-office1', '"DEP-marketing"']
+        result = self.tags._sanitize(tag_list)
+        self.assertEqual(result, ['LOC-office1', 'DEP-marketing'])
 
-    def test_valid_tag_single_hyphen(self):
-        """Test valid tag with single hyphen"""
-        self.assertTrue(self._sanitize_tag('LOC-office1'))
+    @patch('sys.exit')
+    @patch('migasfree_client.tags.MigasFreeTags.operation_failed')
+    def test_sanitize_invalid_format(self, mock_failed, mock_exit):
+        """Test sanitization fails when tag format is incorrect"""
+        tag_list = ['invalidtag']
+        self.tags._sanitize(tag_list)
+        mock_failed.assert_called_once()
+        mock_exit.assert_called_once()
 
-    def test_valid_tag_multiple_hyphens(self):
-        """Test valid tag with multiple hyphens (split at first hyphen)"""
-        self.assertTrue(self._sanitize_tag('LOC-sub-office-1'))
+    @patch('migasfree_client.tags.execute')
+    @patch('migasfree_client.tags.is_zenity', return_value=True)
+    @patch('migasfree_client.tags.is_xsession', return_value=True)
+    @patch('migasfree_client.tags.is_linux', return_value=True)
+    def test_select_tags_zenity_linux(self, mock_linux, mock_xsession, mock_zenity, mock_execute):
+        """Test tag selection using zenity on Linux"""
+        mock_execute.return_value = (0, 'LOC-office1\nDEP-marketing\n', '')
+        available = {'LOC': ['LOC-office1', 'LOC-office2'], 'DEP': ['DEP-marketing']}
+        assigned = ['LOC-office1']
 
-    def test_valid_tag_short(self):
-        """Test minimal valid tag"""
-        self.assertTrue(self._sanitize_tag('A-B'))
+        selected = self.tags._select_tags(assigned, available)
 
-    def test_invalid_tag_no_hyphen(self):
-        """Test invalid tag without hyphen"""
-        with self.assertRaises(ValueError):
-            self._sanitize_tag('invalidtag')
-
-    def test_invalid_tag_underscore(self):
-        """Test invalid tag with underscore instead of hyphen"""
-        with self.assertRaises(ValueError):
-            self._sanitize_tag('invalid_tag')
-
-    def test_tag_with_quotes(self):
-        """Test tag with quotes are handled"""
-        self.assertTrue(self._sanitize_tag('"LOC-office1"'))
-
-    def test_tag_empty_prefix(self):
-        """Test tag with empty prefix fails"""
-        with self.assertRaises(ValueError):
-            self._sanitize_tag('-value')
-
-    def test_tag_empty_value(self):
-        """Test tag with empty value fails"""
-        with self.assertRaises(ValueError):
-            self._sanitize_tag('prefix-')
-
-
-class TestTagSelection(unittest.TestCase):
-    """Tests for tag selection logic"""
-
-    def test_available_tags_sorted(self):
-        """Test available tags dictionary is sorted by key"""
-        available = {'ZZZ': ['ZZZ-1'], 'AAA': ['AAA-1'], 'MMM': ['MMM-1']}
-        sorted_tags = collections.OrderedDict(sorted(available.items()))
-        keys = list(sorted_tags.keys())
-        self.assertEqual(keys, ['AAA', 'MMM', 'ZZZ'])
-
-    def test_tag_values_sorted(self):
-        """Test tag values within a category are sorted"""
-        values = ['LOC-z', 'LOC-a', 'LOC-m']
-        values.sort()
-        self.assertEqual(values, ['LOC-a', 'LOC-m', 'LOC-z'])
-
-    def test_tag_active_detection(self):
-        """Test detection of active tags from assigned list"""
-        assigned = ['LOC-office1', 'DEP-marketing']
-        tag = 'LOC-office1'
-        self.assertIn(tag, assigned)
-
-        tag2 = 'LOC-office2'
-        self.assertNotIn(tag2, assigned)
-
-    def test_empty_available_tags(self):
-        """Test empty available tags"""
-        available = {}
-        self.assertEqual(len(available), 0)
-
-    def test_filter_selected_tags(self):
-        """Test filtering selected tags from output"""
-        output = 'LOC-office1\nDEP-marketing\n'
-        selected = list(filter(None, output.split('\n')))
         self.assertEqual(selected, ['LOC-office1', 'DEP-marketing'])
+        # Check if zenity was called with correct icon from base class
+        args, _ = mock_execute.call_args
+        self.assertEqual(args[0][0], 'zenity')
+        icon_arg = next(arg for arg in args[0] if '--window-icon=' in arg)
+        self.assertIn('migasfree.svg', icon_arg)
+        self.assertIn('--separator=\n', args[0])
 
-    def test_filter_empty_output(self):
-        """Test filtering empty output"""
-        output = ''
-        selected = list(filter(None, output.split('\n')))
-        self.assertEqual(selected, [])
+    @patch('migasfree_client.tags.execute')
+    @patch('migasfree_client.tags.is_zenity', return_value=False)
+    @patch('migasfree_client.tags.is_xsession', return_value=False)
+    def test_select_tags_dialog(self, mock_xsession, mock_zenity, mock_execute):
+        """Test tag selection using dialog when GUI is not available"""
+        mock_execute.return_value = (0, 'LOC-office1\nDEP-office2\n', '')
+        available = {'LOC': ['LOC-office1', 'LOC-office2']}
+        assigned = []
 
+        self.tags._select_tags(assigned, available)
 
-class TestTagRules(unittest.TestCase):
-    """Tests for tag rules processing"""
+        args, _ = mock_execute.call_args
+        self.assertEqual(args[0][0], 'dialog')
+        self.assertIn('--checklist', args[0])
 
-    def test_rules_structure(self):
-        """Test expected rules structure from API"""
-        rules = {
-            'install': ['pkg1', 'pkg2'],
-            'remove': ['pkg3'],
-            'preinstall': ['pkg4'],
-        }
-        self.assertIn('install', rules)
-        self.assertIn('remove', rules)
-        self.assertIn('preinstall', rules)
-        self.assertIsInstance(rules['install'], list)
+    @patch('migasfree_client.tags.MigasFreeTags._api_call')
+    @patch('migasfree_client.tags.MigasFreeTags._handle_response')
+    def test_get_assigned_tags(self, mock_handle, mock_api):
+        """Test getting assigned tags from API"""
+        self.tags._computer_id = 123
+        self.tags.get_assigned_tags()
+        mock_api.assert_called_with('get_assigned_tags', {'id': 123})
 
-    def test_empty_rules(self):
-        """Test empty rules lists"""
-        rules = {
-            'install': [],
-            'remove': [],
-            'preinstall': [],
-        }
-        self.assertEqual(len(rules['install']), 0)
-        self.assertEqual(len(rules['remove']), 0)
-        self.assertEqual(len(rules['preinstall']), 0)
+    @patch('migasfree_client.tags.MigasFreeSync')
+    def test_apply_rules(self, mock_sync_class):
+        """Test applying rules initializes MigasFreeSync and calls its methods"""
+        mock_sync_instance = mock_sync_class.return_value
+        self.tags.pms = MagicMock()
 
+        rules = {'remove': ['pkg1'], 'preinstall': ['pkg2'], 'install': ['pkg3']}
 
-class TestZenityCommand(unittest.TestCase):
-    """Tests for zenity command building logic"""
+        self.tags._apply_rules(rules)
 
-    def _build_zenity_command(self, title, text, available_tags, assigned, linux=True):
-        """
-        Build zenity command similar to MigasFreeTags._select_tags
-        """
-        cmd = 'zenity --title="{}" --text="{}" {} --list --checklist --column=" " --column=TAG --column=TYPE'.format(
-            title,
-            text,
-            '--separator="\\n"' if linux else '',
-        )
-        for key, value in sorted(available_tags.items()):
-            value.sort()
-            for item in value:
-                tag_active = item in assigned
-                cmd += f' "{tag_active}" "{item}" "{key}"'
-        return cmd
-
-    def test_zenity_command_basic(self):
-        """Test basic zenity command structure"""
-        cmd = self._build_zenity_command('Change tags', 'Select tags', {'LOC': ['LOC-office1']}, [], linux=True)
-        self.assertIn('zenity', cmd)
-        self.assertIn('--title="Change tags"', cmd)
-        self.assertIn('--checklist', cmd)
-        self.assertIn('LOC-office1', cmd)
-
-    def test_zenity_command_with_assigned(self):
-        """Test zenity command marks assigned tags as True"""
-        cmd = self._build_zenity_command(
-            'Change tags', 'Select', {'LOC': ['LOC-office1', 'LOC-office2']}, ['LOC-office1']
-        )
-        # Assigned tag should have True
-        self.assertIn('"True" "LOC-office1"', cmd)
-        # Non-assigned should have False
-        self.assertIn('"False" "LOC-office2"', cmd)
-
-    def test_zenity_linux_separator(self):
-        """Test zenity command has separator on Linux"""
-        cmd = self._build_zenity_command('Title', 'Text', {'A': ['A-1']}, [], linux=True)
-        self.assertIn('--separator=', cmd)
-
-    def test_zenity_windows_no_separator(self):
-        """Test zenity command has no separator on Windows"""
-        cmd = self._build_zenity_command('Title', 'Text', {'A': ['A-1']}, [], linux=False)
-        self.assertNotIn('--separator=', cmd)
-
-
-class TestDialogCommand(unittest.TestCase):
-    """Tests for dialog command building logic"""
-
-    def _build_dialog_command(self, title, text, available_tags, assigned):
-        """
-        Build dialog command similar to MigasFreeTags._select_tags
-        """
-        cmd = f"dialog --backtitle '{title}' --separate-output --stdout --checklist '{text}' 0 0 8"
-        for key, value in sorted(available_tags.items()):
-            value.sort()
-            for item in value:
-                tag_active = 'on' if item in assigned else 'off'
-                cmd += f" '{item}' '{key}' {tag_active}"
-        return cmd
-
-    def test_dialog_command_basic(self):
-        """Test basic dialog command structure"""
-        cmd = self._build_dialog_command('Change tags', 'Select tags', {'LOC': ['LOC-office1']}, [])
-        self.assertIn('dialog', cmd)
-        self.assertIn("--backtitle 'Change tags'", cmd)
-        self.assertIn('--checklist', cmd)
-        self.assertIn('LOC-office1', cmd)
-
-    def test_dialog_command_with_assigned(self):
-        """Test dialog command marks assigned tags as on"""
-        cmd = self._build_dialog_command('Title', 'Text', {'LOC': ['LOC-office1', 'LOC-office2']}, ['LOC-office1'])
-        self.assertIn("'LOC-office1' 'LOC' on", cmd)
-        self.assertIn("'LOC-office2' 'LOC' off", cmd)
+        mock_sync_instance.upload_attributes.assert_called_once()
+        mock_sync_instance.uninstall_packages.assert_called_with(['pkg1'])
+        mock_sync_instance.install_mandatory_packages.assert_any_call(['pkg2'])
+        mock_sync_instance.install_mandatory_packages.assert_any_call(['pkg3'])
 
 
 if __name__ == '__main__':

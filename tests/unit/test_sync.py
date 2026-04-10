@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,615 +15,106 @@
 
 """
 Tests for sync-related functionality.
-
-Since MigasFreeSync has complex initialization requirements (root privileges,
-logging configuration, signal handlers, file permissions), these tests focus
-on testing the core logic directly without importing the class.
 """
 
 import unittest
-from collections import defaultdict
-from datetime import datetime
-
-
-class TestSoftwareHistory(unittest.TestCase):
-    """Tests for software_history static method logic"""
-
-    def test_compare_software_installed(self):
-        """Test detection of installed packages"""
-        before = ['pkg1', 'pkg2']
-        after = ['pkg1', 'pkg2', 'pkg3']
-
-        # Simulating compare_lists behavior
-        diff = [f'+{pkg}' for pkg in after if pkg not in before]
-        diff.extend([f'-{pkg}' for pkg in before if pkg not in after])
-
-        installed = [x for x in diff if x.startswith('+')]
-        uninstalled = [x for x in diff if x.startswith('-')]
-
-        self.assertEqual(installed, ['+pkg3'])
-        self.assertEqual(uninstalled, [])
-
-    def test_compare_software_uninstalled(self):
-        """Test detection of uninstalled packages"""
-        before = ['pkg1', 'pkg2', 'pkg3']
-        after = ['pkg1', 'pkg2']
-
-        diff = [f'+{pkg}' for pkg in after if pkg not in before]
-        diff.extend([f'-{pkg}' for pkg in before if pkg not in after])
-
-        installed = [x for x in diff if x.startswith('+')]
-        uninstalled = [x for x in diff if x.startswith('-')]
-
-        self.assertEqual(installed, [])
-        self.assertEqual(uninstalled, ['-pkg3'])
-
-    def test_compare_software_mixed(self):
-        """Test detection of mixed changes"""
-        before = ['pkg1', 'pkg2', 'pkg3']
-        after = ['pkg1', 'pkg2', 'pkg4']
-
-        diff = [f'+{pkg}' for pkg in after if pkg not in before]
-        diff.extend([f'-{pkg}' for pkg in before if pkg not in after])
-
-        installed = [x for x in diff if x.startswith('+')]
-        uninstalled = [x for x in diff if x.startswith('-')]
-
-        self.assertEqual(installed, ['+pkg4'])
-        self.assertEqual(uninstalled, ['-pkg3'])
-
-    def test_compare_software_no_changes(self):
-        """Test no changes detected"""
-        before = ['pkg1', 'pkg2']
-        after = ['pkg1', 'pkg2']
-
-        diff = [f'+{pkg}' for pkg in after if pkg not in before]
-        diff.extend([f'-{pkg}' for pkg in before if pkg not in after])
-
-        self.assertEqual(diff, [])
-
-
-class TestEvalCodeLogic(unittest.TestCase):
-    """Tests for _eval_code method logic"""
-
-    def test_allowed_languages_linux(self):
-        """Test allowed languages on Linux"""
-        allowed_languages = ['python', 'perl', 'php', 'ruby', 'bash']
-        self.assertIn('python', allowed_languages)
-        self.assertIn('bash', allowed_languages)
-        self.assertIn('perl', allowed_languages)
-        self.assertIn('php', allowed_languages)
-        self.assertIn('ruby', allowed_languages)
-
-    def test_allowed_languages_windows(self):
-        """Test allowed languages on Windows"""
-        allowed_languages = ['python', 'perl', 'php', 'ruby', 'cmd', 'powershell']
-        self.assertIn('python', allowed_languages)
-        self.assertIn('cmd', allowed_languages)
-        self.assertIn('powershell', allowed_languages)
-
-    def test_code_cleanup(self):
-        """Test code cleanup removes carriage returns and strips whitespace"""
-        code = '  echo hello\r\n  '
-        clean_code = code.replace('\r', '').strip()
-        self.assertEqual(clean_code, 'echo hello')
-
-    def test_build_command_python_linux(self):
-        """Test command building for Python on Linux"""
-        lang = 'python'
-        filename = '/tmp/test.py'
-        # On Linux, python becomes python3
-        lang = 'python3'
-        cmd = f'{lang} {filename}'
-        self.assertEqual(cmd, 'python3 /tmp/test.py')
-
-    def test_unknown_language_graceful_degradation(self):
-        """Test unknown language returns no-op command"""
-        lang = 'unknown'
-        allowed = ['python', 'perl', 'php', 'ruby', 'bash']
-        if lang not in allowed:
-            cmd = ':'  # no-op in bash
-        self.assertEqual(cmd, ':')
-
-
-class TestEvalAttributesLogic(unittest.TestCase):
-    """Tests for _eval_attributes method logic"""
-
-    def test_response_structure(self):
-        """Test response structure from _eval_attributes"""
-        computer_id = 123
-        uuid = 'test-uuid'
-        computer_name = 'test-computer'
-        fqdn = 'test-computer.example.com'
-        ip_address = '192.168.1.1'
-        graphic_user = 'testuser'
-        fullname = 'Test User'
-
-        response = {
-            'id': computer_id,
-            'uuid': uuid,
-            'name': computer_name,
-            'fqdn': fqdn,
-            'ip_address': ip_address,
-            'sync_user': graphic_user,
-            'sync_fullname': fullname,
-            'sync_attributes': {},
-        }
-
-        self.assertEqual(response['id'], 123)
-        self.assertEqual(response['uuid'], 'test-uuid')
-        self.assertIn('sync_attributes', response)
-        self.assertIsInstance(response['sync_attributes'], dict)
-
-    def test_property_evaluation(self):
-        """Test property evaluation result structure"""
-        properties = [
-            {'prefix': 'HST', 'language': 'bash', 'code': 'hostname'},
-            {'prefix': 'USR', 'language': 'bash', 'code': 'whoami'},
-        ]
-
-        sync_attributes = {}
-        for item in properties:
-            # Simulating evaluation
-            sync_attributes[item['prefix']] = f'value_of_{item["prefix"]}'
-
-        self.assertEqual(sync_attributes['HST'], 'value_of_HST')
-        self.assertEqual(sync_attributes['USR'], 'value_of_USR')
-
-
-class TestEvalFaultsLogic(unittest.TestCase):
-    """Tests for _eval_faults method logic"""
-
-    def test_faults_response_structure(self):
-        """Test faults response structure"""
-        computer_id = 123
-        response = {'id': computer_id, 'faults': {}}
-
-        self.assertEqual(response['id'], 123)
-        self.assertIsInstance(response['faults'], dict)
-
-    def test_fault_with_output(self):
-        """Test fault with output is recorded"""
-        faults = {}
-        fault_name = 'disk_space_low'
-        result = 'Disk /dev/sda1 is 95% full'
-
-        if result:  # Only record faults with output
-            faults[fault_name] = result
-
-        self.assertEqual(len(faults), 1)
-        self.assertIn('disk_space_low', faults)
-
-    def test_fault_without_output(self):
-        """Test fault without output is not recorded"""
-        faults = {}
-        fault_name = 'disk_space_ok'
-        result = ''  # No output means no fault
-
-        if result:
-            faults[fault_name] = result
-
-        self.assertEqual(len(faults), 0)
-
-
-class TestTraitsLogic(unittest.TestCase):
-    """Tests for _traits and _events method logic"""
-
-    def test_to_prefix_dict(self):
-        """Test conversion of traits list to prefix dictionary"""
-        traits_list = [
-            {'prefix': 'SET', 'value': 'value1'},
-            {'prefix': 'SET', 'value': 'value2'},
-            {'prefix': 'CID', 'value': 'computer1'},
-        ]
-
-        result = defaultdict(list)
-        for item in traits_list:
-            result[item['prefix']].append(item['value'])
-        result = dict(result)
-
-        self.assertEqual(result['SET'], ['value1', 'value2'])
-        self.assertEqual(result['CID'], ['computer1'])
-
-    def test_to_env_single_value(self):
-        """Test environment variable format for single values"""
-        content = {'HST': ['hostname1'], 'USR': ['user1']}
-        prefix = 'TRAIT_'
-
-        result = ''
-        for key in content:
-            if len(content[key]) == 1:
-                value = content[key][0]
-                result += f'{prefix}{key}="{value}"\n'
-
-        self.assertIn('TRAIT_HST="hostname1"', result)
-        self.assertIn('TRAIT_USR="user1"', result)
-
-    def test_to_env_multiple_values(self):
-        """Test environment variable format for multiple values"""
-        content = {'SET': ['value1', 'value2', 'value3']}
-        prefix = 'TRAIT_'
-
-        result = ''
-        for key in content:
-            if len(content[key]) > 1:
-                value = ' '.join([f'"{item}"' for item in content[key]])
-                result += f'{prefix}{key}=({value})\n'
-
-        self.assertIn('TRAIT_SET=("value1" "value2" "value3")', result)
-
-    def test_traits_diff_calculation(self):
-        """Test calculation of traits differences"""
-        before = {'SET': ['val1'], 'CID': ['id1']}
-        after = {'SET': ['val2'], 'CID': ['id1']}
-
-        diff = [
-            (key, {'before': before.get(key), 'after': after.get(key)})
-            for key in before
-            if key not in after or before[key] != after[key]
-        ]
-
-        self.assertEqual(len(diff), 1)
-        self.assertEqual(diff[0][0], 'SET')
-        self.assertEqual(diff[0][1]['before'], ['val1'])
-        self.assertEqual(diff[0][1]['after'], ['val2'])
-
-    def test_traits_no_diff(self):
-        """Test no differences when traits are equal"""
-        before = {'SET': ['val1'], 'CID': ['id1']}
-        after = {'SET': ['val1'], 'CID': ['id1']}
-
-        diff = [
-            (key, {'before': before.get(key), 'after': after.get(key)})
-            for key in before
-            if key not in after or before[key] != after[key]
-        ]
-
-        self.assertEqual(len(diff), 0)
-
-
-class TestPackageProxyCache(unittest.TestCase):
-    """Tests for package proxy cache logic"""
-
-    def test_server_without_proxy(self):
-        """Test server URL without proxy cache"""
-        server = 'migasfree.example.com'
-        package_proxy_cache = None
-
-        if package_proxy_cache:
-            server = f'{package_proxy_cache}/{server}'
-
-        self.assertEqual(server, 'migasfree.example.com')
-
-    def test_server_with_proxy(self):
-        """Test server URL with proxy cache"""
-        server = 'migasfree.example.com'
-        package_proxy_cache = 'http://cache.local:3142'
-
-        if package_proxy_cache:
-            server = f'{package_proxy_cache}/{server}'
-
-        self.assertEqual(server, 'http://cache.local:3142/migasfree.example.com')
-
-
-class TestSynchronizationData(unittest.TestCase):
-    """Tests for synchronization data structures"""
-
-    def test_sync_upload_data(self):
-        """Test synchronization upload data structure"""
-        computer_id = 123
-        start_date = datetime.now().isoformat()
-        consumer = 'migasfree 5.0'
-        pms_status_ok = True
-
-        data = {
-            'id': computer_id,
-            'start_date': start_date,
-            'consumer': consumer,
-            'pms_status_ok': pms_status_ok,
-        }
-
-        self.assertEqual(data['id'], 123)
-        self.assertIn('start_date', data)
-        self.assertEqual(data['consumer'], 'migasfree 5.0')
-        self.assertTrue(data['pms_status_ok'])
-
-    def test_sync_upload_data_with_error(self):
-        """Test synchronization upload data when PMS has errors"""
-        pms_status_ok = False
-
-        data = {'pms_status_ok': pms_status_ok}
-
-        self.assertFalse(data['pms_status_ok'])
-
-
-class TestMandatoryPackagesLogic(unittest.TestCase):
-    """Tests for mandatory packages logic"""
-
-    def test_mandatory_packages_structure(self):
-        """Test mandatory packages response structure"""
-        response = {
-            'install': ['pkg1', 'pkg2'],
-            'remove': ['pkg3'],
-        }
-
-        self.assertIn('install', response)
-        self.assertIn('remove', response)
-        self.assertEqual(len(response['install']), 2)
-        self.assertEqual(len(response['remove']), 1)
-
-    def test_empty_mandatory_packages(self):
-        """Test empty mandatory packages response"""
-        response = None
-
-        if not response:
-            # No action needed
-            pass
-
-        self.assertIsNone(response)
-
-    def test_partial_mandatory_packages(self):
-        """Test mandatory packages with only install"""
-        response = {'install': ['pkg1']}
-
-        remove_pkgs = response.get('remove', [])
-
-        install_pkgs = response.get('install', [])
-
-        self.assertEqual(install_pkgs, ['pkg1'])
-        self.assertEqual(remove_pkgs, [])
-
-
-class TestDevicesLogic(unittest.TestCase):
-    """Tests for devices response structure"""
-
-    def test_devices_response_structure(self):
-        """Test devices response structure"""
-        response = {
-            'logical': [
-                {'id': 1, 'name': 'Printer1'},
-                {'id': 2, 'name': 'Printer2'},
-            ],
-            'default': 1,
-        }
-
-        self.assertIn('logical', response)
-        self.assertIn('default', response)
-        self.assertEqual(len(response['logical']), 2)
-        self.assertEqual(response['default'], 1)
-
-    def test_empty_devices(self):
-        """Test empty devices response"""
-        response = {'logical': [], 'default': None}
-
-        self.assertEqual(len(response['logical']), 0)
-        self.assertIsNone(response['default'])
-
-
-class TestHardwareInventory(unittest.TestCase):
-    """Tests for hardware inventory logic"""
-
-    def test_hardware_capture_required_true(self):
-        """Test hardware capture required response"""
-        response = {'capture': True}
-        self.assertTrue(response.get('capture', False))
-
-    def test_hardware_capture_required_false(self):
-        """Test hardware capture not required response"""
-        response = {'capture': False}
-        self.assertFalse(response.get('capture', False))
-
-    def test_hardware_capture_missing_key(self):
-        """Test hardware capture with missing key defaults to False"""
-        response = {}
-        self.assertFalse(response.get('capture', False))
-
-
-class TestSyncLogicalDevicesLogic(unittest.TestCase):
-    """Tests for sync_logical_devices method logic"""
-
-    def test_no_devices_returns_false(self):
-        """Test that empty devices returns False"""
-        devices = None
-        result = not devices
-        self.assertTrue(result)
-
-    def test_devices_exist_continues(self):
-        """Test that devices dict continues processing"""
-        devices = {'logical': [], 'default': 0}
-        result = not devices
-        self.assertFalse(result)
-
-    def test_manage_devices_disabled(self):
-        """Test behavior when manage_devices is disabled"""
-        migas_manage_devices = False
-
-        should_abort = bool(not migas_manage_devices)
-
-        self.assertTrue(should_abort)
-
-    def test_device_packages_structure(self):
-        """Test extracting packages from device"""
-        device = {
-            'PRINTER': {
-                'packages': ['cups', 'gutenprint'],
-                'IP': '192.168.1.100',
-            }
-        }
-
-        has_printer = 'PRINTER' in device
-        has_packages = 'packages' in device['PRINTER']
-        packages_not_empty = bool(device['PRINTER']['packages'])
-
-        self.assertTrue(has_printer)
-        self.assertTrue(has_packages)
-        self.assertTrue(packages_not_empty)
-        self.assertEqual(device['PRINTER']['packages'], ['cups', 'gutenprint'])
-
-    def test_device_without_packages(self):
-        """Test device without packages key"""
-        device = {
-            'PRINTER': {
-                'IP': '192.168.1.100',
-            }
-        }
-
-        has_packages = 'packages' in device.get('PRINTER', {})
-        self.assertFalse(has_packages)
-
-    def test_device_with_empty_packages(self):
-        """Test device with empty packages list"""
-        device = {
-            'PRINTER': {
-                'packages': [],
-            }
-        }
-
-        packages = device.get('PRINTER', {}).get('packages', [])
-        should_install = bool(packages)
-        self.assertFalse(should_install)
-
-    def test_logical_devices_dict_creation(self):
-        """Test creating logical_devices dict keyed by id"""
-        devices = {
-            'logical': [
-                {'PRINTER': {'id': 1, 'name': 'Printer1', 'manufacturer': 'HP', 'model': 'LJ', 'capability': 'print'}},
-                {
-                    'PRINTER': {
-                        'id': 2,
-                        'name': 'Printer2',
-                        'manufacturer': 'Canon',
-                        'model': 'MX',
-                        'capability': 'print',
-                    }
-                },
-            ],
-            'default': 1,
-        }
-
-        logical_devices = {}
-        for device in devices['logical']:
-            if 'PRINTER' in device:
-                dev_id = int(device['PRINTER']['id'])
-                logical_devices[dev_id] = device['PRINTER']
-
-        self.assertEqual(len(logical_devices), 2)
-        self.assertIn(1, logical_devices)
-        self.assertIn(2, logical_devices)
-        self.assertEqual(logical_devices[1]['name'], 'Printer1')
-
-    def test_migasfree_printer_format_detection(self):
-        """Test detection of migasfree printer format (5 parts separated by __)"""
-        printer_info = 'HP__LaserJet__print__office_printer__42'
-        parts = printer_info.split('__')
-
-        is_migasfree_printer = len(parts) == 5
-        self.assertTrue(is_migasfree_printer)
-
-        # Extract logical_id from last part
-        if is_migasfree_printer:
-            logical_id = int(parts[4])
-            self.assertEqual(logical_id, 42)
-
-    def test_non_migasfree_printer_format(self):
-        """Test detection of non-migasfree printer format"""
-        printer_info = 'HP LaserJet Pro'
-        parts = printer_info.split('__')
-
-        is_migasfree_printer = len(parts) == 5
-        self.assertFalse(is_migasfree_printer)
-
-    def test_printer_info_extraction(self):
-        """Test extracting manufacturer, model, capability from printer info"""
-        printer_info = 'HP__LaserJet__print__office_printer__42'
-        parts = printer_info.split('__')
-
-        manufacturer = parts[0]
-        model = parts[1]
-        capability = parts[2]
-        name = parts[3]
-        logical_id = parts[4]
-
-        self.assertEqual(manufacturer, 'HP')
-        self.assertEqual(model, 'LaserJet')
-        self.assertEqual(capability, 'print')
-        self.assertEqual(name, 'office_printer')
-        self.assertEqual(logical_id, '42')
-
-    def test_no_driver_error_message(self):
-        """Test error message format when driver is None"""
-        device_name = 'TestPrinter'
-        info = 'HP__LaserJet__print__office__1'
-        parts = info.split('__')
-        project = 'test-project'
-
-        error_msg = (  # noqa: UP032
-            'Error: no driver defined for device {}. '
-            'Please, configure capability {}, in the model {} {}, and project {}'
-        ).format(
-            device_name,
-            parts[2],  # capability
-            parts[0],  # manufacturer
-            parts[1],  # model
-            project,
-        )
-
-        self.assertIn('TestPrinter', error_msg)
-        self.assertIn('print', error_msg)
-        self.assertIn('HP', error_msg)
-        self.assertIn('LaserJet', error_msg)
-        self.assertIn('test-project', error_msg)
-
-    def test_default_printer_condition(self):
-        """Test condition for setting default printer"""
-        devices_default = 1
-        logical_devices = {1: 'printer1', 2: 'printer2'}
-
-        should_set_default = devices_default != 0 and devices_default in logical_devices
-
-        self.assertTrue(should_set_default)
-
-    def test_default_printer_zero(self):
-        """Test that default=0 means no default printer"""
-        devices_default = 0
-        logical_devices = {1: 'printer1'}
-
-        should_set_default = devices_default != 0 and devices_default in logical_devices
-
-        self.assertFalse(should_set_default)
-
-    def test_default_printer_not_in_logical_devices(self):
-        """Test default printer not in logical_devices"""
-        devices_default = 3
-        logical_devices = {1: 'printer1', 2: 'printer2'}
-
-        should_set_default = devices_default != 0 and devices_default in logical_devices
-
-        self.assertFalse(should_set_default)
-
-    def test_relate_printer_to_logical_device(self):
-        """Test relating system printer to logical device"""
-        # Simulating printer data from CUPS
-        printers = {
-            'HP_LaserJet': {
-                'printer-info': 'HP__LaserJet__print__office__42',
-                'device-uri': 'socket://192.168.1.100:9100',
-            }
-        }
-
-        logical_devices = {42: {'printer_name': None, 'printer_data': None}}
-
-        for printer_name in printers:
-            info = printers[printer_name]['printer-info']
-            parts = info.split('__')
-            if len(parts) == 5:
-                key = int(parts[4])
-                if key in logical_devices:
-                    logical_devices[key]['printer_name'] = printer_name
-                    logical_devices[key]['printer_data'] = printers[printer_name]
-
-        self.assertEqual(logical_devices[42]['printer_name'], 'HP_LaserJet')
-        self.assertEqual(logical_devices[42]['printer_data']['device-uri'], 'socket://192.168.1.100:9100')
+from unittest.mock import MagicMock, patch
+
+from migasfree_client.sync import MigasFreeSync
+
+
+class TestMigasFreeSync(unittest.TestCase):
+    """Tests for MigasFreeSync class"""
+
+    @patch('migasfree_client.utils.is_root_user', return_value=True)
+    @patch('signal.signal')
+    @patch('migasfree_client.utils.get_config', return_value={})
+    @patch('migasfree_client.command.logging.config.dictConfig')
+    @patch('migasfree_client.utils.get_graphic_pid', return_value=(None, None))
+    def setUp(self, mock_graphic, mock_log_config, mock_config, mock_signal, mock_root):
+        # We need to mock settings.TMP_PATH and other paths to avoid local side effects
+        with patch('migasfree_client.settings.TMP_PATH', '/tmp'), patch(
+            'migasfree_client.settings.CONF_FILE', '/etc/migasfree.conf'
+        ), patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), patch(
+            'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
+        ):
+            self.sync = MigasFreeSync()
+            self.sync.pms = MagicMock()
+            self.sync._url_request = MagicMock()
+            self.sync._computer_id = 123
+
+    def test_software_history_no_file(self):
+        """Test software_history when history file does not exist"""
+        with patch('os.path.isfile', return_value=False):
+            history = self.sync.software_history(['pkg1', 'pkg2'])
+            self.assertEqual(history, {})
+
+    @patch('migasfree_client.utils.compare_lists')
+    def test_software_history_with_changes(self, mock_compare):
+        """Test software_history correctly identifies changes"""
+        mock_compare.return_value = ['+pkg3', '-pkg0']
+
+        # We need to mock the file reading
+        with patch('os.path.isfile', return_value=True), patch('os.stat') as mock_stat, patch(
+            'builtins.open', unittest.mock.mock_open(read_data='pkg1\npkg2')
+        ):
+            mock_stat.return_value.st_size = 10
+
+            history = self.sync.software_history(['pkg1', 'pkg2', 'pkg3'])
+
+            self.assertEqual(history['installed'], ['+pkg3'])
+            self.assertEqual(history['uninstalled'], ['-pkg0'])
+
+    def test_get_repositories_success(self):
+        """Test get_repositories successfully fetches repos"""
+        expected_repos = [{'source_template': 'deb http://server/repo'}]
+        # Mock get_repos_key to return True
+        with patch.object(self.sync, 'get_repos_key', return_value=True), patch.object(
+            self.sync, '_api_call', return_value=expected_repos
+        ):
+            repos = self.sync.get_repositories()
+            self.assertEqual(repos, expected_repos)
+
+    def test_get_mandatory_packages(self):
+        """Test get_mandatory_packages fetches correct data"""
+        expected = {'install': ['pkg1'], 'remove': ['pkg2']}
+        with patch.object(self.sync, '_api_call', return_value=expected):
+            result = self.sync.get_mandatory_packages()
+            self.assertEqual(result, expected)
+
+    def test_mandatory_pkgs_orchestration(self):
+        """Test mandatory_pkgs calls install/uninstall correctly"""
+        response = {'install': ['p1'], 'remove': ['p2']}
+        with patch.object(self.sync, 'get_mandatory_packages', return_value=response), patch.object(
+            self.sync, 'uninstall_packages'
+        ) as mock_uninstall, patch.object(self.sync, 'install_mandatory_packages') as mock_install:
+            self.sync.mandatory_pkgs()
+            mock_uninstall.assert_called_with(['p2'])
+            mock_install.assert_called_with(['p1'])
+
+    def test_sync_logical_devices_no_devices(self):
+        """Test sync_logical_devices returns False if no devices from API"""
+        with patch.object(self.sync, 'get_devices', return_value=None):
+            self.assertFalse(self.sync.sync_logical_devices())
+
+    @patch('migasfree_client.utils.is_windows', return_value=False)
+    def test_is_migasfree_printer(self, mock_win):
+        """Test identification of Migasfree-formatted printer strings"""
+        self.assertTrue(self.sync._is_migasfree_printer('HP__LJ__print__office__42'))
+        self.assertFalse(self.sync._is_migasfree_printer('Plain Printer Name'))
+
+    def test_get_printer_logical_id(self):
+        """Test extraction of logical ID from printer info"""
+        self.assertEqual(self.sync._get_printer_logical_id('A__B__C__D__99'), 99)
+
+    def test_mandatory_packages_partial(self):
+        """Test mandatory packages logic with partial data"""
+        with patch.object(self.sync, 'get_mandatory_packages', return_value={'install': ['pkg1']}), patch.object(
+            self.sync, 'uninstall_packages'
+        ) as mock_uninstall, patch.object(self.sync, 'install_mandatory_packages') as mock_install:
+            self.sync.mandatory_pkgs()
+            mock_uninstall.assert_not_called()
+            mock_install.assert_called_with(['pkg1'])
 
 
 if __name__ == '__main__':

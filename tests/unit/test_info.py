@@ -1,0 +1,88 @@
+# Copyright (c) 2026 Jose Antonio Chavarría <jachavar@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+"""
+Tests for MigasFreeInfo class.
+"""
+
+import unittest
+from unittest.mock import MagicMock, patch
+
+from rich.table import Table
+
+from migasfree_client.info import MigasFreeInfo
+
+
+class TestMigasFreeInfo(unittest.TestCase):
+    """Tests for MigasFreeInfo class"""
+
+    @patch('migasfree_client.utils.is_root_user', return_value=True)
+    @patch('migasfree_client.utils.get_config', return_value={})
+    @patch('migasfree_client.command.logging.config.dictConfig')
+    def setUp(self, mock_log_config, mock_config, mock_root):
+        with patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), patch(
+            'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
+        ):
+            self.info = MigasFreeInfo()
+            self.info._url_request = MagicMock()
+            self.info._init_url_request = MagicMock()
+            self.info._init_mtls = MagicMock()
+            self.info._computer_id = 123
+            self.info._mtls_cert = 'cert-path'
+            self.info.console = MagicMock()
+
+    @patch('migasfree_client.info.MigasFreeInfo.get_label')
+    def test_show_info_all(self, mock_get_label):
+        """Test showing all computer info (table mode)"""
+        mock_get_label.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
+        self.info._quiet = False
+        self.info._show_info()
+
+        self.info.console.print.assert_called()
+        # Find the call that contains the Table object, skipping empty calls
+        table_call = next(
+            call for call in self.info.console.print.call_args_list if call[0] and isinstance(call[0][0], Table)
+        )
+        self.assertIsNotNone(table_call)
+
+    @patch('migasfree_client.info.MigasFreeInfo.get_label')
+    def test_show_info_quiet(self, mock_get_label):
+        """Test showing information in quiet mode (tab separated)"""
+        mock_get_label.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
+        self.info._quiet = True
+        self.info._show_info()
+
+        self.info.console.print.assert_called_with('123\ttest-comp\tTEST-SEARCH\tTEST-UUID')
+
+    @patch('migasfree_client.info.MigasFreeInfo.get_label')
+    def test_show_info_specific_key(self, mock_get_label):
+        """Test showing only a specific key"""
+        mock_get_label.return_value = {'search': 'TEST-SEARCH'}
+        self.info._quiet = True
+        self.info._show_info(key='search')
+
+        self.info.console.print.assert_called_with('TEST-SEARCH')
+
+    @patch('migasfree_client.info.MigasFreeInfo.get_label')
+    def test_show_info_id_only(self, mock_get_label):
+        """Test showing only computer ID"""
+        self.info._quiet = True
+        self.info._show_info(key='id')
+
+        self.info.console.print.assert_called_with('123')
+
+
+if __name__ == '__main__':
+    unittest.main()

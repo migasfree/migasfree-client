@@ -87,5 +87,6 @@ i | repo1      | bash         | 5.0       | x86_64
         self.assertTrue(self.zypper.clean_all())
         self.assertEqual(mock_execute.call_count, 2)
 
+
 if __name__ == '__main__':
     unittest.main()

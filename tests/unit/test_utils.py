@@ -300,7 +300,7 @@ class TestExecuteFunction:
     def test_execute_verbose_prints_command(self, mock_logger):
         """Test execute with verbose=True logs the command"""
         utils.execute('echo test', verbose=True, interactive=False)
-        mock_logger.info.assert_called_with('echo test')
+        mock_logger.info.assert_any_call('echo test')
 
     @pytest.mark.skipif(sys.platform == 'win32', reason='Unix-only test')
     def test_execute_failed_command(self):

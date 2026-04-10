@@ -76,5 +76,6 @@ bash-5.1.008-1
     def test_get_system_architecture(self):
         self.assertEqual(self.wpt.get_system_architecture(), 'x64')
 
+
 if __name__ == '__main__':
     unittest.main()

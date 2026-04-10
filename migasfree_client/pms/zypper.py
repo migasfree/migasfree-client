@@ -48,6 +48,7 @@ class Zypper(Yum):
         logger.debug(' '.join(cmd))
 
         return execute(cmd)[0] == ALL_OK
+
     @invalidate_installed_cache
     def update_silent(self):
         """

@@ -76,8 +76,8 @@ class MigasFreeTags(MigasFreeCommand):
 
     def _sanitize(self, tag_list):
         if tag_list:
-            for item in tag_list[:]:
-                item = item.replace('"', '')
+            tag_list = [item.replace('"', '') for item in tag_list]
+            for item in tag_list:
                 try:
                     _prefix, _value = item.split('-', 1)
                 except ValueError:
@@ -108,7 +108,7 @@ class MigasFreeTags(MigasFreeCommand):
                 cmd.append('--separator=\n')
             cmd.extend(
                 [
-                    f'--window-icon={os.path.join(ICON_PATH, self.ICON)}',
+                    f'--window-icon={os.path.join(ICON_PATH, self.APP_ICON)}',
                     '--list',
                     '--width',
                     '600',

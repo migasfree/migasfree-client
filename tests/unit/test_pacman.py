@@ -100,5 +100,6 @@ Architecture    : x86_64
         mock_execute.return_value = (0, 'x86_64\n', '')
         self.assertEqual(self.pacman.get_system_architecture(), 'x86_64')
 
+
 if __name__ == '__main__':
     unittest.main()
