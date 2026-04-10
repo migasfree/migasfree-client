@@ -295,12 +295,12 @@ class TestExecuteFunction:
         assert returncode == 0
         assert 'hello world' in output
 
+    @patch('migasfree_client.utils.logger')
     @pytest.mark.skipif(sys.platform == 'win32', reason='Unix-only test')
-    def test_execute_verbose_prints_command(self, capsys):
-        """Test execute with verbose=True prints the command"""
+    def test_execute_verbose_prints_command(self, mock_logger):
+        """Test execute with verbose=True logs the command"""
         utils.execute('echo test', verbose=True, interactive=False)
-        captured = capsys.readouterr()
-        assert 'echo test' in captured.out
+        mock_logger.info.assert_called_with('echo test')
 
     @pytest.mark.skipif(sys.platform == 'win32', reason='Unix-only test')
     def test_execute_failed_command(self):

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2016-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
 import argparse
 import gettext
 import sys
+
+from rich import print as rprint
 
 from .utils import ALL_OK, get_mfc_release
 
@@ -131,7 +133,7 @@ def main(argv=None):
     args = parse_args(argv)
 
     if hasattr(args, 'quiet') and not args.quiet:
-        print(_('%(program)s version: %(version)s') % {'program': PROGRAM, 'version': get_mfc_release()})
+        rprint(_('%(program)s version: %(version)s') % {'program': PROGRAM, 'version': get_mfc_release()})
         sys.stdout.flush()
 
     if args.cmd in ['register', 'sync', 'install', 'purge', 'search', 'traits']:

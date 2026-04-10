@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,35 +51,34 @@ class MigasFreeUpload(MigasFreeCommand):
         return self._save_sign_keys(self.auto_register_user, self.auto_register_password)
 
     def _usage_examples(self):
-        print('\n' + _('Examples:'))
+        self.console.print('\n' + _('Examples:'))
 
-        print('  ' + _('Upload single package:'))
-        print(f'\t{self.CMD} upload -f archive.pkg')
-        print(f'\t{self.CMD} upload --file=archive.pkg\n')
+        self.console.print('  ' + _('Upload single package:'))
+        self.console.print(f'\t{self.CMD} upload -f archive.pkg')
+        self.console.print(f'\t{self.CMD} upload --file=archive.pkg\n')
 
-        print('  ' + _('Upload package set:'))
-        print(f'\t{self.CMD} upload -r local_directory')
-        print(f'\t{self.CMD} upload --dir=local_directory\n')
+        self.console.print('  ' + _('Upload package set:'))
+        self.console.print(f'\t{self.CMD} upload -r local_directory')
+        self.console.print(f'\t{self.CMD} upload --dir=local_directory\n')
 
     def _show_running_options(self):
         super()._show_running_options()
 
-        print('\t{}: {}'.format(_('Project'), self.packager_project))
-        print('\t{}: {}'.format(_('Store'), self.packager_store))
-        print('\t{}: {}'.format(_('User'), self.packager_user))
-        # print('\t{}: {}'.format(_("Password"), self.packager_pwd))
+        self.console.print('\t{}: {}'.format(_('Project'), self.packager_project))
+        self.console.print('\t{}: {}'.format(_('Store'), self.packager_store))
+        self.console.print('\t{}: {}'.format(_('User'), self.packager_user))
+        # self.console.print('\t{}: {}'.format(_("Password"), self.packager_pwd))
         if self._file:
-            print('\t{}: {}'.format(_('File'), self._file))
+            self.console.print('\t{}: {}'.format(_('File'), self._file))
         if self._directory:
-            print('\t{}: {}'.format(_('Directory'), self._directory))
-        print()
+            self.console.print('\t{}: {}'.format(_('Directory'), self._directory))
+        self.console.print()
 
     def _left_parameters(self):
         if not self.packager_user:
             self.packager_user = input('{}: '.format(_('User to upload at server')))
             if not self.packager_user:
-                print(_('Empty user. Exiting %s.') % self.CMD)
-                logger.info('Empty user in upload operation')
+                logger.error(_('Empty user. Exiting %s.') % self.CMD)
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_pwd:
@@ -88,22 +87,19 @@ class MigasFreeUpload(MigasFreeCommand):
         if not self.packager_project:
             self.packager_project = input('{}: '.format(_('Project to upload at server')))
             if not self.packager_project:
-                print(_('Empty project. Exiting %s.') % self.CMD)
-                logger.info('Empty project in upload operation')
+                logger.error(_('Empty project. Exiting %s.') % self.CMD)
                 sys.exit(errno.EAGAIN)
 
         if not self.packager_store:
             self.packager_store = input('{}: '.format(_('Store to upload at server')))
             if not self.packager_store:
-                print(_('Empty store. Exiting %s.') % self.CMD)
-                logger.info('Empty store in upload operation')
+                logger.error(_('Empty store. Exiting %s.') % self.CMD)
                 sys.exit(errno.EAGAIN)
 
     def _upload_file(self):
         logger.debug('Upload file operation...')
         if not os.path.isfile(self._file):
-            print(_('File not found'))
-            logger.error('File not found %s', self._file)
+            logger.error(_('File not found: %s'), self._file)
             sys.exit(errno.ENOENT)
 
         self._check_sign_keys(get_computer_id=False)
@@ -137,8 +133,7 @@ class MigasFreeUpload(MigasFreeCommand):
     def _upload_set(self):
         logger.debug('Upload set operation...')
         if not os.path.isdir(self._directory):
-            print(_('Directory not found'))
-            logger.error('Directory not found %s', self._directory)
+            logger.error(_('Directory not found: %s'), self._directory)
             sys.exit(errno.ENOENT)
 
         self._check_sign_keys(get_computer_id=False)
@@ -148,8 +143,7 @@ class MigasFreeUpload(MigasFreeCommand):
                 _filename = os.path.join(_root, _file)
 
                 if os.path.isfile(_filename):
-                    logger.debug('Uploading server set: %s', _filename)
-                    print(f'Uploading file: {os.path.abspath(_filename)}')
+                    logger.info(_('Uploading file: %s'), os.path.abspath(_filename))
 
                     with self.console.status(''):
                         response = self._url_request.run(

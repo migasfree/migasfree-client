@@ -19,8 +19,8 @@
 
 import importlib
 import inspect
+import logging
 import pkgutil
-import sys
 
 from . import plugins
 from .cupswrapper import Cupswrapper
@@ -29,6 +29,7 @@ from .printer import Printer
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __all__ = ['Cupswrapper', 'Printer']
+logger = logging.getLogger('migasfree_client')
 
 
 def iter_namespace(ns_pkg):
@@ -45,7 +46,7 @@ def get_discovered_plugins():
             module = importlib.import_module(name)
             ret[name] = module
         except ImportError as e:
-            print(f'Error importing {name} module: {e}', file=sys.stderr)
+            logger.error('Error importing %s module: %s', name, e)
 
     return ret
 
@@ -62,6 +63,6 @@ def get_available_devices_classes():
                 try:
                     ret.append((class_()._name, class_name))
                 except Exception as e:
-                    print(f'Error processing {class_name} class: {e}', file=sys.stderr)
+                    logger.error('Error processing %s class: %s', class_name, e)
 
     return sorted(ret, key=lambda x: x[0])

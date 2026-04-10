@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2018-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,28 +55,28 @@ class MigasFreeInfo(MigasFreeCommand):
                 table.add_row(str(self._computer_id), info['name'], info['search'], info['uuid'])
                 self.console.print(table)
             else:
-                print(f'{self._computer_id}\t{info["name"]}\t{info["search"]}\t{info["uuid"]}')
+                self.console.print(f'{self._computer_id}\t{info["name"]}\t{info["search"]}\t{info["uuid"]}')
         elif key == 'id':
             if not self._quiet:
                 table.add_column('ID')
                 table.add_row(str(self._computer_id))
                 self.console.print(table)
             else:
-                print(self._computer_id)
+                self.console.print(str(self._computer_id))
         else:
             if not self._quiet:
                 table.add_column(key.upper())
                 table.add_row(info[key])
                 self.console.print(table)
             else:
-                print(info[key])
+                self.console.print(str(info[key]))
 
     def run(self, args=None):
         super().run(args)
 
         if not self._quiet:
             self._show_running_options()
-            print()
+            self.console.print()
 
         self._show_info(key=args.key)
         self.end_of_transmission()

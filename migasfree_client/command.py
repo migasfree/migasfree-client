@@ -30,7 +30,6 @@ import time
 from urllib.parse import urljoin
 
 import requests
-from rich import print
 from rich.console import Console
 
 from . import mtls, settings, utils
@@ -84,7 +83,7 @@ LOGGING_CONF = {
 try:
     logging.config.dictConfig(LOGGING_CONF)
 except (OSError, ValueError):
-    print(_('Failed to configure the log file (%s)') % settings.LOG_FILE)
+    sys.stderr.write(_('Failed to configure the log file (%s)\n') % settings.LOG_FILE)
     sys.exit(errno.EACCES)
 
 logger = logging.getLogger('migasfree_client')
@@ -423,7 +422,7 @@ class MigasFreeCommand:
         return urljoin(self._url_base, path)
 
     def _show_message(self, msg):
-        print()
+        self.console.print()
         self.console.rule(msg)
 
     def _check_path(self, path):
@@ -519,7 +518,7 @@ class MigasFreeCommand:
         logger.debug('Trying writing file: %s', path_file)
 
         if utils.write_file(path_file, str(content)):
-            print(_('Key %s created!') % path_file)
+            self.console.print(_('Key %s created!') % path_file)
             return True
 
         msg = _('Error writing key file!!!')
@@ -667,8 +666,8 @@ class MigasFreeCommand:
     def _show_config_options(self):
         conf_file = settings.CONF_FILE if os.path.isfile(settings.CONF_FILE) else ''
 
-        print()
-        print(_('Config options: %s') % conf_file)
+        self.console.print()
+        self.console.print(_('Config options: %s') % conf_file)
 
         # Config options: (label, value, env_var_name, show_if_truthy)
         config_options = [
@@ -688,24 +687,26 @@ class MigasFreeCommand:
         for label, value, env_var, show in config_options:
             if show:
                 env_indicator = '(ENV)' if env_var in os.environ else ''
-                print(f'\t{label}: {value} {env_indicator}')
+                self.console.print(f'\t{label}: {value} {env_indicator}')
 
     def _show_running_options(self):
-        print()
-        print(_('Running options:'))
-        print('\t{}: {}'.format(_('migasfree server version'), self._server_info.get('version', _('None'))))
-        print('\t{}: {}'.format(_('SSL certificate'), self.migas_ssl_cert))
+        self.console.print()
+        self.console.print(_('Running options:'))
+        self.console.print(
+            '\t{}: {}'.format(_('migasfree server version'), self._server_info.get('version', _('None')))
+        )
+        self.console.print('\t{}: {}'.format(_('SSL certificate'), self.migas_ssl_cert))
         if (
             self.migas_ssl_cert is not None
             and not isinstance(self.migas_ssl_cert, bool)
             and not os.path.exists(self.migas_ssl_cert)
         ):
-            print(
+            self.console.print(
                 '\t\t{}: {}'.format(_('Warning'), _('Certificate does not exist and authentication is not guaranteed'))
             )
-        print('\t{}: {}'.format(_('PMS'), self.pms))
+        self.console.print('\t{}: {}'.format(_('PMS'), self.pms))
         if self.pms:
-            print('\t{}: {}'.format(_('Architecture'), self.pms.get_system_architecture()))
+            self.console.print('\t{}: {}'.format(_('Architecture'), self.pms.get_system_architecture()))
 
     def _write_error(self, msg, append=False):
         _mode = 'a' if append else 'wb'
@@ -834,7 +835,7 @@ class MigasFreeCommand:
 
     def cmd_version(self, args=None):
         if hasattr(args, 'quiet') and args.quiet:
-            print(utils.get_mfc_release())
+            self.console.print(utils.get_mfc_release())
         else:
             self._show_config_options()
 
@@ -848,21 +849,21 @@ class MigasFreeCommand:
         keys_path = settings.KEYS_PATH if is_all else self._get_keys_path()
 
         if is_debug:
-            print(_('Trying to remove %s directory') % keys_path)
+            logger.debug(_('Trying to remove %s directory') % keys_path)
 
         try:
             shutil.rmtree(keys_path)
         except shutil.Error:
             if not is_quiet:
-                print(_('An error occurred while deleting directory %s') % keys_path)
+                self.console.print(_('An error occurred while deleting directory %s') % keys_path)
             sys.exit(errno.EPERM)
         except FileNotFoundError:
             if not is_quiet:
-                print(_('No such directory %s') % keys_path)
+                self.console.print(_('No such directory %s') % keys_path)
             sys.exit(errno.EACCES)
 
         if not is_quiet:
-            print(_('Directory %s has been removed') % keys_path)
+            self.console.print(_('Directory %s has been removed') % keys_path)
 
         sys.exit(utils.ALL_OK)
 

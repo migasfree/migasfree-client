@@ -84,32 +84,31 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
     def _show_running_options(self):
         super()._show_running_options()
-
-        print('\t{}: {}'.format(_('Graphic user'), self._graphic_user))
-        print()
+        self.console.print('\t{}: {}'.format(_('Graphic user'), self._graphic_user))
+        self.console.print()
 
     def _usage_examples(self):
-        print('\n' + _('Examples:'))
+        self.console.print('\n' + _('Examples:'))
 
-        print('  ' + _('Register computer at server:'))
-        print(f'\t{self.CMD} register\n')
+        self.console.print('  ' + _('Register computer at server:'))
+        self.console.print(f'\t{self.CMD} register\n')
 
-        print('  ' + _('Synchronize computer with server:'))
-        print(f'\t{self.CMD} sync\n')
+        self.console.print('  ' + _('Synchronize computer with server:'))
+        self.console.print(f'\t{self.CMD} sync\n')
 
-        print('  ' + _('Search package:'))
-        print(f'\t{self.CMD} search bluefish\n')
+        self.console.print('  ' + _('Search package:'))
+        self.console.print(f'\t{self.CMD} search bluefish\n')
 
-        print('  ' + _('Install package:'))
-        print(f'\t{self.CMD} install bluefish\n')
+        self.console.print('  ' + _('Install package:'))
+        self.console.print(f'\t{self.CMD} install bluefish\n')
 
-        print('  ' + _('Purge package:'))
-        print(f'\t{self.CMD} purge bluefish\n')
+        self.console.print('  ' + _('Purge package:'))
+        self.console.print(f'\t{self.CMD} purge bluefish\n')
 
-        print('  ' + _('Get computer traits at server:'))
-        print(f'\t{self.CMD} traits\n')
-        print(f'\t{self.CMD} traits SET\n')
-        print(f'\t{self.CMD} traits CID id\n')
+        self.console.print('  ' + _('Get computer traits at server:'))
+        self.console.print(f'\t{self.CMD} traits\n')
+        self.console.print(f'\t{self.CMD} traits SET\n')
+        self.console.print(f'\t{self.CMD} traits CID id\n')
 
     def get_repos_key(self):
         self._show_message(_('Getting repositories key...'))
@@ -406,7 +405,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
     def _traits(self, show=True):
         traits = self.get_traits()
         if show:
-            print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
+            self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
 
         content = {}
         if os.path.isfile(settings.TRAITS_FILE):
@@ -432,7 +431,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
             traits = list(ret)
 
-        print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
+        self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
 
     def _run_events(self, diff):
         self._show_message(_('Running events...'))

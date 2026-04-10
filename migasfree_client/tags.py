@@ -49,7 +49,7 @@ class MigasFreeTags(MigasFreeCommand):
         super().__init__()
 
     def _usage_examples(self):
-        print('\n' + _('Examples:'))
+        self.console.print('\n' + _('Examples:'))
 
         examples = [
             (_('Get tags in server (JSON format):'), [f'{self.CMD} tags -g', f'{self.CMD} tags --get']),
@@ -63,16 +63,16 @@ class MigasFreeTags(MigasFreeCommand):
             (_('Unsetting all tags (command line):'), [f'{self.CMD} tags -s ""', f'{self.CMD} tags --set ""']),
         ]
         for title, cmds in examples:
-            print(f'  {title}')
+            self.console.print(f'  {title}')
             for cmd in cmds:
-                print(f'\t{cmd}')
-            print()
+                self.console.print(f'\t{cmd}')
+            self.console.print()
 
     def _show_running_options(self):
         super()._show_running_options()
 
-        print('\t{}: {}'.format(_('Tag list'), self._tags))
-        print()
+        self.console.print('\t{}: {}'.format(_('Tag list'), self._tags))
+        self.console.print()
 
     def _sanitize(self, tag_list):
         if tag_list:
@@ -93,7 +93,7 @@ class MigasFreeTags(MigasFreeCommand):
         selected_tags = []
 
         if len(available) == 0:
-            print()
+            self.console.print()
             self.console.log(_('There is not available tags to select'), style='yellow')
             sys.exit(ALL_OK)
 
@@ -180,7 +180,7 @@ class MigasFreeTags(MigasFreeCommand):
             self.operation_failed(response['error']['info'])
             sys.exit(errno.ENODATA)
 
-        print()
+        self.console.print()
         self.operation_ok(_('Tags setted: %s') % self._tags)
 
         return response
@@ -212,7 +212,7 @@ class MigasFreeTags(MigasFreeCommand):
     def run(self, args=None):
         super().run(args)
         if not self._quiet:
-            print()
+            self.console.print()
 
         if not args or not hasattr(args, 'cmd'):
             self._usage_examples()
@@ -226,7 +226,7 @@ class MigasFreeTags(MigasFreeCommand):
                     'available': self.get_available_tags(),
                 }
 
-            print(json.dumps(response, ensure_ascii=False))
+            self.console.print(json.dumps(response, ensure_ascii=False))
             self.end_of_transmission()
 
         elif isinstance(args.set, list) or isinstance(args.communicate, list):

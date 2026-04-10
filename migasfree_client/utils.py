@@ -19,6 +19,7 @@ import errno
 import gettext
 import hashlib
 import json
+import logging
 import os
 import platform
 import re
@@ -36,12 +37,15 @@ try:
 except ImportError:
     from . import winpwd as pwd
 
+from rich import print as rprint
+
 from . import settings
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 
 _ = gettext.gettext
+logger = logging.getLogger('migasfree_client')
 
 ALL_OK = 0 if sys.platform == 'win32' else os.EX_OK
 
@@ -186,7 +190,7 @@ def _stream_output_nonblocking(process):
                 chunk = process.stdout.read()
                 chunk = _bytes_to_str(chunk)
                 if chunk and chunk != '\n':
-                    print(chunk)
+                    logger.info(chunk)
                 output_buffer = f'{output_buffer}{chunk}'
     else:
         import fcntl
@@ -207,7 +211,7 @@ def _stream_output_nonblocking(process):
                 chunk = process.stdout.read()
                 chunk = _bytes_to_str(chunk)
                 if chunk and chunk != '\n':
-                    print(chunk)
+                    logger.info(chunk)
                 output_buffer = f'{output_buffer}{chunk}'
 
     return output_buffer
@@ -226,7 +230,7 @@ def execute(cmd, verbose=False, interactive=True, input_data=None, **kwargs):
         Tuple of (returncode, stdout, stderr)
     """
     if verbose:
-        print(' '.join(cmd) if isinstance(cmd, (list, tuple)) else cmd)
+        logger.info(' '.join(cmd) if isinstance(cmd, (list, tuple)) else cmd)
 
     process = _create_subprocess(cmd, capture_output=not interactive, input_data=input_data, **kwargs)
     output_buffer = ''
@@ -620,7 +624,7 @@ def query_yes_no(question, default='yes'):
         if choice in valid:
             return valid[choice]
 
-        print(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
+        rprint(_("Please respond with 'yes' or 'no' (or 'y' or 'n')."))
 
 
 def process_is_active(pid):
@@ -651,7 +655,7 @@ def check_lock_file(cmd, lock_file):
 
         try:
             if process_is_active(_pid):
-                print(_('Another instance of %(cmd)s is running: %(pid)d') % {'cmd': cmd, 'pid': int(_pid)})
+                logger.warning(_('Another instance of %(cmd)s is running: %(pid)d') % {'cmd': cmd, 'pid': int(_pid)})
                 sys.exit(errno.EPERM)
         except OSError:
             pass

@@ -212,7 +212,7 @@ class Pacman(Pms):
             config.insert(index[0], line)
             write_file_if_changed(self._config, '\n'.join(config))
         else:
-            print(_('Add manually "%s" to file %s inside "options" section as last option') % (line, self._config))
+            logger.warning(_('Add manually "%s" to file %s inside "options" section as last option') % (line, self._config))
 
     def create_repos(self, protocol, server, repositories):
         """

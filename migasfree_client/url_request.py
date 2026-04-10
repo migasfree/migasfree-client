@@ -361,12 +361,11 @@ class UrlRequest:
         info = self._evaluate_response(request.json()) if is_json else request.text
 
         if self._debug:
-            print(_('HTTP error code: %s') % request.status_code)
+            logger.error(_('HTTP error code: %s') % request.status_code)
 
             if not self._check_tmp_path():
                 msg = _('Error creating %s directory') % TMP_PATH
                 logger.exception(msg)
-                print(msg)
                 if self._exit_on_error:
                     sys.exit(errno.EPERM)
 
@@ -378,13 +377,13 @@ class UrlRequest:
                 f'response.{request.status_code}.{url.replace("/", ".").replace(":", ".").rstrip(".")}.{extension}',
             )
             write_file(_file, str(info))
-            print(_file)
+            logger.info(_('Error response saved to: %s') % _file)
 
         if self._exit_on_error:
             if 'html' not in content_type:
-                print(_('Error: %s') % info)
+                logger.error(_('Error: %s') % info)
             else:
-                print(_('Status code: %s') % request.status_code)
+                logger.error(_('Status code: %s') % request.status_code)
             sys.exit(errno.EACCES)
 
         return {'error': {'info': str(info), 'code': request.status_code}}

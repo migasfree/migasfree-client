@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 
 import importlib
 import inspect
+import logging
 import pkgutil
-import sys
 
 from . import plugins
 from .apk import Apk
@@ -31,6 +31,7 @@ from .zypper import Zypper
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __all__ = ['Apk', 'Apt', 'Dnf', 'Pacman', 'Pms', 'Wpt', 'Yum', 'Zypper']
+logger = logging.getLogger('migasfree_client')
 
 
 def iter_namespace(ns_pkg):
@@ -47,7 +48,7 @@ def get_discovered_plugins():
             module = importlib.import_module(name)
             ret[name] = module
         except ImportError as e:
-            print(f'Error importing {name} module: {e}', file=sys.stderr)
+            logger.error('Error importing %s module: %s', name, e)
 
     return ret
 
@@ -70,6 +71,6 @@ def get_available_pms():
                 try:
                     ret.append((class_()._name, class_name))
                 except Exception as e:
-                    print(f'Error processing {class_name} class: {e}', file=sys.stderr)
+                    logger.error('Error processing %s class: %s', class_name, e)
 
     return sorted(ret, key=lambda x: x[0])

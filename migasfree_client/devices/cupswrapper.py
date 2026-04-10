@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2021-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import contextlib
+import logging
 import os
 
 with contextlib.suppress(ImportError):
@@ -25,6 +26,7 @@ from .printer import Printer
 
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
+logger = logging.getLogger('migasfree_client')
 
 
 @Printer.register('Cupswrapper')
@@ -61,7 +63,7 @@ class Cupswrapper(Printer):
                 conn.addPrinter(name=self.name, info=self.info, location=self.location, device=self.uri)
         except cups.IPPError as e:
             (status, description) = e.args
-            print(f'CUPS Error: {status} ({description})')
+            logger.error('CUPS Error: %s (%s)', status, description)
             return False
 
         conn.acceptJobs(self.name)
