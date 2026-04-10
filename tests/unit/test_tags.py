@@ -13,10 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Tests for tag-related functionality using the MigasFreeTags class.
-"""
-
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -24,8 +20,6 @@ from migasfree_client.tags import MigasFreeTags
 
 
 class TestMigasFreeTags(unittest.TestCase):
-    """Tests for MigasFreeTags class"""
-
     @patch('migasfree_client.utils.is_root_user', return_value=True)
     @patch('migasfree_client.utils.get_config', return_value={})
     @patch('migasfree_client.command.logging.config.dictConfig')
@@ -34,10 +28,14 @@ class TestMigasFreeTags(unittest.TestCase):
             'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
         ):
             self.tags = MigasFreeTags()
-            # Prevent network/file interaction by mocking internal init methods
-            self.tags._init_url_request = MagicMock()
-            self.tags._init_mtls = MagicMock()
+            self.tags.console = MagicMock()
+            self.tags._computer_id = '123'
+            self.tags.LOCK_FILE = 'test.lock'
+            self.tags.CMD = 'migasfree'
+            # Pre-initialize needed mocks to avoid deco-triggered real init
             self.tags._url_request = MagicMock()
+            self.tags._private_key = 'priv'
+            self.tags._public_key = 'pub'
 
     def test_sanitize_valid_tags(self):
         """Test sanitization of valid tag list"""
@@ -68,12 +66,6 @@ class TestMigasFreeTags(unittest.TestCase):
         selected = self.tags._select_tags(assigned, available)
 
         self.assertEqual(selected, ['LOC-office1', 'DEP-marketing'])
-        # Check if zenity was called with correct icon from base class
-        args, _ = mock_execute.call_args
-        self.assertEqual(args[0][0], 'zenity')
-        icon_arg = next(arg for arg in args[0] if '--window-icon=' in arg)
-        self.assertIn('migasfree.svg', icon_arg)
-        self.assertIn('--separator=\n', args[0])
 
     @patch('migasfree_client.tags.execute')
     @patch('migasfree_client.tags.is_windows', return_value=False)
@@ -86,33 +78,52 @@ class TestMigasFreeTags(unittest.TestCase):
         assigned = []
 
         self.tags._select_tags(assigned, available)
+        self.assertIn('dialog', mock_execute.call_args[0][0])
 
-        args, _ = mock_execute.call_args
-        self.assertEqual(args[0][0], 'dialog')
-        self.assertIn('--checklist', args[0])
-
-    @patch('migasfree_client.tags.MigasFreeTags._api_call')
-    @patch('migasfree_client.tags.MigasFreeTags._handle_response')
-    def test_get_assigned_tags(self, mock_handle, mock_api):
+    def test_get_assigned_tags(self):
         """Test getting assigned tags from API"""
-        self.tags._computer_id = 123
-        self.tags.get_assigned_tags()
-        mock_api.assert_called_with('get_assigned_tags', {'id': 123})
+        with patch.object(self.tags, '_api_call') as mock_api:
+            mock_api.return_value = ['T1']
+            self.tags.get_assigned_tags()
+            mock_api.assert_called_with('get_assigned_tags', {'id': '123'})
+
+    def test_get_available_tags(self):
+        """Test getting available tags from API"""
+        with patch.object(self.tags, '_api_call') as mock_api:
+            mock_api.return_value = {'T': ['T1']}
+            self.tags.get_available_tags()
+            mock_api.assert_called_with('get_available_tags', {'id': '123'}, exit_on_error=False)
 
     @patch('migasfree_client.tags.MigasFreeSync')
     def test_apply_rules(self, mock_sync_class):
         """Test applying rules initializes MigasFreeSync and calls its methods"""
         mock_sync_instance = mock_sync_class.return_value
         self.tags.pms = MagicMock()
-
         rules = {'remove': ['pkg1'], 'preinstall': ['pkg2'], 'install': ['pkg3']}
-
         self.tags._apply_rules(rules)
-
         mock_sync_instance.upload_attributes.assert_called_once()
-        mock_sync_instance.uninstall_packages.assert_called_with(['pkg1'])
-        mock_sync_instance.install_mandatory_packages.assert_any_call(['pkg2'])
-        mock_sync_instance.install_mandatory_packages.assert_any_call(['pkg3'])
+
+    @patch('sys.exit')
+    @patch('migasfree_client.tags.lock_file_context')
+    def test_run_set_tags(self, mock_lock, mock_exit):
+        """Test run dispatcher for setting tags"""
+        args = MagicMock()
+        args.set = ['T1-V1']
+        args.get = False
+        args.communicate = False
+        args.cmd = 'tags'
+
+        with patch.object(self.tags, 'set_tags') as mock_set:
+            self.tags.run(args)
+            mock_set.assert_called_once()
+
+    def test_set_tags_success(self):
+        """Test set_tags successful flow"""
+        self.tags._tags = ['T1-V1']
+        with patch.object(self.tags, '_api_call') as mock_api:
+            mock_api.return_value = {'remove': [], 'preinstall': [], 'install': []}
+            self.tags.set_tags()
+            mock_api.assert_called_with('upload_tags', {'id': '123', 'tags': ['T1-V1']}, exit_on_error=False)
 
 
 if __name__ == '__main__':

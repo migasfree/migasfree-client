@@ -83,6 +83,27 @@ class TestMigasFreeInfo(unittest.TestCase):
 
         self.info.console.print.assert_called_with('123')
 
+    def test_get_label_success(self):
+        """Test get_label calls API correctly"""
+        mock_response = {'name': 'test'}
+        with patch.object(self.info, '_api_call', return_value=mock_response), patch.object(
+            self.info, '_handle_response', return_value=mock_response
+        ):
+            result = self.info.get_label()
+            self.assertEqual(result, mock_response)
+
+    @patch('sys.exit')
+    def test_run(self, mock_exit):
+        """Test the run method dispatcher"""
+        args = MagicMock()
+        args.key = 'search'
+        self.info._quiet = True
+
+        with patch.object(self.info, '_show_info') as mock_show:
+            self.info.run(args)
+            mock_show.assert_called_with(key='search')
+            mock_exit.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -152,7 +152,7 @@ class TestMigasFreeSync(unittest.TestCase):
 
     def test_end_synchronization(self):
         """Test end_synchronization sends correct parameters"""
-        start_date = "2026-04-10T10:00:00"
+        start_date = '2026-04-10T10:00:00'
         with patch('migasfree_client.utils.get_mfc_release', return_value='1.0'):
             self.sync.end_synchronization(start_date, consumer='test-cmd')
             self.sync._url_request.run.assert_called_once()
@@ -222,7 +222,9 @@ class TestMigasFreeSync(unittest.TestCase):
     def test_events_execution(self, mock_ls, mock_exists, mock_exe, mock_write, mock_read, mock_isdir):
         """Test event execution when traits change"""
         # Simulate traits transition
-        traits_json = json.dumps({'before': [{'prefix': 'p1', 'value': 'v1'}], 'after': [{'prefix': 'p1', 'value': 'v2'}]})
+        traits_json = json.dumps(
+            {'before': [{'prefix': 'p1', 'value': 'v1'}], 'after': [{'prefix': 'p1', 'value': 'v2'}]}
+        )
         with patch('migasfree_client.utils.read_file', return_value=traits_json):
             self.sync._events()
             self.assertTrue(mock_exe.called)

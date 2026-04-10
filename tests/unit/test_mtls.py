@@ -145,6 +145,35 @@ class TestMtls(unittest.TestCase):
         self.assertTrue(result['success'])
         self.assertIn('imported successfully', result['message'])
 
+    @patch('os.path.isfile')
+    @patch('migasfree_client.mtls.get_mtls_cert_file', return_value='cert.pem')
+    @patch('migasfree_client.mtls.get_mtls_key_file', return_value='key.pem')
+    @patch('migasfree_client.mtls.get_mtls_ca_file', return_value='ca.pem')
+    def test_get_mtls_credentials(self, mock_ca, mock_key, mock_cert, mock_isfile):
+        # Case 1: All files exist
+        mock_isfile.side_effect = [True, True, True]
+        cert, key, ca = mtls.get_mtls_credentials(self.server)
+        self.assertEqual(cert, 'cert.pem')
+        self.assertEqual(key, 'key.pem')
+        self.assertEqual(ca, 'ca.pem')
+
+        # Case 2: Only cert and key exist
+        mock_isfile.side_effect = [True, True, False]
+        cert, key, ca = mtls.get_mtls_credentials(self.server)
+        self.assertEqual(ca, None)
+
+    @patch('migasfree_client.mtls.write_file')
+    def test_download_mtls_certificate_success(self, mock_write):
+        mock_url_request = MagicMock()
+        mock_url_request.run_simple.return_value = {'content': b'tarball content'}
+
+        result = mtls.download_mtls_certificate(mock_url_request, 'http://server', 'token', 'out.tar')
+
+        self.assertTrue(result['success'])
+        self.assertEqual(result['file_path'], 'out.tar')
+        mock_write.assert_called_once_with('out.tar', b'tarball content')
+        self.assertIn('password', result)
+
     @patch('migasfree_client.mtls.request_mtls_token')
     @patch('migasfree_client.mtls.download_ca_certificate')
     @patch('migasfree_client.mtls.download_mtls_certificate')

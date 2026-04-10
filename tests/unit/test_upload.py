@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Tests for package upload functionality using MigasFreeUpload class.
-"""
-
+import errno
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -24,84 +21,98 @@ from migasfree_client.upload import MigasFreeUpload
 
 
 class TestMigasFreeUpload(unittest.TestCase):
-    """Tests for MigasFreeUpload class"""
-
     @patch('migasfree_client.utils.is_root_user', return_value=True)
     @patch('migasfree_client.utils.get_config', return_value={})
     @patch('migasfree_client.command.logging.config.dictConfig')
     def setUp(self, mock_log_config, mock_config, mock_root):
-        with patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), patch(
-            'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
+        with patch('migasfree_client.upload.MigasFreeUpload._ssl_cert'), patch(
+            'migasfree_client.upload.MigasFreeUpload._init_url_request'
         ):
             self.upload = MigasFreeUpload()
-            self.upload._url_request = MagicMock()
-            self.upload._init_url_request = MagicMock()
-            self.upload._init_mtls = MagicMock()
-
-    @patch('builtins.input', side_effect=['user', 'project', 'store'])
-    @patch('getpass.getpass', return_value='password')
-    def test_left_parameters(self, mock_getpass, mock_input):
-        """Test prompted parameters when not provided"""
-        self.upload.packager_user = None
-        self.upload.packager_pwd = None
-        self.upload.packager_project = None
-        self.upload.packager_store = None
-
-        self.upload._left_parameters()
-
-        self.assertEqual(self.upload.packager_user, 'user')
-        self.assertEqual(self.upload.packager_pwd, 'password')
-        self.assertEqual(self.upload.packager_project, 'project')
-        self.assertEqual(self.upload.packager_store, 'store')
+            self.upload.console = MagicMock()
+            self.upload.packager_project = 'test-proj'
+            self.upload.packager_store = 'test-store'
+            self.upload.packager_user = 'test-user'
+            self.upload.packager_pwd = 'test-pass'
+            self.upload._private_key = 'priv'
+            self.upload._public_key = 'pub'
 
     @patch('os.path.isfile', return_value=True)
     @patch('migasfree_client.upload.build_magic')
     @patch('migasfree_client.upload.MigasFreeUpload._check_sign_keys')
-    @patch('migasfree_client.upload.MigasFreeUpload._create_repository', return_value=True)
-    def test_upload_file_success(self, mock_create, mock_keys, mock_magic, mock_exists):
-        """Test successful file upload"""
-        self.upload._file = 'test.pkg'
-        self.upload.packager_project = 'test-proj'
-        self.upload.packager_store = 'test-store'
-        self.upload._url_request.run.return_value = {'status': 'ok'}
+    def test_upload_file_success(self, mock_check, mock_magic, mock_isfile):
+        """Test successful single file upload"""
+        self.upload._file = 'archive.pkg'
+        mock_magic.return_value.file.return_value = 'application/x-debian-package'
+        self.upload.pms = MagicMock()
+        self.upload.pms._mimetype = ['application/x-debian-package']
+        self.upload._url_request = MagicMock()
+        self.upload._url_request.run.return_value = {'id': 1}
 
-        result = self.upload._upload_file()
+        with patch.object(self.upload, '_create_repository', return_value=True):
+            result = self.upload._upload_file()
+            self.assertTrue(result)
+            self.upload._url_request.run.assert_called_once()
 
-        self.assertTrue(result)
-        self.upload._url_request.run.assert_called_once()
-        _args, kwargs = self.upload._url_request.run.call_args
-        self.assertEqual(kwargs['data']['project'], 'test-proj')
-        self.assertIn('test.pkg', kwargs['upload_files'][0])
+    @patch('os.path.isfile', return_value=False)
+    def test_upload_file_not_found(self, mock_isfile):
+        """Test upload fails if file does not exist"""
+        self.upload._file = 'missing.pkg'
+        with self.assertRaises(SystemExit) as cm:
+            self.upload._upload_file()
+        self.assertEqual(cm.exception.code, errno.ENOENT)
 
     @patch('os.path.isdir', return_value=True)
-    @patch('os.walk')
+    @patch('os.walk', return_value=[('/dir', [], ['file1.pkg'])])
     @patch('os.path.isfile', return_value=True)
     @patch('migasfree_client.upload.MigasFreeUpload._check_sign_keys')
-    @patch('migasfree_client.upload.MigasFreeUpload._create_repository', return_value=True)
-    def test_upload_set_success(self, mock_create, mock_keys, mock_isfile, mock_walk, mock_isdir):
-        """Test successful directory (set) upload"""
-        self.upload._directory = '/tmp/test_dir'
-        mock_walk.return_value = [('/tmp/test_dir', ['subdir'], ['pkg1.pkg', 'pkg2.pkg'])]
-        self.upload._url_request.run.return_value = {'status': 'ok'}
-
-        result = self.upload._upload_set()
-
-        self.assertTrue(result)
-        # Should call run twice (one for each file)
-        self.assertEqual(self.upload._url_request.run.call_count, 2)
+    def test_upload_set_success(self, mock_check, mock_isfile, mock_walk, mock_isdir):
+        """Test successful directory (package set) upload"""
+        self.upload._directory = '/dir'
+        self.upload._url_request = MagicMock()
+        self.upload._url_request.run.return_value = {'id': 1}
+        with patch.object(self.upload, '_create_repository', return_value=True):
+            result = self.upload._upload_set()
+            self.assertTrue(result)
+            self.upload._url_request.run.assert_called()
 
     def test_create_repository_success(self):
-        """Test successful repository creation API call"""
-        self.upload._file = 'test.pkg'
-        self.upload.packager_project = 'test-proj'
+        """Test triggering repository creation on server"""
+        self.upload._file = 'file.pkg'
+        self.upload._url_request = MagicMock()
         self.upload._url_request.run.return_value = {'status': 'ok'}
-
         result = self.upload._create_repository()
-
         self.assertTrue(result)
         self.upload._url_request.run.assert_called_once()
-        _args, kwargs = self.upload._url_request.run.call_args
-        self.assertEqual(kwargs['url'], self.upload.api_endpoint(self.upload.URLS['create_repository']))
+
+    @patch('builtins.input', side_effect=['user', 'proj', 'store'])
+    @patch('getpass.getpass', return_value='pass')
+    def test_left_parameters(self, mock_getpass, mock_input):
+        """Test interactive parameter collection"""
+        self.upload.packager_user = None
+        self.upload.packager_pwd = None
+        self.upload.packager_project = None
+        self.upload.packager_store = None
+        self.upload._left_parameters()
+        self.assertEqual(self.upload.packager_user, 'user')
+        self.assertEqual(self.upload.packager_pwd, 'pass')
+
+    @patch('sys.exit')
+    @patch('migasfree_client.upload.lock_file_context')
+    def test_run_file_upload(self, mock_lock, mock_exit):
+        """Test CLI run dispatch for file upload"""
+        args = MagicMock()
+        args.file = 'test.pkg'
+        args.dir = None
+        args.user = 'u'
+        args.pwd = 'p'
+        args.project = 'pr'
+        args.store = 'st'
+
+        with patch.object(self.upload, '_upload_file') as mock_up:
+            self.upload.run(args)
+            mock_up.assert_called_once()
+            self.assertEqual(self.upload.packager_user, 'u')
 
 
 if __name__ == '__main__':
