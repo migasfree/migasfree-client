@@ -186,7 +186,8 @@ eth0\t00000000\tC0A80101\t0003\t0\t0\t0\t00000000\t0\t0\t0
 eth0\tC0A80100\t00000000\t0001\t0\t0\t0\tFFFFFF00\t0\t0\t0
 """,
     )
-    def test_get_gateway(self, mock_file):
+    @patch('migasfree_client.network.is_linux', return_value=True)
+    def test_get_gateway(self, mock_linux, mock_file):
         """Test getting default gateway from /proc/net/route"""
         result = network.get_gateway()
         # C0A80101 in hex = 192.168.1.1 in little-endian
@@ -199,7 +200,8 @@ eth0\tC0A80100\t00000000\t0001\t0\t0\t0\tFFFFFF00\t0\t0\t0
 eth0\tC0A80100\t00000000\t0001\t0\t0\t0\tFFFFFF00\t0\t0\t0
 """,
     )
-    def test_get_gateway_no_default_route(self, mock_file):
+    @patch('migasfree_client.network.is_linux', return_value=True)
+    def test_get_gateway_no_default_route(self, mock_linux, mock_file):
         """Test getting gateway when no default route exists"""
         result = network.get_gateway()
         assert result is None

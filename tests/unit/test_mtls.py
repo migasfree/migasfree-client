@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock, mock_open, patch
 
@@ -23,11 +24,12 @@ from migasfree_client import mtls
 class TestMtls(unittest.TestCase):
     def setUp(self):
         self.server = 'test-server'
-        self.mtls_path = '/tmp/migasfree-tests/mtls/test-server'
+        self.test_tmp_dir = os.path.join(tempfile.gettempdir(), 'migasfree-tests')
+        self.mtls_path = os.path.join(self.test_tmp_dir, 'mtls', 'test-server')
 
-    @patch('migasfree_client.mtls.MTLS_PATH', '/tmp/migasfree-tests/mtls')
     def test_get_mtls_path(self):
-        self.assertEqual(mtls.get_mtls_path(self.server), self.mtls_path)
+        with patch('migasfree_client.mtls.MTLS_PATH', os.path.join(self.test_tmp_dir, 'mtls')):
+            self.assertEqual(mtls.get_mtls_path(self.server), self.mtls_path)
 
     @patch('migasfree_client.mtls.get_mtls_path')
     def test_get_mtls_cert_file(self, mock_get_path):

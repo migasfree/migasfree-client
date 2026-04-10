@@ -17,6 +17,8 @@
 Tests for sync-related functionality.
 """
 
+import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -33,8 +35,9 @@ class TestMigasFreeSync(unittest.TestCase):
     @patch('migasfree_client.utils.get_graphic_pid', return_value=(None, None))
     def setUp(self, mock_graphic, mock_log_config, mock_config, mock_signal, mock_root):
         # We need to mock settings.TMP_PATH and other paths to avoid local side effects
-        with patch('migasfree_client.settings.TMP_PATH', '/tmp'), patch(
-            'migasfree_client.settings.CONF_FILE', '/etc/migasfree.conf'
+        test_tmp = tempfile.gettempdir()
+        with patch('migasfree_client.settings.TMP_PATH', test_tmp), patch(
+            'migasfree_client.settings.CONF_FILE', os.path.join(test_tmp, 'migasfree.conf')
         ), patch('migasfree_client.utils.get_mfc_project', return_value='test-project'), patch(
             'migasfree_client.utils.get_mfc_computer_name', return_value='test-computer'
         ):

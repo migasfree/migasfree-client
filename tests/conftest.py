@@ -25,10 +25,12 @@ os.environ['LANGUAGE'] = 'C'
 os.environ['LANG'] = 'C'
 
 # Force mocks before any migasfree_client import
+import tempfile
+
 import migasfree_client.settings as settings
 
 # Create temporary directory for tests
-TEST_TMP_DIR = '/tmp/migasfree-tests'
+TEST_TMP_DIR = os.path.join(tempfile.gettempdir(), 'migasfree-tests')
 if not os.path.exists(TEST_TMP_DIR):
     os.makedirs(TEST_TMP_DIR)
 

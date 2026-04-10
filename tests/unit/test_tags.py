@@ -57,8 +57,9 @@ class TestMigasFreeTags(unittest.TestCase):
     @patch('migasfree_client.tags.execute')
     @patch('migasfree_client.tags.is_zenity', return_value=True)
     @patch('migasfree_client.tags.is_xsession', return_value=True)
+    @patch('migasfree_client.tags.is_windows', return_value=False)
     @patch('migasfree_client.tags.is_linux', return_value=True)
-    def test_select_tags_zenity_linux(self, mock_linux, mock_xsession, mock_zenity, mock_execute):
+    def test_select_tags_zenity_linux(self, mock_linux, mock_windows, mock_xsession, mock_zenity, mock_execute):
         """Test tag selection using zenity on Linux"""
         mock_execute.return_value = (0, 'LOC-office1\nDEP-marketing\n', '')
         available = {'LOC': ['LOC-office1', 'LOC-office2'], 'DEP': ['DEP-marketing']}
@@ -75,9 +76,10 @@ class TestMigasFreeTags(unittest.TestCase):
         self.assertIn('--separator=\n', args[0])
 
     @patch('migasfree_client.tags.execute')
+    @patch('migasfree_client.tags.is_windows', return_value=False)
     @patch('migasfree_client.tags.is_zenity', return_value=False)
     @patch('migasfree_client.tags.is_xsession', return_value=False)
-    def test_select_tags_dialog(self, mock_xsession, mock_zenity, mock_execute):
+    def test_select_tags_dialog(self, mock_xsession, mock_zenity, mock_windows, mock_execute):
         """Test tag selection using dialog when GUI is not available"""
         mock_execute.return_value = (0, 'LOC-office1\nDEP-office2\n', '')
         available = {'LOC': ['LOC-office1', 'LOC-office2']}
