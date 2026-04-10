@@ -138,7 +138,7 @@ To see which environment variables are being used:
 MIGASFREE_CLIENT_DEBUG=True migasfree sync 2>&1 | head -50
 
 # The log will show:
-# Config client: {'server': 'example.com', ...}
+# 2026-04-10T09:33:24+0200 - INFO - command - _show_config_options - Config client: {'server': 'example.com', ...}
 ```
 
 ## Security Considerations

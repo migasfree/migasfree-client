@@ -149,6 +149,24 @@ This command will:
 7. ✅ Upload hardware information (if requested)
 8. ✅ Configure devices (printers, etc.)
 
+### Synchronization Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: Check Availability
+    Client->>Client: Pre-Sync Scripts
+    Client->>Server: Upload Attributes
+    Client->>Server: Upload Faults
+    Client->>Server: Get Repositories
+    Client->>Client: Update PMS Metadata
+    Client->>Server: Upload Software Inventory
+    Client->>Server: Upload Hardware (if required)
+    Client->>Client: Post-Sync Scripts
+    Client->>Server: End Synchronization
+```
+
 ### Synchronization Output
 
 ```text
@@ -171,7 +189,7 @@ Now that you have migasfree-client running, you can:
 
 ### Learn More
 
-- 📚 [Tutorial: Advanced Synchronization Options](tutorials/first-sync.md)
+- 📚 [Tutorial: Your First Synchronization](tutorials/first-sync.md)
 - 🔐 [Tutorial: Setting Up mTLS Security](tutorials/setup-mtls.md)
 
 ### Common Tasks
@@ -202,6 +220,6 @@ Now that you have migasfree-client running, you can:
 If you encounter issues:
 
 1. **Enable debug mode**: `sudo migasfree sync -d`
-2. **Check logs**: `/var/log/migasfree.log` (Linux) or Windows Event Viewer
+2. **Check logs**: `/var/tmp/migasfree.log` (Linux) or `%WINDIR%\temp\migasfree.log` (Windows)
 3. **See troubleshooting**: [Troubleshooting Guide](how-to/troubleshooting.md)
 4. **Report issues**: [GitHub Issues](https://github.com/migasfree/migasfree-client/issues)

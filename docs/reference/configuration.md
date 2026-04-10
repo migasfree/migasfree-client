@@ -222,7 +222,8 @@ Debug = True
 | Default     | `False`                    |
 | Environment | `MIGASFREE_CLIENT_DEBUG`   |
 
-Logs are written to `/var/log/migasfree.log` (Linux) or `C:\Windows\Temp\logs\migasfree.log` (Windows).
+Logs are written to `/var/tmp/migasfree.log` (Linux) or `%WINDIR%\temp\migasfree.log` (Windows).
+Since version 5.0, these logs are structured using standard Python logging and terminal output is formatted using [Rich](https://github.com/Textualize/rich).
 
 ---
 

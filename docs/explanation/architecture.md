@@ -44,15 +44,22 @@ migasfree_client/
 ├── __main__.py          # Entry point
 ├── command.py           # Base command class & decorators
 ├── sync.py              # Synchronization logic
+├── upload.py            # Package upload logic
+├── info.py              # Computer information retrieval
+├── tags.py              # Tag management
+├── label.py             # Computer identification (ASCII art)
 ├── availability.py      # Server availability check
 ├── client.py            # HTTP client wrapper
 ├── url_request.py       # Low-level HTTP requests
-├── secure.py            # Cryptographic operations
+├── secure.py            # Cryptographic operations (JWS/JWE)
 ├── mtls.py              # mTLS certificate management
 ├── utils.py             # Utility functions
 ├── settings.py          # Configuration management
+├── mixins/              # Shared logic (Software, Hardware, etc.)
+├── devices/             # Device management (Printers, CUPS)
 └── pms/                 # Package Management Systems
     ├── __init__.py      # PMS factory
+    ├── pms.py           # Abstract base class
     ├── apt.py           # Debian/Ubuntu
     ├── dnf.py           # Fedora
     ├── yum.py           # RHEL/CentOS
@@ -116,6 +123,7 @@ sequenceDiagram
     participant PMS as Package Manager
 
     Client->>Server: Check Availability
+    Client->>Client: Execute Pre-Sync Scripts
     Client->>Server: Upload Attributes & Faults
     Client->>PMS: Query Installed Software (BEFORE)
     Client->>Client: Create Repositories & Clean Cache
@@ -128,6 +136,7 @@ sequenceDiagram
     end
     Client->>Server: Sync Logical Devices (Printers)
     Client->>Server: Execute Traits & Events
+    Client->>Client: Execute Post-Sync Scripts
     Client->>Server: Upload Execution Errors
     Client->>Server: End Synchronization
 ```

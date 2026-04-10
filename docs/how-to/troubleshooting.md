@@ -11,7 +11,7 @@ Before troubleshooting, gather diagnostic information:
 sudo migasfree sync -d
 
 # Check the log file
-cat /var/log/migasfree.log | tail -100
+cat /var/tmp/migasfree.log | tail -100
 
 # Verify configuration
 cat /etc/migasfree.conf
@@ -414,8 +414,8 @@ Debug = True
 
 Debug logs are written to:
 
-- **Linux**: `/var/log/migasfree.log`
-- **Windows**: `C:\Windows\Temp\logs\migasfree.log`
+- **Linux**: `/var/tmp/migasfree.log`
+- **Windows**: `%WINDIR%\temp\migasfree.log`
 
 ## Log Analysis
 
@@ -431,14 +431,8 @@ Debug logs are written to:
 ### Filtering Logs
 
 ```bash
-# Show only errors
-grep -i error /var/log/migasfree.log
-
-# Show today's logs
-grep "$(date +%Y-%m-%d)" /var/log/migasfree.log
-
 # Show last sync attempt
-grep -A 50 "in execution" /var/log/migasfree.log | tail -60
+grep -A 50 "synchronize" /var/tmp/migasfree.log | tail -60
 ```
 
 ## Getting Help
@@ -450,7 +444,7 @@ If you can't resolve the issue:
    ```bash
    migasfree version > diagnostics.txt
    cat /etc/migasfree.conf >> diagnostics.txt
-   tail -200 /var/log/migasfree.log >> diagnostics.txt
+   tail -200 /var/tmp/migasfree.log >> diagnostics.txt
    ```
 
 2. **Open an issue**: [GitHub Issues](https://github.com/migasfree/migasfree-client/issues)
