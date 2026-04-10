@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import contextlib
 import copy
 import errno
 import gettext
@@ -21,19 +20,19 @@ import json
 import logging
 import os
 import signal
-import socket
 import sys
-import tempfile
 from collections import defaultdict
 from datetime import datetime
 
 from . import (
     availability,
-    network,
     settings,
     utils,
 )
 from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
+from .mixins.evaluator import CodeEvaluatorMixin
+from .mixins.hardware import HardwareCollectorMixin
+from .mixins.software import SoftwareManagerMixin
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -43,7 +42,7 @@ _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
 
 
-class MigasFreeSync(MigasFreeCommand):
+class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerMixin, MigasFreeCommand):
     APP_NAME = 'Migasfree'
 
     _graphic_user = None
@@ -111,92 +110,6 @@ class MigasFreeSync(MigasFreeCommand):
         print(f'\t{self.CMD} traits\n')
         print(f'\t{self.CMD} traits SET\n')
         print(f'\t{self.CMD} traits CID id\n')
-
-    def _eval_code(self, name, lang, code):
-        code = code.replace('\r', '').strip()  # clean code
-        logger.debug('Name: %s', name)
-        logger.debug('Language code: %s', lang)
-        logger.debug('Code: %s', code)
-
-        filename = tempfile.mkstemp()[1]
-        utils.write_file(filename, code)
-
-        allowed_languages = ['python', 'perl', 'php', 'ruby']
-        if utils.is_linux():
-            allowed_languages.append('bash')
-        if utils.is_windows():
-            allowed_languages.extend(['cmd', 'powershell'])
-
-        if lang in allowed_languages:
-            if lang == 'python' and utils.is_linux():
-                lang = 'python3'
-            cmd = [lang, filename]
-        else:
-            cmd = [':']  # gracefully degradation
-
-        ret, output, error = utils.timeout_execute(cmd)
-        logger.debug('Executed command: %s', cmd)
-        logger.debug('Output: %s', output)
-        if ret != 0:
-            logger.error('Error: %s', error)
-            msg = _('Name: "%s"\n') % name
-            msg += _('Code "%s" with error: %s') % (code, error)
-            self._write_error(msg)
-
-        with contextlib.suppress(IOError):
-            os.remove(filename)
-
-        return ret, output, error
-
-    def _eval_attributes(self, properties):
-        response = {
-            'id': self._computer_id,
-            'uuid': utils.get_hardware_uuid(),
-            'name': self.migas_computer_name,
-            'fqdn': socket.getfqdn(),
-            'ip_address': network.get_network_info()['ip'],
-            'sync_user': self._graphic_user,
-            'sync_fullname': utils.get_user_info(self._graphic_user)['fullname'],
-            'sync_attributes': {},
-        }
-
-        # properties converted in attributes
-        self._show_message(_('Evaluating attributes...'))
-        with self.console.status(''):
-            for item in properties:
-                ret, response['sync_attributes'][item['prefix']], error = self._eval_code(
-                    item['prefix'], item['language'], item['code']
-                )
-                info = f'{item["prefix"]}: {response["sync_attributes"][item["prefix"]]}'
-                if ret == 0 and response['sync_attributes'][item['prefix']].strip() != '':
-                    self.operation_ok(info)
-                else:
-                    if error:
-                        info = f'{item["prefix"]}: {error}'
-                        self.operation_failed(info)
-                        self._write_error(_('Error: property %s without value') % item['prefix'])
-
-        return response
-
-    def _eval_faults(self, fault_definitions):
-        response = {'id': self._computer_id, 'faults': {}}
-
-        self._show_message(_('Executing faults...'))
-        with self.console.status(''):
-            for item in fault_definitions:
-                ret, result, error = self._eval_code(item['name'], item['language'], item['code'])
-                info = f'{item["name"]}: {result}'
-                if ret == 0:
-                    if result:
-                        # only send faults with output!!!
-                        response['faults'][item['name']] = result
-                        self.operation_failed(info)
-                    else:
-                        self.operation_ok(info)
-                else:
-                    self.operation_failed(f'{item["name"]}: {error}')
-
-        return response
 
     def get_repos_key(self):
         self._show_message(_('Getting repositories key...'))
@@ -299,27 +212,6 @@ class MigasFreeSync(MigasFreeCommand):
 
         return response
 
-    @staticmethod
-    def software_history(software):
-        history = {}
-
-        # if have been managed packages manually
-        # information is uploaded to server
-        if os.path.isfile(settings.SOFTWARE_FILE) and os.stat(settings.SOFTWARE_FILE).st_size:
-            diff_software = utils.compare_lists(
-                open(settings.SOFTWARE_FILE, encoding='utf_8').read().splitlines(),  # not readlines!!!  # noqa: SIM115
-                software,
-            )
-
-            if diff_software:
-                history = {
-                    'installed': [x for x in diff_software if x.startswith('+')],
-                    'uninstalled': [x for x in diff_software if x.startswith('-')],
-                }
-                logger.debug('Software diff: %s', history)
-
-        return history
-
     def upload_old_errors(self):
         """
         if there are old errors, upload them to server
@@ -342,141 +234,6 @@ class MigasFreeSync(MigasFreeCommand):
 
         self._url_request._check_tmp_path()
         self._error_file_descriptor = open(self.ERROR_FILE, 'wb')  # noqa: SIM115
-
-    def create_repositories(self):
-        self._check_pms()
-
-        repos = self.get_repositories()
-
-        self._show_message(_('Creating repositories...'))
-
-        server = self.migas_server
-        if self.migas_package_proxy_cache:
-            server = f'{self.migas_package_proxy_cache}/{server}'
-
-        ret = self.pms.create_repos(self.migas_protocol, server, repos)
-
-        if ret:
-            self.operation_ok()
-        else:
-            self._pms_status_ok = False
-            self._report_error(_('Error creating repositories: %s') % repos)
-
-    def clean_pms_cache(self):
-        """
-        clean cache of Package Management System
-        """
-        self._check_pms()
-
-        self._show_message(_('Getting repositories metadata...'))
-        ret = self.pms.clean_all()
-
-        if ret:
-            self.operation_ok()
-        else:
-            self._report_error(_('Error getting repositories metadata'))
-
-    def uninstall_packages(self, packages):
-        self._check_pms()
-
-        self._show_message(_('Uninstalling packages...'))
-        ret, error = self.pms.remove_silent(packages)
-
-        if ret:
-            self.operation_ok()
-        else:
-            self._pms_status_ok = False
-            self._report_error(_('Error uninstalling packages: %s') % error)
-
-    def install_mandatory_packages(self, packages):
-        self._check_pms()
-
-        self._show_message(_('Installing mandatory packages...'))
-        ret, error = self.pms.install_silent(packages)
-
-        if ret:
-            self.operation_ok()
-        else:
-            self._pms_status_ok = False
-            self._report_error(_('Error installing packages: %s') % error)
-
-        return ret
-
-    def _update_packages(self):
-        self._check_pms()
-
-        self._show_message(_('Updating packages...'))
-        ret, error = self.pms.update_silent()
-
-        if ret:
-            self.operation_ok()
-        else:
-            self._pms_status_ok = False
-            self._report_error(_('Error updating packages: %s') % error)
-
-        return ret
-
-    @require_computer_id
-    def hardware_capture_is_required(self):
-        with self.console.status(''):
-            response = self._url_request.run(
-                url=self.api_endpoint(self.URLS['get_hardware_required']),
-                data={'id': self._computer_id},
-                exit_on_error=False,
-                debug=self._debug,
-            )
-            logger.debug('Response hardware_capture_is_required: %s', response)
-
-        if isinstance(response, dict) and 'error' in response:
-            self.operation_failed(response['error']['info'])
-            sys.exit(errno.ENODATA)
-
-        return response.get('capture', False)
-
-    @require_computer_id
-    def update_hardware_inventory(self):
-        hardware = {}
-
-        self._show_message(_('Capturing hardware information...'))
-        env = os.environ.copy()
-        if not utils.is_windows():
-            env['LC_ALL'] = 'C'
-        cmd = ['lshw', '-json']
-        if utils.is_windows():
-            cmd = ['lshw', '--json']
-            env = None
-        with self.console.status(''):
-            ret, output, error = utils.execute(cmd, interactive=False, env=env)
-
-        if ret == 0:
-            self.operation_ok()
-        else:
-            self._report_error(_('lshw command failed: %s') % error)
-            return
-
-        try:
-            hardware = json.loads(output)
-        except ValueError as e:
-            self._show_message(_('Parsing hardware information...'))
-            self._report_error(f'{_("Hardware information")}: {e!s}')
-            return
-
-        logger.debug('Hardware inventory: %s', hardware)
-
-        self._show_message(_('Sending hardware information...'))
-        response = self._url_request.run(
-            url=self.api_endpoint(self.URLS['upload_hardware']),
-            data={'id': self._computer_id, 'hardware': hardware},
-            exit_on_error=False,
-            debug=self._debug,
-        )
-        logger.debug('Response upload_hardware: %s', response)
-
-        if 'error' in response:
-            self._report_error(response['error']['info'])
-            return
-
-        self.operation_ok()
 
     def upload_execution_errors(self):
         self._error_file_descriptor.close()
@@ -528,52 +285,6 @@ class MigasFreeSync(MigasFreeCommand):
             logger.debug('Response upload_faults: %s', response)
 
         return response
-
-    def mandatory_pkgs(self):
-        response = self.get_mandatory_packages()
-        if not response:
-            return
-
-        if 'remove' in response:
-            self.uninstall_packages(response['remove'])
-        if 'install' in response:
-            self.install_mandatory_packages(response['install'])
-
-    @require_computer_id
-    def upload_software(self, before, history):
-        self._check_pms()
-
-        after = self.pms.query_all()
-        utils.write_file(settings.SOFTWARE_FILE, '\n'.join(after))
-
-        diff_software = utils.compare_lists(before, after)
-        if diff_software:
-            data = {
-                'installed': [x for x in diff_software if x.startswith('+')],
-                'uninstalled': [x for x in diff_software if x.startswith('-')],
-            }
-            logger.debug('Software diff: %s', data)
-
-            if data['installed']:
-                if 'installed' in history:
-                    history['installed'].extend(data['installed'])
-                else:
-                    history['installed'] = data['installed']
-            if data['uninstalled']:
-                if 'uninstalled' in history:
-                    history['uninstalled'].extend(data['uninstalled'])
-                else:
-                    history['uninstalled'] = data['uninstalled']
-
-            self._show_message(_('Software diff'))
-            self.console.print(history)
-
-        self._show_message(_('Uploading software...'))
-        response = self._api_call(
-            'upload_software',
-            {'id': self._computer_id, 'inventory': after, 'history': history},
-        )
-        return self._handle_response(response)
 
     def end_synchronization(self, start_date, consumer=''):
         if not consumer:
