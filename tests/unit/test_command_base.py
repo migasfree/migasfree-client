@@ -55,13 +55,15 @@ class TestMigasFreeCommandBase(unittest.TestCase):
             self.cmd._check_user_is_root()
             mock_exit.assert_called_with(errno.EACCES)
 
-    def test_operation_ok(self):
+    @patch('migasfree_client.command.utils.is_windows', return_value=False)
+    def test_operation_ok(self, mock_win):
         """Test operation_ok console output"""
         self.cmd.console = MagicMock()
         self.cmd.operation_ok('Success')
         self.cmd.console.log.assert_called()
 
-    def test_operation_failed(self):
+    @patch('migasfree_client.command.utils.is_windows', return_value=False)
+    def test_operation_failed(self, mock_win):
         """Test operation_failed console output"""
         self.cmd.error_console = MagicMock()
         self.cmd.operation_failed('Failure')
@@ -93,8 +95,9 @@ class TestMigasFreeCommandBase(unittest.TestCase):
         result = self.cmd._handle_response(response)
         self.assertEqual(result, response)
 
+    @patch('migasfree_client.command.utils.is_windows', return_value=False)
     @patch('sys.exit')
-    def test_handle_response_error(self, mock_exit):
+    def test_handle_response_error(self, mock_exit, mock_win):
         """Test handling API response with error"""
         self.cmd.error_console = MagicMock()
         response = {'error': {'info': 'API Error', 'code': 404}}
