@@ -491,8 +491,13 @@ class MigasFreeCommand:
 
         error = response['error']
         if isinstance(error, dict) and 'code' in error:
-            self.operation_failed(error['info'])
-            logger.error(error['info'])
+            error_info = error['info']
+            if error['code'] == requests.codes.not_found:
+                error_info = _('Project "{}" not found on server. You must create it or review the "Project" parameter in the configuration file.').format(
+                    self.migas_project
+                )
+            self.operation_failed(error_info)
+            logger.error(error_info)
             if exit_on_error:
                 sys.exit(error['code'])
         else:
@@ -605,9 +610,15 @@ class MigasFreeCommand:
                 )
                 sys.exit(errno.EPERM)
 
-            self.operation_failed(response['error']['info'])
             if response['error']['code'] == requests.codes.not_found:
+                self.operation_failed(
+                    _('Project "{}" not found on server. You must create it or review the "Project" parameter in the configuration file.').format(
+                        self.migas_project
+                    )
+                )
                 sys.exit(errno.ENODATA)
+
+            self.operation_failed(response['error']['info'])
 
         return response.get('id', 0)  # computer ID
 
