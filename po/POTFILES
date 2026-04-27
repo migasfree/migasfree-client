@@ -1,11 +1,13 @@
 ../migasfree_client/__main__.py
 ../migasfree_client/command.py
-../migasfree_client/label.py
+../migasfree_client/mixins/evaluator.py
+../migasfree_client/mixins/hardware.py
+../migasfree_client/mixins/software.py
 ../migasfree_client/mtls.py
+../migasfree_client/pms/pacman.py
 ../migasfree_client/secure.py
 ../migasfree_client/sync.py
 ../migasfree_client/tags.py
 ../migasfree_client/upload.py
 ../migasfree_client/url_request.py
 ../migasfree_client/utils.py
-../migasfree_client/pms/pacman.py
