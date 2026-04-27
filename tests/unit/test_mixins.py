@@ -77,7 +77,7 @@ class TestCodeEvaluatorMixin(unittest.TestCase):
         props = [{'prefix': 'P1', 'language': 'bash', 'code': 'echo 1'}]
         with patch('migasfree_client.network.get_network_info', return_value={'ip': '1.1.1.1'}), patch(
             'migasfree_client.utils.get_user_info', return_value={'fullname': 'Full Name'}
-        ):
+        ), patch('migasfree_client.utils.get_hardware_uuid', return_value='00000000-0000-0000-0000-000000000000'):
             res = self.comp._eval_attributes(props)
             self.assertEqual(res['sync_attributes']['P1'], 'result')
 
