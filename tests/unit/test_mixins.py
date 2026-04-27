@@ -68,10 +68,11 @@ class TestCodeEvaluatorMixin(unittest.TestCase):
 
         self.comp = Comp()
 
+    @patch('migasfree_client.utils.is_linux', return_value=True)
     @patch('migasfree_client.utils.timeout_execute')
     @patch('migasfree_client.utils.write_file')
     @patch('os.remove')
-    def test_eval_attributes(self, mock_remove, mock_write, mock_execute):
+    def test_eval_attributes(self, mock_remove, mock_write, mock_execute, mock_is_linux):
         mock_execute.return_value = (0, 'result', '')
         props = [{'prefix': 'P1', 'language': 'bash', 'code': 'echo 1'}]
         with patch('migasfree_client.network.get_network_info', return_value={'ip': '1.1.1.1'}), patch(
