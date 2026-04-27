@@ -6,8 +6,10 @@
 /stdeb.cfg
 /build/
 /venv/
-/migasfree_client/devices/plugins/azw.py
-/migasfree_client/pms/plugins/giman.py
+/migasfree_client/devices/plugins/*.py
+!/migasfree_client/devices/plugins/__init__.py
+/migasfree_client/pms/plugins/*.py
+!/migasfree_client/pms/plugins/__init__.py
 *.pyc
 /.coverage
 .agent/
