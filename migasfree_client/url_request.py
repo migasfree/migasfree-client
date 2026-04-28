@@ -286,8 +286,15 @@ class UrlRequest:
             except ValueError:
                 return {'data': None, 'content': req.content}
 
-        logger.error('Simple request failed with status %d: %s', req.status_code, req.text)
-        return {'error': {'info': req.text, 'code': req.status_code}}
+        content_type = req.headers.get('content-type', '')
+        if 'html' in content_type:
+            logger.error('Simple request failed with status %d (HTML response)', req.status_code)
+            info = f'HTTP Error {req.status_code}'
+        else:
+            logger.error('Simple request failed with status %d: %s', req.status_code, req.text)
+            info = req.text
+
+        return {'error': {'info': info, 'code': req.status_code}}
 
     def run_simple(self, url, data=None, json_data=None, headers=None, timeout=None, download=False):
         """
@@ -354,7 +361,9 @@ class UrlRequest:
 
     def _error_response(self, request, url):
         logger.error('url_request server error response code: %s', request.status_code)
-        logger.error('url_request server error response info: %s', request.text)
+        content_type = request.headers.get('content-type', '')
+        if 'html' not in content_type:
+            logger.error('url_request server error response info: %s', request.text)
 
         content_type = request.headers.get('content-type', '')
         is_json = 'json' in content_type
@@ -385,5 +394,8 @@ class UrlRequest:
             else:
                 logger.error(_('Status code: %s') % request.status_code)
             sys.exit(errno.EACCES)
+
+        if 'html' in content_type:
+            info = f'HTTP Error {request.status_code}'
 
         return {'error': {'info': str(info), 'code': request.status_code}}
