@@ -265,7 +265,11 @@ class Apt(Pms):
             # otherwise it ignores the argument and looks at system sources.
             # IMPORTANT: Do NOT use /dev/null as SourceList — apt may try to
             # back it up or modify it, corrupting /dev/null when running as root.
-            empty_source_list = os.path.join(tmp_dir, 'empty.list')
+            # The empty file must live outside SourceParts (tmp_dir), otherwise
+            # apt modernize-sources will process it and then fail to re-read it.
+            main_dir = os.path.join(tmp_dir, 'main')
+            os.makedirs(main_dir)
+            empty_source_list = os.path.join(main_dir, 'sources.list')
             write_file(empty_source_list, '')
             cmd = [
                 '/usr/bin/apt',
