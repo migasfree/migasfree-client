@@ -263,9 +263,13 @@ class Apt(Pms):
             # and creates a .list.bak
             # We must override Dir::Etc configuration to point to our temp dir,
             # otherwise it ignores the argument and looks at system sources.
+            # IMPORTANT: Do NOT use /dev/null as SourceList — apt may try to
+            # back it up or modify it, corrupting /dev/null when running as root.
+            empty_source_list = os.path.join(tmp_dir, 'empty.list')
+            write_file(empty_source_list, '')
             cmd = [
                 '/usr/bin/apt',
-                '-o', 'Dir::Etc::SourceList=/dev/null',
+                '-o', f'Dir::Etc::SourceList={empty_source_list}',
                 '-o', f'Dir::Etc::SourceParts={tmp_dir}',
                 'modernize-sources',
                 '--assume-yes',
