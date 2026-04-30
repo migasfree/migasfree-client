@@ -261,9 +261,17 @@ class Apt(Pms):
 
             # apt modernize-sources converts <file>.list to <file>.sources
             # and creates a .list.bak
-            cmd = ['/usr/bin/apt', 'modernize-sources', list_path]
+            # We must override Dir::Etc configuration to point to our temp dir,
+            # otherwise it ignores the argument and looks at system sources.
+            cmd = [
+                '/usr/bin/apt',
+                '-o', 'Dir::Etc::SourceList=/dev/null',
+                '-o', f'Dir::Etc::SourceParts={tmp_dir}',
+                'modernize-sources',
+                '--assume-yes',
+            ]
             logging.debug(' '.join(cmd))
-            ret, _, err = execute(cmd, interactive=False, input_data='y\n')
+            ret, _, err = execute(cmd, interactive=False)
             if ret != ALL_OK:
                 logging.error('apt modernize-sources failed: %s', str(err))
                 return ''

@@ -337,8 +337,10 @@ class TestApt(unittest.TestCase):
         self.assertTrue(result)
         # Check modernize-sources call
         modernize_call = mock_execute.call_args_list[1]
-        self.assertEqual(modernize_call[0][0][0:2], ['/usr/bin/apt', 'modernize-sources'])
-        self.assertEqual(modernize_call[1].get('input_data'), 'y\n')
+        self.assertEqual(modernize_call[0][0][0], '/usr/bin/apt')
+        self.assertIn('modernize-sources', modernize_call[0][0])
+        self.assertIn('--assume-yes', modernize_call[0][0])
+        self.assertIn('Dir::Etc::SourceList=/dev/null', str(modernize_call[0][0]))
 
     @patch('migasfree_client.pms.apt.execute')
     def test_install_invalidates_cache(self, mock_execute):
