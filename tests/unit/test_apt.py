@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import unittest
 from unittest.mock import patch
 
@@ -252,11 +253,14 @@ class TestApt(unittest.TestCase):
         self.assertTrue(result)
         mock_write_file.assert_not_called()
 
+    @patch('os.remove')
+    @patch('os.path.isfile')
     @patch('migasfree_client.pms.apt.write_file_if_changed')
     @patch('migasfree_client.pms.apt.execute')
-    def test_create_repos_apt2(self, mock_execute, mock_write_file):
+    def test_create_repos_apt2(self, mock_execute, mock_write_file, mock_isfile, mock_remove):
         mock_execute.return_value = (0, '2.4.11', '')
         mock_write_file.return_value = True
+        mock_isfile.return_value = True
 
         repos = [{'source_template': 'deb {protocol}://{server}/repo stable main'}]
         result = self.apt.create_repos('https', 'server.example.com', repos)
@@ -266,6 +270,8 @@ class TestApt(unittest.TestCase):
         call_args = mock_write_file.call_args[0]
         self.assertIn('migasfree.list', call_args[0])
         self.assertIn('deb https://server.example.com/repo stable main', call_args[1])
+        # Check cleanup call: should remove .sources because we are using .list
+        mock_remove.assert_called_with(os.path.join(self.apt._repo_dir, self.apt._repo_sources))
 
     def test_adapt_sources_adds_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com'
@@ -317,21 +323,24 @@ class TestApt(unittest.TestCase):
         result = self.apt._get_pms_version()
         self.assertEqual(result, (2, 4))
 
+    @patch('os.remove')
+    @patch('os.path.isfile')
     @patch('migasfree_client.pms.apt.write_file')
     @patch('migasfree_client.pms.apt.write_file_if_changed')
     @patch('migasfree_client.pms.apt.execute')
-    def test_create_repos_apt3(self, mock_execute, mock_write_file_if_changed, mock_write_file):
+    def test_create_repos_apt3(
+        self, mock_execute, mock_write_file_if_changed, mock_write_file, mock_isfile, mock_remove
+    ):
         mock_execute.side_effect = [
             (0, 'apt 3.0.0 (amd64)', ''),  # _get_pms_version
             (0, 'Converted content', ''),  # modernize-sources
         ]
         mock_write_file_if_changed.return_value = True
         mock_write_file.return_value = True
+        mock_isfile.return_value = True
 
         repos = [{'source_template': 'deb {protocol}://{server}/repo stable main'}]
-        with patch('os.path.isfile', return_value=True), patch(
-            'builtins.open', unittest.mock.mock_open(read_data='Converted content')
-        ):
+        with patch('builtins.open', unittest.mock.mock_open(read_data='Converted content')):
             result = self.apt.create_repos('https', 'server.example.com', repos)
 
         self.assertTrue(result)
@@ -341,6 +350,8 @@ class TestApt(unittest.TestCase):
         self.assertIn('modernize-sources', modernize_call[0][0])
         self.assertIn('--assume-yes', modernize_call[0][0])
         self.assertIn('Dir::Etc::SourceList=/dev/null', str(modernize_call[0][0]))
+        # Check cleanup call: should remove .list because we are using .sources
+        mock_remove.assert_called_with(os.path.join(self.apt._repo_dir, self.apt._repo_list))
 
     @patch('migasfree_client.pms.apt.execute')
     def test_install_invalidates_cache(self, mock_execute):

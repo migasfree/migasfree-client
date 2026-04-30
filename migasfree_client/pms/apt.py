@@ -319,16 +319,25 @@ class Apt(Pms):
             return True
 
         # Choose format by APT version
-        self._repo = os.path.join(self._repo_dir, self._repo_list)
+        list_path = os.path.join(self._repo_dir, self._repo_list)
+        sources_path = os.path.join(self._repo_dir, self._repo_sources)
+        self._repo = list_path
+
         try:
             apt_version = self._get_pms_version()
             if apt_version[0] >= 3:
                 sources_content = self._convert_list_to_sources(content, server)
                 if sources_content:
                     content = sources_content
-                    self._repo = os.path.join(self._repo_dir, self._repo_sources)
+                    self._repo = sources_path
                 else:
                     logging.warning('Failed to convert repos to .sources format, falling back to .list')
+
+            # Clean up the format not in use to avoid duplicates
+            other_repo = sources_path if self._repo == list_path else list_path
+            if os.path.isfile(other_repo):
+                os.remove(other_repo)
+
         except (AttributeError, ValueError, IndexError) as e:
             logging.debug('Error detecting APT version or converting sources: %s', str(e))
 
