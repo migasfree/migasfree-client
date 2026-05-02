@@ -493,7 +493,11 @@ class MigasFreeCommand:
         if isinstance(error, dict) and 'code' in error:
             error_info = error['info']
             if error['code'] == requests.codes.not_found:
-                error_info = _('Project "{}" not found on server. You must create it or review the "Project" parameter in the configuration file.').format(
+                error_info = _(
+                    'Project "{}" not found on server. '
+                    'You must create it or review the "Project" parameter '
+                    'in the configuration file.'
+                ).format(
                     self.migas_project
                 )
             self.operation_failed(error_info)
@@ -612,7 +616,11 @@ class MigasFreeCommand:
 
             if response['error']['code'] == requests.codes.not_found:
                 self.operation_failed(
-                    _('Project "{}" not found on server. You must create it or review the "Project" parameter in the configuration file.').format(
+                    _(
+                        'Project "{}" not found on server. '
+                        'You must create it or review the "Project" parameter '
+                        'in the configuration file.'
+                    ).format(
                         self.migas_project
                     )
                 )
