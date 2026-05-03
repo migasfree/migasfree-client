@@ -75,7 +75,7 @@ class TestMigasFreeCommandBase(unittest.TestCase):
         self.cmd.operation_failed('Failure')
         self.cmd.error_console.log.assert_called()
 
-    @patch('migasfree_client.command.UrlRequest')
+    @patch('migasfree_client.mixins.config.UrlRequest')
     def test_init_url_request(self, mock_url_request_class):
         """Test URL request object initialization"""
         self.cmd.migas_proxy = 'http://proxy:8080'

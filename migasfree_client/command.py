@@ -24,19 +24,16 @@ import logging.handlers
 import os
 import platform
 import shutil
-import ssl
 import sys
-import time
-from urllib.parse import urljoin
 
 import requests
 from rich.console import Console
 
 from . import mtls, settings, utils
-from .devices import Printer, get_available_devices_classes
+from .mixins.config import ConfigMixin
+from .mixins.renderer import RendererMixin
 from .network import get_network_info
-from .pms import Pms, get_available_pms
-from .url_request import UrlRequest
+from .url_request import UrlRequest  # noqa: F401 — re-exported for tests
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -135,7 +132,7 @@ def lock_file_context(cmd, lock_file):
         utils.remove_file(lock_file)
 
 
-class MigasFreeCommand:
+class MigasFreeCommand(RendererMixin, ConfigMixin):
     """
     Interface class
     """
@@ -271,190 +268,6 @@ class MigasFreeCommand:
         logger.info('Config file: %s', settings.CONF_FILE)
         logger.debug('Config client: %s', _config_client)
         logger.debug('Config packager: %s', _config_packager)
-
-    def _ssl_cert(self):
-        self.migas_ssl_cert = False
-        if self.migas_protocol == 'https':
-            port = self.migas_port if self.migas_port else 443
-
-            if os.path.isfile(settings.CERT_FILE):
-                os.remove(settings.CERT_FILE)
-
-            try:
-                cert = ssl.get_server_certificate((self.migas_server, port), ssl.PROTOCOL_SSLv23)
-                if utils.write_file(settings.CERT_FILE, cert):
-                    self.migas_ssl_cert = settings.CERT_FILE
-            except ssl.SSLError:
-                pass
-            except OSError as e:
-                _msg = _('Error getting server certificate: %s') % e
-                self.operation_failed(_msg)
-                sys.exit(errno.ECONNREFUSED)
-
-    def _get_keys_path(self):
-        return os.path.join(settings.KEYS_PATH, utils.sanitize_path(self.migas_server))
-
-    def _init_url_base(self):
-        self._url_base = '{}://{}{}'.format(
-            self.migas_protocol, self.migas_server, f':{self.migas_port}' if self.migas_port else ''
-        )
-
-    def _init_mtls(self):
-        """Initialize mTLS certificate paths, fetching from server if needed."""
-        self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
-
-        if self._mtls_cert and self._mtls_key:
-            self._update_ca_certificate()
-            self._enable_mtls()
-            return
-
-        self._fetch_mtls_from_server()
-
-    def _update_ca_certificate(self):
-        """Check and update CA certificate from server."""
-        logger.info('Checking CA certificate...')
-        ca_result = mtls.download_ca_certificate(self._url_base, self.migas_server)
-
-        if ca_result['success']:
-            self._ca_cert = ca_result['ca_file']
-            if ca_result.get('updated'):
-                logger.info('CA certificate updated')
-        elif not ca_result.get('not_available'):
-            logger.warning('Failed to download CA certificate: %s', ca_result['message'])
-
-    def _enable_mtls(self):
-        """Enable mTLS mode: force https protocol and update URL base."""
-        self.migas_protocol = 'https'
-        self._init_url_base()
-        logger.info('mTLS enabled, protocol: https')
-
-    def _fetch_mtls_from_server(self):
-        """Attempt to fetch mTLS certificates from server."""
-        logger.info('No mTLS credentials found, attempting to fetch from server...')
-
-        url_request = UrlRequest(
-            debug=self._debug,
-            proxy=self.migas_proxy,
-            cert=self.migas_ssl_cert,
-        )
-
-        result = mtls.fetch_and_install_mtls_certificate(
-            url_request=url_request,
-            server=self.migas_server,
-            server_url=self._url_base,
-            uuid=utils.get_hardware_uuid(),
-            project_name=self.migas_project,
-        )
-
-        if result['success']:
-            self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
-            self._enable_mtls()
-            logger.info('mTLS credentials installed successfully')
-        elif not result.get('not_available'):
-            logger.warning('Failed to fetch mTLS credentials: %s', result['message'])
-
-    def _init_url_request(self):
-        keys_path = self._get_keys_path()
-        self._url_request = UrlRequest(
-            debug=self._debug,
-            proxy=self.migas_proxy,
-            project=self.migas_project,
-            keys={
-                'private': os.path.join(keys_path, self.PRIVATE_KEY),
-                'public': os.path.join(keys_path, self.PUBLIC_KEY),
-            },
-            cert=self.migas_ssl_cert,
-            mtls_cert=self._mtls_cert,
-            mtls_key=self._mtls_key,
-            ca_cert=self._ca_cert,
-        )
-
-    def _fetch_mtls_certificates(self):
-        """Fetch mTLS and CA certificates from server."""
-        # Download CA certificate
-        ca_result = mtls.download_ca_certificate(self._url_base, self.migas_server)
-        if ca_result['success']:
-            self._ca_cert = ca_result['ca_file']
-            if ca_result.get('updated'):
-                self.operation_ok(_('CA certificate downloaded'))
-            else:
-                self.operation_ok(_('CA certificate is up to date'))
-        elif ca_result.get('not_available'):
-            logger.info('CA certificate endpoint not available')
-        else:
-            self.operation_failed(_('Failed to download CA certificate: %s') % ca_result['message'])
-
-        # Download mTLS certificates
-        url_request = UrlRequest(
-            debug=self._debug,
-            proxy=self.migas_proxy,
-            cert=self.migas_ssl_cert,
-        )
-
-        result = mtls.fetch_and_install_mtls_certificate(
-            url_request=url_request,
-            server=self.migas_server,
-            server_url=self._url_base,
-            uuid=utils.get_hardware_uuid(),
-            project_name=self.migas_project,
-        )
-
-        if result['success']:
-            self._mtls_cert, self._mtls_key, self._ca_cert = mtls.get_mtls_credentials(self.migas_server)
-            self.operation_ok(_('mTLS certificates downloaded'))
-        elif result.get('not_available'):
-            logger.info('mTLS endpoint not available')
-        else:
-            self.operation_failed(_('Failed to download mTLS certificates: %s') % result['message'])
-
-    def _init_command(self):
-        self._ssl_cert()
-        self._init_url_base()
-        self._init_mtls()
-        self.pms_selection()
-        self._init_url_request()
-        self.get_server_info()
-
-    def api_protocol(self):
-        return self.migas_protocol
-
-    def api_endpoint(self, path):
-        return urljoin(self._url_base, path)
-
-    def _show_message(self, msg):
-        self.console.print()
-        self.console.rule(msg)
-
-    def _check_path(self, path):
-        if not os.path.isdir(path):
-            try:
-                os.makedirs(path)
-            except OSError:
-                _msg = _('Error creating %s directory') % path
-                self.operation_failed(_msg)
-                logger.error(_msg)
-                return False
-
-        return True
-
-    def _execute_path(self, path):
-        self._check_path(path)
-        files = os.listdir(path)
-        for file_ in sorted(files):
-            self._show_message(_('Running command %s...') % file_)
-            _ret, _output, _error = utils.execute(os.path.join(path, file_), verbose=True, interactive=False)
-            if _ret == 0:
-                self.operation_ok()
-            else:
-                _msg = _('Command %s failed: %s') % (file_, _error)
-                self.operation_failed(_msg)
-                logger.error(_msg)
-                self._write_error(_msg)
-
-    def _check_user_is_root(self):
-        if not utils.is_root_user():
-            self.operation_failed(_('User has insufficient privileges to execute this command'))
-            sys.exit(errno.EACCES)
 
     def _check_sign_keys(self, get_computer_id=True):
         keys_path = self._get_keys_path()
@@ -682,119 +495,6 @@ class MigasFreeCommand:
         )
         logger.debug('Response end_of_transmission: %s', response)
 
-    def _show_config_options(self):
-        conf_file = settings.CONF_FILE if os.path.isfile(settings.CONF_FILE) else ''
-
-        self.console.print()
-        self.console.print(_('Config options: %s') % conf_file)
-
-        # Config options: (label, value, env_var_name, show_if_truthy)
-        config_options = [
-            (_('Project'), self.migas_project, 'MIGASFREE_CLIENT_PROJECT', True),
-            (_('Server'), self.migas_server, 'MIGASFREE_CLIENT_SERVER', True),
-            (_('Protocol'), self.migas_protocol, 'MIGASFREE_CLIENT_PROTOCOL', True),
-            (_('Port'), self.migas_port, 'MIGASFREE_CLIENT_PORT', bool(self.migas_port)),
-            (_('Auto update packages'), self.migas_auto_update_packages, 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', True),
-            (_('Manage devices'), self.migas_manage_devices, 'MIGASFREE_CLIENT_MANAGE_DEVICES', True),
-            (_('Upload hardware'), self.migas_upload_hardware, 'MIGASFREE_CLIENT_UPLOAD_HARDWARE', True),
-            (_('Proxy'), self.migas_proxy, 'MIGASFREE_CLIENT_PROXY', True),
-            (_('Package Proxy Cache'), self.migas_package_proxy_cache, 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE', True),
-            (_('Debug'), self._debug, 'MIGASFREE_CLIENT_DEBUG', True),
-            (_('Computer name'), self.migas_computer_name, 'MIGASFREE_CLIENT_COMPUTER_NAME', True),
-        ]
-
-        for label, value, env_var, show in config_options:
-            if show:
-                env_indicator = '(ENV)' if env_var in os.environ else ''
-                self.console.print(f'\t{label}: {value} {env_indicator}')
-
-    def _show_running_options(self):
-        self.console.print()
-        self.console.print(_('Running options:'))
-        self.console.print(
-            '\t{}: {}'.format(_('migasfree server version'), self._server_info.get('version', _('None')))
-        )
-        self.console.print('\t{}: {}'.format(_('SSL certificate'), self.migas_ssl_cert))
-        if (
-            self.migas_ssl_cert is not None
-            and not isinstance(self.migas_ssl_cert, bool)
-            and not os.path.exists(self.migas_ssl_cert)
-        ):
-            self.console.print(
-                '\t\t{}: {}'.format(_('Warning'), _('Certificate does not exist and authentication is not guaranteed'))
-            )
-        self.console.print('\t{}: {}'.format(_('PMS'), self.pms))
-        if self.pms:
-            self.console.print('\t{}: {}'.format(_('Architecture'), self.pms.get_system_architecture()))
-
-    def _write_error(self, msg, append=False):
-        _mode = 'ab' if append else 'wb'
-
-        if not self._error_file_descriptor:
-            self._error_file_descriptor = open(self.ERROR_FILE, _mode)  # noqa: SIM115
-
-        _text = '{}\n{}\n{}\n\n'.format('-' * 20, time.strftime('%Y-%m-%d %H:%M:%S'), str(msg))
-        _text = bytes(_text, encoding='utf8')
-
-        self._error_file_descriptor.write(_text)
-
-    def _usage_examples(self):
-        raise NotImplementedError
-
-    @staticmethod
-    def _search_pms():
-        cmd_to_find = 'command -v'
-        if utils.is_windows():
-            cmd_to_find = 'where'
-
-        for item in get_available_pms():
-            cmd = f'{cmd_to_find} {item[0]}'
-            ret, _, _ = utils.execute(cmd, interactive=False)
-            if ret == 0:
-                return item[1]
-
-        return None  # if not found
-
-    def pms_selection(self):
-        pms_info = self._search_pms()
-        logger.debug('PMS info: %s', pms_info)
-        if not pms_info:
-            return
-
-        self.pms = Pms.factory(pms_info)()
-
-    def _devices_class_selection(self):
-        _class = None
-        for item in get_available_devices_classes():
-            _class = Printer.factory(item[1])(self.migas_server)
-            if _class.platform == sys.platform:
-                self.devices_class = _class
-                return
-
-    def _check_pms(self):
-        if not self.pms:
-            msg = _('Any PMS was not found. Cannot continue.')
-            self.operation_failed(msg)
-            logger.critical(msg)
-            sys.exit(errno.EINPROGRESS)
-
-    def operation_ok(self, info=''):
-        msg = str(info) if info else _('Ok')
-        self.console.log(msg, style='green')
-
-    def operation_failed(self, info=''):
-        console = self.error_console
-        if utils.is_windows():
-            console = self.console
-            console.style = 'bright_red'
-
-        console.rule(_('Failed'))
-        if info:
-            console.log(info)
-
-        if utils.is_windows():
-            console.style = ''
-
     def _handle_response(self, response, success_msg=True):
         """Handle API response with standard error checking."""
         if 'error' in response:
@@ -845,12 +545,6 @@ class MigasFreeCommand:
             self.console.log(f'Response: {response}')
 
         return response
-
-    def _report_error(self, msg):
-        """Report error to console, logger and error file."""
-        self.operation_failed(msg)
-        logger.error(msg)
-        self._write_error(msg)
 
     def cmd_version(self, args=None):
         if hasattr(args, 'quiet') and args.quiet:
