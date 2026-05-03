@@ -41,24 +41,28 @@ graph TD
 
 ```text
 migasfree_client/
-├── __main__.py          # Entry point
-├── command.py           # Base command class & decorators
+├── __main__.py          # Entry point & arg parser
+├── command.py           # MigasFreeCommand orchestration
 ├── sync.py              # Synchronization logic
 ├── upload.py            # Package upload logic
 ├── info.py              # Computer information retrieval
 ├── tags.py              # Tag management
 ├── label.py             # Computer identification (ASCII art)
 ├── availability.py      # Server availability check
-├── client.py            # HTTP client wrapper
-├── url_request.py       # Low-level HTTP requests
+├── url_request.py       # HTTP requests with JWS/JWE + mTLS
 ├── secure.py            # Cryptographic operations (JWS/JWE)
 ├── mtls.py              # mTLS certificate management
 ├── utils.py             # Utility functions
 ├── settings.py          # Configuration management
-├── mixins/              # Shared logic (Software, Hardware, etc.)
+├── mixins/
+│   ├── config.py        # ConfigMixin (init, SSL, PMS selection)
+│   ├── renderer.py      # RendererMixin (console output)
+│   ├── evaluator.py     # CodeEvaluatorMixin (traits, faults)
+│   ├── hardware.py      # HardwareCollectorMixin (lshw)
+│   └── software.py      # SoftwareManagerMixin (PMS ops)
 ├── devices/             # Device management (Printers, CUPS)
 └── pms/                 # Package Management Systems
-    ├── __init__.py      # PMS factory
+    ├── __init__.py      # PMS factory + plugin discovery
     ├── pms.py           # Abstract base class
     ├── apt.py           # Debian/Ubuntu
     ├── dnf.py           # Fedora
@@ -72,24 +76,44 @@ migasfree_client/
 ### Component Diagram
 
 ```mermaid
-flowchart TD
-    CLI[CLI Entry Point<br/>__main__.py] --> CMD[Command Base Class<br/>command.py]
-    
-    subgraph Core Features
-        CMD --> SYNC[Sync Command<br/>sync.py]
-        CMD --> REG[Register Command<br/>sync.py]
-        CMD --> UPLL[Upload Command<br/>upload.py]
+graph TD
+    CLI[CLI Entry Point<br/>__main__.py] --> CMD[MigasFreeCommand<br/>command.py]
+
+    CMD --> URL[UrlRequest<br/>url_request.py]
+    CMD --> PMS[Pms Factory<br/>pms/*.py]
+    CMD --> DEV[Devices Factory<br/>devices/*.py]
+    CMD --> MTLS[mTLS<br/>mtls.py]
+
+    URL --> SEC[secure.py<br/>JWS / JWE]
+    URL --> SESSION[requests Session<br/>+ mTLS]
+
+    PMS --> APT[Apt]
+    PMS --> DNF[Dnf]
+    PMS --> YUM[Yum]
+    PMS --> ZYP[Zypper]
+    PMS --> PAC[Pacman]
+    PMS --> APK[Apk]
+    PMS --> WPT[Wpt]
+
+    DEV --> CUPS[Cupswrapper]
+    DEV --> PLG[Plugins]
+
+    MTLS --> CACERT[CA Certificate Mgmt]
+    MTLS --> CERTFETCH[mTLS Certificate<br/>Fetch & Install]
+
+    subgraph Mixins
+        M1[HardwareCollectorMixin]
+        M2[SoftwareManagerMixin]
+        M3[CodeEvaluatorMixin]
+        M4[ConfigMixin]
+        M5[RendererMixin]
     end
-    
-    SYNC --> URL[URL Request Layer<br/>url_request.py]
-    REG --> URL
-    UPLL --> URL
-    
-    subgraph Low Level Modules
-        URL --> SEC[Secure<br/>secure.py]
-        URL --> MTLS[mTLS<br/>mtls.py]
-        URL --> PMS[PMS<br/>pms/*.py]
-    end
+
+    CMD --- M1
+    CMD --- M2
+    CMD --- M3
+    CMD --- M4
+    CMD --- M5
 ```
 
 ## Synchronization Flow
