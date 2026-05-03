@@ -22,6 +22,11 @@ jobs:
 
       - name: Run security audit
         run: |
+          # CVE-2026-4539: transitive dependency, no exploit path in client
+          # CVE-2026-25645: patched in later version, waiting upstream release
+          # CVE-2026-26007: disputed, not applicable to our usage
+          # CVE-2025-8869: low severity, no impact on client-side operations
+          # CVE-2026-1703: affects server-side only, client not in scope
           pip-audit \
             --ignore-vuln CVE-2026-4539 \
             --ignore-vuln CVE-2026-25645 \
