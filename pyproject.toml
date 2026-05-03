@@ -98,6 +98,7 @@ addopts = [
     "--cov=migasfree_client",
     "--cov-report=html",
     "--cov-report=term-missing",
+    "--cov-fail-under=60",
     "--verbose"
 ]
 
