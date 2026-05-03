@@ -57,6 +57,34 @@ mTLS provides strong client authentication using X.509 certificates.
 └────────────┘                       └────────────┘
 ```
 
+### Provisioning Flow
+
+The complete mTLS certificate provisioning sequence:
+
+```mermaid
+sequenceDiagram
+    participant C as migasfree-client
+    participant S as migasfree-server
+
+    C->>C: Generate hardware UUID
+    C->>S: POST /api/v1/public/keys/project/<br/>(username + password + project)
+    S-->>C: Signing keys (JWS)
+
+    C->>C: Save keys to /var/migasfree-client/keys/
+
+    C->>S: POST /api/v1/safe/computers/<br/>(uuid + name + ip + credentials)
+    S-->>C: Computer ID
+
+    C->>S: GET /api/v1/public/ca-certificate/<br/>(simple HTTP)
+    S-->>C: CA certificate
+
+    C->>S: POST /api/v1/public/mtls/enroll/<br/>(uuid + project + signed request)
+    S-->>C: PKCS#12 archive (encrypted)
+
+    C->>C: Extract P12 → cert + key
+    C->>C: Switch to HTTPS + mTLS
+```
+
 ### Certificate Files
 
 ```text
