@@ -18,7 +18,7 @@ import os
 import re
 import tempfile
 
-from ..utils import ALL_OK, execute, sanitize_path, write_file
+from ..utils import ALL_OK, execute, sanitize_path, write_file, write_file_if_changed
 from .pms import Pms, invalidate_installed_cache
 
 __author__ = 'Jose Antonio Chavarría'
@@ -351,7 +351,7 @@ class Apt(Pms):
 
         logging.debug('Creating repos: %s', self._repo)
 
-        return write_file(self._repo, content)
+        return write_file_if_changed(self._repo, content)
 
     def import_server_key(self, file_key):
         """

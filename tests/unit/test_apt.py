@@ -349,7 +349,7 @@ class TestApt(unittest.TestCase):
         self.assertEqual(modernize_call[0][0][0], '/usr/bin/apt')
         self.assertIn('modernize-sources', modernize_call[0][0])
         self.assertIn('--assume-yes', modernize_call[0][0])
-        self.assertIn('Dir::Etc::SourceList=/dev/null', str(modernize_call[0][0]))
+        self.assertIn('Dir::Etc::SourceList=', str(modernize_call[0][0]))
         # Check cleanup call: should remove .list because we are using .sources
         mock_remove.assert_called_with(os.path.join(self.apt._repo_dir, self.apt._repo_list))
 

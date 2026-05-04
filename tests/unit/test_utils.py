@@ -762,7 +762,9 @@ class TestIdempotency:
             assert ret is True
             mock_write.assert_called_once_with('/tmp/exist.txt', new_content)
 
-    def test_apt_create_repos_is_idempotent(self):
+    @patch('os.remove')
+    @patch('os.path.isfile', return_value=False)
+    def test_apt_create_repos_is_idempotent(self, mock_isfile, mock_remove):
         """Test Apt.create_repos uses write_file_if_changed"""
         from migasfree_client.pms.apt import Apt
 
