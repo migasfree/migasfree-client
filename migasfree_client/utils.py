@@ -569,7 +569,7 @@ def write_file_if_changed(filename, content):
     """
     bool write_file_if_changed(string filename, string content)
     Writes file only if content is different from existing file content.
-    Returns True if written, False if not changed or error.
+    Returns True if written or not changed, False if error.
     """
     if os.path.exists(filename):
         try:
@@ -581,11 +581,12 @@ def write_file_if_changed(filename, content):
                 c_content = content
 
             if current_content == c_content:
-                return False
+                return True
         except OSError:
             pass
 
     return write_file(filename, content)
+
 
 
 def remove_file(archive):

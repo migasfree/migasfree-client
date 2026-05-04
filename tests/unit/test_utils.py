@@ -735,7 +735,7 @@ class TestIdempotency:
             mock_write.assert_called_once_with('/tmp/new.txt', 'content')
 
     def test_write_file_if_changed_skips_identical(self):
-        """Test write_file_if_changed returns False if content is identical"""
+        """Test write_file_if_changed returns True if content is identical"""
         content = 'same content'
         try:
             # Py3 encoding behavior in mocks can be tricky, so we mock read_file directly
@@ -744,10 +744,11 @@ class TestIdempotency:
             ), patch('migasfree_client.utils.write_file') as mock_write:
                 ret = utils.write_file_if_changed('/tmp/exist.txt', content)
 
-                assert ret is False
+                assert ret is True
                 mock_write.assert_not_called()
         except Exception as e:
             pytest.fail(f'Test failed with: {e}')
+
 
     def test_write_file_if_changed_writes_different(self):
         """Test write_file_if_changed writes if content matches but is different"""
