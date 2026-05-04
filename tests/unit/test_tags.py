@@ -23,7 +23,7 @@ class TestMigasFreeTags(unittest.TestCase):
     @patch('migasfree_client.utils.is_root_user', return_value=True)
     @patch('migasfree_client.utils.get_config', return_value={})
     @patch('migasfree_client.command.logging.config.dictConfig')
-    @patch('migasfree_client.command.UrlRequest')
+    @patch('migasfree_client.url_request.UrlRequest')
     def setUp(self, mock_url_req_class, mock_log_config, mock_config, mock_root):
         self.mock_url_request = MagicMock()
         mock_url_req_class.return_value = self.mock_url_request

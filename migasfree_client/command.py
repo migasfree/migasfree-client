@@ -33,7 +33,6 @@ from . import mtls, settings, utils
 from .mixins.config import ConfigMixin
 from .mixins.renderer import RendererMixin
 from .network import get_network_info
-from .url_request import UrlRequest  # noqa: F401 — re-exported for tests
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -387,7 +386,12 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
             sys.exit(errno.EAGAIN)
 
         if not self._auto_register():
-            sys.stdin = open('/dev/tty')  # noqa: SIM115
+            if utils.is_windows():
+                with contextlib.suppress(Exception):
+                    sys.stdin = open('CON')  # noqa: SIM115
+            else:
+                with contextlib.suppress(Exception):
+                    sys.stdin = open('/dev/tty')  # noqa: SIM115
             user = input('{}: '.format(_('User to register computer at server')))
             if not user:
                 self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
