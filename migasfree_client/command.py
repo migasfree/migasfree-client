@@ -386,10 +386,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
             sys.exit(errno.EAGAIN)
 
         if not self._auto_register():
-            if utils.is_windows():
-                with contextlib.suppress(Exception):
-                    sys.stdin = open('CON')  # noqa: SIM115
-            else:
+            if utils.is_linux():
                 with contextlib.suppress(Exception):
                     sys.stdin = open('/dev/tty')  # noqa: SIM115
             user = input('{}: '.format(_('User to register computer at server')))

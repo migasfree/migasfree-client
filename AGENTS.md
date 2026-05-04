@@ -59,3 +59,4 @@ This project is supported by specialized AI Skills in `.agent/skills`. **ALWAYS*
 3. **mTLS Integrity**: Be careful when modifying the certificate handling logic in `utils/mtls.py`.
 4. **PMS Safety**: Package management operations can be destructive. Always ensure safety checks are in place.
 5. **Security First**: All communication with the server should be signed/encrypted as per protocol.
+6. **Platform Detection Best Practices**: Always use the direct built-in platform detection helpers in `migasfree_client.utils` (`is_windows()`, `is_linux()`) instead of raw `sys.platform` or negations.
