@@ -18,6 +18,7 @@ import gettext
 import json
 import logging
 import os
+import ssl
 import sys
 
 import requests
@@ -34,6 +35,31 @@ __license__ = 'GPLv3'
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
+
+
+class StrictSSLCompatAdapter(HTTPAdapter):
+    """Custom HTTPAdapter that disables strict SSL verification in modern Python versions (e.g., Python 3.13+).
+    This is required when using self-signed or legacy internal CA certificates that lack the required
+    Key Usage extensions under modern RFC 5280 strict compliance rules.
+    """
+
+    def init_poolmanager(self, connections, maxsize, block=False, **kwargs):
+        context = ssl.create_default_context()
+        if hasattr(ssl, 'VERIFY_X509_STRICT'):
+            context.verify_flags &= ~ssl.VERIFY_X509_STRICT
+        if hasattr(ssl, 'VERIFY_X509_PARTIAL_CHAIN'):
+            context.verify_flags &= ~ssl.VERIFY_X509_PARTIAL_CHAIN
+        kwargs['ssl_context'] = context
+        return super().init_poolmanager(connections, maxsize, block=block, **kwargs)
+
+    def proxy_manager_for(self, proxy, **kwargs):
+        context = ssl.create_default_context()
+        if hasattr(ssl, 'VERIFY_X509_STRICT'):
+            context.verify_flags &= ~ssl.VERIFY_X509_STRICT
+        if hasattr(ssl, 'VERIFY_X509_PARTIAL_CHAIN'):
+            context.verify_flags &= ~ssl.VERIFY_X509_PARTIAL_CHAIN
+        kwargs['ssl_context'] = context
+        return super().proxy_manager_for(proxy, **kwargs)
 
 
 class UrlRequest:
@@ -94,8 +120,18 @@ class UrlRequest:
 
         # Initialize session with exponential backoff retry
         self.session = requests.Session()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504], raise_on_status=False)
-        adapter = HTTPAdapter(max_retries=retries)
+        retries = Retry(
+            total=5,
+            backoff_factor=1,
+            status_forcelist=[
+                requests.codes.internal_server_error,
+                requests.codes.bad_gateway,
+                requests.codes.service_unavailable,
+                requests.codes.gateway_timeout,
+            ],
+            raise_on_status=False,
+        )
+        adapter = StrictSSLCompatAdapter(max_retries=retries)
         self.session.mount('https://', adapter)
         self.session.mount('http://', adapter)
 
