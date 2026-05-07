@@ -114,6 +114,17 @@ def parse_args(argv):
         '-a', '--all', action='store_true', help=_('Remove client keys from all servers')
     )
 
+    subparser_conf = subparsers.add_parser('conf', help=_('View or update configuration file'))
+    subparser_conf.add_argument('-s', '--server', action='store', metavar='VALUE', help=_('Set Server in configuration file'))
+    subparser_conf.add_argument('-p', '--project', action='store', metavar='VALUE', help=_('Set Project in configuration file'))
+    subparser_conf.add_argument('-a', '--auto-update-packages', choices=['true', 'false'], help=_('Set Auto_Update_Packages'))
+    subparser_conf.add_argument('-m', '--manage-devices', choices=['true', 'false'], help=_('Set Manage_Devices'))
+    subparser_conf.add_argument('-u', '--upload-hardware', choices=['true', 'false'], help=_('Set Upload_Hardware'))
+    subparser_conf.add_argument('-c', '--computer-name', action='store', metavar='VALUE', help=_('Set Computer_Name'))
+    subparser_conf.add_argument('--debug-mode', choices=['true', 'false'], help=_('Set Debug in configuration file'))
+    subparser_conf.add_argument('-x', '--proxy', action='store', metavar='VALUE', help=_('Set Proxy in configuration file'))
+    subparser_conf.add_argument('-k', '--package-proxy-cache', action='store', metavar='VALUE', help=_('Set Package_Proxy_Cache'))
+
     subparser_import_mtls = subparsers.add_parser('import-mtls', help=_('Import mTLS certificate from tar file'))
     subparser_import_mtls.add_argument(
         'cert_file', action='store', metavar='FILE', help=_('Certificate tar file to import')
@@ -168,6 +179,10 @@ def main(argv=None):
         from .command import MigasFreeCommand
 
         MigasFreeCommand().cmd_import_mtls(args.cert_file)
+    elif args.cmd == 'conf':
+        from .conf import MigasFreeConf
+
+        MigasFreeConf().run(args)
 
     return ALL_OK
 

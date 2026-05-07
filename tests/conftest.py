@@ -37,6 +37,7 @@ if not os.path.exists(TEST_TMP_DIR):
 # Override critical paths
 settings.LOG_FILE = os.path.join(TEST_TMP_DIR, 'migasfree.log')
 settings.TMP_PATH = TEST_TMP_DIR
+settings.CERT_FILE = os.path.join(TEST_TMP_DIR, 'cert.pem')
 settings.KEYS_PATH = os.path.join(TEST_TMP_DIR, 'keys')
 settings.CONF_FILE = os.path.join(TEST_TMP_DIR, 'migasfree.conf')
 settings.SOFTWARE_FILE = os.path.join(TEST_TMP_DIR, 'installed_software.txt')

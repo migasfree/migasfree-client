@@ -47,23 +47,33 @@ class RendererMixin:
         self.console.print()
         self.console.print(_('Config options: %s') % conf_file)
 
-        # Config options: (label, value, env_var_name, show_if_truthy)
+        # Config options: (label, value, env_var_name, file_key, show_if_truthy)
         config_options = [
-            (_('Project'), self.migas_project, 'MIGASFREE_CLIENT_PROJECT', True),
-            (_('Server'), self._url_base or self.migas_server, 'MIGASFREE_CLIENT_SERVER', True),
-            (_('Auto update packages'), self.migas_auto_update_packages, 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', True),
-            (_('Manage devices'), self.migas_manage_devices, 'MIGASFREE_CLIENT_MANAGE_DEVICES', True),
-            (_('Upload hardware'), self.migas_upload_hardware, 'MIGASFREE_CLIENT_UPLOAD_HARDWARE', True),
-            (_('Proxy'), self.migas_proxy, 'MIGASFREE_CLIENT_PROXY', True),
-            (_('Package Proxy Cache'), self.migas_package_proxy_cache, 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE', True),
-            (_('Debug'), self._debug, 'MIGASFREE_CLIENT_DEBUG', True),
-            (_('Computer name'), self.migas_computer_name, 'MIGASFREE_CLIENT_COMPUTER_NAME', True),
+            (_('Project'), self.migas_project, 'MIGASFREE_CLIENT_PROJECT', None, True),
+            (_('Server'), self._url_base or self.migas_server, 'MIGASFREE_CLIENT_SERVER', 'server', True),
+            (_('Auto update packages'), self.migas_auto_update_packages, 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', 'auto_update_packages', True),
+            (_('Manage devices'), self.migas_manage_devices, 'MIGASFREE_CLIENT_MANAGE_DEVICES', 'manage_devices', True),
+            (_('Upload hardware'), self.migas_upload_hardware, 'MIGASFREE_CLIENT_UPLOAD_HARDWARE', 'upload_hardware', True),
+            (_('Proxy'), self.migas_proxy, 'MIGASFREE_CLIENT_PROXY', 'proxy', True),
+            (_('Package Proxy Cache'), self.migas_package_proxy_cache, 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE', 'package_proxy_cache', True),
+            (_('Debug'), self._debug, 'MIGASFREE_CLIENT_DEBUG', 'debug', True),
+            (_('Computer name'), self.migas_computer_name, 'MIGASFREE_CLIENT_COMPUTER_NAME', None, True),
         ]
 
-        for label, value, env_var, show in config_options:
+        for label, value, env_var, file_key, show in config_options:
             if show:
-                env_indicator = '(ENV)' if env_var in os.environ else ''
-                self.console.print(f'\t{label}: {value} {env_indicator}')
+                indicator = ''
+                if env_var in os.environ:
+                    indicator = _('(ENV)')
+                elif file_key and file_key in getattr(self, '_config_client_raw', {}):
+                    indicator = _('(FILE)')
+                else:
+                    indicator = _('(DEFAULT)')
+
+                if indicator:
+                    self.console.print(f'\t{label}: {value} {indicator}')
+                else:
+                    self.console.print(f'\t{label}: {value}')
 
     def _show_running_options(self):
         self.console.print()

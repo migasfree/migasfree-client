@@ -276,6 +276,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
         if not isinstance(_config_client, dict):
             _config_client = {}
+        self._config_client_raw = _config_client
 
         self.migas_project = os.environ.get('MIGASFREE_CLIENT_PROJECT', utils.get_mfc_project())
 
