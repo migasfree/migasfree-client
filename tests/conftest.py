@@ -13,21 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging.config
 import os
+import ssl
 import sys
+import tempfile
 from unittest.mock import MagicMock
 
 import pytest
+from jwcrypto import jwk
+
+import migasfree_client.settings as settings
 
 # Force locale to C to avoid translated error messages in tests
 os.environ['LC_ALL'] = 'C'
 os.environ['LANGUAGE'] = 'C'
 os.environ['LANG'] = 'C'
-
-# Force mocks before any migasfree_client import
-import tempfile
-
-import migasfree_client.settings as settings
 
 # Create temporary directory for tests
 TEST_TMP_DIR = os.path.join(tempfile.gettempdir(), 'migasfree-tests')
@@ -60,9 +61,10 @@ def mocked_fdopen(fd, *args, **kwargs):
 os.fdopen = mocked_fdopen
 
 # Mock logging config to avoid EACCES or other issues during import
-import logging.config  # noqa: E402
-
 logging.config.dictConfig = MagicMock()
+
+# Mock ssl.get_server_certificate globally to avoid real network calls during tests
+ssl.get_server_certificate = MagicMock(return_value='-----BEGIN CERTIFICATE-----\nDummy\n-----END CERTIFICATE-----')
 
 
 @pytest.fixture
@@ -72,8 +74,6 @@ def tmp_dir(tmp_path):
 
 @pytest.fixture
 def private_key_path(tmp_path):
-    from jwcrypto import jwk
-
     key = jwk.JWK.generate(kty='RSA', size=2048)
     export = key.export_to_pem(private_key=True, password=None)
     key_file = tmp_path / 'private.pem'
@@ -83,8 +83,6 @@ def private_key_path(tmp_path):
 
 @pytest.fixture
 def public_key_path(tmp_path, private_key_path):
-    from jwcrypto import jwk
-
     with open(private_key_path, 'rb') as f:
         key = jwk.JWK.from_pem(f.read())
     export = key.export_to_pem(private_key=False)
