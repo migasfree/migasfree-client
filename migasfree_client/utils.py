@@ -588,7 +588,6 @@ def write_file_if_changed(filename, content):
     return write_file(filename, content)
 
 
-
 def remove_file(archive):
     if os.path.isfile(archive):
         os.remove(archive)
@@ -908,3 +907,83 @@ def trait_value_exists(prefix, value, state='after'):
         return value in result
 
     return result == value
+
+
+def migrate_legacy_server_config(conf_file):
+    """Rewrite conf_file merging legacy Protocol/Port keys into Server.
+
+    Detects uncommented Protocol and/or Port keys in the [client] section,
+    builds the new unified Server URL, updates the Server line, and comments
+    out the obsolete keys in-place preserving all other content and comments.
+
+    Returns the new Server URL string if migration was performed, '' otherwise.
+    """
+    if not os.path.isfile(conf_file):
+        return ''
+
+    try:
+        with open(conf_file, encoding='utf-8') as fh:
+            content = fh.read()
+    except OSError:
+        return ''
+
+    # Only match active (non-commented) keys.
+    _pat = r'^(?![ \t]*#)[ \t]*{key}[ \t]*=[ \t]*(.+)$'
+
+    server_m = re.search(_pat.format(key='Server'), content, re.IGNORECASE | re.MULTILINE)
+    protocol_m = re.search(_pat.format(key='Protocol'), content, re.IGNORECASE | re.MULTILINE)
+    port_m = re.search(_pat.format(key='Port'), content, re.IGNORECASE | re.MULTILINE)
+
+    if not (protocol_m or port_m):
+        return ''  # nothing to migrate
+
+    server = server_m.group(1).strip() if server_m else 'localhost'
+    protocol = protocol_m.group(1).strip() if protocol_m else 'https'
+    port = port_m.group(1).strip() if port_m else ''
+
+    # Build unified URL only when server has no scheme or port yet.
+    new_server = f'{protocol}://{server}' if '://' not in server else server
+
+    host_part = new_server.split('://', 1)[1]
+    if port and f':{port}' not in host_part:
+        new_server = f'{new_server}:{port}'
+
+    new_content = content
+
+    # Update the Server line value.
+    if server_m:
+        new_content = re.sub(
+            r'^((?![ \t]*#)[ \t]*Server[ \t]*=[ \t]*)(.+)$',
+            lambda m: f'{m.group(1)}{new_server}',
+            new_content,
+            count=1,
+            flags=re.IGNORECASE | re.MULTILINE,
+        )
+    else:
+        # Server key missing entirely: insert after [client] header.
+        new_content = re.sub(
+            r'(\[client\])',
+            f'\\1\nServer = {new_server}',
+            new_content,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+
+    # Comment out obsolete Protocol and Port lines.
+    for key in ('Protocol', 'Port'):
+        new_content = re.sub(
+            r'^((?![ \t]*#)([ \t]*' + key + r'[ \t]*=.+))$',
+            r'# \2  # migrated to Server',
+            new_content,
+            flags=re.IGNORECASE | re.MULTILINE,
+        )
+
+    if new_content == content:
+        return ''
+
+    if write_file(conf_file, new_content):
+        logger.info('Migrated legacy config: Server = %s in %s', new_server, conf_file)
+        return new_server
+
+    logger.warning('Could not write migrated config to %s', conf_file)
+    return ''

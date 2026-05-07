@@ -8,19 +8,17 @@ These variables override the corresponding settings in `migasfree.conf`:
 
 ### Client Section
 
-| Variable                                | Config Option          | Description               | Example                  |
-| --------------------------------------- | ---------------------- | ------------------------- | ------------------------ |
-| `MIGASFREE_CLIENT_SERVER`               | `Server`               | migasfree server hostname | `migasfree.example.com`  |
-| `MIGASFREE_CLIENT_PROTOCOL`             | `Protocol`             | Connection protocol       | `https`                  |
-| `MIGASFREE_CLIENT_PORT`                 | `Port`                 | Server port               | `443`                    |
-| `MIGASFREE_CLIENT_PROJECT`              | `Project`              | Project name              | `Ubuntu-22.04`           |
-| `MIGASFREE_CLIENT_COMPUTER_NAME`        | `Computer_Name`        | Override hostname         | `my-workstation`         |
-| `MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES` | `Auto_Update_Packages` | Auto-update packages      | `True` / `False`         |
-| `MIGASFREE_CLIENT_MANAGE_DEVICES`       | `Manage_Devices`       | Manage devices            | `True` / `False`         |
-| `MIGASFREE_CLIENT_UPLOAD_HARDWARE`      | `Upload_Hardware`      | Upload hardware info      | `True` / `False`         |
-| `MIGASFREE_CLIENT_PROXY`                | `Proxy`                | HTTP proxy                | `192.168.1.100:8080`     |
-| `MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE`  | `Package_Proxy_Cache`  | Package cache proxy       | `apt-cache.local:3142`   |
-| `MIGASFREE_CLIENT_DEBUG`                | `Debug`                | Enable debug mode         | `True` / `False`         |
+| Variable                                | Config Option          | Description               | Example                           |
+| --------------------------------------- | ---------------------- | ------------------------- | --------------------------------- |
+| `MIGASFREE_CLIENT_SERVER`               | `Server`               | Server address (host, host:port, or full URL) | `migasfree.example.com` or `https://migasfree.example.com:8443` |
+| `MIGASFREE_CLIENT_PROJECT`              | `Project`              | Project name              | `Ubuntu-22.04`                    |
+| `MIGASFREE_CLIENT_COMPUTER_NAME`        | `Computer_Name`        | Override hostname         | `my-workstation`                  |
+| `MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES` | `Auto_Update_Packages` | Auto-update packages      | `True` / `False`                  |
+| `MIGASFREE_CLIENT_MANAGE_DEVICES`       | `Manage_Devices`       | Manage devices            | `True` / `False`                  |
+| `MIGASFREE_CLIENT_UPLOAD_HARDWARE`      | `Upload_Hardware`      | Upload hardware info      | `True` / `False`                  |
+| `MIGASFREE_CLIENT_PROXY`                | `Proxy`                | HTTP proxy                | `192.168.1.100:8080`              |
+| `MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE`  | `Package_Proxy_Cache`  | Package cache proxy       | `apt-cache.local:3142`            |
+| `MIGASFREE_CLIENT_DEBUG`                | `Debug`                | Enable debug mode         | `True` / `False`                  |
 
 ### Packager Section
 
@@ -45,6 +43,9 @@ These variables override the corresponding settings in `migasfree.conf`:
 # Override server for a single command
 MIGASFREE_CLIENT_SERVER=test-server.local sudo migasfree sync
 
+# Non-standard port
+MIGASFREE_CLIENT_SERVER=https://test-server.local:8443 sudo migasfree sync
+
 # Enable debug mode temporarily
 MIGASFREE_CLIENT_DEBUG=True sudo migasfree sync
 ```
@@ -56,8 +57,7 @@ FROM python:3.10-slim
 
 RUN pip install migasfree-client
 
-ENV MIGASFREE_CLIENT_SERVER=migasfree.example.com
-ENV MIGASFREE_CLIENT_PROTOCOL=https
+ENV MIGASFREE_CLIENT_SERVER=https://migasfree.example.com
 ENV MIGASFREE_CLIENT_PROJECT=Docker-Container
 
 CMD ["migasfree", "sync"]
@@ -65,7 +65,7 @@ CMD ["migasfree", "sync"]
 
 ```bash
 # Run with environment variables
-docker run -e MIGASFREE_CLIENT_SERVER=prod-server.example.com \
+docker run -e MIGASFREE_CLIENT_SERVER=https://prod-server.example.com \
            -e MIGASFREE_CLIENT_DEBUG=True \
            migasfree-client
 ```
@@ -75,8 +75,7 @@ docker run -e MIGASFREE_CLIENT_SERVER=prod-server.example.com \
 ```ini
 # /etc/systemd/system/migasfree-sync.service.d/override.conf
 [Service]
-Environment="MIGASFREE_CLIENT_SERVER=migasfree.example.com"
-Environment="MIGASFREE_CLIENT_PROTOCOL=https"
+Environment="MIGASFREE_CLIENT_SERVER=https://migasfree.example.com"
 ```
 
 ### CI/CD Pipeline
@@ -101,8 +100,7 @@ jobs:
 #!/bin/bash
 # sync-with-custom-server.sh
 
-export MIGASFREE_CLIENT_SERVER="custom-server.local"
-export MIGASFREE_CLIENT_PROTOCOL="https"
+export MIGASFREE_CLIENT_SERVER="https://custom-server.local"
 export MIGASFREE_CLIENT_DEBUG="True"
 
 migasfree sync

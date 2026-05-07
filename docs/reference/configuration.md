@@ -30,50 +30,30 @@ User = packager
 
 #### Server
 
-**Required**. The hostname or IP address of the migasfree server.
+**Required**. The migasfree server address. Accepts hostname, IP, or full URL with optional scheme and port.
 
 ```ini
+# Minimal: scheme defaults to https
 Server = migasfree.example.com
+
+# Non-standard HTTPS port
+Server = https://migasfree.example.com:8443
+
+# Development without TLS
+Server = http://localhost:8000
 ```
 
 | Property    | Value                       |
 | ----------- | --------------------------- |
-| Type        | String                      |
-| Default     | (none)                      |
+| Type        | String (host, host:port, or full URL) |
+| Default     | `https://localhost`         |
 | Environment | `MIGASFREE_CLIENT_SERVER`   |
 
----
+**Parsing rules:**
 
-#### Protocol
-
-The connection protocol to use.
-
-```ini
-Protocol = https
-```
-
-| Property     | Value                       |
-| ------------ | --------------------------- |
-| Type         | String                      |
-| Default      | `http`                      |
-| Valid values | `http`, `https`             |
-| Environment  | `MIGASFREE_CLIENT_PROTOCOL` |
-
----
-
-#### Port
-
-Server port number. Optional if using default ports.
-
-```ini
-Port = 8443
-```
-
-| Property    | Value                         |
-| ----------- | ----------------------------- |
-| Type        | Integer                       |
-| Default     | `80` (http) or `443` (https)  |
-| Environment | `MIGASFREE_CLIENT_PORT`       |
+- If no scheme is provided, `https` is assumed.
+- Port can be embedded directly: `host:port` or `https://host:port`.
+- The legacy `Protocol` and `Port` parameters are no longer supported.
 
 ---
 
@@ -306,10 +286,10 @@ Store = production
 #
 
 [client]
-# Server connection
+# Server connection (scheme and port are optional)
 Server = migasfree.example.com
-Protocol = https
-Port = 443
+# Server = https://migasfree.example.com:8443   # non-standard port
+# Server = http://localhost:8000                 # development
 
 # Project (auto-detected if not specified)
 # Project = Ubuntu-22.04

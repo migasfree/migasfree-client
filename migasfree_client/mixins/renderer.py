@@ -50,9 +50,7 @@ class RendererMixin:
         # Config options: (label, value, env_var_name, show_if_truthy)
         config_options = [
             (_('Project'), self.migas_project, 'MIGASFREE_CLIENT_PROJECT', True),
-            (_('Server'), self.migas_server, 'MIGASFREE_CLIENT_SERVER', True),
-            (_('Protocol'), self.migas_protocol, 'MIGASFREE_CLIENT_PROTOCOL', True),
-            (_('Port'), self.migas_port, 'MIGASFREE_CLIENT_PORT', bool(self.migas_port)),
+            (_('Server'), self._url_base or self.migas_server, 'MIGASFREE_CLIENT_SERVER', True),
             (_('Auto update packages'), self.migas_auto_update_packages, 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', True),
             (_('Manage devices'), self.migas_manage_devices, 'MIGASFREE_CLIENT_MANAGE_DEVICES', True),
             (_('Upload hardware'), self.migas_upload_hardware, 'MIGASFREE_CLIENT_UPLOAD_HARDWARE', True),

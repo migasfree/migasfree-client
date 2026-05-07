@@ -25,6 +25,7 @@ import os
 import platform
 import shutil
 import sys
+from urllib.parse import urlparse
 
 import requests
 from rich.console import Console
@@ -210,6 +211,67 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
     _mtls_key = None
     _ca_cert = None
 
+    @staticmethod
+    def _parse_server(raw):
+        """Parse scheme, host and port from a Server value.
+
+        Accepted formats:
+          - host
+          - host:port
+          - https://host
+          - https://host:port
+          - http://host:port
+
+        Returns (protocol, host, port) where port is str or ''.
+        Defaults to 'https' when no scheme is provided.
+        """
+
+        if '://' not in raw:
+            raw = f'https://{raw}'
+
+        parsed = urlparse(raw)
+        protocol = parsed.scheme or 'https'
+        host = parsed.hostname or ''
+        port = str(parsed.port) if parsed.port else ''
+
+        return protocol, host, port
+
+    @staticmethod
+    def _migrate_and_merge_legacy_config(raw_server, config_client):
+        """Handle legacy Protocol and Port settings (Layer 1 and Layer 2)."""
+        # Layer 1: attempt to migrate the config file on disk (requires write access).
+        migrated = utils.migrate_legacy_server_config(settings.CONF_FILE)
+        if migrated:
+            # File was rewritten; re-read the updated server value.
+            raw_server = migrated
+
+        # Layer 2: merge legacy Protocol/Port in-memory for env vars or
+        # config files that could not be rewritten (e.g., read-only).
+        legacy_protocol = (
+            os.environ.get('MIGASFREE_CLIENT_PROTOCOL')
+            or config_client.get('protocol')
+        )
+        legacy_port = (
+            os.environ.get('MIGASFREE_CLIENT_PORT')
+            or config_client.get('port')
+        )
+        if legacy_protocol or legacy_port:
+            deprecated = [k for k, v in (('Protocol', legacy_protocol), ('Port', legacy_port)) if v]
+            logger.warning(
+                'Deprecated config key(s) detected: %s. '
+                'Merge them into "Server = <url>" and remove the obsolete keys from %s.',
+                ', '.join(deprecated),
+                settings.CONF_FILE,
+            )
+            if '://' not in raw_server and legacy_protocol:
+                raw_server = f'{legacy_protocol}://{raw_server}'
+            if legacy_port:
+                host_part = raw_server.split('://', 1)[-1]
+                if f':{legacy_port}' not in host_part:
+                    raw_server = f'{raw_server}:{legacy_port}'
+
+        return raw_server
+
     def __init__(self):
         _config_client = utils.get_config(settings.CONF_FILE, 'client')
         if not isinstance(_config_client, dict):
@@ -221,11 +283,11 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
 
         self.migas_computer_name = os.environ.get('MIGASFREE_CLIENT_COMPUTER_NAME', utils.get_mfc_computer_name())
 
-        self.migas_server = os.environ.get('MIGASFREE_CLIENT_SERVER', _config_client.get('server', 'localhost'))
+        _raw_server = os.environ.get('MIGASFREE_CLIENT_SERVER', _config_client.get('server', 'localhost'))
 
-        self.migas_port = os.environ.get('MIGASFREE_CLIENT_PORT', _config_client.get('port', ''))
+        _raw_server = self._migrate_and_merge_legacy_config(_raw_server, _config_client)
 
-        self.migas_protocol = os.environ.get('MIGASFREE_CLIENT_PROTOCOL', _config_client.get('protocol', 'http'))
+        self.migas_protocol, self.migas_server, self.migas_port = self._parse_server(_raw_server)
 
         self.migas_auto_update_packages = utils.cast_to_bool(
             os.environ.get('MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', _config_client.get('auto_update_packages', True)),
