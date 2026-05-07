@@ -100,6 +100,7 @@ The `migasfree` command provides several subcommands:
 | `migasfree traits [PREFIX]`      | Get computer traits at server                   |
 | `migasfree label`                | Show computer identification label              |
 | `migasfree version`              | Show version info                               |
+| `migasfree conf [OPTIONS]`       | View or modify client configuration options     |
 | `migasfree tags -g`              | Get tags from server (JSON format)              |
 | `migasfree tags -s TAG [TAG...]` | Set tags in server                              |
 | `migasfree tags -c TAG [TAG...]` | Communicate tags to server                      |

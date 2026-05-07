@@ -349,6 +349,43 @@ migasfree upload -f mypackage_1.0.rpm -s custom-store
 
 ---
 
+### conf
+
+Inspects or modifies configuration parameters in the `migasfree.conf` file. If invoked without write options, it lists all active options, their values, and their origin (`(ENV)`, `(FILE)`, or `(DEFAULT)`).
+
+```bash
+migasfree conf [options]
+```
+
+**Options:**
+
+| Option                                      | Description                                                 |
+| ------------------------------------------- | ----------------------------------------------------------- |
+| `-s`, `--server VALUE`                      | Set the migasfree server hostname/IP or complete URL.       |
+| `-p`, `--project VALUE`                     | Set the active project name.                                |
+| `-a`, `--auto-update-packages {true,false}` | Enable or disable automatic package updates during sync.    |
+| `-m`, `--manage-devices {true,false}`       | Enable or disable peripheral device management.             |
+| `-u`, `--upload-hardware {true,false}`      | Enable or disable automatic hardware inventory uploads.     |
+| `-c`, `--computer-name VALUE`               | Set the custom computer name override.                      |
+| `--debug-mode {true,false}`                 | Enable or disable debug logging mode.                       |
+| `-x`, `--proxy VALUE`                       | Set system proxy (`host:port`). Empty to disable.            |
+| `-k`, `--package-proxy-cache VALUE`         | Set package proxy cache (`host:port`). Empty to disable.    |
+
+**Examples:**
+
+```bash
+# View all current active configuration values and their sources
+migasfree conf
+
+# Update the Server and set Auto Update Packages to false
+sudo migasfree conf -s https://migasfree.example.com -a false
+
+# Configure proxy server
+sudo migasfree conf -x 192.168.1.100:8080
+```
+
+---
+
 ### import-mtls
 
 Imports mTLS client certificates from a tar archive.
