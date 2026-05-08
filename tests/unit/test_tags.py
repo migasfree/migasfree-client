@@ -109,8 +109,9 @@ class TestMigasFreeTags(unittest.TestCase):
         mock_sync_instance.upload_attributes.assert_called_once()
 
     @patch('sys.exit')
+    @patch('migasfree_client.tags.MigasFreeTags._init_command')
     @patch('migasfree_client.tags.lock_file_context')
-    def test_run_set_tags(self, mock_lock, mock_exit):
+    def test_run_set_tags(self, mock_lock, mock_init, mock_exit):
         """Test run dispatcher for setting tags"""
         args = MagicMock()
         args.set = ['T1-V1']

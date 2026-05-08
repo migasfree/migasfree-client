@@ -63,7 +63,7 @@ class TestPlatformDetection:
         """Test is_linux returns False on Windows"""
         assert utils.is_linux() is False
 
-    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.data.is_windows', return_value=True)
     def test_sanitize_path_windows(self, mock_is_windows):
         """Test sanitize_path on Windows replaces invalid characters"""
         path = 'C:\\\\path\\\\to\\\\file:name?.txt'
@@ -72,7 +72,7 @@ class TestPlatformDetection:
         assert '?' not in result
         assert '\\\\' not in result
 
-    @patch('migasfree_client.utils.is_windows', return_value=False)
+    @patch('migasfree_client.utils.data.is_windows', return_value=False)
     def test_sanitize_path_linux(self, mock_is_windows):
         """Test sanitize_path on Linux removes leading slash to prevent absolute paths"""
         import posixpath
@@ -295,7 +295,7 @@ class TestExecuteFunction:
         assert returncode == 0
         assert 'hello world' in output
 
-    @patch('migasfree_client.utils.logger')
+    @patch('migasfree_client.utils.process.logger')
     @pytest.mark.skipif(sys.platform == 'win32', reason='Unix-only test')
     def test_execute_verbose_prints_command(self, mock_logger):
         """Test execute with verbose=True logs the command"""
@@ -533,7 +533,7 @@ class TestGetUserInfo:
     def test_get_user_info_nonexistent(self):
         """Test get_user_info with non-existent user returns False"""
         # Mock pwd.getpwnam to raise KeyError and getpwuid to raise KeyError
-        with patch('migasfree_client.utils.pwd') as mock_pwd:
+        with patch('migasfree_client.utils.system.pwd') as mock_pwd:
             mock_pwd.getpwnam.side_effect = KeyError('user not found')
             mock_pwd.getpwuid.side_effect = KeyError('uid not found')
             result = utils.get_user_info('999999')  # Use numeric string to trigger getpwuid path
@@ -699,7 +699,7 @@ class TestPathSanitization:
     """Tests for path sanitization to prevent directory traversal"""
 
     @patch('sys.platform', 'linux')
-    @patch('migasfree_client.utils.is_windows', return_value=False)
+    @patch('migasfree_client.utils.data.is_windows', return_value=False)
     def test_sanitize_path_traversal_linux(self, mock_is_windows):
         """Test sanitize_path removes traversal characters on Linux"""
         # Intent: prevent climbing up directories
@@ -713,7 +713,7 @@ class TestPathSanitization:
         assert result != '../../etc/passwd'
 
     @patch('sys.platform', 'win32')
-    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.data.is_windows', return_value=True)
     def test_sanitize_path_traversal_windows(self, mock_is_windows):
         """Test sanitize_path removes traversal characters on Windows"""
         path = '..\\..\\windows\\system32'
@@ -727,7 +727,7 @@ class TestIdempotency:
     def test_write_file_if_changed_writes_when_new(self):
         """Test write_file_if_changed writes if file does not exist"""
         with patch('os.path.exists', return_value=False), patch(
-            'migasfree_client.utils.write_file', return_value=True
+            'migasfree_client.utils.fs.write_file', return_value=True
         ) as mock_write:
             ret = utils.write_file_if_changed('/tmp/new.txt', 'content')
 
@@ -740,8 +740,8 @@ class TestIdempotency:
         try:
             # Py3 encoding behavior in mocks can be tricky, so we mock read_file directly
             with patch('os.path.exists', return_value=True), patch(
-                'migasfree_client.utils.read_file', return_value=content.encode('utf-8')
-            ), patch('migasfree_client.utils.write_file') as mock_write:
+                'migasfree_client.utils.fs.read_file', return_value=content.encode('utf-8')
+            ), patch('migasfree_client.utils.fs.write_file') as mock_write:
                 ret = utils.write_file_if_changed('/tmp/exist.txt', content)
 
                 assert ret is True
@@ -755,8 +755,8 @@ class TestIdempotency:
         new_content = 'new content'
 
         with patch('os.path.exists', return_value=True), patch(
-            'migasfree_client.utils.read_file', return_value=old_content
-        ), patch('migasfree_client.utils.write_file', return_value=True) as mock_write:
+            'migasfree_client.utils.fs.read_file', return_value=old_content
+        ), patch('migasfree_client.utils.fs.write_file', return_value=True) as mock_write:
             ret = utils.write_file_if_changed('/tmp/exist.txt', new_content)
 
             assert ret is True
@@ -823,7 +823,7 @@ class TestIdempotency:
 
 
 class TestGetGraphicPid:
-    @patch('migasfree_client.utils.is_windows', return_value=False)
+    @patch('migasfree_client.utils.session.is_windows', return_value=False)
     def test_get_graphic_pid_linux(self, mock_is_windows):
         """Test get_graphic_pid on Linux (existing behavior)"""
         # We can't easily mock /proc completely, so we just check it doesn't crash
@@ -836,7 +836,7 @@ class TestGetGraphicPid:
             assert pid is None
             assert name is None
 
-    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.session.is_windows', return_value=True)
     def test_get_graphic_pid_windows_explorer_running(self, mock_is_windows):
         """Test get_graphic_pid on Windows with explorer.exe running"""
         mock_process = MagicMock()
@@ -848,7 +848,7 @@ class TestGetGraphicPid:
             assert pid == 1234
             assert name == 'explorer.exe'
 
-    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.session.is_windows', return_value=True)
     def test_get_graphic_pid_windows_no_explorer(self, mock_is_windows):
         """Test get_graphic_pid on Windows with no explorer.exe"""
         with patch('psutil.process_iter', return_value=[]):
@@ -856,7 +856,7 @@ class TestGetGraphicPid:
             assert pid is None
             assert name is None
 
-    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.session.is_windows', return_value=True)
     def test_get_graphic_pid_windows_proc_not_accessed(self, mock_is_windows):
         """Test that /proc is NOT accessed on Windows"""
         with patch('os.listdir') as mock_listdir, patch('psutil.process_iter', return_value=[]):

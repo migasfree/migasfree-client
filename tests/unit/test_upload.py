@@ -98,8 +98,9 @@ class TestMigasFreeUpload(unittest.TestCase):
         self.assertEqual(self.upload.packager_pwd, 'pass')
 
     @patch('sys.exit')
+    @patch('migasfree_client.upload.MigasFreeUpload._init_command')
     @patch('migasfree_client.upload.lock_file_context')
-    def test_run_file_upload(self, mock_lock, mock_exit):
+    def test_run_file_upload(self, mock_lock, mock_init, mock_exit):
         """Test CLI run dispatch for file upload"""
         args = MagicMock()
         args.file = 'test.pkg'

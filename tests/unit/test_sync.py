@@ -230,8 +230,9 @@ class TestMigasFreeSync(unittest.TestCase):
             self.assertTrue(mock_exe.called)
 
     @patch('sys.exit')
+    @patch('migasfree_client.sync.MigasFreeSync._init_command')
     @patch('migasfree_client.sync.MigasFreeSync._handle_sync_command')
-    def test_run_dispatch_sync(self, mock_handle, mock_exit):
+    def test_run_dispatch_sync(self, mock_handle, mock_init, mock_exit):
         """Test main run method dispatches to sync handler"""
         args = MagicMock()
         args.cmd = 'sync'
@@ -239,9 +240,12 @@ class TestMigasFreeSync(unittest.TestCase):
         mock_handle.assert_called_with(args)
 
     @patch('sys.exit', side_effect=SystemExit)
-    def test_run_usage_on_no_cmd(self, mock_exit):
+    @patch('migasfree_client.sync.MigasFreeSync._init_command')
+    def test_run_usage_on_no_cmd(self, mock_init, mock_exit):
         """Test show usage when no command is provided"""
         self.sync.console = MagicMock()
+        self.sync.migas_ssl_cert = False
+        self.sync._server_info = {}
         with self.assertRaises(SystemExit):
             self.sync.run(None)
         self.assertTrue(self.sync.console.print.called)
