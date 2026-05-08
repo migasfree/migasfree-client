@@ -20,7 +20,9 @@
 import importlib
 import inspect
 import logging
+import os
 import pkgutil
+import sys
 
 from . import plugins
 from .cupswrapper import Cupswrapper
@@ -36,7 +38,15 @@ def iter_namespace(ns_pkg):
     if not hasattr(ns_pkg, '__path__'):
         return []
 
-    return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + '.')
+    paths = list(ns_pkg.__path__)
+
+    # If frozen (packaged), add the real filesystem folder so custom untracked plugins can be discovered
+    if getattr(sys, 'frozen', False):
+        real_dir = os.path.join(os.path.dirname(sys.executable), 'migasfree_client', 'devices', 'plugins')
+        if os.path.isdir(real_dir) and real_dir not in paths:
+            paths.append(real_dir)
+
+    return pkgutil.iter_modules(paths, ns_pkg.__name__ + '.')
 
 
 def get_discovered_plugins():
