@@ -14,11 +14,18 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import hashlib
+import importlib
+import inspect
+import logging
 import os
+import pkgutil
+import sys
 
 import magic
 
 from .data import compare_lists
+
+logger = logging.getLogger('migasfree_client')
 
 
 def read_file(filename, mode='rb'):
@@ -121,9 +128,6 @@ def build_magic():
 
 
 def iter_namespace(ns_pkg, subfolder=None):
-    import pkgutil
-    import sys
-
     if not hasattr(ns_pkg, '__path__'):
         return []
 
@@ -139,10 +143,6 @@ def iter_namespace(ns_pkg, subfolder=None):
 
 
 def get_discovered_plugins(ns_pkg, subfolder=None):
-    import importlib
-    import logging
-
-    logger = logging.getLogger('migasfree_client')
     ret = {}
     for _finder, name, _ispkg in iter_namespace(ns_pkg, subfolder):
         try:
@@ -152,3 +152,18 @@ def get_discovered_plugins(ns_pkg, subfolder=None):
             logger.error('Error importing %s module: %s', name, e)
 
     return ret
+
+
+def get_available_classes(base_class, ns_pkg, subfolder, initial_classes=None):
+    ret = list(initial_classes) if initial_classes else []
+
+    discovered_plugins = get_discovered_plugins(ns_pkg, subfolder)
+    for _module_name, module in discovered_plugins.items():
+        for class_name, class_ in inspect.getmembers(module, inspect.isclass):
+            if issubclass(class_, base_class) and class_ != base_class:
+                try:
+                    ret.append((class_()._name, class_name))
+                except Exception as e:
+                    logger.error('Error processing %s class: %s', class_name, e)
+
+    return sorted(ret, key=lambda x: x[0])

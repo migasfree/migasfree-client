@@ -26,6 +26,7 @@ from .data import (
 from .fs import (
     build_magic,
     compare_files,
+    get_available_classes,
     get_discovered_plugins,
     iter_namespace,
     md5sum,
@@ -92,6 +93,7 @@ __all__ = [
     'escape_quotes',
     'execute',
     'execute_as_user',
+    'get_available_classes',
     'get_config',
     'get_current_user',
     'get_discovered_plugins',

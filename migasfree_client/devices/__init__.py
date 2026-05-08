@@ -17,10 +17,7 @@
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-import inspect
-import logging
-
-from ..utils import get_discovered_plugins
+from ..utils import get_available_classes
 from . import plugins
 from .cupswrapper import Cupswrapper
 from .printer import Printer
@@ -28,21 +25,12 @@ from .printer import Printer
 __author__ = 'Jose Antonio Chavarría'
 __license__ = 'GPLv3'
 __all__ = ['Cupswrapper', 'Printer']
-logger = logging.getLogger('migasfree_client')
 
 
 def get_available_devices_classes():
-    ret = [
-        ('cupswrapper', 'Cupswrapper'),
-    ]
-
-    discovered_plugins = get_discovered_plugins(plugins, 'devices')
-    for _module_name, module in discovered_plugins.items():
-        for class_name, class_ in inspect.getmembers(module, inspect.isclass):
-            if issubclass(class_, Printer) and class_ != Printer:
-                try:
-                    ret.append((class_()._name, class_name))
-                except Exception as e:
-                    logger.error('Error processing %s class: %s', class_name, e)
-
-    return sorted(ret, key=lambda x: x[0])
+    return get_available_classes(
+        Printer,
+        plugins,
+        'devices',
+        [('cupswrapper', 'Cupswrapper')],
+    )
