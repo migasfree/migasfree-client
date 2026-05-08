@@ -76,6 +76,20 @@ bash-5.1.008-1
     def test_get_system_architecture(self):
         self.assertEqual(self.wpt.get_system_architecture(), 'x64')
 
+    @patch('migasfree_client.pms.wpt.execute')
+    def test_import_server_key(self, mock_execute):
+        mock_execute.return_value = (0, 'Imported key successfully', '')
+        self.assertTrue(self.wpt.import_server_key('/path/to/key'))
+        self.assertIn('import-key', mock_execute.call_args[0][0])
+        self.assertIn('/path/to/key', mock_execute.call_args[0][0])
+
+    @patch('migasfree_client.pms.wpt.execute')
+    def test_import_server_key_failure(self, mock_execute):
+        mock_execute.return_value = (1, 'GPG not found', 'Failed to import GPG key')
+        with patch('migasfree_client.pms.wpt.logger.error') as mock_log:
+            self.assertFalse(self.wpt.import_server_key('/path/to/key'))
+            mock_log.assert_called_with('Failed to import server key: %s', 'GPG not found Failed to import GPG key')
+
 
 if __name__ == '__main__':
     unittest.main()

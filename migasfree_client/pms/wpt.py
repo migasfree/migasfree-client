@@ -198,7 +198,12 @@ class Wpt(Pms):
         cmd = [self._pms, 'import-key', file_key]
         logger.debug(' '.join(cmd))
 
-        return execute(cmd, interactive=False)[0] == ALL_OK
+        ret, output, error = execute(cmd, interactive=False)
+        if ret != ALL_OK:
+            err_msg = f'{output.strip()} {error.strip()}'.strip()
+            logger.error('Failed to import server key: %s', err_msg or 'Unknown error')
+
+        return ret == ALL_OK
 
     def get_system_architecture(self):
         """
