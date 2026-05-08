@@ -273,8 +273,10 @@ class Apt(Pms):
             write_file(empty_source_list, '')
             cmd = [
                 '/usr/bin/apt',
-                '-o', f'Dir::Etc::SourceList={empty_source_list}',
-                '-o', f'Dir::Etc::SourceParts={tmp_dir}',
+                '-o',
+                f'Dir::Etc::SourceList={empty_source_list}',
+                '-o',
+                f'Dir::Etc::SourceParts={tmp_dir}',
                 'modernize-sources',
                 '--assume-yes',
             ]

@@ -247,14 +247,8 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
 
         # Layer 2: merge legacy Protocol/Port in-memory for env vars or
         # config files that could not be rewritten (e.g., read-only).
-        legacy_protocol = (
-            os.environ.get('MIGASFREE_CLIENT_PROTOCOL')
-            or config_client.get('protocol')
-        )
-        legacy_port = (
-            os.environ.get('MIGASFREE_CLIENT_PORT')
-            or config_client.get('port')
-        )
+        legacy_protocol = os.environ.get('MIGASFREE_CLIENT_PROTOCOL') or config_client.get('protocol')
+        legacy_port = os.environ.get('MIGASFREE_CLIENT_PORT') or config_client.get('port')
         if legacy_protocol or legacy_port:
             deprecated = [k for k, v in (('Protocol', legacy_protocol), ('Port', legacy_port)) if v]
             logger.warning(
@@ -372,9 +366,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
                     'Project "{}" not found on server. '
                     'You must create it or review the "Project" parameter '
                     'in the configuration file.'
-                ).format(
-                    self.migas_project
-                )
+                ).format(self.migas_project)
             self.operation_failed(error_info)
             logger.error(error_info)
             if exit_on_error:
@@ -497,9 +489,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
                         'Project "{}" not found on server. '
                         'You must create it or review the "Project" parameter '
                         'in the configuration file.'
-                    ).format(
-                        self.migas_project
-                    )
+                    ).format(self.migas_project)
                 )
                 sys.exit(errno.ENODATA)
 

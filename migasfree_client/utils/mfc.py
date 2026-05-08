@@ -22,10 +22,10 @@ import sys
 import uuid
 
 from .. import settings
-from .system import is_windows, is_linux, get_hostname, get_distro_project
-from .process import execute
 from .data import get_config, remove_commented_lines
 from .fs import read_file, write_file
+from .process import execute
+from .system import get_distro_project, get_hostname, is_linux, is_windows
 
 logger = logging.getLogger('migasfree_client')
 
@@ -59,6 +59,7 @@ def check_lock_file(cmd, lock_file):
         try:
             if process_is_active(_pid):
                 import gettext
+
                 _ = gettext.gettext
                 logger.warning(_('Another instance of %(cmd)s is running: %(pid)d') % {'cmd': cmd, 'pid': int(_pid)})
                 sys.exit(errno.EPERM)

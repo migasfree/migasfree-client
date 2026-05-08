@@ -51,11 +51,29 @@ class RendererMixin:
         config_options = [
             (_('Project'), self.migas_project, 'MIGASFREE_CLIENT_PROJECT', None, True),
             (_('Server'), self._url_base or self.migas_server, 'MIGASFREE_CLIENT_SERVER', 'server', True),
-            (_('Auto update packages'), self.migas_auto_update_packages, 'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES', 'auto_update_packages', True),
+            (
+                _('Auto update packages'),
+                self.migas_auto_update_packages,
+                'MIGASFREE_CLIENT_AUTO_UPDATE_PACKAGES',
+                'auto_update_packages',
+                True,
+            ),
             (_('Manage devices'), self.migas_manage_devices, 'MIGASFREE_CLIENT_MANAGE_DEVICES', 'manage_devices', True),
-            (_('Upload hardware'), self.migas_upload_hardware, 'MIGASFREE_CLIENT_UPLOAD_HARDWARE', 'upload_hardware', True),
+            (
+                _('Upload hardware'),
+                self.migas_upload_hardware,
+                'MIGASFREE_CLIENT_UPLOAD_HARDWARE',
+                'upload_hardware',
+                True,
+            ),
             (_('Proxy'), self.migas_proxy, 'MIGASFREE_CLIENT_PROXY', 'proxy', True),
-            (_('Package Proxy Cache'), self.migas_package_proxy_cache, 'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE', 'package_proxy_cache', True),
+            (
+                _('Package Proxy Cache'),
+                self.migas_package_proxy_cache,
+                'MIGASFREE_CLIENT_PACKAGE_PROXY_CACHE',
+                'package_proxy_cache',
+                True,
+            ),
             (_('Debug'), self._debug, 'MIGASFREE_CLIENT_DEBUG', 'debug', True),
             (_('Computer name'), self.migas_computer_name, 'MIGASFREE_CLIENT_COMPUTER_NAME', None, True),
         ]
@@ -88,9 +106,7 @@ class RendererMixin:
             and not os.path.exists(self.migas_ssl_cert)
         ):
             self.console.print(
-                '\t\t{}: {}'.format(
-                    _('Warning'), _('Certificate does not exist and authentication is not guaranteed')
-                )
+                '\t\t{}: {}'.format(_('Warning'), _('Certificate does not exist and authentication is not guaranteed'))
             )
         self.console.print('\t{}: {}'.format(_('PMS'), self.pms))
         if self.pms:

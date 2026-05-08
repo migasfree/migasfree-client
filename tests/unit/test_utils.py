@@ -749,7 +749,6 @@ class TestIdempotency:
         except Exception as e:
             pytest.fail(f'Test failed with: {e}')
 
-
     def test_write_file_if_changed_writes_different(self):
         """Test write_file_if_changed writes if content matches but is different"""
         old_content = b'old content'
