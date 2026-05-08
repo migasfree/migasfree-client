@@ -118,3 +118,37 @@ def build_magic():
         my_magic.file = my_magic.from_file
 
     return my_magic
+
+
+def iter_namespace(ns_pkg, subfolder=None):
+    import pkgutil
+    import sys
+
+    if not hasattr(ns_pkg, '__path__'):
+        return []
+
+    paths = list(ns_pkg.__path__)
+
+    # If frozen (packaged), add the real filesystem folder so custom untracked plugins can be discovered
+    if getattr(sys, 'frozen', False) and subfolder:
+        real_dir = os.path.join(os.path.dirname(sys.executable), 'migasfree_client', subfolder, 'plugins')
+        if os.path.isdir(real_dir) and real_dir not in paths:
+            paths.append(real_dir)
+
+    return pkgutil.iter_modules(paths, ns_pkg.__name__ + '.')
+
+
+def get_discovered_plugins(ns_pkg, subfolder=None):
+    import importlib
+    import logging
+
+    logger = logging.getLogger('migasfree_client')
+    ret = {}
+    for _finder, name, _ispkg in iter_namespace(ns_pkg, subfolder):
+        try:
+            module = importlib.import_module(name)
+            ret[name] = module
+        except ImportError as e:
+            logger.error('Error importing %s module: %s', name, e)
+
+    return ret

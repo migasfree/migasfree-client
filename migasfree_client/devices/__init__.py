@@ -17,13 +17,10 @@
 #
 # Author: Jose Antonio Chavarría <jachavar@gmail.com>
 
-import importlib
 import inspect
 import logging
-import os
-import pkgutil
-import sys
 
+from ..utils import get_discovered_plugins
 from . import plugins
 from .cupswrapper import Cupswrapper
 from .printer import Printer
@@ -34,39 +31,12 @@ __all__ = ['Cupswrapper', 'Printer']
 logger = logging.getLogger('migasfree_client')
 
 
-def iter_namespace(ns_pkg):
-    if not hasattr(ns_pkg, '__path__'):
-        return []
-
-    paths = list(ns_pkg.__path__)
-
-    # If frozen (packaged), add the real filesystem folder so custom untracked plugins can be discovered
-    if getattr(sys, 'frozen', False):
-        real_dir = os.path.join(os.path.dirname(sys.executable), 'migasfree_client', 'devices', 'plugins')
-        if os.path.isdir(real_dir) and real_dir not in paths:
-            paths.append(real_dir)
-
-    return pkgutil.iter_modules(paths, ns_pkg.__name__ + '.')
-
-
-def get_discovered_plugins():
-    ret = {}
-    for _finder, name, _ispkg in iter_namespace(plugins):
-        try:
-            module = importlib.import_module(name)
-            ret[name] = module
-        except ImportError as e:
-            logger.error('Error importing %s module: %s', name, e)
-
-    return ret
-
-
 def get_available_devices_classes():
     ret = [
         ('cupswrapper', 'Cupswrapper'),
     ]
 
-    discovered_plugins = get_discovered_plugins()
+    discovered_plugins = get_discovered_plugins(plugins, 'devices')
     for _module_name, module in discovered_plugins.items():
         for class_name, class_ in inspect.getmembers(module, inspect.isclass):
             if issubclass(class_, Printer) and class_ != Printer:
