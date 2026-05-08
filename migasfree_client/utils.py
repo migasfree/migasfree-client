@@ -190,6 +190,8 @@ def _stream_output_nonblocking(process):
                 chunk = process.stdout.read()
                 chunk = _bytes_to_str(chunk)
                 if chunk and chunk != '\n':
+                    sys.stdout.write(chunk)
+                    sys.stdout.flush()
                     logger.info(chunk)
                 output_buffer = f'{output_buffer}{chunk}'
     else:
@@ -211,6 +213,8 @@ def _stream_output_nonblocking(process):
                 chunk = process.stdout.read()
                 chunk = _bytes_to_str(chunk)
                 if chunk and chunk != '\n':
+                    sys.stdout.write(chunk)
+                    sys.stdout.flush()
                     logger.info(chunk)
                 output_buffer = f'{output_buffer}{chunk}'
 
