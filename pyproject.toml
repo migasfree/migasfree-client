@@ -13,7 +13,7 @@ authors = [
 maintainers = [
   {name = "Jose Antonio Chavarría", email = "jachavar@gmail.com"},
 ]
-license = {text = "GPL-3.0-or-later"}
+license = "GPL-3.0-or-later"
 description = "Synchronizes a computer from a migasfree server"
 readme = "README.md"
 keywords = ["migasfree", "systems management", "devops"]
@@ -57,7 +57,8 @@ migasfree = "migasfree_client.__main__:main"
 where = ["."]
 include = [
   "migasfree_client", "migasfree_client.devices", "migasfree_client.pms",
-  "migasfree_client.devices.plugins", "migasfree_client.pms.plugins"
+  "migasfree_client.devices.plugins", "migasfree_client.pms.plugins",
+  "migasfree_client.utils", "migasfree_client.mixins"
 ]
 
 [tool.setuptools.dynamic]
