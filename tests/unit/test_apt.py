@@ -269,29 +269,38 @@ class TestApt(unittest.TestCase):
         mock_write_file.assert_called_once()
         call_args = mock_write_file.call_args[0]
         self.assertIn('migasfree.list', call_args[0])
-        self.assertIn('deb https://server.example.com/repo stable main', call_args[1])
+        expected_path = os.path.join(self.apt._keyring_dir, 'server.example.com.gpg')
+        self.assertIn(f'deb [signed-by={expected_path}] https://server.example.com/repo stable main', call_args[1])
         # Check cleanup call: should remove .sources because we are using .list
         mock_remove.assert_called_with(os.path.join(self.apt._repo_dir, self.apt._repo_sources))
 
     def test_adapt_sources_adds_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com'
-        result = self.apt._adapt_sources(sources_content, 'server.example.com')
+        repos_options = [{'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}]
+        result = self.apt._adapt_sources(sources_content, 'server.example.com', repos_options)
         self.assertIn('Signed-By:', result)
         self.assertIn('server.example.com.gpg', result)
 
     def test_adapt_sources_replaces_empty_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com\nSigned-By:'
-        result = self.apt._adapt_sources(sources_content, 'server.example.com')
-        import os
+        repos_options = [{'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}]
+        result = self.apt._adapt_sources(sources_content, 'server.example.com', repos_options)
 
         expected_path = os.path.join('/etc/apt/trusted.gpg.d', 'server.example.com.gpg')
         expected = f'Types: deb\nURIs: http://example.com\nSigned-By: {expected_path}'
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_adapt_sources_preserves_existing_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com\nSigned-By: /path/to/key.gpg'
-        result = self.apt._adapt_sources(sources_content, 'server.example.com')
+        repos_options = [{'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}]
+        result = self.apt._adapt_sources(sources_content, 'server.example.com', repos_options)
         self.assertIn('Signed-By: /path/to/key.gpg', result)
+
+    def test_adapt_sources_preserves_arch(self):
+        sources_content = 'Types: deb\nURIs: http://example.com\nSigned-By: /key.gpg'
+        repos_options = [{'uri': 'http://example.com', 'options': {'arch': 'amd64'}}]
+        result = self.apt._adapt_sources(sources_content, 'server', repos_options)
+        self.assertIn('Architectures: amd64', result)
 
     @patch('migasfree_client.pms.apt.execute')
     def test_get_pms_version_success(self, mock_execute):

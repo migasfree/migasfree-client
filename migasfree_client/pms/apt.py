@@ -216,35 +216,81 @@ class Apt(Pms):
 
         return result
 
-    def _adapt_sources(self, sources_content, server):
+    def _adapt_sources(self, sources_content, server, repos_options):
         """
-        Adds 'Signed-By: <key>' in each block of sources content if not exists (deb822)
+        Adds missing fields in each block of sources content (deb822)
         """
 
         key_path = os.path.join(self._keyring_dir, f'{sanitize_path(server)}.gpg')
-        signed_by_line = f'Signed-By: {key_path}'
 
-        blocks = sources_content.split('\n\n')  # each block separated by empty line
+        # Map list options to deb822 fields
+        opt_to_field = {
+            'signed-by': 'Signed-By',
+            'arch': 'Architectures',
+            'check-valid-until': 'Check-Valid-Until',
+            'trusted': 'Trusted',
+            'allow-insecure': 'Allow-Insecure',
+            'pdiffs': 'PDiffs',
+            'by-hash': 'By-Hash',
+            'languages': 'Languages',
+            'allow-weak': 'Allow-Weak',
+            'allow-downgrade-to-insecure': 'Allow-Downgrade-To-Insecure',
+        }
+
+        # blocks separated by empty line (one or more newlines)
+        blocks = re.split(r'\n\s*\n', sources_content.strip())
         new_blocks = []
 
         for block in blocks:
-            lines = block.splitlines()
-            for i, line in enumerate(lines):
-                line_lower = line.lower()
-                if line_lower.startswith('signed-by:'):
-                    value = line[10:].strip()
-                    if not value:
-                        lines[i] = signed_by_line
+            block = block.strip()
+            if not block:
+                continue
 
-            # if signed-by not exists, add to the end
-            if all(not line.lower().startswith('signed-by:') for line in lines):
-                lines.append(signed_by_line)
+            lines = block.splitlines()
+            block_fields = {}
+            for line in lines:
+                if ':' in line:
+                    k, v = line.split(':', 1)
+                    block_fields[k.strip().lower()] = v.strip()
+
+            # Try to match this block with one of our repos_options by URI
+            # (URIs in deb822 usually have a trailing slash)
+            block_uri = block_fields.get('uris', '').rstrip('/')
+            options = {}
+            for ro in repos_options:
+                if ro['uri'].rstrip('/') == block_uri:
+                    options = ro['options']
+                    break
+
+            # If no options found by URI, at least we must have the server key
+            if not options:
+                options = {'signed-by': key_path}
+
+            for opt_k, opt_v in options.items():
+                field_name = opt_to_field.get(opt_k.lower())
+                if not field_name:
+                    continue
+
+                field_lower = field_name.lower()
+                if field_lower not in block_fields or not block_fields[field_lower]:
+                    # If field exists but empty, replace it in lines
+                    field_found_in_lines = False
+                    for i, line in enumerate(lines):
+                        if line.strip().lower().startswith(f'{field_lower}:'):
+                            lines[i] = f'{field_name}: {opt_v}'
+                            field_found_in_lines = True
+                            break
+
+                    if not field_found_in_lines:
+                        lines.append(f'{field_name}: {opt_v}')
+
+                    block_fields[field_lower] = opt_v
 
             new_blocks.append('\n'.join(lines))
 
         return '\n\n'.join(new_blocks)
 
-    def _convert_list_to_sources(self, list_content, server):
+    def _convert_list_to_sources(self, list_content, server, repos_options):
         """
         Converts formatted content .list to .sources format using 'apt modernize-sources'
 
@@ -294,7 +340,7 @@ class Apt(Pms):
             with open(sources_path, encoding='utf-8') as f:
                 sources_content = f.read()
 
-            return self._adapt_sources(sources_content, server)
+            return self._adapt_sources(sources_content, server, repos_options)
 
     def _get_pms_version(self):
         """
@@ -322,9 +368,58 @@ class Apt(Pms):
         bool create_repos(string protocol, string server, list repositories)
         """
 
-        content = ''.join(
-            f'{repo.get("source_template").format(protocol=protocol, server=server)}' for repo in repositories
-        )
+        key_path = os.path.join(self._keyring_dir, f'{sanitize_path(server)}.gpg')
+        new_content = []
+        repos_options = []
+
+        def clean_brackets(match):
+            opts = match.group(1).strip()
+            parts = opts.split()
+            cleaned_parts = []
+            for p in parts:
+                if '=' in p:
+                    k, v = p.split('=', 1)
+                    cleaned_parts.append(f'{k.lower()}={v}')
+                else:
+                    cleaned_parts.append(p)
+            return f"[{' '.join(cleaned_parts)}]"
+
+        for repo in repositories:
+            template = repo.get('source_template', '')
+            if not template:
+                continue
+
+            # Inject Signed-By if missing in the template
+            if 'signed-by=' not in template.lower():
+                if ' [' in template:
+                    template = template.replace(' [', f' [signed-by={key_path} ', 1)
+                else:
+                    template = re.sub(r'^(deb(?:-src)?)\s+', rf'\1 [signed-by={key_path}] ', template)
+
+            # Cleanup and normalize options in brackets: remove extra spaces and lowercase keys
+            # to help 'apt modernize-sources' recognize them.
+            template = re.sub(r'\[([^\]]+)\]', clean_brackets, template)
+
+            formatted_template = template.format(protocol=protocol, server=server)
+            new_content.append(formatted_template)
+
+            # Store options for later deb822 adaptation if needed
+            match = re.search(r'\[([^\]]+)\]\s+(\S+)', formatted_template)
+            if match:
+                opts_str, uri = match.groups()
+                opts = {}
+                for part in opts_str.split():
+                    if '=' in part:
+                        k, v = part.split('=', 1)
+                        opts[k.lower()] = v
+                repos_options.append({'uri': uri, 'options': opts})
+            else:
+                # No brackets, but maybe it has a URI
+                match = re.search(r'^(?:deb(?:-src)?)\s+(\S+)', formatted_template)
+                if match:
+                    repos_options.append({'uri': match.group(1), 'options': {'signed-by': key_path}})
+
+        content = ''.join(new_content)
         if not content:
             return True
 
@@ -336,7 +431,7 @@ class Apt(Pms):
         try:
             apt_version = self._get_pms_version()
             if apt_version[0] >= 3:
-                sources_content = self._convert_list_to_sources(content, server)
+                sources_content = self._convert_list_to_sources(content, server, repos_options)
                 if sources_content:
                     content = sources_content
                     self._repo = sources_path
