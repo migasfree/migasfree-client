@@ -16,3 +16,4 @@
 graphify-out/
 docs/governance/
 .kilo/
+.venv/ 
