@@ -42,6 +42,7 @@ class TestMigasFreeInfo(unittest.TestCase):
             self.info._computer_id = 123
             self.info._mtls_cert = 'cert-path'
             self.info.console = MagicMock()
+            self.info._check_sign_keys = MagicMock(return_value=True)
 
     @patch('migasfree_client.info.MigasFreeInfo.get_label')
     def test_show_info_all(self, mock_get_label):

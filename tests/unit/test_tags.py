@@ -41,6 +41,7 @@ class TestMigasFreeTags(unittest.TestCase):
             self.tags._public_key = 'pub'
             # Globally mock end_of_transmission to avoid security key reading
             self.tags.end_of_transmission = MagicMock()
+            self.tags._check_sign_keys = MagicMock(return_value=True)
 
     def test_sanitize_valid_tags(self):
         """Test sanitization of valid tag list"""

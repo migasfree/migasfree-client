@@ -34,6 +34,7 @@ class TestMigasFreeLabel(unittest.TestCase):
             self.label._computer_id = '123'
             self.label._mtls_cert = 'cert-path'
             self.label.console = MagicMock()
+            self.label._check_sign_keys = MagicMock(return_value=True)
 
     @patch('migasfree_client.label.MigasFreeLabel._api_call')
     @patch('migasfree_client.label.MigasFreeLabel._handle_response')
