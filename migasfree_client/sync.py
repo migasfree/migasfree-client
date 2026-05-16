@@ -78,7 +78,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         logger.debug('Graphic user: %s', self._graphic_user)
 
     def _exit_gracefully(self, signal_number, frame):
-        self._show_message(_('Killing %s before time!!!') % self.CMD)
+        self._show_message(_('Killing %s before time') % self.CMD)
         logger.critical('Exiting %s, signal: %s', self.CMD, signal_number)
         sys.exit(errno.EINPROGRESS)
 
@@ -130,7 +130,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
         ret = utils.write_file(path_file, response)
         if not ret:
-            msg = _('Error writing key file!!!')
+            msg = _('Error writing key file')
             self.operation_failed(msg)
             logger.error(msg)
 
@@ -579,7 +579,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
             self.devices_class.get_connection()
         except RuntimeError:
             self._show_message(_('Synchronizing logical devices...'))
-            _msg = _('Printer service is not running!!!')
+            _msg = _('Printer service is not running')
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)

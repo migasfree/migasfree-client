@@ -335,21 +335,26 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
 
         all_keys_exist = all(os.path.isfile(path) for path in paths.values())
 
+        if not all_keys_exist:
+            missing_keys = [key for key, path in paths.items() if not os.path.isfile(path)]
+            logger.info('Security keys are not present: %s', ', '.join(missing_keys))
+            self._auto_register()
+            all_keys_exist = all(os.path.isfile(path) for path in paths.values())
+
         if all_keys_exist:
             if get_computer_id and not self._computer_id:
                 self.get_computer_id()
 
-            return True  # all OK
+            return True
 
-        missing_keys = [key for key, path in paths.items() if not os.path.isfile(path)]
-        logger.warning('Security keys are not present!!! %s', ', '.join(missing_keys))
-        return self._auto_register()
+        return False
 
     def _auto_register(self):
         self._show_message(_('Autoregistering computer...'))
 
         if self._save_sign_keys(self.auto_register_user, self.auto_register_password):
-            return self._save_computer(self.auto_register_user, self.auto_register_password) != 0
+            self._computer_id = self._save_computer(self.auto_register_user, self.auto_register_password)
+            return self._computer_id != 0
 
         return False
 
@@ -397,7 +402,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
             self.console.print(_('Key %s created!') % path_file)
             return True
 
-        msg = _('Error writing key file!!!')
+        msg = _('Error writing key file')
         self.operation_failed(msg)
         logger.error(msg)
         sys.exit(errno.ENOENT)
