@@ -221,7 +221,7 @@ class Apt(Pms):
         Adds missing fields in each block of sources content (deb822)
         """
 
-        key_path = os.path.join(self._keyring_dir, f'{sanitize_path(server)}.gpg')
+        key_path = os.path.join(self._keyring_dir, f'{sanitize_path(server)}.gpg').replace('\\', '/')
 
         # Map list options to deb822 fields
         opt_to_field = {
@@ -368,7 +368,7 @@ class Apt(Pms):
         bool create_repos(string protocol, string server, list repositories)
         """
 
-        key_path = os.path.join(self._keyring_dir, f'{sanitize_path(server)}.gpg')
+        key_path = os.path.join(self._keyring_dir, f'{sanitize_path(server)}.gpg').replace('\\', '/')
         new_content = []
         repos_options = []
 

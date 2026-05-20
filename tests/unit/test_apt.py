@@ -269,7 +269,7 @@ class TestApt(unittest.TestCase):
         mock_write_file.assert_called_once()
         call_args = mock_write_file.call_args[0]
         self.assertIn('migasfree.list', call_args[0])
-        expected_path = os.path.join(self.apt._keyring_dir, 'server.example.com.gpg')
+        expected_path = os.path.join(self.apt._keyring_dir, 'server.example.com.gpg').replace('\\', '/')
         self.assertIn(f'deb [signed-by={expected_path}] https://server.example.com/repo stable main', call_args[1])
         # Check cleanup call: should remove .sources because we are using .list
         mock_remove.assert_called_with(os.path.join(self.apt._repo_dir, self.apt._repo_sources))
@@ -290,7 +290,7 @@ class TestApt(unittest.TestCase):
         ]
         result = self.apt._adapt_sources(sources_content, 'server.example.com', repos_options)
 
-        expected_path = os.path.join('/etc/apt/trusted.gpg.d', 'server.example.com.gpg')
+        expected_path = os.path.join('/etc/apt/trusted.gpg.d', 'server.example.com.gpg').replace('\\', '/')
         expected = f'Types: deb\nURIs: http://example.com\nSigned-By: {expected_path}'
         self.assertEqual(result, expected)
 
