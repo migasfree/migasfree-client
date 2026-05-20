@@ -61,7 +61,7 @@ def check_lock_file(cmd, lock_file):
                 import gettext
 
                 _ = gettext.gettext
-                logger.warning(_('Another instance of %(cmd)s is running: %(pid)d') % {'cmd': cmd, 'pid': int(_pid)})
+                logger.warning(_('Another instance of %(cmd)s is running: %(pid)d') % {'cmd': cmd, 'pid': _pid})
                 sys.exit(errno.EPERM)
         except OSError:
             pass
