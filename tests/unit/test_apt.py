@@ -276,14 +276,18 @@ class TestApt(unittest.TestCase):
 
     def test_adapt_sources_adds_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com'
-        repos_options = [{'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}]
+        repos_options = [
+            {'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}
+        ]
         result = self.apt._adapt_sources(sources_content, 'server.example.com', repos_options)
         self.assertIn('Signed-By:', result)
         self.assertIn('server.example.com.gpg', result)
 
     def test_adapt_sources_replaces_empty_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com\nSigned-By:'
-        repos_options = [{'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}]
+        repos_options = [
+            {'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}
+        ]
         result = self.apt._adapt_sources(sources_content, 'server.example.com', repos_options)
 
         expected_path = os.path.join('/etc/apt/trusted.gpg.d', 'server.example.com.gpg')
@@ -292,7 +296,9 @@ class TestApt(unittest.TestCase):
 
     def test_adapt_sources_preserves_existing_signed_by(self):
         sources_content = 'Types: deb\nURIs: http://example.com\nSigned-By: /path/to/key.gpg'
-        repos_options = [{'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}]
+        repos_options = [
+            {'uri': 'http://example.com', 'options': {'signed-by': '/etc/apt/trusted.gpg.d/server.example.com.gpg'}}
+        ]
         result = self.apt._adapt_sources(sources_content, 'server.example.com', repos_options)
         self.assertIn('Signed-By: /path/to/key.gpg', result)
 

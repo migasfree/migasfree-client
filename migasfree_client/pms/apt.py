@@ -382,7 +382,7 @@ class Apt(Pms):
                     cleaned_parts.append(f'{k.lower()}={v}')
                 else:
                     cleaned_parts.append(p)
-            return f"[{' '.join(cleaned_parts)}]"
+            return f'[{" ".join(cleaned_parts)}]'
 
         for repo in repositories:
             template = repo.get('source_template', '')
