@@ -31,9 +31,12 @@ logger = logging.getLogger('migasfree_client')
 class MigasFreeConf(MigasFreeCommand):
     CMD = 'migasfree conf'
 
-    def run(self, args):
+    def run(self, args=None):
         # We don't need all the mtls/pms setup from _init_command for local config changes
         # self._init_command()
+
+        if args is None:
+            return
 
         # Determine if we are writing or just reading
         write_operations = {
