@@ -8,7 +8,7 @@
 
 ## 1. Overview
 
-The `conf` subcommand allows administrators to view, set, or modify the local `migasfree-client` configurations directly via the command-line interface. This ensures automated configuration updates can be run programmatically without manually parsing or editing the configuration file on disk.
+The `conf` subcommand allows administrators to view, set, modify, or **reset** the local `migasfree-client` configurations directly via the command-line interface. This ensures automated configuration updates can be run programmatically without manually parsing or editing the configuration file on disk.
 
 ---
 
@@ -29,14 +29,46 @@ If no options are passed, `migasfree conf` outputs the entire active configurati
 | `-a`, `--auto-update-packages` | `true`, `false` | `Auto_Update_Packages` | Enables or disables automatic mandatory package upgrades. |
 | `-m`, `--manage-devices` | `true`, `false` | `Manage_Devices` | Enables or disables logical printer provisioning. |
 | `-u`, `--upload-hardware` | `true`, `false` | `Upload_Hardware` | Toggles detailed hardware inventory collection. |
-| `-c`, `--computer-name` | `String` | `Computer_Name` | Overrides local hostname reporting. |
+| `-c`, `--computer-name` | `String` or `""` | `Computer_Name` | Overrides local hostname reporting. Pass `""` to reset to system hostname. |
 | `--debug-mode` | `true`, `false` | `Debug` | Toggles verbose debugging in log files. |
-| `-x`, `--proxy` | `String` | `Proxy` | Configures HTTP/HTTPS network proxy. |
-| `-k`, `--package-proxy-cache` | `String` | `Package_Proxy_Cache` | Configures proxy cache address for package downloads. |
+| `-x`, `--proxy` | `String` or `""` | `Proxy` | Configures HTTP/HTTPS network proxy. Pass `""` to disable. |
+| `-k`, `--package-proxy-cache` | `String` or `""` | `Package_Proxy_Cache` | Configures proxy cache address for package downloads. Pass `""` to disable. |
 
 ---
 
-## 3. Business Rules & Configuration Migration
+## 3. Resetting Optional Parameters
+
+Certain optional parameters can be **reset to their default value** by passing an empty string `""`. When reset, the configuration key is **commented out** in `/etc/migasfree.conf`, which restores the built-in default behaviour without requiring manual file editing.
+
+**Resettable parameters:**
+
+| Parameter | Default when reset |
+| :--- | :--- |
+| `--computer-name` | System hostname (`socket.getfqdn()`) |
+| `--proxy` | No proxy (direct connection) |
+| `--package-proxy-cache` | No proxy cache |
+
+**Example — reset a custom computer name:**
+
+```bash
+migasfree conf --computer-name ""
+```
+
+This is equivalent to commenting out `Computer_Name` in the configuration file:
+
+```ini
+[client]
+Server = migasfree.example.com
+Project = myproject
+# Computer_Name = mcs-builder
+```
+
+> [!NOTE]
+> Parameters that are **mandatory** (`Server`, `Project`) cannot be reset to empty — they will be rejected with a validation error.
+
+---
+
+## 4. Business Rules & Configuration Migration
 
 > [!WARNING]
 >
