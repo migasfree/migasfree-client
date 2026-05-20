@@ -12,3 +12,5 @@ An Architecture Decision Record (ADR) is a document that captures an important a
 - [ADR 002: Adoption of Diátaxis Framework for Documentation](002-diataxis-framework.md)
 - [ADR 003: Unify Server Configuration into a Single Parameter](003-unified-server-parameter.md)
 - [ADR 004: Command-Line Interface for Configuration Management](004-cli-configuration-management.md)
+- [ADR 005: Support for DEB822 (.sources) Repository Format in Modern APT](005-apt-deb822-sources-support.md)
+- [ADR 006: Stricter & More Resilient Security Keys Auto-Registration Flow](006-security-keys-auto-registration.md)
