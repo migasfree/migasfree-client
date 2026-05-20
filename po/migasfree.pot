@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-27 14:03+0200\n"
+"POT-Creation-Date: 2026-05-20 19:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "Register computer at server"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:45 ../migasfree_client/command.py:574
+#: ../migasfree_client/__main__.py:45 ../migasfree_client/command.py:452
 msgid "User to register computer at server"
 msgstr ""
 
@@ -166,242 +166,204 @@ msgid "Remove client keys from all servers"
 msgstr ""
 
 #: ../migasfree_client/__main__.py:117
-msgid "Import mTLS certificate from tar file"
+msgid "View or update configuration file"
 msgstr ""
 
 #: ../migasfree_client/__main__.py:119
+msgid "Set Server in configuration file"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:122
+msgid "Set Project in configuration file"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:125
+msgid "Set Auto_Update_Packages"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:127
+msgid "Set Manage_Devices"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:128
+msgid "Set Upload_Hardware"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:129
+msgid "Set Computer_Name"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:130
+msgid "Set Debug in configuration file"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:132
+msgid "Set Proxy in configuration file"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:135
+msgid "Set Package_Proxy_Cache"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:138
+msgid "Import mTLS certificate from tar file"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:140
 msgid "Certificate tar file to import"
 msgstr ""
 
-#: ../migasfree_client/__main__.py:136
+#: ../migasfree_client/__main__.py:157
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr ""
 
-#: ../migasfree_client/command.py:86
+#: ../migasfree_client/command.py:83
 #, python-format
 msgid "Failed to configure the log file (%s)\n"
 msgstr ""
 
-#: ../migasfree_client/command.py:290
-#, python-format
-msgid "Error getting server certificate: %s"
-msgstr ""
-
-#: ../migasfree_client/command.py:379
-msgid "CA certificate downloaded"
-msgstr ""
-
-#: ../migasfree_client/command.py:381 ../migasfree_client/mtls.py:282
-msgid "CA certificate is up to date"
-msgstr ""
-
-#: ../migasfree_client/command.py:385 ../migasfree_client/mtls.py:265
-#, python-format
-msgid "Failed to download CA certificate: %s"
-msgstr ""
-
-#: ../migasfree_client/command.py:404
-msgid "mTLS certificates downloaded"
-msgstr ""
-
-#: ../migasfree_client/command.py:408
-#, python-format
-msgid "Failed to download mTLS certificates: %s"
-msgstr ""
-
-#: ../migasfree_client/command.py:433 ../migasfree_client/url_request.py:367
-#, python-format
-msgid "Error creating %s directory"
-msgstr ""
-
-#: ../migasfree_client/command.py:444
-#, python-format
-msgid "Running command %s..."
-msgstr ""
-
-#: ../migasfree_client/command.py:449
-#, python-format
-msgid "Command %s failed: %s"
-msgstr ""
-
-#: ../migasfree_client/command.py:456
-msgid "User has insufficient privileges to execute this command"
-msgstr ""
-
-#: ../migasfree_client/command.py:480 ../migasfree_client/upload.py:49
+#: ../migasfree_client/command.py:353 ../migasfree_client/upload.py:49
 msgid "Autoregistering computer..."
 msgstr ""
 
-#: ../migasfree_client/command.py:496 ../migasfree_client/command.py:615
+#: ../migasfree_client/command.py:371 ../migasfree_client/command.py:494
 msgid ""
 "Project \"{}\" not found on server. You must create it or review the "
 "\"Project\" parameter in the configuration file."
 msgstr ""
 
-#: ../migasfree_client/command.py:526
+#: ../migasfree_client/command.py:402
 #, python-format
 msgid "Key %s created!"
 msgstr ""
 
-#: ../migasfree_client/command.py:529 ../migasfree_client/sync.py:133
-msgid "Error writing key file!!!"
+#: ../migasfree_client/command.py:405 ../migasfree_client/sync.py:133
+msgid "Error writing key file"
 msgstr ""
 
-#: ../migasfree_client/command.py:566
+#: ../migasfree_client/command.py:442
 #, python-format
 msgid "Have you check config options in this machine (%s)?"
 msgstr ""
 
-#: ../migasfree_client/command.py:568
+#: ../migasfree_client/command.py:444
 #, python-format
 msgid "Check %s file and register again"
 msgstr ""
 
-#: ../migasfree_client/command.py:576 ../migasfree_client/upload.py:81
+#: ../migasfree_client/command.py:454 ../migasfree_client/upload.py:81
 #, python-format
 msgid "Empty user. Exiting %s."
 msgstr ""
 
-#: ../migasfree_client/command.py:580
+#: ../migasfree_client/command.py:458
 msgid "Password"
 msgstr ""
 
-#: ../migasfree_client/command.py:582
+#: ../migasfree_client/command.py:460
 msgid "Registering computer..."
 msgstr ""
 
-#: ../migasfree_client/command.py:586
+#: ../migasfree_client/command.py:464
 msgid "Computer registered at server"
 msgstr ""
 
-#: ../migasfree_client/command.py:588
+#: ../migasfree_client/command.py:466
 msgid "Fetching mTLS certificates..."
 msgstr ""
 
-#: ../migasfree_client/command.py:609
+#: ../migasfree_client/command.py:487
 msgid "You must register the computer with a valid user"
 msgstr ""
 
-#: ../migasfree_client/command.py:657
+#: ../migasfree_client/command.py:537
 msgid "Review keys or register computer again"
 msgstr ""
 
-#: ../migasfree_client/command.py:681
-#, python-format
-msgid "Config options: %s"
-msgstr ""
-
-#: ../migasfree_client/command.py:685 ../migasfree_client/upload.py:67
-msgid "Project"
-msgstr ""
-
-#: ../migasfree_client/command.py:686
-msgid "Server"
-msgstr ""
-
-#: ../migasfree_client/command.py:687
-msgid "Protocol"
-msgstr ""
-
-#: ../migasfree_client/command.py:688
-msgid "Port"
-msgstr ""
-
-#: ../migasfree_client/command.py:689
-msgid "Auto update packages"
-msgstr ""
-
-#: ../migasfree_client/command.py:690
-msgid "Manage devices"
-msgstr ""
-
-#: ../migasfree_client/command.py:691
-msgid "Upload hardware"
-msgstr ""
-
-#: ../migasfree_client/command.py:692
-msgid "Proxy"
-msgstr ""
-
-#: ../migasfree_client/command.py:693
-msgid "Package Proxy Cache"
-msgstr ""
-
-#: ../migasfree_client/command.py:694
-msgid "Debug"
-msgstr ""
-
-#: ../migasfree_client/command.py:695
-msgid "Computer name"
-msgstr ""
-
-#: ../migasfree_client/command.py:705
-msgid "Running options:"
-msgstr ""
-
-#: ../migasfree_client/command.py:707
-msgid "migasfree server version"
-msgstr ""
-
-#: ../migasfree_client/command.py:707
-msgid "None"
-msgstr ""
-
-#: ../migasfree_client/command.py:709
-msgid "SSL certificate"
-msgstr ""
-
-#: ../migasfree_client/command.py:716
-msgid "Warning"
-msgstr ""
-
-#: ../migasfree_client/command.py:716
-msgid "Certificate does not exist and authentication is not guaranteed"
-msgstr ""
-
-#: ../migasfree_client/command.py:718
-msgid "PMS"
-msgstr ""
-
-#: ../migasfree_client/command.py:720
-msgid "Architecture"
-msgstr ""
-
-#: ../migasfree_client/command.py:768
-msgid "Any PMS was not found. Cannot continue."
-msgstr ""
-
-#: ../migasfree_client/command.py:774
-msgid "Ok"
-msgstr ""
-
-#: ../migasfree_client/command.py:783
-msgid "Failed"
-msgstr ""
-
-#: ../migasfree_client/command.py:863
+#: ../migasfree_client/command.py:624
 #, python-format
 msgid "Trying to remove %s directory"
 msgstr ""
 
-#: ../migasfree_client/command.py:869
+#: ../migasfree_client/command.py:630
 #, python-format
 msgid "An error occurred while deleting directory %s"
 msgstr ""
 
-#: ../migasfree_client/command.py:873
+#: ../migasfree_client/command.py:634
 #, python-format
 msgid "No such directory %s"
 msgstr ""
 
-#: ../migasfree_client/command.py:877
+#: ../migasfree_client/command.py:638
 #, python-format
 msgid "Directory %s has been removed"
 msgstr ""
 
-#: ../migasfree_client/command.py:883
+#: ../migasfree_client/command.py:644
 msgid "Importing mTLS certificate..."
+msgstr ""
+
+#: ../migasfree_client/conf.py:63
+#, python-format
+msgid "Invalid value for %s: %s"
+msgstr ""
+
+#: ../migasfree_client/conf.py:69
+#, python-format
+msgid "Set %s = %s"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:66
+#, python-format
+msgid "Error getting server certificate: %s"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:155
+msgid "CA certificate downloaded"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:157 ../migasfree_client/mtls.py:282
+msgid "CA certificate is up to date"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:161 ../migasfree_client/mtls.py:265
+#, python-format
+msgid "Failed to download CA certificate: %s"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:180
+msgid "mTLS certificates downloaded"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:184
+#, python-format
+msgid "Failed to download mTLS certificates: %s"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:205
+#: ../migasfree_client/url_request.py:412
+#, python-format
+msgid "Error creating %s directory"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:216
+#, python-format
+msgid "Running command %s..."
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:221
+#, python-format
+msgid "Command %s failed: %s"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:228
+msgid "User has insufficient privileges to execute this command"
+msgstr ""
+
+#: ../migasfree_client/mixins/config.py:263
+msgid "Any PMS was not found. Cannot continue."
 msgstr ""
 
 #: ../migasfree_client/mixins/evaluator.py:70
@@ -446,6 +408,99 @@ msgstr ""
 
 #: ../migasfree_client/mixins/hardware.py:93
 msgid "Sending hardware information..."
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:48
+#, python-format
+msgid "Config options: %s"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:52 ../migasfree_client/upload.py:67
+msgid "Project"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:53
+msgid "Server"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:55
+msgid "Auto update packages"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:61
+msgid "Manage devices"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:63
+msgid "Upload hardware"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:69
+msgid "Proxy"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:71
+msgid "Package Proxy Cache"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:77
+msgid "Debug"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:78
+msgid "Computer name"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:85
+msgid "(ENV)"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:87
+msgid "(FILE)"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:89
+msgid "(DEFAULT)"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:98
+msgid "Running options:"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:100
+msgid "migasfree server version"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:100
+msgid "None"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:102
+msgid "SSL certificate"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:109
+msgid "Warning"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:109
+msgid "Certificate does not exist and authentication is not guaranteed"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:111
+msgid "PMS"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:113
+msgid "Architecture"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:130
+msgid "Ok"
+msgstr ""
+
+#: ../migasfree_client/mixins/renderer.py:139
+msgid "Failed"
 msgstr ""
 
 #: ../migasfree_client/mixins/software.py:75
@@ -589,17 +644,9 @@ msgid ""
 "Add manually \"%s\" to file %s inside \"options\" section as last option"
 msgstr ""
 
-#: ../migasfree_client/secure.py:127
-msgid "Invalid Data"
-msgstr ""
-
-#: ../migasfree_client/secure.py:135
-msgid "Invalid Signature"
-msgstr ""
-
 #: ../migasfree_client/sync.py:81
 #, python-format
-msgid "Killing %s before time!!!"
+msgid "Killing %s before time"
 msgstr ""
 
 #: ../migasfree_client/sync.py:87
@@ -735,7 +782,7 @@ msgid "Synchronizing logical devices..."
 msgstr ""
 
 #: ../migasfree_client/sync.py:582
-msgid "Printer service is not running!!!"
+msgid "Printer service is not running"
 msgstr ""
 
 #: ../migasfree_client/sync.py:589
@@ -903,64 +950,64 @@ msgstr ""
 msgid "Creating repository operation..."
 msgstr ""
 
-#: ../migasfree_client/url_request.py:364
+#: ../migasfree_client/url_request.py:409
 #, python-format
 msgid "HTTP error code: %s"
 msgstr ""
 
-#: ../migasfree_client/url_request.py:380
+#: ../migasfree_client/url_request.py:425
 #, python-format
 msgid "Error response saved to: %s"
 msgstr ""
 
-#: ../migasfree_client/url_request.py:384
+#: ../migasfree_client/url_request.py:429
 #, python-format
 msgid "Error: %s"
 msgstr ""
 
-#: ../migasfree_client/url_request.py:386
+#: ../migasfree_client/url_request.py:431
 #, python-format
 msgid "Status code: %s"
 msgstr ""
 
-#: ../migasfree_client/utils.py:286
+#: ../migasfree_client/utils/mfc.py:64
+#, python-format
+msgid "Another instance of %(cmd)s is running: %(pid)d"
+msgstr ""
+
+#: ../migasfree_client/utils/process.py:179
 #, python-format
 msgid "\"%s\" command expired timeout"
 msgstr ""
 
-#: ../migasfree_client/utils.py:608
+#: ../migasfree_client/utils/session.py:237
 msgid "yes"
 msgstr ""
 
-#: ../migasfree_client/utils.py:608
+#: ../migasfree_client/utils/session.py:237
 msgid "y"
 msgstr ""
 
-#: ../migasfree_client/utils.py:608
+#: ../migasfree_client/utils/session.py:237
 msgid "no"
 msgstr ""
 
-#: ../migasfree_client/utils.py:608
+#: ../migasfree_client/utils/session.py:237
 msgid "n"
 msgstr ""
 
-#: ../migasfree_client/utils.py:610
+#: ../migasfree_client/utils/session.py:239
 msgid "[y/n]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:612
+#: ../migasfree_client/utils/session.py:241
 msgid "[Y/n]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:614
+#: ../migasfree_client/utils/session.py:243
 msgid "[y/N]"
 msgstr ""
 
-#: ../migasfree_client/utils.py:627
+#: ../migasfree_client/utils/session.py:256
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
-msgstr ""
-
-#: ../migasfree_client/utils.py:658
-#, python-format
-msgid "Another instance of %(cmd)s is running: %(pid)d"
 msgstr ""
