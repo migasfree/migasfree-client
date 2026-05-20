@@ -20,6 +20,12 @@ class TestMigasFreeConf:
         assert self.cmd._validate_value('Project', '') is False
         assert self.cmd._validate_value('Project', 'invalid project') is False
 
+    def test_validate_computer_name(self):
+        assert self.cmd._validate_value('Computer_Name', 'mcs-builder') is True
+        assert self.cmd._validate_value('Computer_Name', 'my-pc.1') is True
+        assert self.cmd._validate_value('Computer_Name', '') is True  # Empty to reset/disable
+        assert self.cmd._validate_value('Computer_Name', 'invalid name') is False
+
     def test_validate_proxy(self):
         assert self.cmd._validate_value('Proxy', '') is True  # empty is valid (disables proxy)
         assert self.cmd._validate_value('Proxy', '192.168.1.1:3128') is True
@@ -83,5 +89,20 @@ class TestMigasFreeConf:
                 content = f.read()
             assert 'Server = migasfree.org' in content
             assert 'Project = NEW_PROJECT' in content
+        finally:
+            os.unlink(conf_file)
+
+    def test_set_config_value_reset_key(self):
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tf:
+            tf.write('[client]\nServer = migasfree.org\nComputer_Name = my-custom-pc\n')
+            conf_file = tf.name
+
+        try:
+            self.cmd._set_config_value(conf_file, 'client', 'Computer_Name', '')
+            with open(conf_file, encoding='utf-8') as f:
+                content = f.read()
+            assert 'Server = migasfree.org' in content
+            assert '# Computer_Name = my-custom-pc' in content
+            assert content == '[client]\nServer = migasfree.org\n# Computer_Name = my-custom-pc\n'
         finally:
             os.unlink(conf_file)

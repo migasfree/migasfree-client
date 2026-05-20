@@ -85,7 +85,7 @@ class MigasFreeConf(MigasFreeCommand):
 
         elif key == 'Computer_Name':
             if not value:
-                return False
+                return True
             # RFC 1123 loosely
             return bool(re.match(r'^[\w.-]+$', value))
 
@@ -103,55 +103,70 @@ class MigasFreeConf(MigasFreeCommand):
     def _set_config_value(self, conf_file, section, key, value):
         """Update a specific configuration value in an ini file preserving comments."""
         if not os.path.isfile(conf_file):
+            if value == '':
+                return
             utils.write_file(conf_file, f'[{section}]\n{key} = {value}\n')
             return
 
         with open(conf_file, encoding='utf-8') as fh:
             content = fh.read()
 
-        # Format boolean correctly if choices was true/false
-        if str(value).lower() == 'true':
-            value = 'True'
-        elif str(value).lower() == 'false':
-            value = 'False'
-
-        # Build regex for active key
-        _pat = r'^((?![ \t]*#)[ \t]*' + re.escape(key) + r'[ \t]*=[ \t]*)(.+)$'
+        # Build regex for active key (allowing empty value after = with .*)
+        _pat = r'^((?![ \t]*#)[ \t]*' + re.escape(key) + r'[ \t]*=[ \t]*)(.*)$'
         # Build regex for commented key
         _comment_pat = r'^([ \t]*#[ \t]*' + re.escape(key) + r'[ \t]*=.*)$'
 
-        if re.search(_pat, content, re.IGNORECASE | re.MULTILINE):
-            # Replace existing active value
-            new_content = re.sub(
-                _pat,
-                lambda m: f'{m.group(1)}{value}',
-                content,
-                count=1,
-                flags=re.IGNORECASE | re.MULTILINE,
-            )
-        elif re.search(_comment_pat, content, re.IGNORECASE | re.MULTILINE):
-            # Key is commented out, insert active key right below it
-            new_content = re.sub(
-                _comment_pat,
-                r'\1' + f'\n{key} = {value}',
-                content,
-                count=1,
-                flags=re.IGNORECASE | re.MULTILINE,
-            )
-        else:
-            # Key not found, append to section
-            # Find the section and append
-            section_pat = r'(\[' + re.escape(section) + r'\])'
-            if re.search(section_pat, content, re.IGNORECASE):
+        if value == '':
+            if re.search(_pat, content, re.IGNORECASE | re.MULTILINE):
+                # Comment out the active key
                 new_content = re.sub(
-                    section_pat,
-                    f'\\1\n{key} = {value}',
+                    _pat,
+                    r'# \1\2',
                     content,
                     count=1,
-                    flags=re.IGNORECASE,
+                    flags=re.IGNORECASE | re.MULTILINE,
                 )
             else:
-                # Section not found, append everything to end
-                new_content = content + f'\n[{section}]\n{key} = {value}\n'
+                return
+        else:
+            # Format boolean correctly if choices was true/false
+            if str(value).lower() == 'true':
+                value = 'True'
+            elif str(value).lower() == 'false':
+                value = 'False'
+
+            if re.search(_pat, content, re.IGNORECASE | re.MULTILINE):
+                # Replace existing active value
+                new_content = re.sub(
+                    _pat,
+                    lambda m: f'{m.group(1)}{value}',
+                    content,
+                    count=1,
+                    flags=re.IGNORECASE | re.MULTILINE,
+                )
+            elif re.search(_comment_pat, content, re.IGNORECASE | re.MULTILINE):
+                # Key is commented out, insert active key right below it
+                new_content = re.sub(
+                    _comment_pat,
+                    r'\1' + f'\n{key} = {value}',
+                    content,
+                    count=1,
+                    flags=re.IGNORECASE | re.MULTILINE,
+                )
+            else:
+                # Key not found, append to section
+                # Find the section and append
+                section_pat = r'(\[' + re.escape(section) + r'\])'
+                if re.search(section_pat, content, re.IGNORECASE):
+                    new_content = re.sub(
+                        section_pat,
+                        f'\\1\n{key} = {value}',
+                        content,
+                        count=1,
+                        flags=re.IGNORECASE,
+                    )
+                else:
+                    # Section not found, append everything to end
+                    new_content = content + f'\n[{section}]\n{key} = {value}\n'
 
         utils.write_file(conf_file, new_content)
