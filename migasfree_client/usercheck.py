@@ -20,6 +20,7 @@ import os
 import platform
 import subprocess
 import sys
+from typing import ClassVar
 
 from .command import MigasFreeCommand, set_debug_log_level
 from .utils import ALL_OK
@@ -124,13 +125,13 @@ class MigasFreeUserCheck(MigasFreeCommand):
                     pass
 
                 class PamMessage(ctypes.Structure):
-                    _fields_ = [('msg_style', ctypes.c_int), ('msg', ctypes.c_char_p)]  # noqa: RUF012
+                    _fields_: ClassVar = [('msg_style', ctypes.c_int), ('msg', ctypes.c_char_p)]
 
                 class PamResponse(ctypes.Structure):
-                    _fields_ = [('resp', ctypes.c_char_p), ('resp_retcode', ctypes.c_int)]  # noqa: RUF012
+                    _fields_: ClassVar = [('resp', ctypes.c_char_p), ('resp_retcode', ctypes.c_int)]
 
                 class PamConv(ctypes.Structure):
-                    _fields_ = [  # noqa: RUF012
+                    _fields_: ClassVar = [
                         (
                             'conv',
                             ctypes.CFUNCTYPE(
