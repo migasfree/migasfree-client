@@ -92,7 +92,9 @@ class TestMigasFreeUserCheck(unittest.TestCase):
 
         self.cmd.run(args)
 
-        args_called = [call.args[0] for call in self.cmd.console.print.mock_calls if call.args and isinstance(call.args[0], str)]
+        args_called = [
+            call.args[0] for call in self.cmd.console.print.mock_calls if call.args and isinstance(call.args[0], str)
+        ]
         self.assertTrue(any('tux' in arg for arg in args_called))
         self.assertTrue(any('linux' in arg for arg in args_called))
         mock_exit.assert_called_once()

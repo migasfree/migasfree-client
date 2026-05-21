@@ -88,6 +88,7 @@ dev = [
     "freezegun>=1.2.2",
     "psutil",
     "ruff",
+    "pre-commit",
 ]
 
 [tool.pytest.ini_options]

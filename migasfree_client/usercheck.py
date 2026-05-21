@@ -13,12 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
+import gettext
 import json
 import os
 import platform
 import subprocess
 import sys
-import gettext
 
 from .command import MigasFreeCommand, set_debug_log_level
 from .utils import ALL_OK
@@ -28,6 +29,7 @@ __license__ = 'GPLv3'
 __all__ = ['MigasFreeUserCheck']
 
 _ = gettext.gettext
+
 
 class MigasFreeUserCheck(MigasFreeCommand):
     def __init__(self):
@@ -53,18 +55,19 @@ class MigasFreeUserCheck(MigasFreeCommand):
 
         if os_platform == 'Windows':
             try:
-                import win32security
                 import ctypes
-                import win32net
 
-                domain = os.environ.get('userdomain', '')
+                import win32net
+                import win32security
+
+                domain = os.environ.get('USERDOMAIN', '')
                 try:
-                    hUser = win32security.LogonUser(
+                    win32security.LogonUser(
                         username,
                         domain,
                         password,
                         win32security.Logon32_LOGON_NETWORK,
-                        win32security.Logon32_PROVIDER_DEFAULT
+                        win32security.Logon32_PROVIDER_DEFAULT,
                     )
                     authenticated = True
                 except win32security.error as e:
@@ -97,10 +100,8 @@ class MigasFreeUserCheck(MigasFreeCommand):
             # Get user groups
             try:
                 user_pw = pwd.getpwnam(username)
-                try:
+                with contextlib.suppress(KeyError):
                     groups.append(grp.getgrgid(user_pw.pw_gid).gr_name)
-                except KeyError:
-                    pass
                 for g in grp.getgrall():
                     if username in g.gr_mem:
                         groups.append(g.gr_name)
@@ -123,21 +124,24 @@ class MigasFreeUserCheck(MigasFreeCommand):
                     pass
 
                 class PamMessage(ctypes.Structure):
-                    _fields_ = [('msg_style', ctypes.c_int), ('msg', ctypes.c_char_p)]
+                    _fields_ = [('msg_style', ctypes.c_int), ('msg', ctypes.c_char_p)]  # noqa: RUF012
 
                 class PamResponse(ctypes.Structure):
-                    _fields_ = [('resp', ctypes.c_char_p), ('resp_retcode', ctypes.c_int)]
+                    _fields_ = [('resp', ctypes.c_char_p), ('resp_retcode', ctypes.c_int)]  # noqa: RUF012
 
                 class PamConv(ctypes.Structure):
-                    _fields_ = [
-                        ('conv', ctypes.CFUNCTYPE(
-                            ctypes.c_int,
-                            ctypes.c_int,
-                            ctypes.POINTER(ctypes.POINTER(PamMessage)),
-                            ctypes.POINTER(ctypes.POINTER(PamResponse)),
-                            ctypes.c_void_p
-                        )),
-                        ('appdata_ptr', ctypes.c_void_p)
+                    _fields_ = [  # noqa: RUF012
+                        (
+                            'conv',
+                            ctypes.CFUNCTYPE(
+                                ctypes.c_int,
+                                ctypes.c_int,
+                                ctypes.POINTER(ctypes.POINTER(PamMessage)),
+                                ctypes.POINTER(ctypes.POINTER(PamResponse)),
+                                ctypes.c_void_p,
+                            ),
+                        ),
+                        ('appdata_ptr', ctypes.c_void_p),
                     ]
 
                 def conversation(num_msg, msg, resp, appdata_ptr):
@@ -160,12 +164,12 @@ class MigasFreeUserCheck(MigasFreeCommand):
                     except Exception:
                         return 19  # PAM_CONV_ERR
 
-                CONV_FUNC = ctypes.CFUNCTYPE(
+                conv_func_type = ctypes.CFUNCTYPE(
                     ctypes.c_int,
                     ctypes.c_int,
                     ctypes.POINTER(ctypes.POINTER(PamMessage)),
                     ctypes.POINTER(ctypes.POINTER(PamResponse)),
-                    ctypes.c_void_p
+                    ctypes.c_void_p,
                 )
 
                 pam_start = libpam.pam_start
@@ -174,7 +178,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
                     ctypes.c_char_p,
                     ctypes.c_char_p,
                     ctypes.POINTER(PamConv),
-                    ctypes.POINTER(ctypes.POINTER(PamHandle))
+                    ctypes.POINTER(ctypes.POINTER(PamHandle)),
                 ]
 
                 pam_authenticate = libpam.pam_authenticate
@@ -186,7 +190,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
                 pam_end.argtypes = [ctypes.POINTER(PamHandle), ctypes.c_int]
 
                 handle = ctypes.POINTER(PamHandle)()
-                conv = PamConv(CONV_FUNC(conversation), 0)
+                conv = PamConv(conv_func_type(conversation), 0)
 
                 try:
                     u_enc = username.encode('utf-8')
@@ -204,10 +208,8 @@ class MigasFreeUserCheck(MigasFreeCommand):
                 admin_groups = ['sudo', 'wheel', 'root']
                 target_gids = []
                 for gname in admin_groups:
-                    try:
+                    with contextlib.suppress(KeyError):
                         target_gids.append(grp.getgrnam(gname).gr_gid)
-                    except KeyError:
-                        pass
                 if not target_gids:
                     return False
                 try:
@@ -230,6 +232,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
             def check_sudo_auth(user_, password_):
                 try:
                     import getpass
+
                     cur_user = getpass.getuser()
                     cmd = []
                     if cur_user == 'root' and user_ != 'root':
@@ -240,7 +243,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
                         return False
 
                     input_bytes = password_.encode('utf-8') + b'\n' if isinstance(password_, str) else password_ + b'\n'
-                    p = subprocess.run(cmd, input=input_bytes, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                    p = subprocess.run(cmd, input=input_bytes, capture_output=True)
                     return p.returncode == 0
                 except Exception:
                     return False
@@ -251,9 +254,8 @@ class MigasFreeUserCheck(MigasFreeCommand):
                 is_privileged = True
             else:
                 authenticated = pam_auth(username, password)
-                if authenticated:
-                    if is_admin_group(username) or is_root(username):
-                        is_privileged = True
+                if authenticated and (is_admin_group(username) or is_root(username)):
+                    is_privileged = True
 
         if self._quiet:
             response = {
@@ -261,7 +263,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
                 'is_privileged': is_privileged,
                 'username': username,
                 'platform': os_platform.lower(),
-                'groups': groups
+                'groups': groups,
             }
             if error_msg:
                 response['error'] = error_msg
@@ -269,33 +271,44 @@ class MigasFreeUserCheck(MigasFreeCommand):
         else:
             self.console.print()
             self.console.print(
-                _('USER AUTHENTICATION STATUS') + '\n' +
-                '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-                style='bold cyan'
+                _('USER AUTHENTICATION STATUS')
+                + '\n'
+                + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+                style='bold cyan',
             )
-            
+
             label_username = _('Username:')
             label_platform = _('Platform:')
             label_auth = _('Authenticated:')
             label_priv = _('Privileges:')
             label_groups = _('Groups:')
             label_error = _('Error Details:')
-            
+
             # Find max length of labels for perfect alignment
-            max_len = max(len(label_username), len(label_platform), len(label_auth), len(label_priv), len(label_groups)) + 2
-            
-            self.console.print(f"{label_username:<{max_len}} {username}")
-            self.console.print(f"{label_platform:<{max_len}} {os_platform.lower()}")
-            
-            auth_status = '[bold green]' + _('[YES] Success') + '[/bold green]' if authenticated else '[bold red]' + _('[NO] Failed') + '[/bold red]'
-            self.console.print(f"{label_auth:<{max_len}} {auth_status}")
-            
-            priv_status = '[bold green]' + _('[YES] Administrative Access') + '[/bold green]' if is_privileged else '[bold yellow]' + _('[NO] Standard Access') + '[/bold yellow]'
-            self.console.print(f"{label_priv:<{max_len}} {priv_status}")
-            
-            self.console.print(f"{label_groups:<{max_len}} {', '.join(groups)}")
+            max_len = (
+                max(len(label_username), len(label_platform), len(label_auth), len(label_priv), len(label_groups)) + 2
+            )
+
+            self.console.print(f'{label_username:<{max_len}} {username}')
+            self.console.print(f'{label_platform:<{max_len}} {os_platform.lower()}')
+
+            auth_status = (
+                '[bold green]' + _('[YES] Success') + '[/bold green]'
+                if authenticated
+                else '[bold red]' + _('[NO] Failed') + '[/bold red]'
+            )
+            self.console.print(f'{label_auth:<{max_len}} {auth_status}')
+
+            priv_status = (
+                '[bold green]' + _('[YES] Administrative Access') + '[/bold green]'
+                if is_privileged
+                else '[bold yellow]' + _('[NO] Standard Access') + '[/bold yellow]'
+            )
+            self.console.print(f'{label_priv:<{max_len}} {priv_status}')
+
+            self.console.print(f'{label_groups:<{max_len}} {", ".join(groups)}')
             if error_msg:
-                self.console.print(f"{label_error:<{max_len}} {error_msg}", style='red')
+                self.console.print(f'{label_error:<{max_len}} {error_msg}', style='red')
             self.console.print()
 
         sys.exit(ALL_OK)
