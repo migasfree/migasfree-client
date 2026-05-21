@@ -11,6 +11,7 @@
 ../migasfree_client/mixins/renderer.py
 ../migasfree_client/mixins/software.py
 ../migasfree_client/mtls.py
+../migasfree_client/packages.py
 ../migasfree_client/pms/apk.py
 ../migasfree_client/pms/apt.py
 ../migasfree_client/pms/dnf.py
@@ -27,4 +28,5 @@
 ../migasfree_client/utils/mfc.py
 ../migasfree_client/utils/process.py
 ../migasfree_client/utils/session.py
+../migasfree_client/usercheck.py
 ../migasfree_client/winpwd.py

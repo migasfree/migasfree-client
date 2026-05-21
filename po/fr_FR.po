@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-20 19:56+0200\n"
+"POT-Creation-Date: 2026-05-21 14:41+0200\n"
 "PO-Revision-Date: 2026-05-20 19:56+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -214,7 +214,37 @@ msgstr "Importer le certificat mTLS depuis le fichier tar"
 msgid "Certificate tar file to import"
 msgstr "Fichier tar du certificat à importer"
 
-#: ../migasfree_client/__main__.py:157
+#: ../migasfree_client/__main__.py:143
+msgid "Local and remote package information"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:145
+#, fuzzy
+msgid "Get available packages in repositories"
+msgstr "Rechercher un paquet dans les dépôts"
+
+#: ../migasfree_client/__main__.py:146
+msgid "Get all installed packages on the system"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:147
+msgid "Check which of the given packages are installed"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:149
+msgid "Verify local credentials and administrative privileges"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:150
+msgid "Username to verify"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:151
+#, fuzzy
+msgid "Password to verify"
+msgstr "Mot de passe"
+
+#: ../migasfree_client/__main__.py:167
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr "%(program)s version : %(version)s"
@@ -232,7 +262,9 @@ msgstr "Enregistrement automatique de l'ordinateur en cours..."
 msgid ""
 "Project \"{}\" not found on server. You must create it or review the "
 "\"Project\" parameter in the configuration file."
-msgstr "Projet \"{}\" non trouvé sur le serveur. Vous devez le créer ou revoir le paramètre \"Project\" dans le fichier de configuration."
+msgstr ""
+"Projet \"{}\" non trouvé sur le serveur. Vous devez le créer ou revoir le "
+"paramètre \"Project\" dans le fichier de configuration."
 
 #: ../migasfree_client/command.py:402
 #, python-format
@@ -246,7 +278,8 @@ msgstr "Erreur lors de l'écriture du fichier de clé"
 #: ../migasfree_client/command.py:442
 #, python-format
 msgid "Have you check config options in this machine (%s)?"
-msgstr "Avez-vous vérifié les options de configuration sur cette machine (%s) ?"
+msgstr ""
+"Avez-vous vérifié les options de configuration sur cette machine (%s) ?"
 
 #: ../migasfree_client/command.py:444
 #, python-format
@@ -306,12 +339,12 @@ msgstr "Le répertoire %s a été supprimé"
 msgid "Importing mTLS certificate..."
 msgstr "Importation du certificat mTLS..."
 
-#: ../migasfree_client/conf.py:63
+#: ../migasfree_client/conf.py:66
 #, python-format
 msgid "Invalid value for %s: %s"
 msgstr "Valeur invalide pour %s : %s"
 
-#: ../migasfree_client/conf.py:69
+#: ../migasfree_client/conf.py:72
 #, python-format
 msgid "Set %s = %s"
 msgstr "Définir %s = %s"
@@ -361,7 +394,8 @@ msgstr "La commande %s a échoué : %s"
 
 #: ../migasfree_client/mixins/config.py:228
 msgid "User has insufficient privileges to execute this command"
-msgstr "L'utilisateur n'a pas les privilèges suffisants pour exécuter cette commande"
+msgstr ""
+"L'utilisateur n'a pas les privilèges suffisants pour exécuter cette commande"
 
 #: ../migasfree_client/mixins/config.py:263
 msgid "Any PMS was not found. Cannot continue."
@@ -493,6 +527,7 @@ msgid "PMS"
 msgstr "Gestionnaire de paquets"
 
 #: ../migasfree_client/mixins/renderer.py:113
+#: ../migasfree_client/packages.py:86
 msgid "Architecture"
 msgstr "Architecture"
 
@@ -575,7 +610,10 @@ msgid ""
 "mTLS certificate imported successfully.\n"
 "Certificate: %s\n"
 "Key: %s"
-msgstr "Certificat mTLS importé avec succès.\nCertificat : %s\nClé : %s"
+msgstr ""
+"Certificat mTLS importé avec succès.\n"
+"Certificat : %s\n"
+"Clé : %s"
 
 #: ../migasfree_client/mtls.py:162
 #, python-format
@@ -639,11 +677,55 @@ msgstr "Certificat téléchargé avec succès"
 msgid "No content in response"
 msgstr "Aucun contenu dans la réponse"
 
+#: ../migasfree_client/packages.py:44
+msgid "No Package Management System (PMS) found on this system."
+msgstr "Aucun système de gestion de paquets (PMS) n'a été trouvé sur ce système."
+
+#: ../migasfree_client/packages.py:68
+msgid "AVAILABLE PACKAGES IN REPOSITORIES"
+msgstr "PAQUETS DISPONIBLES DANS LES DÉPÔTS"
+
+#: ../migasfree_client/packages.py:74
+#, python-brace-format
+msgid "Total Available Packages: {0}"
+msgstr "Total des paquets disponibles : {0}"
+
+#: ../migasfree_client/packages.py:84
+msgid "Package Name"
+msgstr "Nom du paquet"
+
+#: ../migasfree_client/packages.py:85
+msgid "Version"
+msgstr "Version"
+
+#: ../migasfree_client/packages.py:97
+#, python-brace-format
+msgid "Total Installed Packages: {0}"
+msgstr "Total des paquets installés : {0}"
+
+#: ../migasfree_client/packages.py:104
+msgid "Invalid JSON array provided for packages check."
+msgstr "Tableau JSON non valide fourni pour la vérification des paquets."
+
+#: ../migasfree_client/packages.py:120
+msgid "Checking package installation status:"
+msgstr "Vérification de l'état de l'installation des paquets :"
+
+#: ../migasfree_client/packages.py:123
+msgid "Installed"
+msgstr "Installé"
+
+#: ../migasfree_client/packages.py:125
+msgid "Not Installed"
+msgstr "Non installé"
+
 #: ../migasfree_client/pms/pacman.py:216
 #, python-format
 msgid ""
 "Add manually \"%s\" to file %s inside \"options\" section as last option"
-msgstr "Ajoutez manuellement \"%s\" au fichier %s dans la section \"options\" comme dernière option"
+msgstr ""
+"Ajoutez manuellement \"%s\" au fichier %s dans la section \"options\" comme "
+"dernière option"
 
 #: ../migasfree_client/sync.py:81
 #, python-format
@@ -746,7 +828,9 @@ msgstr "Connexion au serveur migasfree..."
 msgid ""
 "Server is saturated. Synchronization will be queued and performed via "
 "migasfree-agent service."
-msgstr "Le serveur est saturé. La synchronisation sera mise en file d'attente et effectuée via le service migasfree-agent."
+msgstr ""
+"Le serveur est saturé. La synchronisation sera mise en file d'attente et "
+"effectuée via le service migasfree-agent."
 
 #: ../migasfree_client/sync.py:356 ../migasfree_client/sync.py:364
 #: ../migasfree_client/sync.py:372 ../migasfree_client/sync.py:380
@@ -790,7 +874,9 @@ msgstr "Le service d'impression n'est pas en cours d'exécution"
 msgid ""
 "Printer service is required. If not, configure Manage_Devices parameter to "
 "False."
-msgstr "Le service d'impression est requis. Sinon, configurez le paramètre Manage_Devices sur False."
+msgstr ""
+"Le service d'impression est requis. Sinon, configurez le paramètre "
+"Manage_Devices sur False."
 
 #: ../migasfree_client/sync.py:623
 #, python-format
@@ -807,7 +893,9 @@ msgstr "Erreur lors de la suppression du périphérique : %s"
 msgid ""
 "Error: no driver defined for device %s. Please, configure capability %s, in "
 "the model %s %s, and project %s"
-msgstr "Erreur : aucun pilote défini pour le périphérique %s. Veuillez configurer la fonctionnalité %s dans le modèle %s %s et le projet %s"
+msgstr ""
+"Erreur : aucun pilote défini pour le périphérique %s. Veuillez configurer la "
+"fonctionnalité %s dans le modèle %s %s et le projet %s"
 
 #: ../migasfree_client/sync.py:656
 #, python-format
@@ -831,7 +919,8 @@ msgstr "Erreur lors de la définition du périphérique par défaut : %s"
 
 #: ../migasfree_client/sync.py:691
 msgid "Assigned device(s) but client does not manage devices"
-msgstr "Périphérique(s) attribué(s) mais le client ne gère pas les périphériques"
+msgstr ""
+"Périphérique(s) attribué(s) mais le client ne gère pas les périphériques"
 
 #: ../migasfree_client/sync.py:708
 msgid "Error getting printers information"
@@ -1013,3 +1102,46 @@ msgstr "[o/N]"
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
 msgstr "Veuillez répondre par 'oui' ou 'non' (ou 'o' ou 'n')."
 
+#: ../migasfree_client/usercheck.py:272
+msgid "USER AUTHENTICATION STATUS"
+msgstr "ÉTAT DE L'AUTHENTIFICATION DE L'UTILISATEUR"
+
+#: ../migasfree_client/usercheck.py:277
+msgid "Username:"
+msgstr "Nom d'utilisateur :"
+
+#: ../migasfree_client/usercheck.py:278
+msgid "Platform:"
+msgstr "Plateforme :"
+
+#: ../migasfree_client/usercheck.py:279
+msgid "Authenticated:"
+msgstr "Authentifié :"
+
+#: ../migasfree_client/usercheck.py:280
+msgid "Privileges:"
+msgstr "Privilèges :"
+
+#: ../migasfree_client/usercheck.py:281
+msgid "Groups:"
+msgstr "Groupes :"
+
+#: ../migasfree_client/usercheck.py:282
+msgid "Error Details:"
+msgstr "Détails de l'erreur :"
+
+#: ../migasfree_client/usercheck.py:290
+msgid "[YES] Success"
+msgstr "[OUI] Succès"
+
+#: ../migasfree_client/usercheck.py:290
+msgid "[NO] Failed"
+msgstr "[NON] Échec"
+
+#: ../migasfree_client/usercheck.py:293
+msgid "[YES] Administrative Access"
+msgstr "[OUI] Accès administratif"
+
+#: ../migasfree_client/usercheck.py:293
+msgid "[NO] Standard Access"
+msgstr "[NON] Accès standard"

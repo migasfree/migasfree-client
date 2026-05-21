@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: migasfree-client 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-20 19:56+0200\n"
+"POT-Creation-Date: 2026-05-21 14:41+0200\n"
 "PO-Revision-Date: 2025-09-04 13:01+0200\n"
 "Last-Translator: Jose Antonio Chavarría <jachavar@gmail.com>\n"
 "Language-Team: es_ES <jachavar@gmail.com>\n"
@@ -213,7 +213,37 @@ msgstr "Importar certificado mTLS desde archivo tar"
 msgid "Certificate tar file to import"
 msgstr "Archivo tar del certificado a importar"
 
-#: ../migasfree_client/__main__.py:157
+#: ../migasfree_client/__main__.py:143
+msgid "Local and remote package information"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:145
+#, fuzzy
+msgid "Get available packages in repositories"
+msgstr "Buscar un paquete en los repositorios"
+
+#: ../migasfree_client/__main__.py:146
+msgid "Get all installed packages on the system"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:147
+msgid "Check which of the given packages are installed"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:149
+msgid "Verify local credentials and administrative privileges"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:150
+msgid "Username to verify"
+msgstr ""
+
+#: ../migasfree_client/__main__.py:151
+#, fuzzy
+msgid "Password to verify"
+msgstr "Contraseña"
+
+#: ../migasfree_client/__main__.py:167
 #, python-format
 msgid "%(program)s version: %(version)s"
 msgstr "Versión de %(program)s: %(version)s"
@@ -307,12 +337,12 @@ msgstr "El directorio %s ha sido borrado"
 msgid "Importing mTLS certificate..."
 msgstr "Importando certificado mTLS..."
 
-#: ../migasfree_client/conf.py:63
+#: ../migasfree_client/conf.py:66
 #, python-format
 msgid "Invalid value for %s: %s"
 msgstr "Valor no válido para %s: %s"
 
-#: ../migasfree_client/conf.py:69
+#: ../migasfree_client/conf.py:72
 #, python-format
 msgid "Set %s = %s"
 msgstr "Establecer %s = %s"
@@ -494,6 +524,7 @@ msgid "PMS"
 msgstr "PMS"
 
 #: ../migasfree_client/mixins/renderer.py:113
+#: ../migasfree_client/packages.py:86
 msgid "Architecture"
 msgstr "Arquitectura"
 
@@ -642,6 +673,48 @@ msgstr "Certificado descargado correctamente"
 #: ../migasfree_client/mtls.py:459
 msgid "No content in response"
 msgstr "Sin contenido en la respuesta"
+
+#: ../migasfree_client/packages.py:44
+msgid "No Package Management System (PMS) found on this system."
+msgstr "No se ha encontrado un sistema gestor de paquetes (PMS) en el sistema."
+
+#: ../migasfree_client/packages.py:68
+msgid "AVAILABLE PACKAGES IN REPOSITORIES"
+msgstr "PAQUETES DISPONIBLES EN REPOSITORIOS"
+
+#: ../migasfree_client/packages.py:74
+#, python-brace-format
+msgid "Total Available Packages: {0}"
+msgstr "Total de paquetes disponibles: {0}"
+
+#: ../migasfree_client/packages.py:84
+msgid "Package Name"
+msgstr "Nombre del paquete"
+
+#: ../migasfree_client/packages.py:85
+msgid "Version"
+msgstr "Versión"
+
+#: ../migasfree_client/packages.py:97
+#, python-brace-format
+msgid "Total Installed Packages: {0}"
+msgstr "Total de paquetes instalados: {0}"
+
+#: ../migasfree_client/packages.py:104
+msgid "Invalid JSON array provided for packages check."
+msgstr "Matriz JSON no válida proporcionada para la comprobación."
+
+#: ../migasfree_client/packages.py:120
+msgid "Checking package installation status:"
+msgstr "Comprobando estado de instalación:"
+
+#: ../migasfree_client/packages.py:123
+msgid "Installed"
+msgstr "Instalado"
+
+#: ../migasfree_client/packages.py:125
+msgid "Not Installed"
+msgstr "No instalado"
 
 #: ../migasfree_client/pms/pacman.py:216
 #, python-format
@@ -799,8 +872,8 @@ msgid ""
 "Printer service is required. If not, configure Manage_Devices parameter to "
 "False."
 msgstr ""
-"Es necesario el servicio de impresión. Si no lo tiene, configure "
-"el parámetro Manage_Devices como False."
+"Es necesario el servicio de impresión. Si no lo tiene, configure el "
+"parámetro Manage_Devices como False."
 
 #: ../migasfree_client/sync.py:623
 #, python-format
@@ -1025,6 +1098,50 @@ msgstr "[s/N]"
 msgid "Please respond with 'yes' or 'no' (or 'y' or 'n')."
 msgstr "Por favor, responde 'sí' o 'no' (o 's' o 'n')."
 
+#: ../migasfree_client/usercheck.py:272
+msgid "USER AUTHENTICATION STATUS"
+msgstr "ESTADO DE AUTENTICACIÓN DEL USUARIO"
+
+#: ../migasfree_client/usercheck.py:277
+msgid "Username:"
+msgstr "Nombre de usuario:"
+
+#: ../migasfree_client/usercheck.py:278
+msgid "Platform:"
+msgstr "Plataforma:"
+
+#: ../migasfree_client/usercheck.py:279
+msgid "Authenticated:"
+msgstr "Autenticado:"
+
+#: ../migasfree_client/usercheck.py:280
+msgid "Privileges:"
+msgstr "Privilegios:"
+
+#: ../migasfree_client/usercheck.py:281
+msgid "Groups:"
+msgstr "Grupos:"
+
+#: ../migasfree_client/usercheck.py:282
+msgid "Error Details:"
+msgstr "Detalles del error:"
+
+#: ../migasfree_client/usercheck.py:290
+msgid "[YES] Success"
+msgstr "[SÍ] Éxito"
+
+#: ../migasfree_client/usercheck.py:290
+msgid "[NO] Failed"
+msgstr "[NO] Fallo"
+
+#: ../migasfree_client/usercheck.py:293
+msgid "[YES] Administrative Access"
+msgstr "[SÍ] Acceso administrativo"
+
+#: ../migasfree_client/usercheck.py:293
+msgid "[NO] Standard Access"
+msgstr "[NO] Acceso estándar"
+
 #~ msgid "Protocol"
 #~ msgstr "Protocolo"
 
@@ -1097,9 +1214,6 @@ msgstr "Por favor, responde 'sí' o 'no' (o 's' o 'n')."
 #~ msgid "Remove needs a package!!!"
 #~ msgstr "¡Desinstalar requiere un paquete!"
 
-#~ msgid "Version"
-#~ msgstr "Versión"
-
 #~ msgid "GUI verbose"
 #~ msgstr "GUI detallado"
 
@@ -1168,9 +1282,6 @@ msgstr "Por favor, responde 'sí' o 'no' (o 's' o 'n')."
 
 #~ msgid "No errors"
 #~ msgstr "Sin errores"
-
-#~ msgid "User not authenticated"
-#~ msgstr "Usuario no autentificado"
 
 #~ msgid "Method GET not allowed"
 #~ msgstr "El método GET no está permitido"
