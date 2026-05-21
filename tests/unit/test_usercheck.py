@@ -1,6 +1,12 @@
 import json
+import sys
 import unittest
 from unittest.mock import MagicMock, patch
+
+# Mock pwd and grp on Windows to avoid ModuleNotFoundError during patch decoration
+if sys.platform == 'win32':
+    sys.modules['pwd'] = MagicMock()
+    sys.modules['grp'] = MagicMock()
 
 from migasfree_client.usercheck import MigasFreeUserCheck
 
