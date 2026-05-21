@@ -13,9 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import gettext
 import json
 import sys
-import gettext
+
 from rich.table import Table
 
 from .command import MigasFreeCommand, set_debug_log_level
@@ -26,6 +27,7 @@ __license__ = 'GPLv3'
 __all__ = ['MigasFreePackages']
 
 _ = gettext.gettext
+
 
 class MigasFreePackages(MigasFreeCommand):
     def __init__(self):
@@ -67,7 +69,7 @@ class MigasFreePackages(MigasFreeCommand):
                 '┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n'
                 '┃' + _('AVAILABLE PACKAGES IN REPOSITORIES').center(64) + '┃\n'
                 '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛',
-                style='bold green'
+                style='bold green',
             )
             for pkg in packages:
                 self.console.print(f'  • {pkg}')
