@@ -244,7 +244,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
                         return False
 
                     input_bytes = password_.encode('utf-8') + b'\n' if isinstance(password_, str) else password_ + b'\n'
-                    p = subprocess.run(cmd, input=input_bytes, capture_output=True)
+                    p = subprocess.run(cmd, input=input_bytes, stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # noqa: UP022
                     return p.returncode == 0
                 except Exception:
                     return False

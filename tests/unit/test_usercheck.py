@@ -25,12 +25,13 @@ class TestMigasFreeUserCheck(unittest.TestCase):
     @patch('sys.exit')
     @patch('builtins.print')
     @patch('platform.system', return_value='Linux')
+    @patch('getpass.getuser', return_value='tux')
     @patch('pwd.getpwnam')
     @patch('grp.getgrgid')
     @patch('grp.getgrall', return_value=[])
     @patch('subprocess.run')
     def test_run_auth_sudo_success_quiet(
-        self, mock_sub_run, mock_grall, mock_grgid, mock_pwnam, mock_sys, mock_print, mock_exit
+        self, mock_sub_run, mock_grall, mock_grgid, mock_pwnam, mock_getuser, mock_sys, mock_print, mock_exit
     ):
         """Test user-check success via sudo_auth in quiet mode"""
         args = MagicMock()
@@ -68,12 +69,13 @@ class TestMigasFreeUserCheck(unittest.TestCase):
 
     @patch('sys.exit')
     @patch('platform.system', return_value='Linux')
+    @patch('getpass.getuser', return_value='tux')
     @patch('pwd.getpwnam')
     @patch('grp.getgrgid')
     @patch('grp.getgrall', return_value=[])
     @patch('subprocess.run')
     def test_run_auth_sudo_success_interactive(
-        self, mock_sub_run, mock_grall, mock_grgid, mock_pwnam, mock_sys, mock_exit
+        self, mock_sub_run, mock_grall, mock_grgid, mock_pwnam, mock_getuser, mock_sys, mock_exit
     ):
         """Test user-check success via sudo_auth in interactive mode (verbose)"""
         args = MagicMock()
