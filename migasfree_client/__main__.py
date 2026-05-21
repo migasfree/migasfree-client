@@ -140,6 +140,16 @@ def parse_args(argv):
         'cert_file', action='store', metavar='FILE', help=_('Certificate tar file to import')
     )
 
+    subparser_packages = subparsers.add_parser('packages', help=_('Local and remote package information'))
+    group_packages = subparser_packages.add_mutually_exclusive_group(required=True)
+    group_packages.add_argument('-a', '--available', action='store_true', help=_('Get available packages in repositories'))
+    group_packages.add_argument('-i', '--installed', action='store_true', help=_('Get all installed packages on the system'))
+    group_packages.add_argument('-c', '--check', nargs=1, metavar='JSON_ARRAY', help=_('Check which of the given packages are installed'))
+
+    subparser_user_check = subparsers.add_parser('user-check', help=_('Verify local credentials and administrative privileges'))
+    subparser_user_check.add_argument('-u', '--user', action='store', required=True, help=_('Username to verify'))
+    subparser_user_check.add_argument('-p', '--pwd', action='store', required=True, help=_('Password to verify'))
+
     if len(argv) < 1:
         parser.print_help()
         sys.exit(ALL_OK)
@@ -193,6 +203,14 @@ def main(argv=None):
         from .conf import MigasFreeConf
 
         MigasFreeConf().run(args)
+    elif args.cmd == 'packages':
+        from .packages import MigasFreePackages
+
+        MigasFreePackages().run(args)
+    elif args.cmd == 'user-check':
+        from .usercheck import MigasFreeUserCheck
+
+        MigasFreeUserCheck().run(args)
 
     return ALL_OK
 

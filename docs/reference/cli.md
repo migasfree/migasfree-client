@@ -439,6 +439,64 @@ sudo migasfree remove-keys --all
 
 ---
 
+### packages
+
+Retrieves available or installed packages, or checks if specific packages are installed.
+
+```bash
+migasfree packages {-a | -i | -c JSON_ARRAY}
+```
+
+**Options:**
+
+| Option               | Description                                                        |
+| -------------------- | ------------------------------------------------------------------ |
+| `-a`, `--available`  | Get available packages in repositories (JSON format if quiet).     |
+| `-i`, `--installed`  | Get all installed packages on the system (JSON format if quiet).   |
+| `-c`, `--check`      | Check which of the given packages are installed (takes JSON array).|
+
+**Examples:**
+
+```bash
+# Get available packages (verbose)
+migasfree packages -a
+
+# Get installed packages (JSON format)
+migasfree -q packages -i
+
+# Check package installation status
+migasfree packages -c '["firefox-esr", "vlc"]'
+```
+
+---
+
+### user-check
+
+Verifies user credentials and checks if they have administrative privileges.
+
+```bash
+migasfree user-check -u USER -p PASSWORD
+```
+
+**Options:**
+
+| Option            | Description                 |
+| ----------------- | --------------------------- |
+| `-u`, `--user`    | Username to verify          |
+| `-p`, `--pwd`     | Password to verify          |
+
+**Examples:**
+
+```bash
+# Check user auth and privilege (verbose)
+migasfree user-check -u tux -p secret
+
+# Quiet check returning JSON for machine integration
+migasfree -q user-check -u tux -p secret
+```
+
+---
+
 ## Exit Codes
 
 | Code | Meaning                  |
