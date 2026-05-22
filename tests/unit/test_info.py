@@ -44,10 +44,10 @@ class TestMigasFreeInfo(unittest.TestCase):
             self.info.console = MagicMock()
             self.info._check_sign_keys = MagicMock(return_value=True)
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_label')
-    def test_show_info_all(self, mock_get_label):
+    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    def test_show_info_all(self, mock_get_info):
         """Test showing all computer info (table mode)"""
-        mock_get_label.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
+        mock_get_info.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
         self.info._quiet = False
         self.info._show_info()
 
@@ -58,39 +58,39 @@ class TestMigasFreeInfo(unittest.TestCase):
         )
         self.assertIsNotNone(table_call)
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_label')
-    def test_show_info_quiet(self, mock_get_label):
+    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    def test_show_info_quiet(self, mock_get_info):
         """Test showing information in quiet mode (tab separated)"""
-        mock_get_label.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
+        mock_get_info.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
         self.info._quiet = True
         self.info._show_info()
 
         self.info.console.print.assert_called_with('123\ttest-comp\tTEST-SEARCH\tTEST-UUID')
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_label')
-    def test_show_info_specific_key(self, mock_get_label):
+    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    def test_show_info_specific_key(self, mock_get_info):
         """Test showing only a specific key"""
-        mock_get_label.return_value = {'search': 'TEST-SEARCH'}
+        mock_get_info.return_value = {'search': 'TEST-SEARCH'}
         self.info._quiet = True
         self.info._show_info(key='search')
 
         self.info.console.print.assert_called_with('TEST-SEARCH')
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_label')
-    def test_show_info_id_only(self, mock_get_label):
+    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    def test_show_info_id_only(self, mock_get_info):
         """Test showing only computer ID"""
         self.info._quiet = True
         self.info._show_info(key='id')
 
         self.info.console.print.assert_called_with('123')
 
-    def test_get_label_success(self):
-        """Test get_label calls API correctly"""
+    def test_get_info_success(self):
+        """Test get_info calls API correctly"""
         mock_response = {'name': 'test'}
         with patch.object(self.info, '_api_call', return_value=mock_response), patch.object(
             self.info, '_handle_response', return_value=mock_response
         ):
-            result = self.info.get_label()
+            result = self.info.get_info()
             self.assertEqual(result, mock_response)
 
     @patch('sys.exit')
@@ -98,11 +98,12 @@ class TestMigasFreeInfo(unittest.TestCase):
         """Test the run method dispatcher"""
         args = MagicMock()
         args.key = 'search'
+        args.json = False
         self.info._quiet = True
 
         with patch.object(self.info, '_show_info') as mock_show:
             self.info.run(args)
-            mock_show.assert_called_with(key='search')
+            mock_show.assert_called_with(key='search', output_json=False)
             mock_exit.assert_called_once()
 
 

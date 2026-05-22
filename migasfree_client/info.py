@@ -36,14 +36,14 @@ class MigasFreeInfo(MigasFreeCommand):
         super().__init__()
 
     @require_computer_id
-    def get_label(self):
-        logger.debug('Getting label')
-        response = self._api_call('get_label', {'id': self._computer_id})
+    def get_info(self):
+        logger.debug('Getting info')
+        response = self._api_call('get_info', {'id': self._computer_id})
         return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
     def _show_info(self, key=None, output_json=False):
-        info = self.get_label()
+        info = self.get_info()
 
         if output_json:
             import json
@@ -78,12 +78,13 @@ class MigasFreeInfo(MigasFreeCommand):
             else:
                 self.console.print(str(self._computer_id))
         else:
+            val = str(info[key]) if info[key] is not None else ''
             if not self._quiet:
                 table.add_column(key.upper())
-                table.add_row(info[key])
+                table.add_row(val)
                 self.console.print(table)
             else:
-                self.console.print(str(info[key]))
+                self.console.print(val)
 
     def run(self, args=None):
         super().run(args)

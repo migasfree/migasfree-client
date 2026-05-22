@@ -105,7 +105,27 @@ def parse_args(argv):
     subparser_info = subparsers.add_parser('info', help=_('Retrieve computer info at server'))
 
     subparser_info.add_argument(
-        'key', nargs='?', choices=('id', 'uuid', 'name', 'search'), help=_('Get individual value')
+        'key',
+        nargs='?',
+        choices=(
+            'id',
+            'uuid',
+            'name',
+            'search',
+            'status',
+            'sync_end_date',
+            'fqdn',
+            'mac_address',
+            'ip_address',
+            'cpu',
+            'architecture',
+            'ram',
+            'storage',
+            'disks',
+            'product',
+            'product_system',
+        ),
+        help=_('Get individual value'),
     )
     subparser_info.add_argument('-j', '--json', action='store_true', help=_('Output as JSON'))
 

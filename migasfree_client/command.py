@@ -165,6 +165,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         #
         # label API
         'get_label': '/api/v1/safe/computers/label/',
+        'get_info': '/api/v1/safe/computers/info/',
         #
         # tags API
         'get_assigned_tags': '/api/v1/safe/computers/tags/assigned/',
