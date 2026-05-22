@@ -257,8 +257,14 @@ migasfree tags -c branch-office
 Retrieves basic computer information from the server registry.
 
 ```bash
-migasfree info [KEY]
+migasfree info [options] [KEY]
 ```
+
+**Options:**
+
+| Option         | Description                                   |
+| -------------- | --------------------------------------------- |
+| `-j`, `--json` | Output information in JSON format             |
 
 **Arguments:**
 
@@ -274,6 +280,9 @@ migasfree info
 
 # Show only server-side id
 migasfree info id
+
+# Get all info in JSON format (quiet mode for pure JSON)
+migasfree -q info --json
 ```
 
 ---
