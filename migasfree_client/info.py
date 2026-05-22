@@ -62,14 +62,19 @@ class MigasFreeInfo(MigasFreeCommand):
 
         if not key:
             if not self._quiet:
-                table.add_column('ID')
-                table.add_column('NAME')
-                table.add_column('SEARCH')
-                table.add_column('UUID')
-                table.add_row(str(self._computer_id), info['name'], info['search'], info['uuid'])
+                table.add_column('KEY')
+                table.add_column('VALUE')
+                table.add_row('id', str(self._computer_id))
+                for k in sorted(info.keys()):
+                    val = str(info[k]) if info[k] is not None else ''
+                    table.add_row(k, val)
                 self.console.print(table)
             else:
-                self.console.print(f'{self._computer_id}\t{info["name"]}\t{info["search"]}\t{info["uuid"]}')
+                fields = [str(self._computer_id)]
+                for k in sorted(info.keys()):
+                    val = str(info[k]) if info[k] is not None else ''
+                    fields.append(val)
+                self.console.print('\t'.join(fields))
         elif key == 'id':
             if not self._quiet:
                 table.add_column('ID')
