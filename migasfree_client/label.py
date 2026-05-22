@@ -151,7 +151,14 @@ class MigasFreeLabel(MigasFreeCommand):
     def run(self, args=None):
         super().run(args)
 
-        self._show_label()
+        if getattr(args, 'json', False):
+            import json
+
+            info = self.get_label()
+            self.console.print(json.dumps(info))
+        else:
+            self._show_label()
+
         self.end_of_transmission()
 
         sys.exit(ALL_OK)

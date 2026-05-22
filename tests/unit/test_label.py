@@ -69,8 +69,33 @@ class TestMigasFreeLabel(unittest.TestCase):
         """Test run method dispatcher"""
         args = MagicMock()
         args.cmd = 'label'
+        args.json = False
         self.label.run(args)
         mock_show.assert_called_once()
+        mock_exit.assert_called_once()
+
+    @patch('sys.exit')
+    @patch('migasfree_client.label.MigasFreeLabel.get_label')
+    def test_run_json(self, mock_get_label, mock_exit):
+        """Test run method with json option"""
+        mock_get_label.return_value = {
+            'search': 'TEST-SEARCH',
+            'uuid': 'TEST-UUID',
+            'helpdesk': 'Contact Support',
+        }
+        args = MagicMock()
+        args.cmd = 'label'
+        args.json = True
+        self.label.run(args)
+
+        self.label.console.print.assert_called_once()
+        # Verify JSON was printed
+        printed_arg = self.label.console.print.call_args[0][0]
+        import json
+
+        parsed = json.loads(printed_arg)
+        self.assertEqual(parsed['search'], 'TEST-SEARCH')
+        self.assertEqual(parsed['uuid'], 'TEST-UUID')
         mock_exit.assert_called_once()
 
 

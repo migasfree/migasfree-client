@@ -82,7 +82,8 @@ def parse_args(argv):
         help=_('Get individual value'),
     )
 
-    subparsers.add_parser('label', help=_('Computer identification'))
+    subparser_label = subparsers.add_parser('label', help=_('Computer identification'))
+    subparser_label.add_argument('-j', '--json', action='store_true', help=_('JSON format'))
 
     subparsers.add_parser('version', help=_('Show version info'))
 
