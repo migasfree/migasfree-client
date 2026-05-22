@@ -613,7 +613,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
             )
         logger.debug('Response %s: %s', log_name or url_key, response)
         if self._debug:
-            self.console.log(f'Response: {response}')
+            self.error_console.log(f'Response: {response}')
 
         return response
 

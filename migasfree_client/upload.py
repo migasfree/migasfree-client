@@ -122,7 +122,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
         logger.debug('Uploading response: %s', response)
         if self._debug:
-            self.console.log(f'Response: {response}')
+            self.error_console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
@@ -161,7 +161,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
                     logger.debug('Uploading set response: %s', response)
                     if self._debug:
-                        self.console.log(f'Response: {response}')
+                        self.error_console.log(f'Response: {response}')
 
                     if 'error' in response:
                         self.operation_failed(response['error']['info'])
@@ -185,7 +185,7 @@ class MigasFreeUpload(MigasFreeCommand):
 
         logger.debug('Creating repository response: %s', response)
         if self._debug:
-            self.console.log(f'Response: {response}')
+            self.error_console.log(f'Response: {response}')
 
         if 'error' in response:
             self.operation_failed(response['error']['info'])
