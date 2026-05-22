@@ -42,8 +42,22 @@ class MigasFreeInfo(MigasFreeCommand):
         return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
-    def _show_info(self, key=None):
+    def _show_info(self, key=None, output_json=False):
         info = self.get_label()
+
+        if output_json:
+            import json
+
+            if not key:
+                out = info.copy()
+                out['id'] = self._computer_id
+                self.console.print(json.dumps(out))
+            elif key == 'id':
+                self.console.print(json.dumps({'id': self._computer_id}))
+            else:
+                self.console.print(json.dumps({key: info[key]}))
+            return
+
         table = Table(show_header=True, header_style='bold')
 
         if not key:
@@ -78,7 +92,10 @@ class MigasFreeInfo(MigasFreeCommand):
             self._show_running_options()
             self.console.print()
 
-        self._show_info(key=args.key)
+        key = getattr(args, 'key', None)
+        output_json = getattr(args, 'json', False)
+
+        self._show_info(key=key, output_json=output_json)
         self.end_of_transmission()
 
         sys.exit(ALL_OK)

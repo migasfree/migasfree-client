@@ -107,6 +107,7 @@ def parse_args(argv):
     subparser_info.add_argument(
         'key', nargs='?', choices=('id', 'uuid', 'name', 'search'), help=_('Get individual value')
     )
+    subparser_info.add_argument('-j', '--json', action='store_true', help=_('Output as JSON'))
 
     subparser_remove_keys = subparsers.add_parser('remove-keys', help=_('Remove client keys'))
 
