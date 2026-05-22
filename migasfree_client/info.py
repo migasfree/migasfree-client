@@ -50,11 +50,11 @@ class MigasFreeInfo(MigasFreeCommand):
             if not key:
                 out = info.copy()
                 out['id'] = self._computer_id
-                self.console.print(json.dumps(out))
+                self.console.print(json.dumps(out), soft_wrap=True)
             elif key == 'id':
-                self.console.print(json.dumps({'id': self._computer_id}))
+                self.console.print(json.dumps({'id': self._computer_id}), soft_wrap=True)
             else:
-                self.console.print(json.dumps({key: info[key]}))
+                self.console.print(json.dumps({key: info[key]}), soft_wrap=True)
             return
 
         table = Table(show_header=True, header_style='bold')

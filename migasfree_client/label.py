@@ -154,7 +154,7 @@ class MigasFreeLabel(MigasFreeCommand):
             import json
 
             info = self.get_label()
-            self.console.print(json.dumps(info))
+            self.console.print(json.dumps(info), soft_wrap=True)
         else:
             self._show_label()
 

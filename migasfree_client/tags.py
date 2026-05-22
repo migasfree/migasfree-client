@@ -226,7 +226,7 @@ class MigasFreeTags(MigasFreeCommand):
                     'available': self.get_available_tags(),
                 }
 
-            self.console.print(json.dumps(response, ensure_ascii=False))
+            self.console.print(json.dumps(response, ensure_ascii=False), soft_wrap=True)
             self.end_of_transmission()
 
         elif isinstance(args.set, list) or isinstance(args.communicate, list):

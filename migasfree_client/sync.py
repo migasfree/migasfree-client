@@ -405,7 +405,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
     def _traits(self, show=True):
         traits = self.get_traits()
         if show:
-            self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
+            self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False), soft_wrap=True)
 
         content = {}
         if os.path.isfile(settings.TRAITS_FILE):
@@ -431,7 +431,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
             traits = list(ret)
 
-        self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False))
+        self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False), soft_wrap=True)
 
     def _run_events(self, diff):
         self._show_message(_('Running events...'))
