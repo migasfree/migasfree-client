@@ -254,7 +254,7 @@ migasfree tags -c branch-office
 
 ### info
 
-Retrieves basic computer information from the server registry.
+Retrieves comprehensive computer and telemetry information from the server registry.
 
 ```bash
 migasfree info [options] [KEY]
@@ -270,13 +270,26 @@ migasfree info [options] [KEY]
 
 | Argument | Description                                   |
 | -------- | --------------------------------------------- |
-| `KEY`    | (Optional) Extract: id, uuid, name, or search |
+| `KEY`    | (Optional) Extract a specific value.          |
+
+Supported keys:
+
+- **Identification**: `id`, `uuid`, `name`, `search`, `fqdn`
+- **System Telemetry**: `status`, `sync_end_date`, `ip_address`, `mac_address`
+- **Hardware Specifications**: `cpu`, `architecture`, `ram`, `storage`, `disks`
+- **Product Info**: `product`, `product_system`
 
 **Examples:**
 
 ```bash
-# Show all info
+# Show all information (key-value formatting)
 migasfree info
+
+# Show only the CPU details
+migasfree info cpu
+
+# Show only the RAM size
+migasfree info ram
 
 # Show only server-side id
 migasfree info id
@@ -377,7 +390,7 @@ migasfree conf [options]
 | `-u`, `--upload-hardware {true,false}`      | Enable or disable automatic hardware inventory uploads.     |
 | `-c`, `--computer-name VALUE`               | Set the custom computer name override.                      |
 | `--debug-mode {true,false}`                 | Enable or disable debug logging mode.                       |
-| `-x`, `--proxy VALUE`                       | Set system proxy (`host:port`). Empty to disable.            |
+| `-x`, `--proxy VALUE`                       | Set system proxy (`host:port`). Empty to disable.           |
 | `-k`, `--package-proxy-cache VALUE`         | Set package proxy cache (`host:port`). Empty to disable.    |
 
 **Examples:**
