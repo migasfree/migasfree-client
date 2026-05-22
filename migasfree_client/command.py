@@ -80,8 +80,18 @@ LOGGING_CONF = {
 try:
     logging.config.dictConfig(LOGGING_CONF)
 except (OSError, ValueError):
-    sys.stderr.write(_('Failed to configure the log file (%s)\n') % settings.LOG_FILE)
-    sys.exit(errno.EACCES)
+    if 'file' in LOGGING_CONF['handlers']:
+        del LOGGING_CONF['handlers']['file']
+    if 'file' in LOGGING_CONF['loggers']['root']['handlers']:
+        LOGGING_CONF['loggers']['root']['handlers'].remove('file')
+    try:
+        logging.config.dictConfig(LOGGING_CONF)
+        sys.stderr.write(
+            _('Warning: Failed to configure the log file (%s). Falling back to console logging.\n') % settings.LOG_FILE
+        )
+    except (OSError, ValueError):
+        sys.stderr.write(_('Failed to configure the log file (%s)\n') % settings.LOG_FILE)
+        sys.exit(errno.EACCES)
 
 logger = logging.getLogger('migasfree_client')
 
@@ -93,7 +103,8 @@ sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 1)
 
 
 def set_debug_log_level():
-    LOGGING_CONF['handlers']['file']['level'] = 'DEBUG'
+    if 'file' in LOGGING_CONF['handlers']:
+        LOGGING_CONF['handlers']['file']['level'] = 'DEBUG'
     LOGGING_CONF['loggers']['root']['level'] = 'DEBUG'
     logging.config.dictConfig(LOGGING_CONF)
 

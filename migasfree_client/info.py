@@ -32,7 +32,6 @@ logger = logging.getLogger('migasfree_client')
 
 class MigasFreeInfo(MigasFreeCommand):
     def __init__(self):
-        self._check_user_is_root()
         super().__init__()
 
     @require_computer_id

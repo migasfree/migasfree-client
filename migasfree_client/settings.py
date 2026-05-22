@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2011-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ else:
     KEYS_PATH = '/var/migasfree-client/keys'
     DEVICES_PATH = '/var/migasfree-client/devices'
     MTLS_PATH = '/var/migasfree-client/mtls'
-    TMP_PATH = '/tmp/migasfree-client'
+    TMP_PATH = '/tmp/migasfree-client' if os.getuid() == 0 else f'/tmp/migasfree-client-{os.getuid()}'
     ICON_PATH = '/usr/share/icons/hicolor/scalable'
     LOCALE_PATH = '/usr/share/locale'
 
