@@ -24,6 +24,7 @@ All communications with endpoints located under the `/api/v1/safe/` namespace re
 | `/api/v1/safe/computers/id/` | `POST` | mTLS + JWS | Returns the unique server-assigned computer ID matching the client's UUID and Name. |
 | `/api/v1/safe/computers/` | `POST` | Public | Enrolls a new computer into the system with its hardware UUID, computer name, and IP address. |
 | `/api/v1/safe/computers/label/` | `GET` | mTLS + JWS | Retrieves support desk identification info (label layout) for terminal printing. |
+| `/api/v1/safe/computers/info/` | `GET` | mTLS + JWS | Retrieves comprehensive computer metadata and system telemetry (CPU, RAM, status, network). |
 | `/api/v1/safe/eot/` | `POST` | mTLS + JWS | Signals "End of Transmission" to release locks and finalize CLI session. |
 
 ---
