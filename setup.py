@@ -25,22 +25,22 @@ import os
 import subprocess
 
 # Patch for stdeb compatibility with Python 3.12 (SafeConfigParser removed)
-if not hasattr(configparser, 'SafeConfigParser'):
-    configparser.SafeConfigParser = configparser.ConfigParser
-if not hasattr(configparser.ConfigParser, 'readfp'):
-    configparser.ConfigParser.readfp = configparser.ConfigParser.read_file
+if not hasattr(configparser, "SafeConfigParser"):
+    configparser.SafeConfigParser = configparser.ConfigParser  # type: ignore
+if not hasattr(configparser.ConfigParser, "readfp"):
+    configparser.ConfigParser.readfp = configparser.ConfigParser.read_file  # type: ignore
 
 from setuptools import setup
 from setuptools.command.build_py import build_py
 
 try:
-    from setuptools.command.install_data import install_data
+    from setuptools.command.install_data import install_data  # type: ignore
 except ImportError:
-    from distutils.command.install_data import install_data
+    from distutils.command.install_data import install_data  # type: ignore
 
-DOMAIN = 'migasfree'
-PO_DIR = 'po'
-MO_DIR = os.path.join('build', 'mo')
+DOMAIN = "migasfree"
+PO_DIR = "po"
+MO_DIR = os.path.join("build", "mo")
 
 
 def newer(source, target):
@@ -56,9 +56,9 @@ class BuildData(build_py):
 
     def run(self):
         # Compile translations
-        for po in glob.glob(os.path.join(PO_DIR, '*.po')):
+        for po in glob.glob(os.path.join(PO_DIR, "*.po")):
             lang = os.path.basename(po[:-3])
-            mo = os.path.join(MO_DIR, lang, f'{DOMAIN}.mo')
+            mo = os.path.join(MO_DIR, lang, f"{DOMAIN}.mo")
 
             directory = os.path.dirname(mo)
             if not os.path.exists(directory):
@@ -66,22 +66,22 @@ class BuildData(build_py):
 
             if newer(po, mo):
                 try:
-                    subprocess.call(['msgfmt', '-o', mo, po])
+                    subprocess.call(["msgfmt", "-o", mo, po])
                 except OSError as e:
-                    print(f'Warning: msgfmt failed: {e}')
+                    print(f"Warning: msgfmt failed: {e}")
 
         # Run the standard build_py
         build_py.run(self)
 
 
-class InstallData(install_data):
+class InstallData(install_data):  # type: ignore
     """Install command that includes compiled translations."""
 
     def _find_mo_files(self):
         data_files = []
-        for mo in glob.glob(os.path.join(MO_DIR, '*', f'{DOMAIN}.mo')):
+        for mo in glob.glob(os.path.join(MO_DIR, "*", f"{DOMAIN}.mo")):
             lang = os.path.basename(os.path.dirname(mo))
-            dest = os.path.join('share', 'locale', lang, 'LC_MESSAGES')
+            dest = os.path.join("share", "locale", lang, "LC_MESSAGES")
             data_files.append((dest, [mo]))
         self.data_files.extend(data_files)
 
@@ -91,8 +91,24 @@ class InstallData(install_data):
 
 
 setup(
+    name="migasfree-client",
+    version="5.0",
+    packages=[
+        "migasfree_client",
+        "migasfree_client.devices",
+        "migasfree_client.devices.plugins",
+        "migasfree_client.mixins",
+        "migasfree_client.pms",
+        "migasfree_client.pms.plugins",
+        "migasfree_client.utils",
+    ],
+    entry_points={
+        "console_scripts": [
+            "migasfree = migasfree_client.__main__:main",
+        ],
+    },
     cmdclass={
-        'build_py': BuildData,
-        'install_data': InstallData,
+        "build_py": BuildData,
+        "install_data": InstallData,
     },
 )

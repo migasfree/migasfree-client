@@ -23,7 +23,10 @@ import sys
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+try:
+    from urllib3.util import Retry
+except ImportError:
+    from requests.packages.urllib3.util.retry import Retry  # type: ignore
 from requests_toolbelt import MultipartEncoder
 
 from .secure import unwrap, wrap
@@ -49,6 +52,7 @@ class StrictSSLCompatAdapter(HTTPAdapter):
             context.verify_flags &= ~ssl.VERIFY_X509_STRICT
         if hasattr(ssl, 'VERIFY_X509_PARTIAL_CHAIN'):
             context.verify_flags &= ~ssl.VERIFY_X509_PARTIAL_CHAIN
+        context.check_hostname = False
         kwargs['ssl_context'] = context
         return super().init_poolmanager(connections, maxsize, block=block, **kwargs)
 
@@ -58,6 +62,7 @@ class StrictSSLCompatAdapter(HTTPAdapter):
             context.verify_flags &= ~ssl.VERIFY_X509_STRICT
         if hasattr(ssl, 'VERIFY_X509_PARTIAL_CHAIN'):
             context.verify_flags &= ~ssl.VERIFY_X509_PARTIAL_CHAIN
+        context.check_hostname = False
         kwargs['ssl_context'] = context
         return super().proxy_manager_for(proxy, **kwargs)
 
@@ -131,7 +136,7 @@ class UrlRequest:
             ],
             raise_on_status=False,
         )
-        adapter = StrictSSLCompatAdapter(max_retries=retries)
+        adapter = StrictSSLCompatAdapter(max_retries=retries)  # type: ignore
         self.session.mount('https://', adapter)
         self.session.mount('http://', adapter)
 
