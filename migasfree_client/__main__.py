@@ -85,6 +85,10 @@ def parse_args(argv):
     subparser_label = subparsers.add_parser('label', help=_('Computer identification'))
     subparser_label.add_argument('-j', '--json', action='store_true', help=_('JSON format'))
 
+    subparser_attributes = subparsers.add_parser('attributes', help=_('Assigned attributes to computer'))
+    subparser_attributes.add_argument('-j', '--json', action='store_true', help=_('JSON format'))
+    subparser_attributes.add_argument('-c', '--cid', action='store_true', help=_('Get only the CID attribute'))
+
     subparsers.add_parser('version', help=_('Show version info'))
 
     subparser_tags = subparsers.add_parser('tags', help=_('Computer tags'))
@@ -217,6 +221,10 @@ def main(argv=None):
         from .info import MigasFreeInfo
 
         MigasFreeInfo().run(args)
+    elif args.cmd == 'attributes':
+        from .attributes import MigasFreeAttributes
+
+        MigasFreeAttributes().run(args)
     elif args.cmd == 'version':
         from .command import MigasFreeCommand
 

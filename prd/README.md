@@ -60,6 +60,7 @@ graph TD
 | `upload` | Push custom packages or files to server-side repositories. | **User (Authorized Packager)** | [CLI Upload Command](./pages/04-cli-command-upload.md) |
 | `conf` | Configure local settings (Server URL, proxy, package cache, auto-updates). | **Root / Administrator** | [CLI Conf Command](./pages/05-cli-command-conf.md) |
 | `info` | Retrieve comprehensive computer metadata and telemetry (UUID, CPU, RAM, status, network). | **Root / Administrator** | [CLI Sync Command](./pages/01-cli-command-sync.md#info) |
+| `attributes` | Query assigned organizational attributes and identity (CID). | **Root / Administrator** | N/A |
 | `traits` | Query system attributes and configuration traits retrieved from server. | **Public** | [CLI Sync Command](./pages/01-cli-command-sync.md#traits) |
 | `label` | Show terminal-rendered identification details for support desks. | **Public** | [CLI Sync Command](./pages/01-cli-command-sync.md#label) |
 | `import-mtls`| Bulk-import administrative certificates from a tar archive. | **Root / Administrator** | [CLI Register Command](./pages/02-cli-command-register.md#import-mtls) |

@@ -154,6 +154,8 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         'get_project_keys': '/api/v1/public/keys/project/',
         'get_repositories_keys': '/api/v1/public/keys/repositories/',
         'get_computer_id': '/api/v1/safe/computers/id/',
+        'get_assigned_attributes': '/api/v1/safe/computers/attributes/assigned/',
+        'get_cid_attribute': '/api/v1/safe/computers/attributes/cid/',
         'upload_computer': '/api/v1/safe/computers/',
         'upload_eot': '/api/v1/safe/eot/',
         #

@@ -252,6 +252,33 @@ migasfree tags -c branch-office
 
 ---
 
+### attributes
+
+Retrieves the computer's currently assigned attribute from the server.
+
+```bash
+migasfree attributes [options]
+```
+
+**Options:**
+
+| Option         | Description                                   |
+| -------------- | --------------------------------------------- |
+| `-j`, `--json` | Output information in JSON format             |
+| `-c`, `--cid`  | Retrieve exclusively the computer CID attribute |
+
+**Examples:**
+
+```bash
+# Show assigned attributes (tabular formatting)
+migasfree attributes
+
+# Get the CID attribute in JSON format (quiet mode for pure JSON)
+migasfree -q attributes -c --json
+```
+
+---
+
 ### info
 
 Retrieves comprehensive computer and telemetry information from the server registry.
