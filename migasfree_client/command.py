@@ -191,6 +191,15 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         'upload_package': '/api/v1/safe/packages/',
         'upload_set': '/api/v1/safe/packages/set/',
         'create_repository': '/api/v1/safe/packages/repos/',
+        #
+        # catalog API
+        'get_categories': '/api/v1/safe/catalog/categories/',
+        'get_available_apps': '/api/v1/safe/catalog/apps/available/',
+        #
+        # devices API
+        'get_available_devices': '/api/v1/safe/devices/devices/available/',
+        'get_logical_devices': '/api/v1/safe/devices/logical/available/',
+        'get_capabilities': '/api/v1/safe/devices/capabilities/',
     }
 
     CMD = 'migasfree'  # /usr/bin/migasfree
@@ -608,6 +617,12 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         """Make API call with console status and logging."""
         if message:
             self._show_message(message)
+
+        if safe and keys is None:
+            keys = {
+                'private': os.path.join(self._get_keys_path(), self.PRIVATE_KEY),
+                'public': os.path.join(self._get_keys_path(), self.PUBLIC_KEY),
+            }
 
         with self.console.status(''):
             response = self._url_request.run(

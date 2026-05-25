@@ -192,6 +192,25 @@ def parse_args(argv):
         '-j', '--json', action='store_true', help=_('Return current network information as JSON')
     )
 
+    subparser_apps = subparsers.add_parser('apps', help=_('Get available applications from catalog'))
+    subparser_apps.add_argument('-c', '--category', action='store', metavar='ID', help=_('Filter by category ID'))
+    subparser_apps.add_argument('-j', '--json', action='store_true', help=_('Return applications as JSON'))
+
+    subparser_categories = subparsers.add_parser('categories', help=_('Get software catalog categories'))
+    subparser_categories.add_argument('-j', '--json', action='store_true', help=_('Return categories as JSON'))
+
+    subparser_devices = subparsers.add_parser('devices', help=_('Get hardware and logical device information'))
+    group_devices = subparser_devices.add_mutually_exclusive_group()
+    group_devices.add_argument(
+        '-a', '--available', action='store_true', help=_('Get available (unassigned) physical devices')
+    )
+    group_devices.add_argument('-l', '--logical', action='store_true', help=_('Get logical device relations'))
+    group_devices.add_argument('-c', '--capabilities', action='store', metavar='ID', help=_('Get capabilities by ID'))
+    subparser_devices.add_argument(
+        '--device-id', action='store', metavar='ID', help=_('Filter logical relations by device ID')
+    )
+    subparser_devices.add_argument('-j', '--json', action='store_true', help=_('Return data as JSON'))
+
     if len(argv) < 1:
         parser.print_help()
         sys.exit(ALL_OK)
@@ -261,6 +280,18 @@ def main(argv=None):
         from .command import MigasFreeCommand
 
         MigasFreeCommand().cmd_network(args)
+    elif args.cmd == 'apps':
+        from .apps import MigasFreeApps
+
+        MigasFreeApps().run(args)
+    elif args.cmd == 'categories':
+        from .apps import MigasFreeCategories
+
+        MigasFreeCategories().run(args)
+    elif args.cmd == 'devices':
+        from .device import MigasFreeDevices
+
+        MigasFreeDevices().run(args)
 
     return ALL_OK
 

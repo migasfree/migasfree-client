@@ -519,6 +519,95 @@ migasfree packages -c '["firefox-esr", "vlc"]'
 
 ---
 
+### apps
+
+Retrieves available applications from the software catalog for the computer.
+
+```bash
+migasfree apps [options]
+```
+
+**Options:**
+
+| Option           | Description                        |
+| ---------------- | ---------------------------------- |
+| `-c`, `--category` | Filter applications by category ID |
+| `-j`, `--json`     | Output information in JSON format  |
+
+**Examples:**
+
+```bash
+# List all available apps
+migasfree apps
+
+# List apps in category 3 in JSON format
+migasfree -q apps -c 3 --json
+```
+
+---
+
+### categories
+
+Retrieves the list of software catalog categories.
+
+```bash
+migasfree categories [options]
+```
+
+**Options:**
+
+| Option         | Description                       |
+| -------------- | --------------------------------- |
+| `-j`, `--json` | Output information in JSON format |
+
+**Examples:**
+
+```bash
+# List all categories
+migasfree categories
+
+# Get categories in JSON format
+migasfree -q categories --json
+```
+
+---
+
+### devices
+
+Retrieves physical and logical device assignments and capabilities.
+
+```bash
+migasfree devices {-a | -l | -c ID} [options]
+```
+
+**Options:**
+
+| Option               | Description                                           |
+| -------------------- | ----------------------------------------------------- |
+| `-a`, `--available`  | Get available (unassigned) physical devices           |
+| `-l`, `--logical`    | Get logical device relations                          |
+| `-c`, `--capabilities` | Get capabilities info by specific capability ID     |
+| `--device-id`        | Filter logical relations by a specific device ID      |
+| `-j`, `--json`       | Output information in JSON format                     |
+
+**Examples:**
+
+```bash
+# List currently assigned devices
+migasfree devices
+
+# List available unassigned physical devices in JSON format
+migasfree -q devices -a --json
+
+# List logical device relations for device ID 5
+migasfree devices -l --device-id 5
+
+# Get capabilities info for ID 10
+migasfree -q devices -c 10 --json
+```
+
+---
+
 ### user-check
 
 Verifies user credentials and checks if they have administrative privileges.
