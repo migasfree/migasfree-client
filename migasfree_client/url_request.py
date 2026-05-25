@@ -23,6 +23,7 @@ import sys
 
 import requests
 from requests.adapters import HTTPAdapter
+
 try:
     from urllib3.util import Retry
 except ImportError:
