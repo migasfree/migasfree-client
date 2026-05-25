@@ -18,6 +18,7 @@ import errno
 import functools
 import getpass
 import gettext
+import json
 import logging
 import logging.config
 import logging.handlers
@@ -624,6 +625,24 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
             self.console.print(utils.get_mfc_release())
         else:
             self._show_config_options()
+
+        sys.exit(utils.ALL_OK)
+
+    def cmd_network(self, args=None):
+        net_info = get_network_info()
+
+        if getattr(args, 'json', False):
+            ret = {
+                'network': net_info.get('net', ''),
+                'mask': net_info.get('netmask', ''),
+                'ip_address': net_info.get('ip', ''),
+            }
+            self.console.print(json.dumps(ret))
+        else:
+            self.console.print(_('Network Configuration:'))
+            self.console.print(f"  {_('IP Address')}: {net_info.get('ip', '')}")
+            self.console.print(f"  {_('Netmask')}:    {net_info.get('netmask', '')}")
+            self.console.print(f"  {_('Network')}:    {net_info.get('net', '')}")
 
         sys.exit(utils.ALL_OK)
 

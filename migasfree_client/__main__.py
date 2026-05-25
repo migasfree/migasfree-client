@@ -185,6 +185,11 @@ def parse_args(argv):
     subparser_user_check.add_argument('-u', '--user', action='store', required=True, help=_('Username to verify'))
     subparser_user_check.add_argument('-p', '--pwd', action='store', required=True, help=_('Password to verify'))
 
+    subparser_network = subparsers.add_parser('network', help=_('View network information'))
+    subparser_network.add_argument(
+        '-j', '--json', action='store_true', help=_('Return current network information as JSON')
+    )
+
     if len(argv) < 1:
         parser.print_help()
         sys.exit(ALL_OK)
@@ -250,6 +255,10 @@ def main(argv=None):
         from .usercheck import MigasFreeUserCheck
 
         MigasFreeUserCheck().run(args)
+    elif args.cmd == 'network':
+        from .command import MigasFreeCommand
+
+        MigasFreeCommand().cmd_network(args)
 
     return ALL_OK
 
