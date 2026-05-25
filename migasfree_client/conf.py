@@ -15,6 +15,7 @@
 
 import errno
 import gettext
+import json
 import logging
 import os
 import re
@@ -23,6 +24,7 @@ from urllib.parse import urlparse
 
 from . import settings, utils
 from .command import MigasFreeCommand
+from .mtls import get_mtls_ca_file
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
@@ -55,7 +57,20 @@ class MigasFreeConf(MigasFreeCommand):
         to_write = {k: v for k, v in write_operations.items() if v is not None}
 
         if not to_write:
-            self._show_config_options()
+            if getattr(args, 'json', False):
+                ret = {
+                    'server': self.migas_server,
+                    'project': self.migas_project,
+                    'computer_name': self.migas_computer_name,
+                    'user': utils.get_graphic_user(None),
+                    'uuid': utils.get_hardware_uuid(),
+                    'api_protocol': self.api_protocol(),
+                    'manage_devices': self.migas_manage_devices,
+                    'ca_file': get_mtls_ca_file(self.migas_server),
+                }
+                print(json.dumps(ret, ensure_ascii=False))
+            else:
+                self._show_config_options()
             return
 
         self._check_user_is_root()
