@@ -453,28 +453,33 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
 
         return True
 
-    def cmd_register_computer(self, user=None):
-        carry_on = utils.query_yes_no(_('Have you check config options in this machine (%s)?') % settings.CONF_FILE)
-        if carry_on == 'no':
-            msg = _('Check %s file and register again') % settings.CONF_FILE
-            self.operation_failed(msg)
-            sys.exit(errno.EAGAIN)
+    def cmd_register_computer(self, user=None, pwd=None, assume_yes=False):
+        if not assume_yes:
+            carry_on = utils.query_yes_no(_('Have you check config options in this machine (%s)?') % settings.CONF_FILE)
+            if carry_on == 'no':
+                msg = _('Check %s file and register again') % settings.CONF_FILE
+                self.operation_failed(msg)
+                sys.exit(errno.EAGAIN)
 
         if not self._auto_register():
-            if utils.is_linux():
+            if (not user or not pwd) and utils.is_linux():
                 with contextlib.suppress(Exception):
                     sys.stdin = open('/dev/tty')  # noqa: SIM115
-            user = input('{}: '.format(_('User to register computer at server')))
+
+            if not user:
+                user = input('{}: '.format(_('User to register computer at server')))
+
             if not user:
                 self.operation_failed(_('Empty user. Exiting %s.') % self.CMD)
                 logger.info('Empty user in register computer option')
                 sys.exit(errno.EAGAIN)
 
-            password = getpass.getpass('{}: '.format(_('Password')))
+            if not pwd:
+                pwd = getpass.getpass('{}: '.format(_('Password')))
 
             self._show_message(_('Registering computer...'))
-            self._save_sign_keys(user, password)
-            self._save_computer(user, password)
+            self._save_sign_keys(user, pwd)
+            self._save_computer(user, pwd)
 
         self.operation_ok(_('Computer registered at server'))
 
@@ -640,9 +645,9 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
             self.console.print(json.dumps(ret))
         else:
             self.console.print(_('Network Configuration:'))
-            self.console.print(f"  {_('IP Address')}: {net_info.get('ip', '')}")
-            self.console.print(f"  {_('Netmask')}:    {net_info.get('netmask', '')}")
-            self.console.print(f"  {_('Network')}:    {net_info.get('net', '')}")
+            self.console.print(f'  {_("IP Address")}: {net_info.get("ip", "")}')
+            self.console.print(f'  {_("Netmask")}:    {net_info.get("netmask", "")}')
+            self.console.print(f'  {_("Network")}:    {net_info.get("net", "")}')
 
         sys.exit(utils.ALL_OK)
 

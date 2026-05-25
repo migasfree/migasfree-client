@@ -43,6 +43,8 @@ def parse_args(argv):
 
     subparser_register = subparsers.add_parser('register', help=_('Register computer at server'))
     subparser_register.add_argument('-u', '--user', action='store', help=_('User to register computer at server'))
+    subparser_register.add_argument('-p', '--pwd', action='store', help=_('User password'))
+    subparser_register.add_argument('-y', '--assume-yes', action='store_true', help=_('Automatic yes to prompts'))
 
     subparser_search = subparsers.add_parser('search', help=_('Search package in repositories'))
     subparser_search.add_argument('pattern', nargs=1, action='store', metavar='STRING', help=_('Pattern to search'))
