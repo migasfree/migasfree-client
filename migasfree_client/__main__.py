@@ -160,6 +160,7 @@ def parse_args(argv):
     subparser_conf.add_argument(
         '-k', '--package-proxy-cache', action='store', metavar='VALUE', help=_('Set Package_Proxy_Cache')
     )
+    subparser_conf.add_argument('-j', '--json', action='store_true', help=_('Return current configuration as JSON'))
 
     subparser_import_mtls = subparsers.add_parser('import-mtls', help=_('Import mTLS certificate from tar file'))
     subparser_import_mtls.add_argument(
