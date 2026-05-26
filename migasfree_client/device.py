@@ -89,38 +89,207 @@ class MigasFreeDevices(MigasFreeCommand):
         elif not results:
             self.console.print(_('No results found.'))
         else:
-            table = Table(box=box.SIMPLE, show_edge=False, title=_('Devices'))
-            table.add_column('ID', style='cyan', justify='right')
-            table.add_column(_('Name'), style='green')
-            table.add_column(_('Model / Capability'), style='magenta')
-            table.add_column(_('Connection'), style='blue')
-            table.add_column(_('Location'), style='yellow')
+            from rich.columns import Columns
+            from rich.panel import Panel
 
-            for item in results:
-                device_id = str(item.get('id', ''))
-                name = item.get('name') or item.get('__str__') or item.get('capability', {}).get('name') or _('Unknown')
+            # -------------------------------------------------------------
+            # CASE 1: AVAILABLE PHYSICAL DEVICES (Table View)
+            # -------------------------------------------------------------
+            if getattr(args, 'available', False):
+                table = Table(box=box.SIMPLE, show_edge=False, title=_('Available Physical Devices'))
+                table.add_column('ID', style='cyan', justify='right')
+                table.add_column(_('Name'), style='green')
+                table.add_column(_('Model'), style='magenta')
+                table.add_column(_('Connection'), style='blue')
+                table.add_column(_('Location'), style='yellow')
 
-                model_col = ''
-                if isinstance(item.get('model'), dict):
-                    model_name = item['model'].get('name', '')
-                    manufacturer = item['model'].get('manufacturer', {}).get('name', '')
-                    model_col = f'{manufacturer} {model_name}'.strip()
-                elif isinstance(item.get('capability'), dict):
-                    model_col = item['capability'].get('name', '')
-                elif item.get('manufacturer'):
-                    model_col = f'{item.get("manufacturer", "")} {item.get("model", "")}'.strip()
+                for item in results:
+                    device_id = str(item.get('id', ''))
+                    name = item.get('name') or _('Unknown')
 
-                connection = ''
-                if isinstance(item.get('connection'), dict):
-                    connection = item['connection'].get('name', '')
+                    model_col = ''
+                    if isinstance(item.get('model'), dict):
+                        model_name = item['model'].get('name', '')
+                        manufacturer = item['model'].get('manufacturer', {}).get('name', '')
+                        model_col = f'{manufacturer} {model_name}'.strip()
+                    elif item.get('manufacturer'):
+                        model_col = f'{item.get("manufacturer", "")} {item.get("model", "")}'.strip()
 
-                location = item.get('location', '')
-                if not location and isinstance(item.get('data'), dict):
-                    location = item['data'].get('LOCATION', '')
+                    connection = ''
+                    if isinstance(item.get('connection'), dict):
+                        connection = item['connection'].get('name', '')
 
-                table.add_row(device_id, name, model_col, connection, location)
+                    location = item.get('location', '')
+                    if not location and isinstance(item.get('data'), dict):
+                        location = item['data'].get('LOCATION', '')
 
-            self.console.print()
-            self.console.print(table)
+                    table.add_row(device_id, name, model_col, connection, location)
+
+                self.console.print()
+                self.console.print(table)
+
+            # -------------------------------------------------------------
+            # CASE 2: LOGICAL DEVICE RELATIONS (--logical)
+            # -------------------------------------------------------------
+            elif getattr(args, 'logical', False):
+                # Build physical devices map to get locations
+                phys_locations = {}
+                try:
+                    available = self.get_available_devices()
+                    for dev in available:
+                        if dev.get('id'):
+                            phys_locations[dev['id']] = dev.get('location') or ''
+                except Exception:
+                    pass
+
+                devices_dict = {}
+                for item in results:
+                    dev_info = item.get('device') or {}
+                    dev_id = dev_info.get('id')
+                    if not dev_id:
+                        continue
+
+                    if dev_id not in devices_dict:
+                        devices_dict[dev_id] = {
+                            'name': dev_info.get('name') or _('Unknown'),
+                            'location': phys_locations.get(dev_id) or '',
+                            '__str__': item.get('__str__') or '',
+                            'logical_devices': [],
+                        }
+
+                    logical_name = (
+                        item.get('alternative_capability_name')
+                        or item.get('capability', {}).get('name')
+                        or _('Unknown')
+                    )
+                    devices_dict[dev_id]['logical_devices'].append(
+                        {
+                            'id': item.get('id', ''),
+                            'name': logical_name,
+                        }
+                    )
+
+                cards = []
+                for dev_id, dev_data in sorted(devices_dict.items()):
+                    logical_lines = []
+                    for log_dev in sorted(dev_data['logical_devices'], key=lambda x: x['name']):
+                        logical_lines.append(
+                            f'  [cyan]•[/cyan] [dim]({log_dev["id"]})[/dim] [magenta]{log_dev["name"]}[/magenta]'
+                        )
+
+                    logical_content = '\n'.join(logical_lines)
+                    str_val = dev_data.get('__str__')
+                    str_line = f'\n[dim]{str_val}[/dim]' if str_val else ''
+                    loc = dev_data['location']
+                    loc_str = f'\n[dim]📍 {loc}[/dim]' if loc else ''
+
+                    card_content = (
+                        f'[bold green]{dev_data["name"]}[/bold green]{str_line}{loc_str}\n\n{logical_content}'
+                    )
+
+                    cards.append(
+                        Panel(
+                            card_content,
+                            title=f'[bold cyan]Device ID: {dev_id}[/bold cyan]',
+                            title_align='left',
+                            border_style='blue',
+                            width=50,
+                        )
+                    )
+
+                self.console.print()
+                self.console.print(Columns(cards, equal=True, expand=False))
+
+            # -------------------------------------------------------------
+            # CASE 3: CAPABILITIES
+            # -------------------------------------------------------------
+            elif getattr(args, 'capabilities', None):
+                table = Table(box=box.SIMPLE, show_edge=False, title=_('Capabilities'))
+                table.add_column('ID', style='cyan', justify='right')
+                table.add_column(_('Name'), style='green')
+
+                for item in results:
+                    table.add_row(str(item.get('id', '')), item.get('name', _('Unknown')))
+
+                self.console.print()
+                self.console.print(table)
+
+            # -------------------------------------------------------------
+            # CASE 4: ASSIGNED/ACTIVE DEVICES (No flags)
+            # -------------------------------------------------------------
+            else:
+                assigned_list = []
+                default_id = 0
+                if isinstance(results, dict):
+                    assigned_list = results.get('logical') or []
+                    default_id = results.get('default') or 0
+                elif isinstance(results, list):
+                    assigned_list = results
+
+                devices_dict = {}
+                for outer_item in assigned_list:
+                    if not isinstance(outer_item, dict):
+                        continue
+                    inner_keys = list(outer_item.keys())
+                    if not inner_keys:
+                        continue
+                    inner_item = outer_item[inner_keys[0]]
+                    if not isinstance(inner_item, dict):
+                        continue
+
+                    phys_name = inner_item.get('name') or _('Unknown')
+                    location = ''
+                    conn_data = inner_item.get('connection') or {}
+                    if isinstance(conn_data, dict):
+                        location = conn_data.get('LOCATION') or ''
+
+                    if phys_name not in devices_dict:
+                        devices_dict[phys_name] = {
+                            'name': phys_name,
+                            'location': location,
+                            '__str__': inner_item.get('__str__') or '',
+                            'logical_devices': [],
+                        }
+
+                    logical_name = inner_item.get('capability') or _('Unknown')
+                    devices_dict[phys_name]['logical_devices'].append(
+                        {
+                            'id': inner_item.get('id', ''),
+                            'name': logical_name,
+                            'is_default': inner_item.get('id') == default_id,
+                        }
+                    )
+
+                cards = []
+                for phys_name, dev_data in sorted(devices_dict.items()):
+                    logical_lines = []
+                    for log_dev in sorted(dev_data['logical_devices'], key=lambda x: x['name']):
+                        bullet = '[green]✔ DEFAULT[/green]' if log_dev['is_default'] else '[cyan]•[/cyan]'
+                        logical_lines.append(
+                            f'  {bullet} [dim]({log_dev["id"]})[/dim] [magenta]{log_dev["name"]}[/magenta]'
+                        )
+
+                    logical_content = '\n'.join(logical_lines)
+                    str_val = dev_data.get('__str__')
+                    str_line = f'\n[dim]{str_val}[/dim]' if str_val else ''
+                    loc = dev_data['location']
+                    loc_str = f'\n[dim]📍 {loc}[/dim]' if loc else ''
+
+                    card_content = f'[bold green]{phys_name}[/bold green]{str_line}{loc_str}\n\n{logical_content}'
+
+                    cards.append(
+                        Panel(
+                            card_content,
+                            title='[bold cyan]Assigned[/bold cyan]',
+                            title_align='left',
+                            border_style='green'
+                            if any(x['is_default'] for x in dev_data['logical_devices'])
+                            else 'blue',
+                            width=50,
+                        )
+                    )
+
+                self.console.print()
+                self.console.print(Columns(cards, equal=True, expand=False))
 
         sys.exit(ALL_OK)
