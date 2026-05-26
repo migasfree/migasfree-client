@@ -27,6 +27,9 @@ migasfree devices [options]
 | `-l`, `--logical` | `Flag` | No | `False` | Retrieves logical device relationships. |
 | `-c`, `--capabilities` | `String` | No | `None` | Retrieves hardware capabilities by specific capability ID. |
 | `--device-id` | `String` | No | `None` | Used alongside `-l` to filter logical relations targeting a specific device ID. |
+| `--assign` | `String` | No | `None` | Assigns a logical device to the computer by logical device ID. |
+| `--unassign` | `String` | No | `None` | Unassigns a logical device from the computer by logical device ID. |
+| `--set-default` | `String` | No | `None` | Sets a default logical device for the computer by logical device ID. |
 | `-j`, `--json` | `Flag` | No | `False` | Outputs the result in JSON format instead of human-readable text. |
 
 ---
@@ -56,3 +59,21 @@ migasfree devices [options]
 - **Trigger**: `migasfree devices -c ID`
 - **Network call**: `POST` to `/api/v1/safe/devices/capabilities/` passing `id` in the encrypted JSON body.
 - **Outcome**: Fetches capability details from `SafeCapabilityViewSet` securely over mTLS.
+
+### Assign Logical Device (`--assign`)
+
+- **Trigger**: `migasfree devices --assign ID`
+- **Network call**: `POST` to `/api/v1/safe/devices/logical/assign/` passing `cid`, `id` (logical device ID), and `assigned=True` in the encrypted JSON body.
+- **Outcome**: Registers the logical device assignment. Returns success confirmation.
+
+### Unassign Logical Device (`--unassign`)
+
+- **Trigger**: `migasfree devices --unassign ID`
+- **Network call**: `POST` to `/api/v1/safe/devices/logical/assign/` passing `cid`, `id` (logical device ID), and `assigned=False` in the encrypted JSON body.
+- **Outcome**: Removes the logical device assignment. Returns success confirmation.
+
+### Set Default Logical Device (`--set-default`)
+
+- **Trigger**: `migasfree devices --set-default ID` (ID `0` to clear/remove the default assignment).
+- **Network call**: `POST` to `/api/v1/safe/devices/logical/set-default/` passing `cid` and `logical_id` (logical device ID or `None` if ID is `0`) in the encrypted JSON body.
+- **Outcome**: Sets or clears the default logical device assignment. Returns success confirmation.

@@ -576,9 +576,9 @@ migasfree -q categories --json
 
 Retrieves physical and logical device assignments and capabilities.
 
-```bash
-migasfree devices {-a | -l | -c ID} [options]
-```
+migasfree devices [options]
+
+```txt
 
 **Options:**
 
@@ -588,6 +588,9 @@ migasfree devices {-a | -l | -c ID} [options]
 | `-l`, `--logical`    | Get logical device relations                          |
 | `-c`, `--capabilities` | Get capabilities info by specific capability ID     |
 | `--device-id`        | Filter logical relations by a specific device ID      |
+| `--assign ID`        | Assign logical device to the computer by ID           |
+| `--unassign ID`      | Unassign logical device from the computer by ID       |
+| `--set-default ID`   | Set default logical device for the computer by ID     |
 | `-j`, `--json`       | Output information in JSON format                     |
 
 **Examples:**
@@ -604,6 +607,18 @@ migasfree devices -l --device-id 5
 
 # Get capabilities info for ID 10
 migasfree -q devices -c 10 --json
+
+# Assign logical device 4 to the computer
+sudo migasfree devices --assign 4
+
+# Unassign logical device 4 from the computer
+sudo migasfree devices --unassign 4
+
+# Set logical device 4 as default for this computer
+sudo migasfree devices --set-default 4
+
+# Clear default logical device
+sudo migasfree devices --set-default 0
 ```
 
 ---
