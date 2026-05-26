@@ -69,8 +69,26 @@ class MigasFreeDevices(MigasFreeCommand):
         response = self._api_call('get_capabilities', data=data)
         return self._handle_response(response, success_msg=False)
 
+    @require_sign_keys
+    @require_computer_id
+    def assign_logical(self, logical_id, assigned=True):
+        logger.debug('Assigning or unassigning logical device: id=%s, assigned=%s', logical_id, assigned)
+        data = {'cid': self._computer_id, 'id': int(logical_id), 'assigned': assigned}
+        response = self._api_call('assign_logical', data=data)
+        return self._handle_response(response, success_msg=False)
+
+    @require_sign_keys
+    @require_computer_id
+    def set_default_logical(self, logical_id):
+        logger.debug('Setting default logical device: logical_id=%s', logical_id)
+        data = {'cid': self._computer_id, 'logical_id': int(logical_id) if logical_id and logical_id != '0' else None}
+        response = self._api_call('set_default_logical', data=data)
+        return self._handle_response(response, success_msg=False)
+
     def run(self, args=None):
         super().run(args)
+        if args is None:
+            return
 
         with lock_file_context(self.CMD, self.LOCK_FILE):
             if getattr(args, 'available', False):
@@ -81,11 +99,23 @@ class MigasFreeDevices(MigasFreeCommand):
             elif getattr(args, 'capabilities', None):
                 capability_id = getattr(args, 'capabilities', None)
                 results = self.get_capabilities(capability_id=capability_id)
+            elif isinstance(getattr(args, 'assign', None), (str, int)):
+                results = self.assign_logical(args.assign, assigned=True)
+            elif isinstance(getattr(args, 'unassign', None), (str, int)):
+                results = self.assign_logical(args.unassign, assigned=False)
+            elif isinstance(getattr(args, 'set_default', None), (str, int)):
+                results = self.set_default_logical(args.set_default)
             else:
                 results = self.get_assigned_devices()
 
         if getattr(args, 'json', False):
             self.console.print(json.dumps(results, ensure_ascii=False), soft_wrap=True)
+        elif isinstance(getattr(args, 'assign', None), (str, int)):
+            self.console.print(_('Logical device assigned successfully.'))
+        elif isinstance(getattr(args, 'unassign', None), (str, int)):
+            self.console.print(_('Logical device unassigned successfully.'))
+        elif isinstance(getattr(args, 'set_default', None), (str, int)):
+            self.console.print(_('Default logical device updated successfully.'))
         elif not results:
             self.console.print(_('No results found.'))
         else:

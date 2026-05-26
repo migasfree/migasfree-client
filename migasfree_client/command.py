@@ -200,6 +200,8 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         'get_available_devices': '/api/v1/safe/devices/devices/available/',
         'get_logical_devices': '/api/v1/safe/devices/logical/available/',
         'get_capabilities': '/api/v1/safe/devices/capabilities/',
+        'assign_logical': '/api/v1/safe/devices/logical/assign/',
+        'set_default_logical': '/api/v1/safe/devices/logical/set-default/',
     }
 
     CMD = 'migasfree'  # /usr/bin/migasfree

@@ -258,6 +258,78 @@ class TestMigasFreeDevices(unittest.TestCase):
             result = self.devices.get_capabilities(capability_id=5)
             self.assertEqual(result, mock_response)
 
+    def test_assign_logical(self):
+        """Test assign_logical method calls API correctly"""
+        mock_response = {'id': 99, 'attributes': []}
+        with patch.object(self.devices, '_api_call', return_value=mock_response), patch.object(
+            self.devices, '_handle_response', return_value=mock_response
+        ):
+            result = self.devices.assign_logical(logical_id='99', assigned=True)
+            self.assertEqual(result, mock_response)
+
+    def test_set_default_logical(self):
+        """Test set_default_logical method calls API correctly"""
+        mock_response = {'id': 99}
+        with patch.object(self.devices, '_api_call', return_value=mock_response), patch.object(
+            self.devices, '_handle_response', return_value=mock_response
+        ):
+            result = self.devices.set_default_logical(logical_id='99')
+            self.assertEqual(result, mock_response)
+
+    @patch('sys.exit')
+    def test_run_assign(self, mock_exit):
+        """Test run with --assign"""
+        args = MagicMock()
+        args.json = False
+        args.available = False
+        args.logical = False
+        args.capabilities = None
+        args.assign = '99'
+        args.unassign = None
+        args.set_default = None
+
+        mock_results = {'id': 99}
+        with patch.object(self.devices, 'assign_logical', return_value=mock_results):
+            self.devices.run(args)
+            self.devices.console.print.assert_called_with('Logical device assigned successfully.')
+            mock_exit.assert_called_once()
+
+    @patch('sys.exit')
+    def test_run_unassign(self, mock_exit):
+        """Test run with --unassign"""
+        args = MagicMock()
+        args.json = False
+        args.available = False
+        args.logical = False
+        args.capabilities = None
+        args.assign = None
+        args.unassign = '99'
+        args.set_default = None
+
+        mock_results = {}
+        with patch.object(self.devices, 'assign_logical', return_value=mock_results):
+            self.devices.run(args)
+            self.devices.console.print.assert_called_with('Logical device unassigned successfully.')
+            mock_exit.assert_called_once()
+
+    @patch('sys.exit')
+    def test_run_set_default(self, mock_exit):
+        """Test run with --set-default"""
+        args = MagicMock()
+        args.json = False
+        args.available = False
+        args.logical = False
+        args.capabilities = None
+        args.assign = None
+        args.unassign = None
+        args.set_default = '99'
+
+        mock_results = {'id': 99}
+        with patch.object(self.devices, 'set_default_logical', return_value=mock_results):
+            self.devices.run(args)
+            self.devices.console.print.assert_called_with('Default logical device updated successfully.')
+            mock_exit.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

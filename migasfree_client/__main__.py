@@ -206,6 +206,13 @@ def parse_args(argv):
     )
     group_devices.add_argument('-l', '--logical', action='store_true', help=_('Get logical device relations'))
     group_devices.add_argument('-c', '--capabilities', action='store', metavar='ID', help=_('Get capabilities by ID'))
+    group_devices.add_argument('--assign', action='store', metavar='ID', help=_('Assign logical device to computer'))
+    group_devices.add_argument(
+        '--unassign', action='store', metavar='ID', help=_('Unassign logical device from computer')
+    )
+    group_devices.add_argument(
+        '--set-default', action='store', metavar='ID', help=_('Set default logical device for computer')
+    )
     subparser_devices.add_argument(
         '--device-id', action='store', metavar='ID', help=_('Filter logical relations by device ID')
     )
