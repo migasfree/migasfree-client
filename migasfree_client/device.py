@@ -283,6 +283,10 @@ class MigasFreeDevices(MigasFreeCommand):
                 }
             )
 
+        if not devices_dict:
+            self.console.print(_('No results found.'))
+            return
+
         cards = []
         for phys_name, dev_data in sorted(devices_dict.items()):
             logical_lines = []
