@@ -23,7 +23,7 @@ from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table
 
-from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
+from .command import MigasFreeCommand, require_computer_id, require_sign_keys
 from .utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -92,23 +92,22 @@ class MigasFreeDevices(MigasFreeCommand):
         if args is None:
             return
 
-        with lock_file_context(self.CMD, self.LOCK_FILE):
-            if getattr(args, 'available', False):
-                results = self.get_available_devices()
-            elif getattr(args, 'logical', False):
-                device_id = getattr(args, 'device_id', None)
-                results = self.get_logical_devices(device_id=device_id)
-            elif getattr(args, 'capabilities', None):
-                capability_id = getattr(args, 'capabilities', None)
-                results = self.get_capabilities(capability_id=capability_id)
-            elif isinstance(getattr(args, 'assign', None), (str, int)):
-                results = self.assign_logical(args.assign, assigned=True)
-            elif isinstance(getattr(args, 'unassign', None), (str, int)):
-                results = self.assign_logical(args.unassign, assigned=False)
-            elif isinstance(getattr(args, 'set_default', None), (str, int)):
-                results = self.set_default_logical(args.set_default)
-            else:
-                results = self.get_assigned_devices()
+        if getattr(args, 'available', False):
+            results = self.get_available_devices()
+        elif getattr(args, 'logical', False):
+            device_id = getattr(args, 'device_id', None)
+            results = self.get_logical_devices(device_id=device_id)
+        elif getattr(args, 'capabilities', None):
+            capability_id = getattr(args, 'capabilities', None)
+            results = self.get_capabilities(capability_id=capability_id)
+        elif isinstance(getattr(args, 'assign', None), (str, int)):
+            results = self.assign_logical(args.assign, assigned=True)
+        elif isinstance(getattr(args, 'unassign', None), (str, int)):
+            results = self.assign_logical(args.unassign, assigned=False)
+        elif isinstance(getattr(args, 'set_default', None), (str, int)):
+            results = self.set_default_logical(args.set_default)
+        else:
+            results = self.get_assigned_devices()
 
         if getattr(args, 'json', False):
             self.console.print(json.dumps(results, ensure_ascii=False), soft_wrap=True)

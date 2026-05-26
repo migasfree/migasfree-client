@@ -24,7 +24,7 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
-from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
+from .command import MigasFreeCommand, require_computer_id, require_sign_keys
 from .utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -45,8 +45,7 @@ class MigasFreeCategories(MigasFreeCommand):
     def run(self, args=None):
         super().run(args)
 
-        with lock_file_context(self.CMD, self.LOCK_FILE):
-            categories = self.get_categories()
+        categories = self.get_categories()
 
         if getattr(args, 'json', False):
             self.console.print(json.dumps(categories, ensure_ascii=False), soft_wrap=True)
@@ -83,8 +82,7 @@ class MigasFreeApps(MigasFreeCommand):
 
         category_id = getattr(args, 'category', None)
 
-        with lock_file_context(self.CMD, self.LOCK_FILE):
-            apps = self.get_available_apps(category_id=category_id)
+        apps = self.get_available_apps(category_id=category_id)
 
         if getattr(args, 'json', False):
             self.console.print(json.dumps(apps, ensure_ascii=False), soft_wrap=True)

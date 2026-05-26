@@ -220,11 +220,10 @@ class MigasFreeTags(MigasFreeCommand):
 
         # actions dispatcher
         if args.get:
-            with lock_file_context(self.CMD, self.LOCK_FILE):
-                response = {
-                    'assigned': self.get_assigned_tags(),
-                    'available': self.get_available_tags(),
-                }
+            response = {
+                'assigned': self.get_assigned_tags(),
+                'available': self.get_available_tags(),
+            }
 
             self.console.print(json.dumps(response, ensure_ascii=False), soft_wrap=True)
             self.end_of_transmission()
@@ -239,9 +238,9 @@ class MigasFreeTags(MigasFreeCommand):
             if not self._quiet:
                 self._show_running_options()
 
-            with lock_file_context(self.CMD, self.LOCK_FILE):
-                rules = self.set_tags()
-                if args.set:
+            rules = self.set_tags()
+            if args.set:
+                with lock_file_context(self.CMD, self.LOCK_FILE):
                     self._apply_rules(rules)
 
             self.end_of_transmission()
