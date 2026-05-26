@@ -90,11 +90,45 @@ class MigasFreeDevices(MigasFreeCommand):
 
         if getattr(args, 'json', False):
             self.console.print(json.dumps(results, ensure_ascii=False), soft_wrap=True)
+        elif not results:
+            self.console.print(_('No devices found.'))
         else:
-            self.console.print()
-            self.console.print(_('Devices:'))
+            from rich.table import Table
+            from rich import box
+
+            table = Table(box=box.SIMPLE, show_edge=False, title=_('Devices'))
+            table.add_column('ID', style='cyan', justify='right')
+            table.add_column(_('Name'), style='green')
+            table.add_column(_('Model / Capability'), style='magenta')
+            table.add_column(_('Connection'), style='blue')
+            table.add_column(_('Location'), style='yellow')
+
             for item in results:
-                name = item.get('name') or item.get('capability', {}).get('name') or _('Unknown')
-                self.console.print(f'  {item.get("id", "")}: {name}')
+                device_id = str(item.get('id', ''))
+                
+                name = item.get('name') or item.get('__str__') or item.get('capability', {}).get('name') or _('Unknown')
+                
+                model_col = ''
+                if isinstance(item.get('model'), dict):
+                    model_name = item['model'].get('name', '')
+                    manufacturer = item['model'].get('manufacturer', {}).get('name', '')
+                    model_col = f'{manufacturer} {model_name}'.strip()
+                elif isinstance(item.get('capability'), dict):
+                    model_col = item['capability'].get('name', '')
+                elif item.get('manufacturer'):
+                    model_col = f"{item.get('manufacturer', '')} {item.get('model', '')}".strip()
+
+                connection = ''
+                if isinstance(item.get('connection'), dict):
+                    connection = item['connection'].get('name', '')
+                
+                location = item.get('location', '')
+                if not location and isinstance(item.get('data'), dict):
+                    location = item['data'].get('LOCATION', '')
+
+                table.add_row(device_id, name, model_col, connection, location)
+                
+            self.console.print()
+            self.console.print(table)
 
         sys.exit(ALL_OK)

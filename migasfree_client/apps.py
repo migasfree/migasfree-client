@@ -47,11 +47,21 @@ class MigasFreeCategories(MigasFreeCommand):
 
         if getattr(args, 'json', False):
             self.console.print(json.dumps(categories, ensure_ascii=False), soft_wrap=True)
+        elif not categories:
+            self.console.print(_('No categories found.'))
         else:
-            self.console.print()
-            self.console.print(_('Categories:'))
+            from rich.table import Table
+            from rich import box
+
+            table = Table(box=box.SIMPLE, show_edge=False, title=_('Categories'))
+            table.add_column('ID', style='cyan', justify='right')
+            table.add_column(_('Name'), style='green')
+
             for cat in categories:
-                self.console.print(f'  {cat.get("id", "")}: {cat.get("name", "")}')
+                table.add_row(str(cat.get('id', '')), cat.get('name', ''))
+
+            self.console.print()
+            self.console.print(table)
 
         sys.exit(ALL_OK)
 
@@ -82,10 +92,34 @@ class MigasFreeApps(MigasFreeCommand):
 
         if getattr(args, 'json', False):
             self.console.print(json.dumps(apps, ensure_ascii=False), soft_wrap=True)
+        elif not apps:
+            self.console.print(_('No applications found.'))
         else:
-            self.console.print()
-            self.console.print(_('Applications:'))
+            from rich.table import Table
+            from rich import box
+            
+            table = Table(box=box.SIMPLE, show_edge=False, title=_('Applications'))
+            table.add_column('ID', style='cyan', justify='right')
+            table.add_column(_('Name'), style='green')
+            table.add_column(_('Category'), style='magenta')
+            table.add_column(_('Level'), style='blue')
+            table.add_column(_('Description'), style='yellow', max_width=60)
+
             for app in apps:
-                self.console.print(f'  {app.get("id", "")}: {app.get("name", "")}')
+                app_id = str(app.get('id', ''))
+                name = app.get('name', '')
+                
+                cat = app.get('category') or {}
+                category_name = cat.get('name', '') if isinstance(cat, dict) else str(cat)
+                
+                lvl = app.get('level') or {}
+                level_name = lvl.get('name', '') if isinstance(lvl, dict) else str(lvl)
+                
+                desc = app.get('description', '')
+                
+                table.add_row(app_id, name, category_name, level_name, desc)
+
+            self.console.print()
+            self.console.print(table)
 
         sys.exit(ALL_OK)
