@@ -19,6 +19,9 @@ import logging
 import sys
 
 from rich import box
+from rich.columns import Columns
+from rich.markup import escape
+from rich.panel import Panel
 from rich.table import Table
 
 from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
@@ -88,13 +91,7 @@ class MigasFreeApps(MigasFreeCommand):
         elif not apps:
             self.console.print(_('No results found.'))
         else:
-            table = Table(box=box.SIMPLE, show_edge=False, title=_('Applications'))
-            table.add_column('ID', style='cyan', justify='right')
-            table.add_column(_('Name'), style='green')
-            table.add_column(_('Category'), style='magenta')
-            table.add_column(_('Level'), style='blue')
-            table.add_column(_('Description'), style='yellow', max_width=60)
-
+            cards = []
             for app in apps:
                 app_id = str(app.get('id', ''))
                 name = app.get('name', '')
@@ -106,10 +103,51 @@ class MigasFreeApps(MigasFreeCommand):
                 level_name = lvl.get('name', '') if isinstance(lvl, dict) else str(lvl)
 
                 desc = app.get('description', '')
+                score_val = app.get('score') or 1
 
-                table.add_row(app_id, name, category_name, level_name, desc)
+                # Extract related packages for the current project only
+                pkgs_list = []
+                for pbp in app.get('packages_by_project', []):
+                    proj_name = pbp.get('project', {}).get('name', '')
+                    if proj_name and proj_name != self.migas_project:
+                        continue
+                    pkgs_to_install = pbp.get('packages_to_install', [])
+                    if isinstance(pkgs_to_install, list):
+                        pkgs_list.extend(pkgs_to_install)
+                    elif isinstance(pkgs_to_install, str):
+                        pkgs_list.append(pkgs_to_install)
+
+                # Format card elements resembling the desktop play look
+                category_name_escaped = escape(category_name)
+                name_escaped = escape(name)
+                level_name_escaped = escape(level_name)
+                desc_escaped = escape(desc)
+
+                category_str = f'[dim]{category_name_escaped}[/dim]\n' if category_name_escaped else ''
+                name_str = f'[bold]{name_escaped}[/bold]'
+                stars = '[yellow]★[/yellow]' * score_val + '[dim]☆[/dim]' * (5 - score_val)
+                stars_str = f'\n{stars}  [dim]({level_name_escaped})[/dim]' if level_name_escaped else f'\n{stars}'
+                desc_str = f'\n\n{desc_escaped}' if desc_escaped else ''
+
+                pkgs_str = ''
+                if pkgs_list:
+                    pkgs_escaped = [escape(pkg) for pkg in sorted(pkgs_list)]
+                    pkgs_formatted = ', '.join(f'[cyan]{pkg}[/cyan]' for pkg in pkgs_escaped)
+                    pkgs_str = f'\n\n[dim]📦 {pkgs_formatted}[/dim]'
+
+                card_content = f'{category_str}{name_str}{stars_str}{desc_str}{pkgs_str}'
+
+                cards.append(
+                    Panel(
+                        card_content,
+                        title=f'[bold cyan]App ID: {app_id}[/bold cyan]',
+                        title_align='left',
+                        border_style='blue',
+                        width=50,
+                    )
+                )
 
             self.console.print()
-            self.console.print(table)
+            self.console.print(Columns(cards, equal=True, expand=False))
 
         sys.exit(ALL_OK)
