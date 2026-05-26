@@ -18,6 +18,9 @@ import json
 import logging
 import sys
 
+from rich import box
+from rich.table import Table
+
 from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
 from .utils import ALL_OK
 
@@ -30,9 +33,6 @@ logger = logging.getLogger('migasfree_client')
 
 
 class MigasFreeDevices(MigasFreeCommand):
-    def __init__(self):
-        super().__init__()
-
     @require_sign_keys
     @require_computer_id
     def get_assigned_devices(self):
@@ -45,9 +45,7 @@ class MigasFreeDevices(MigasFreeCommand):
     def get_available_devices(self):
         logger.debug('Getting available physical devices')
         data = {'cid': self._computer_id}
-
         response = self._api_call('get_available_devices', data=data)
-
         return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
@@ -59,7 +57,6 @@ class MigasFreeDevices(MigasFreeCommand):
             data['did'] = device_id
 
         response = self._api_call('get_logical_devices', data=data)
-
         return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
@@ -70,7 +67,6 @@ class MigasFreeDevices(MigasFreeCommand):
             data['id'] = capability_id
 
         response = self._api_call('get_capabilities', data=data)
-
         return self._handle_response(response, success_msg=False)
 
     def run(self, args=None):
@@ -91,11 +87,8 @@ class MigasFreeDevices(MigasFreeCommand):
         if getattr(args, 'json', False):
             self.console.print(json.dumps(results, ensure_ascii=False), soft_wrap=True)
         elif not results:
-            self.console.print(_('No devices found.'))
+            self.console.print(_('No results found.'))
         else:
-            from rich.table import Table
-            from rich import box
-
             table = Table(box=box.SIMPLE, show_edge=False, title=_('Devices'))
             table.add_column('ID', style='cyan', justify='right')
             table.add_column(_('Name'), style='green')
@@ -105,9 +98,8 @@ class MigasFreeDevices(MigasFreeCommand):
 
             for item in results:
                 device_id = str(item.get('id', ''))
-                
                 name = item.get('name') or item.get('__str__') or item.get('capability', {}).get('name') or _('Unknown')
-                
+
                 model_col = ''
                 if isinstance(item.get('model'), dict):
                     model_name = item['model'].get('name', '')
@@ -116,18 +108,18 @@ class MigasFreeDevices(MigasFreeCommand):
                 elif isinstance(item.get('capability'), dict):
                     model_col = item['capability'].get('name', '')
                 elif item.get('manufacturer'):
-                    model_col = f"{item.get('manufacturer', '')} {item.get('model', '')}".strip()
+                    model_col = f'{item.get("manufacturer", "")} {item.get("model", "")}'.strip()
 
                 connection = ''
                 if isinstance(item.get('connection'), dict):
                     connection = item['connection'].get('name', '')
-                
+
                 location = item.get('location', '')
                 if not location and isinstance(item.get('data'), dict):
                     location = item['data'].get('LOCATION', '')
 
                 table.add_row(device_id, name, model_col, connection, location)
-                
+
             self.console.print()
             self.console.print(table)
 

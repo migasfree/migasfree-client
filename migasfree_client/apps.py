@@ -18,6 +18,9 @@ import json
 import logging
 import sys
 
+from rich import box
+from rich.table import Table
+
 from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
 from .utils import ALL_OK
 
@@ -30,9 +33,6 @@ logger = logging.getLogger('migasfree_client')
 
 
 class MigasFreeCategories(MigasFreeCommand):
-    def __init__(self):
-        super().__init__()
-
     @require_sign_keys
     def get_categories(self):
         logger.debug('Getting categories')
@@ -48,11 +48,8 @@ class MigasFreeCategories(MigasFreeCommand):
         if getattr(args, 'json', False):
             self.console.print(json.dumps(categories, ensure_ascii=False), soft_wrap=True)
         elif not categories:
-            self.console.print(_('No categories found.'))
+            self.console.print(_('No results found.'))
         else:
-            from rich.table import Table
-            from rich import box
-
             table = Table(box=box.SIMPLE, show_edge=False, title=_('Categories'))
             table.add_column('ID', style='cyan', justify='right')
             table.add_column(_('Name'), style='green')
@@ -67,9 +64,6 @@ class MigasFreeCategories(MigasFreeCommand):
 
 
 class MigasFreeApps(MigasFreeCommand):
-    def __init__(self):
-        super().__init__()
-
     @require_sign_keys
     @require_computer_id
     def get_available_apps(self, category_id=None):
@@ -79,7 +73,6 @@ class MigasFreeApps(MigasFreeCommand):
             data['category'] = category_id
 
         response = self._api_call('get_available_apps', data=data)
-
         return self._handle_response(response, success_msg=False)
 
     def run(self, args=None):
@@ -93,11 +86,8 @@ class MigasFreeApps(MigasFreeCommand):
         if getattr(args, 'json', False):
             self.console.print(json.dumps(apps, ensure_ascii=False), soft_wrap=True)
         elif not apps:
-            self.console.print(_('No applications found.'))
+            self.console.print(_('No results found.'))
         else:
-            from rich.table import Table
-            from rich import box
-            
             table = Table(box=box.SIMPLE, show_edge=False, title=_('Applications'))
             table.add_column('ID', style='cyan', justify='right')
             table.add_column(_('Name'), style='green')
@@ -108,15 +98,15 @@ class MigasFreeApps(MigasFreeCommand):
             for app in apps:
                 app_id = str(app.get('id', ''))
                 name = app.get('name', '')
-                
+
                 cat = app.get('category') or {}
                 category_name = cat.get('name', '') if isinstance(cat, dict) else str(cat)
-                
+
                 lvl = app.get('level') or {}
                 level_name = lvl.get('name', '') if isinstance(lvl, dict) else str(lvl)
-                
+
                 desc = app.get('description', '')
-                
+
                 table.add_row(app_id, name, category_name, level_name, desc)
 
             self.console.print()
