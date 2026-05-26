@@ -39,7 +39,7 @@ class MigasFreeDevices(MigasFreeCommand):
     @require_computer_id
     def get_assigned_devices(self):
         logger.debug('Getting assigned devices')
-        response = self._api_call('get_devices', exit_on_error=True)
+        response = self._api_call('get_devices', data={'id': self._computer_id}, exit_on_error=True)
         return self._handle_response(response, success_msg=False)
 
     @require_sign_keys
