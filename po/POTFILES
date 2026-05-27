@@ -6,8 +6,11 @@
 ../migasfree_client/cli/info.py
 ../migasfree_client/cli/label.py
 ../migasfree_client/cli/packages.py
+../migasfree_client/cli/register.py
+../migasfree_client/cli/search.py
 ../migasfree_client/cli/sync.py
 ../migasfree_client/cli/tags.py
+../migasfree_client/cli/traits.py
 ../migasfree_client/cli/upload.py
 ../migasfree_client/cli/usercheck.py
 ../migasfree_client/command.py
