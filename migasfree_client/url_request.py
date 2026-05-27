@@ -196,6 +196,13 @@ class UrlRequest:
     def _build_mtls_params(self):
         """Build mTLS certificate and verify parameters."""
         if self._mtls_cert and self._mtls_key:
+            if not os.access(self._mtls_key, os.R_OK) or not os.access(self._mtls_cert, os.R_OK):
+                msg = _(
+                    'Permission denied reading mTLS security keys. You must run this command with administrative privileges (root/sudo).'
+                )
+                logger.error(msg)
+                print(f'Error: {msg}', file=sys.stderr)
+                sys.exit(errno.EPERM)
             cert_param = (self._mtls_cert, self._mtls_key)
             verify_param = self._ca_cert if self._ca_cert else False
             return cert_param, verify_param
