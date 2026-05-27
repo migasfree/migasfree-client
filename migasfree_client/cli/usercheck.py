@@ -45,7 +45,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
             self._quiet = True
 
         username = args.user
-        password = args.pwd
+        password = args.password
 
         authenticated = False
         is_privileged = False

@@ -737,7 +737,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
             sys.exit(errno.EPROTO)
 
     def _handle_register_command(self, args):
-        self.cmd_register_computer(args.user, getattr(args, 'pwd', None), getattr(args, 'assume_yes', False))
+        self.cmd_register_computer(args.user, getattr(args, 'password', None), getattr(args, 'assume_yes', False))
 
     def _handle_search_command(self, args):
         self.cmd_search(' '.join(args.pattern))

@@ -43,7 +43,7 @@ def parse_args(argv):
 
     subparser_register = subparsers.add_parser('register', help=_('Register computer at server'))
     subparser_register.add_argument('-u', '--user', action='store', help=_('User to register computer at server'))
-    subparser_register.add_argument('-p', '--pwd', action='store', help=_('User password'))
+    subparser_register.add_argument('-p', '--password', action='store', help=_('User password'))
     subparser_register.add_argument('-y', '--assume-yes', action='store_true', help=_('Automatic yes to prompts'))
 
     subparser_search = subparsers.add_parser('search', help=_('Search package in repositories'))
@@ -101,7 +101,7 @@ def parse_args(argv):
 
     subparser_upload = subparsers.add_parser('upload', help=_('Upload files to server'))
     subparser_upload.add_argument('-u', '--user', action='store', help=_('Authorized user to upload at server'))
-    subparser_upload.add_argument('-p', '--pwd', action='store', help=_('User password'))
+    subparser_upload.add_argument('-p', '--password', action='store', help=_('User password'))
     subparser_upload.add_argument('-j', '--project', action='store', help=_('Project to upload files'))
     subparser_upload.add_argument('-s', '--store', action='store', help=_('Store at server'))
 
@@ -185,7 +185,7 @@ def parse_args(argv):
         'user-check', help=_('Verify local credentials and administrative privileges')
     )
     subparser_user_check.add_argument('-u', '--user', action='store', required=True, help=_('Username to verify'))
-    subparser_user_check.add_argument('-p', '--pwd', action='store', required=True, help=_('Password to verify'))
+    subparser_user_check.add_argument('-p', '--password', action='store', required=True, help=_('Password to verify'))
 
     subparser_network = subparsers.add_parser('network', help=_('View network information'))
     subparser_network.add_argument(

@@ -200,8 +200,8 @@ class MigasFreeUpload(MigasFreeCommand):
         # assign config options
         if args.user:
             self.packager_user = args.user
-        if args.pwd:
-            self.packager_pwd = args.pwd
+        if args.password:
+            self.packager_pwd = args.password
         if args.project:
             self.packager_project = args.project
         if args.store:

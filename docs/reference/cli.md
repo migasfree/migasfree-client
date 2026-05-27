@@ -78,7 +78,7 @@ migasfree register [options]
 | Option             | Description                              |
 | ------------------ | ---------------------------------------- |
 | `-u`, `--user`     | Username for authentication              |
-| `-p`, `--pwd`      | Password (will prompt if not provided)   |
+| `-p`, `--password` | Password (will prompt if not provided)   |
 
 **Examples:**
 
