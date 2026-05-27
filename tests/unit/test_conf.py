@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from migasfree_client.conf import MigasFreeConf
+from migasfree_client.cli.conf import MigasFreeConf
 
 
 class TestMigasFreeConf:

@@ -24,8 +24,8 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
-from .command import MigasFreeCommand, require_computer_id, require_sign_keys
-from .utils import ALL_OK
+from ..command import MigasFreeCommand, require_computer_id, require_sign_keys
+from ..utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'

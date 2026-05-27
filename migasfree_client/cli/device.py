@@ -23,8 +23,8 @@ from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table
 
-from .command import MigasFreeCommand, require_computer_id, require_sign_keys
-from .utils import ALL_OK
+from ..command import MigasFreeCommand, require_computer_id, require_sign_keys
+from ..utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -274,9 +274,7 @@ class MigasFreeDevices(MigasFreeCommand):
             logical_lines = []
             for log_dev in sorted(dev_data['logical_devices'], key=lambda x: x['name']):
                 bullet = '[green]✔ DEFAULT[/green]' if log_dev.get('is_default') else '[cyan]•[/cyan]'
-                logical_lines.append(
-                    f'  {bullet} [dim]({log_dev["id"]})[/dim] [magenta]{log_dev["name"]}[/magenta]'
-                )
+                logical_lines.append(f'  {bullet} [dim]({log_dev["id"]})[/dim] [magenta]{log_dev["name"]}[/magenta]')
 
             logical_content = '\n'.join(logical_lines)
 
@@ -290,10 +288,7 @@ class MigasFreeDevices(MigasFreeCommand):
             # name (model.manufacturer.name model.name)
             phys_name = dev_data.get('name') or _('Unknown')
             model_col = dev_data.get('model_col') or ''
-            if model_col:
-                name_model_line = f'{phys_name} ({model_col})'
-            else:
-                name_model_line = phys_name
+            name_model_line = f'{phys_name} ({model_col})' if model_col else phys_name
 
             # NAME (si existe) o model.manufacturer.name model.name
             custom_name = dev_data.get('custom_name')
@@ -378,7 +373,7 @@ class MigasFreeDevices(MigasFreeCommand):
                     custom_name = ''
 
             conn_name = inner_keys[0]
-            model_col = f"{inner_item.get('manufacturer', '')} {inner_item.get('model', '')}".strip()
+            model_col = f'{inner_item.get("manufacturer", "")} {inner_item.get("model", "")}'.strip()
 
             if phys_name not in devices_dict:
                 devices_dict[phys_name] = {

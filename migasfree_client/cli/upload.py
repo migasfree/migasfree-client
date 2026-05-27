@@ -20,9 +20,9 @@ import logging
 import os
 import sys
 
-from .command import MigasFreeCommand, lock_file_context
-from .settings import KEYS_PATH
-from .utils import ALL_OK, build_magic, sanitize_path
+from ..command import MigasFreeCommand, lock_file_context
+from ..settings import KEYS_PATH
+from ..utils import ALL_OK, build_magic, sanitize_path
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'

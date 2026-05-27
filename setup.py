@@ -95,6 +95,7 @@ setup(
     version='5.0',
     packages=[
         'migasfree_client',
+        'migasfree_client.cli',
         'migasfree_client.devices',
         'migasfree_client.devices.plugins',
         'migasfree_client.mixins',

@@ -5,7 +5,7 @@ Tests for MigasFreeApps and MigasFreeCategories classes.
 import unittest
 from unittest.mock import MagicMock, patch
 
-from migasfree_client.apps import MigasFreeApps, MigasFreeCategories
+from migasfree_client.cli.apps import MigasFreeApps, MigasFreeCategories
 
 
 class TestMigasFreeCategories(unittest.TestCase):

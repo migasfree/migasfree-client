@@ -1,18 +1,3 @@
-# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 """
 Tests for sync-related functionality.
 """
@@ -23,7 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
-from migasfree_client.sync import MigasFreeSync
+from migasfree_client.cli.sync import MigasFreeSync
 
 
 class TestMigasFreeSync(unittest.TestCase):
@@ -230,8 +215,8 @@ class TestMigasFreeSync(unittest.TestCase):
             self.assertTrue(mock_exe.called)
 
     @patch('sys.exit')
-    @patch('migasfree_client.sync.MigasFreeSync._init_command')
-    @patch('migasfree_client.sync.MigasFreeSync._handle_sync_command')
+    @patch('migasfree_client.cli.sync.MigasFreeSync._init_command')
+    @patch('migasfree_client.cli.sync.MigasFreeSync._handle_sync_command')
     def test_run_dispatch_sync(self, mock_handle, mock_init, mock_exit):
         """Test main run method dispatches to sync handler"""
         args = MagicMock()
@@ -240,7 +225,7 @@ class TestMigasFreeSync(unittest.TestCase):
         mock_handle.assert_called_with(args)
 
     @patch('sys.exit', side_effect=SystemExit)
-    @patch('migasfree_client.sync.MigasFreeSync._init_command')
+    @patch('migasfree_client.cli.sync.MigasFreeSync._init_command')
     def test_run_usage_on_no_cmd(self, mock_init, mock_exit):
         """Test show usage when no command is provided"""
         self.sync.console = MagicMock()

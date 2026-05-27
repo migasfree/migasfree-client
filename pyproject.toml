@@ -56,9 +56,10 @@ migasfree = "migasfree_client.__main__:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-  "migasfree_client", "migasfree_client.devices", "migasfree_client.pms",
-  "migasfree_client.devices.plugins", "migasfree_client.pms.plugins",
-  "migasfree_client.utils", "migasfree_client.mixins"
+  "migasfree_client", "migasfree_client.cli", "migasfree_client.devices",
+  "migasfree_client.pms", "migasfree_client.devices.plugins",
+  "migasfree_client.pms.plugins", "migasfree_client.utils",
+  "migasfree_client.mixins"
 ]
 
 [tool.setuptools.dynamic]

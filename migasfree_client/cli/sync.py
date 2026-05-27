@@ -24,15 +24,15 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 
-from . import (
+from .. import (
     availability,
     settings,
     utils,
 )
-from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
-from .mixins.evaluator import CodeEvaluatorMixin
-from .mixins.hardware import HardwareCollectorMixin
-from .mixins.software import SoftwareManagerMixin
+from ..command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
+from ..mixins.evaluator import CodeEvaluatorMixin
+from ..mixins.hardware import HardwareCollectorMixin
+from ..mixins.software import SoftwareManagerMixin
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'

@@ -45,6 +45,7 @@ graph TD
 | **State Synchronization** | `sync`, `traits` | Orchestrates full system synchronization including attribute uploads, package updates, hardware/software snapshots, and traits execution. |
 | **Package Operations** | `install`, `purge`, `search` | Exposes standard package management routines mapped dynamically to the local OS package manager (APT, DNF, PACMAN, Zypper, WPT). |
 | **System Classification** | `tags`, `info`, `label` | Allows reading and writing system taxonomy labels, managing group tags, and retrieving unique system IDs. |
+| **Device & Peripherals** | `device` | Provisions, manages, and assigns logical and physical devices/printers based on telemetry and server-side rules. |
 | **Resource Distribution**| `upload` | Empowers authorized packagers to upload packages and package sets directly to the Migasfree server repositories. |
 | **Client Configuration** | `conf` | Manages local client options (`/etc/migasfree.conf`) dynamically via the CLI. |
 
@@ -59,6 +60,7 @@ graph TD
 | `tags` | View or assign tags to categorize the computer on the server. | **Root / Administrator** | [CLI Tags Command](./pages/03-cli-command-tags.md) |
 | `upload` | Push custom packages or files to server-side repositories. | **User (Authorized Packager)** | [CLI Upload Command](./pages/04-cli-command-upload.md) |
 | `conf` | Configure local settings (Server URL, proxy, package cache, auto-updates). | **Root / Administrator** | [CLI Conf Command](./pages/05-cli-command-conf.md) |
+| `device` | Query, assign, or configure physical and logical devices/printers. | **Root / Administrator** | [CLI Sync Command](./pages/01-cli-command-sync.md#device) |
 | `info` | Retrieve comprehensive computer metadata and telemetry (UUID, CPU, RAM, status, network). | **Root / Administrator** | [CLI Sync Command](./pages/01-cli-command-sync.md#info) |
 | `attributes` | Query assigned organizational attributes and identity (CID). | **Root / Administrator** | N/A |
 | `traits` | Query system attributes and configuration traits retrieved from server. | **Public** | [CLI Sync Command](./pages/01-cli-command-sync.md#traits) |
@@ -74,3 +76,4 @@ graph TD
 >
 > - **Python 3.6+ Compatibility**: The entire client codebase strictly maintains compatibility with Python 3.6+. Modern features (e.g., structural pattern matching, f-strings with `=` specifiers) are prohibited to ensure operation on legacy operating systems.
 > - **Platform Detection**: Developers MUST use the built-in platform detection helpers in `migasfree_client.utils` (`is_windows()`, `is_linux()`) instead of raw `sys.platform` or negations to ensure seamless cross-platform logic.
+> - **Modular CLI Architecture**: CLI subcommands are grouped under the `migasfree_client.cli` subpackage. Each command inherits from `MigasFreeCommand` and is loaded dynamically. Developers must register new subcommand modules inside both `setup.py` and `pyproject.toml` to ensure correct setuptools packaging.

@@ -2,7 +2,7 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch
 
-from migasfree_client.packages import MigasFreePackages
+from migasfree_client.cli.packages import MigasFreePackages
 
 
 class TestMigasFreePackages(unittest.TestCase):

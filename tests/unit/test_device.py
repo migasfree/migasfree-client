@@ -5,7 +5,7 @@ Tests for MigasFreeDevices class.
 import unittest
 from unittest.mock import MagicMock, patch
 
-from migasfree_client.device import MigasFreeDevices
+from migasfree_client.cli.device import MigasFreeDevices
 
 
 class TestMigasFreeDevices(unittest.TestCase):

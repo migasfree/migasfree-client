@@ -19,8 +19,8 @@ import sys
 
 from rich.table import Table
 
-from .command import MigasFreeCommand, require_computer_id, require_sign_keys
-from .utils import ALL_OK
+from ..command import MigasFreeCommand, require_computer_id, require_sign_keys
+from ..utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'

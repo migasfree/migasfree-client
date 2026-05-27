@@ -1,18 +1,3 @@
-# Copyright (c) 2026 Jose Antonio Chavarría <jachavar@gmail.com>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 """
 Tests for MigasFreeInfo class.
 """
@@ -22,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from rich.table import Table
 
-from migasfree_client.info import MigasFreeInfo
+from migasfree_client.cli.info import MigasFreeInfo
 
 
 class TestMigasFreeInfo(unittest.TestCase):
@@ -44,7 +29,7 @@ class TestMigasFreeInfo(unittest.TestCase):
             self.info.console = MagicMock()
             self.info._check_sign_keys = MagicMock(return_value=True)
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    @patch('migasfree_client.cli.info.MigasFreeInfo.get_info')
     def test_show_info_all(self, mock_get_info):
         """Test showing all computer info (table mode)"""
         mock_get_info.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
@@ -58,7 +43,7 @@ class TestMigasFreeInfo(unittest.TestCase):
         )
         self.assertIsNotNone(table_call)
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    @patch('migasfree_client.cli.info.MigasFreeInfo.get_info')
     def test_show_info_quiet(self, mock_get_info):
         """Test showing information in quiet mode (tab separated)"""
         mock_get_info.return_value = {'name': 'test-comp', 'search': 'TEST-SEARCH', 'uuid': 'TEST-UUID'}
@@ -67,7 +52,7 @@ class TestMigasFreeInfo(unittest.TestCase):
 
         self.info.console.print.assert_called_with('123\ttest-comp\tTEST-SEARCH\tTEST-UUID')
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    @patch('migasfree_client.cli.info.MigasFreeInfo.get_info')
     def test_show_info_specific_key(self, mock_get_info):
         """Test showing only a specific key"""
         mock_get_info.return_value = {'search': 'TEST-SEARCH'}
@@ -76,7 +61,7 @@ class TestMigasFreeInfo(unittest.TestCase):
 
         self.info.console.print.assert_called_with('TEST-SEARCH')
 
-    @patch('migasfree_client.info.MigasFreeInfo.get_info')
+    @patch('migasfree_client.cli.info.MigasFreeInfo.get_info')
     def test_show_info_id_only(self, mock_get_info):
         """Test showing only computer ID"""
         self.info._quiet = True

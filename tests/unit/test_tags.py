@@ -1,22 +1,7 @@
-# Copyright (c) 2025-2026 Jose Antonio Chavarría <jachavar@gmail.com>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 import unittest
 from unittest.mock import MagicMock, patch
 
-from migasfree_client.tags import MigasFreeTags
+from migasfree_client.cli.tags import MigasFreeTags
 
 
 class TestMigasFreeTags(unittest.TestCase):
@@ -50,7 +35,7 @@ class TestMigasFreeTags(unittest.TestCase):
         self.assertEqual(result, ['LOC-office1', 'DEP-marketing'])
 
     @patch('sys.exit')
-    @patch('migasfree_client.tags.MigasFreeTags.operation_failed')
+    @patch('migasfree_client.cli.tags.MigasFreeTags.operation_failed')
     def test_sanitize_invalid_format(self, mock_failed, mock_exit):
         """Test sanitization fails when tag format is incorrect"""
         tag_list = ['invalidtag']
@@ -58,11 +43,11 @@ class TestMigasFreeTags(unittest.TestCase):
         mock_failed.assert_called_once()
         mock_exit.assert_called_once()
 
-    @patch('migasfree_client.tags.execute')
-    @patch('migasfree_client.tags.is_zenity', return_value=True)
-    @patch('migasfree_client.tags.is_xsession', return_value=True)
-    @patch('migasfree_client.tags.is_windows', return_value=False)
-    @patch('migasfree_client.tags.is_linux', return_value=True)
+    @patch('migasfree_client.cli.tags.execute')
+    @patch('migasfree_client.cli.tags.is_zenity', return_value=True)
+    @patch('migasfree_client.cli.tags.is_xsession', return_value=True)
+    @patch('migasfree_client.cli.tags.is_windows', return_value=False)
+    @patch('migasfree_client.cli.tags.is_linux', return_value=True)
     def test_select_tags_zenity_linux(self, mock_linux, mock_windows, mock_xsession, mock_zenity, mock_execute):
         """Test tag selection using zenity on Linux"""
         mock_execute.return_value = (0, 'LOC-office1\nDEP-marketing\n', '')
@@ -73,10 +58,10 @@ class TestMigasFreeTags(unittest.TestCase):
 
         self.assertEqual(selected, ['LOC-office1', 'DEP-marketing'])
 
-    @patch('migasfree_client.tags.execute')
-    @patch('migasfree_client.tags.is_windows', return_value=False)
-    @patch('migasfree_client.tags.is_zenity', return_value=False)
-    @patch('migasfree_client.tags.is_xsession', return_value=False)
+    @patch('migasfree_client.cli.tags.execute')
+    @patch('migasfree_client.cli.tags.is_windows', return_value=False)
+    @patch('migasfree_client.cli.tags.is_zenity', return_value=False)
+    @patch('migasfree_client.cli.tags.is_xsession', return_value=False)
     def test_select_tags_dialog(self, mock_xsession, mock_zenity, mock_windows, mock_execute):
         """Test tag selection using dialog when GUI is not available"""
         mock_execute.return_value = (0, 'LOC-office1\nDEP-office2\n', '')
@@ -100,7 +85,7 @@ class TestMigasFreeTags(unittest.TestCase):
             self.tags.get_available_tags()
             mock_api.assert_called_with('get_available_tags', {'id': '123'}, exit_on_error=False)
 
-    @patch('migasfree_client.tags.MigasFreeSync')
+    @patch('migasfree_client.cli.tags.MigasFreeSync')
     def test_apply_rules(self, mock_sync_class):
         """Test applying rules initializes MigasFreeSync and calls its methods"""
         mock_sync_instance = mock_sync_class.return_value
@@ -110,8 +95,8 @@ class TestMigasFreeTags(unittest.TestCase):
         mock_sync_instance.upload_attributes.assert_called_once()
 
     @patch('sys.exit')
-    @patch('migasfree_client.tags.MigasFreeTags._init_command')
-    @patch('migasfree_client.tags.lock_file_context')
+    @patch('migasfree_client.cli.tags.MigasFreeTags._init_command')
+    @patch('migasfree_client.cli.tags.lock_file_context')
     def test_run_set_tags(self, mock_lock, mock_init, mock_exit):
         """Test run dispatcher for setting tags"""
         args = MagicMock()

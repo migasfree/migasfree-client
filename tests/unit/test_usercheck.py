@@ -8,7 +8,7 @@ if sys.platform == 'win32':
     sys.modules['pwd'] = MagicMock()
     sys.modules['grp'] = MagicMock()
 
-from migasfree_client.usercheck import MigasFreeUserCheck
+from migasfree_client.cli.usercheck import MigasFreeUserCheck
 
 
 class TestMigasFreeUserCheck(unittest.TestCase):

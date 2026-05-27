@@ -1,23 +1,8 @@
-# Copyright (c) 2026 Jose Antonio Chavarría <jachavar@gmail.com>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 import errno
 import unittest
 from unittest.mock import MagicMock, patch
 
-from migasfree_client.upload import MigasFreeUpload
+from migasfree_client.cli.upload import MigasFreeUpload
 
 
 class TestMigasFreeUpload(unittest.TestCase):
@@ -25,8 +10,8 @@ class TestMigasFreeUpload(unittest.TestCase):
     @patch('migasfree_client.utils.get_config', return_value={})
     @patch('migasfree_client.command.logging.config.dictConfig')
     def setUp(self, mock_log_config, mock_config, mock_root):
-        with patch('migasfree_client.upload.MigasFreeUpload._ssl_cert'), patch(
-            'migasfree_client.upload.MigasFreeUpload._init_url_request'
+        with patch('migasfree_client.cli.upload.MigasFreeUpload._ssl_cert'), patch(
+            'migasfree_client.cli.upload.MigasFreeUpload._init_url_request'
         ):
             self.upload = MigasFreeUpload()
             self.upload.console = MagicMock()
@@ -38,8 +23,8 @@ class TestMigasFreeUpload(unittest.TestCase):
             self.upload._public_key = 'pub'
 
     @patch('os.path.isfile', return_value=True)
-    @patch('migasfree_client.upload.build_magic')
-    @patch('migasfree_client.upload.MigasFreeUpload._check_sign_keys')
+    @patch('migasfree_client.cli.upload.build_magic')
+    @patch('migasfree_client.cli.upload.MigasFreeUpload._check_sign_keys')
     def test_upload_file_success(self, mock_check, mock_magic, mock_isfile):
         """Test successful single file upload"""
         self.upload._file = 'archive.pkg'
@@ -65,7 +50,7 @@ class TestMigasFreeUpload(unittest.TestCase):
     @patch('os.path.isdir', return_value=True)
     @patch('os.walk', return_value=[('/dir', [], ['file1.pkg'])])
     @patch('os.path.isfile', return_value=True)
-    @patch('migasfree_client.upload.MigasFreeUpload._check_sign_keys')
+    @patch('migasfree_client.cli.upload.MigasFreeUpload._check_sign_keys')
     def test_upload_set_success(self, mock_check, mock_isfile, mock_walk, mock_isdir):
         """Test successful directory (package set) upload"""
         self.upload._directory = '/dir'
@@ -98,8 +83,8 @@ class TestMigasFreeUpload(unittest.TestCase):
         self.assertEqual(self.upload.packager_pwd, 'pass')
 
     @patch('sys.exit')
-    @patch('migasfree_client.upload.MigasFreeUpload._init_command')
-    @patch('migasfree_client.upload.lock_file_context')
+    @patch('migasfree_client.cli.upload.MigasFreeUpload._init_command')
+    @patch('migasfree_client.cli.upload.lock_file_context')
     def test_run_file_upload(self, mock_lock, mock_init, mock_exit):
         """Test CLI run dispatch for file upload"""
         args = MagicMock()

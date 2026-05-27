@@ -22,9 +22,9 @@ import re
 import sys
 from urllib.parse import urlparse
 
-from . import settings, utils
-from .command import MigasFreeCommand
-from .mtls import get_mtls_ca_file
+from .. import settings, utils
+from ..command import MigasFreeCommand
+from ..mtls import get_mtls_ca_file
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')

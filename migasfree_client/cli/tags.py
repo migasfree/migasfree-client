@@ -21,10 +21,9 @@ import logging
 import os
 import sys
 
-from .command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
-from .settings import ICON_PATH
-from .sync import MigasFreeSync
-from .utils import (
+from ..command import MigasFreeCommand, lock_file_context, require_computer_id, require_sign_keys
+from ..settings import ICON_PATH
+from ..utils import (
     ALL_OK,
     execute,
     is_linux,
@@ -32,6 +31,7 @@ from .utils import (
     is_xsession,
     is_zenity,
 )
+from .sync import MigasFreeSync
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'

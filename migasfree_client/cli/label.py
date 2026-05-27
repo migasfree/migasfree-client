@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2025 Jose Antonio Chavarría <jachavar@gmail.com>
+# Copyright (c) 2015-2026 Jose Antonio Chavarría <jachavar@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@ import logging
 import os
 import sys
 
-from .command import MigasFreeCommand, require_computer_id, require_sign_keys
-from .settings import ICON_PATH, TMP_PATH
-from .utils import ALL_OK, execute_as_user, is_linux, is_windows, write_file
+from ..command import MigasFreeCommand, require_computer_id, require_sign_keys
+from ..settings import ICON_PATH, TMP_PATH
+from ..utils import ALL_OK, execute_as_user, is_linux, is_windows, write_file
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'

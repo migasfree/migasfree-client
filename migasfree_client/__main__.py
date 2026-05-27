@@ -236,27 +236,27 @@ def main(argv=None):
         sys.stdout.flush()
 
     if args.cmd in ['register', 'sync', 'install', 'purge', 'search', 'traits']:
-        from .sync import MigasFreeSync
+        from .cli.sync import MigasFreeSync
 
         MigasFreeSync().run(args)
     elif args.cmd == 'label':
-        from .label import MigasFreeLabel
+        from .cli.label import MigasFreeLabel
 
         MigasFreeLabel().run(args)
     elif args.cmd == 'tags':
-        from .tags import MigasFreeTags
+        from .cli.tags import MigasFreeTags
 
         MigasFreeTags().run(args)
     elif args.cmd == 'upload':
-        from .upload import MigasFreeUpload
+        from .cli.upload import MigasFreeUpload
 
         MigasFreeUpload().run(args)
     elif args.cmd == 'info':
-        from .info import MigasFreeInfo
+        from .cli.info import MigasFreeInfo
 
         MigasFreeInfo().run(args)
     elif args.cmd == 'attributes':
-        from .attributes import MigasFreeAttributes
+        from .cli.attributes import MigasFreeAttributes
 
         MigasFreeAttributes().run(args)
     elif args.cmd == 'version':
@@ -272,15 +272,15 @@ def main(argv=None):
 
         MigasFreeCommand().cmd_import_mtls(args.cert_file)
     elif args.cmd == 'conf':
-        from .conf import MigasFreeConf
+        from .cli.conf import MigasFreeConf
 
         MigasFreeConf().run(args)
     elif args.cmd == 'packages':
-        from .packages import MigasFreePackages
+        from .cli.packages import MigasFreePackages
 
         MigasFreePackages().run(args)
     elif args.cmd == 'user-check':
-        from .usercheck import MigasFreeUserCheck
+        from .cli.usercheck import MigasFreeUserCheck
 
         MigasFreeUserCheck().run(args)
     elif args.cmd == 'network':
@@ -288,15 +288,15 @@ def main(argv=None):
 
         MigasFreeCommand().cmd_network(args)
     elif args.cmd == 'apps':
-        from .apps import MigasFreeApps
+        from .cli.apps import MigasFreeApps
 
         MigasFreeApps().run(args)
     elif args.cmd == 'categories':
-        from .apps import MigasFreeCategories
+        from .cli.apps import MigasFreeCategories
 
         MigasFreeCategories().run(args)
     elif args.cmd == 'devices':
-        from .device import MigasFreeDevices
+        from .cli.device import MigasFreeDevices
 
         MigasFreeDevices().run(args)
 
