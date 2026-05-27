@@ -222,7 +222,7 @@ def parse_args(argv):
         parser.print_help()
         sys.exit(ALL_OK)
 
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def main(argv=None):
