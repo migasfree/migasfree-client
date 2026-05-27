@@ -126,7 +126,7 @@ class TestMigasFreeDevices(unittest.TestCase):
                         'driver': 'hp-laserjet',
                         'capability': 'color',
                         'manufacturer': 'HP',
-                        'connection': {'LOCATION': 'Seminario PLB'},
+                        'connection': {'LOCATION': 'Seminario PLB', 'IP': '192.168.1.103', 'NAME': 'Fotocopiadora'},
                         '__str__': 'HP_DesignJet_1050C__color__cups',
                     }
                 }
@@ -168,7 +168,7 @@ class TestMigasFreeDevices(unittest.TestCase):
                 'model': 'DesignJet 1050C',
                 'manufacturer': 'HP',
                 'location': None,
-                'data': {'LOCATION': 'Seminario PLB'},
+                'data': {'LOCATION': 'Seminario PLB', 'IP': '192.168.1.103', 'NAME': 'Fotocopiadora'},
             }
         ]
         with patch.object(self.devices, 'get_available_devices', return_value=mock_results):

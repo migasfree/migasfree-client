@@ -132,16 +132,11 @@ class MigasFreeDevices(MigasFreeCommand):
         sys.exit(ALL_OK)
 
     def _print_available_physical_devices(self, results):
-        table = Table(box=box.SIMPLE, show_edge=False, title=_('Available Physical Devices'))
-        table.add_column('ID', style='cyan', justify='right')
-        table.add_column(_('Name'), style='green')
-        table.add_column(_('Model'), style='magenta')
-        table.add_column(_('Connection'), style='blue')
-        table.add_column(_('Location'), style='yellow')
-
+        devices_dict = {}
         for item in results:
-            device_id = str(item.get('id', ''))
-            name = item.get('name') or _('Unknown')
+            device_id = item.get('id')
+            if not device_id:
+                continue
 
             model_col = ''
             if isinstance(item.get('model'), dict):
@@ -159,19 +154,71 @@ class MigasFreeDevices(MigasFreeCommand):
             if not location and isinstance(item.get('data'), dict):
                 location = item['data'].get('LOCATION', '')
 
-            table.add_row(device_id, name, model_col, connection, location)
+            ip = ''
+            if isinstance(item.get('data'), dict):
+                ip = item['data'].get('IP') or ''
 
-        self.console.print()
-        self.console.print(table)
+            custom_name = ''
+            if isinstance(item.get('data'), dict):
+                custom_name = item['data'].get('NAME') or ''
+                if custom_name in ('undefined', ''):
+                    custom_name = ''
+
+            devices_dict[device_id] = {
+                'id': device_id,
+                'name': item.get('name') or _('Unknown'),
+                'model_col': model_col,
+                'custom_name': custom_name,
+                'location': location,
+                'connection_name': connection,
+                'ip': ip,
+                'logical_devices': [],
+            }
+
+        self._print_device_cards(devices_dict)
 
     def _print_logical_devices(self, results):
-        # Build physical devices map to get locations
+        # Build physical devices map to get locations, IPs, connections, models, and custom names
         phys_locations = {}
+        phys_ips = {}
+        phys_connections = {}
+        phys_models = {}
+        phys_names = {}
         try:
             available = self.get_available_devices()
             for dev in available:
-                if dev.get('id'):
-                    phys_locations[dev['id']] = dev.get('location') or ''
+                dev_id = dev.get('id')
+                if dev_id:
+                    loc = dev.get('location') or ''
+                    if not loc and isinstance(dev.get('data'), dict):
+                        loc = dev['data'].get('LOCATION') or ''
+                    phys_locations[dev_id] = loc
+
+                    ip_val = ''
+                    if isinstance(dev.get('data'), dict):
+                        ip_val = dev['data'].get('IP') or ''
+                    phys_ips[dev_id] = ip_val
+
+                    name_val = ''
+                    if isinstance(dev.get('data'), dict):
+                        name_val = dev['data'].get('NAME') or ''
+                        if name_val in ('undefined', ''):
+                            name_val = ''
+                    phys_names[dev_id] = name_val
+
+                    conn_name = ''
+                    if isinstance(dev.get('connection'), dict):
+                        conn_name = dev['connection'].get('name') or ''
+                    phys_connections[dev_id] = conn_name
+
+                    model_col = ''
+                    if isinstance(dev.get('model'), dict):
+                        model_name = dev['model'].get('name', '')
+                        manufacturer = dev['model'].get('manufacturer', {}).get('name', '')
+                        model_col = f'{manufacturer} {model_name}'.strip()
+                    elif dev.get('manufacturer'):
+                        model_col = f'{dev.get("manufacturer", "")} {dev.get("model", "")}'.strip()
+                    phys_models[dev_id] = model_col
         except Exception:
             pass
 
@@ -182,11 +229,25 @@ class MigasFreeDevices(MigasFreeCommand):
             if not dev_id:
                 continue
 
+            model_col = phys_models.get(dev_id) or ''
+            custom_name = phys_names.get(dev_id) or ''
+            if not custom_name and not model_col:
+                str_val = item.get('__str__') or ''
+                parts = str_val.split('__')
+                if len(parts) == 3:
+                    custom_name = parts[0]
+                elif len(parts) >= 4:
+                    model_col = f'{parts[0]} {parts[1]}'.strip()
+
             if dev_id not in devices_dict:
                 devices_dict[dev_id] = {
+                    'id': dev_id,
                     'name': dev_info.get('name') or _('Unknown'),
+                    'model_col': model_col,
+                    'custom_name': custom_name,
                     'location': phys_locations.get(dev_id) or '',
-                    '__str__': item.get('__str__') or '',
+                    'connection_name': phys_connections.get(dev_id) or '',
+                    'ip': phys_ips.get(dev_id) or '',
                     'logical_devices': [],
                 }
 
@@ -197,31 +258,75 @@ class MigasFreeDevices(MigasFreeCommand):
                 {
                     'id': item.get('id', ''),
                     'name': logical_name,
+                    'is_default': False,
                 }
             )
 
+        self._print_device_cards(devices_dict)
+
+    def _print_device_cards(self, devices_dict):
+        if not devices_dict:
+            self.console.print(_('No results found.'))
+            return
+
         cards = []
-        for dev_id, dev_data in sorted(devices_dict.items()):
+        for _key, dev_data in sorted(devices_dict.items()):
             logical_lines = []
             for log_dev in sorted(dev_data['logical_devices'], key=lambda x: x['name']):
+                bullet = '[green]✔ DEFAULT[/green]' if log_dev.get('is_default') else '[cyan]•[/cyan]'
                 logical_lines.append(
-                    f'  [cyan]•[/cyan] [dim]({log_dev["id"]})[/dim] [magenta]{log_dev["name"]}[/magenta]'
+                    f'  {bullet} [dim]({log_dev["id"]})[/dim] [magenta]{log_dev["name"]}[/magenta]'
                 )
 
             logical_content = '\n'.join(logical_lines)
-            str_val = dev_data.get('__str__')
-            str_line = f'\n[dim]{str_val}[/dim]' if str_val else ''
-            loc = dev_data['location']
+
+            # Header is device id (or name if no id)
+            title_name = str(dev_data.get('id') or '')
+            if title_name:
+                title = f'[bold cyan]Device ID: {title_name}[/bold cyan]'
+            else:
+                title = f'[bold cyan]{dev_data.get("name")}[/bold cyan]'
+
+            # name (model.manufacturer.name model.name)
+            phys_name = dev_data.get('name') or _('Unknown')
+            model_col = dev_data.get('model_col') or ''
+            if model_col:
+                name_model_line = f'{phys_name} ({model_col})'
+            else:
+                name_model_line = phys_name
+
+            # NAME (si existe) o model.manufacturer.name model.name
+            custom_name = dev_data.get('custom_name')
+            main_bold_val = custom_name or model_col or dev_data.get('name') or _('Unknown')
+            main_bold_str = f'\n[bold green]{main_bold_val}[/bold green]'
+
+            # LOCATION (si existe)
+            loc = dev_data.get('location')
             loc_str = f'\n[dim]📍 {loc}[/dim]' if loc else ''
 
-            card_content = f'[bold green]{dev_data["name"]}[/bold green]{str_line}{loc_str}\n\n{logical_content}'
+            # connection.name (IP si corresponde)
+            conn_name = dev_data.get('connection_name')
+            ip = dev_data.get('ip')
+            conn_str = ''
+            if conn_name and ip:
+                conn_str = f'{conn_name} ({ip})'
+            elif conn_name:
+                conn_str = conn_name
+            elif ip:
+                conn_str = ip
+            conn_line = f'\n[dim]🔌 {conn_str}[/dim]' if conn_str else ''
+
+            if logical_content:
+                card_content = f'{name_model_line}{main_bold_str}{loc_str}{conn_line}\n\n{logical_content}'
+            else:
+                card_content = f'{name_model_line}{main_bold_str}{loc_str}{conn_line}'
 
             cards.append(
                 Panel(
                     card_content,
-                    title=f'[bold cyan]Device ID: {dev_id}[/bold cyan]',
+                    title=title,
                     title_align='left',
-                    border_style='blue',
+                    border_style='green' if any(x.get('is_default') for x in dev_data['logical_devices']) else 'blue',
                     width=50,
                 )
             )
@@ -262,15 +367,28 @@ class MigasFreeDevices(MigasFreeCommand):
 
             phys_name = inner_item.get('name') or _('Unknown')
             location = ''
+            ip = ''
+            custom_name = ''
             conn_data = inner_item.get('connection') or {}
             if isinstance(conn_data, dict):
                 location = conn_data.get('LOCATION') or ''
+                ip = conn_data.get('IP') or ''
+                custom_name = conn_data.get('NAME') or ''
+                if custom_name in ('undefined', ''):
+                    custom_name = ''
+
+            conn_name = inner_keys[0]
+            model_col = f"{inner_item.get('manufacturer', '')} {inner_item.get('model', '')}".strip()
 
             if phys_name not in devices_dict:
                 devices_dict[phys_name] = {
+                    'id': inner_item.get('id'),
                     'name': phys_name,
+                    'model_col': model_col,
+                    'custom_name': custom_name,
                     'location': location,
-                    '__str__': inner_item.get('__str__') or '',
+                    'connection_name': conn_name,
+                    'ip': ip,
                     'logical_devices': [],
                 }
 
@@ -283,34 +401,4 @@ class MigasFreeDevices(MigasFreeCommand):
                 }
             )
 
-        if not devices_dict:
-            self.console.print(_('No results found.'))
-            return
-
-        cards = []
-        for phys_name, dev_data in sorted(devices_dict.items()):
-            logical_lines = []
-            for log_dev in sorted(dev_data['logical_devices'], key=lambda x: x['name']):
-                bullet = '[green]✔ DEFAULT[/green]' if log_dev['is_default'] else '[cyan]•[/cyan]'
-                logical_lines.append(f'  {bullet} [dim]({log_dev["id"]})[/dim] [magenta]{log_dev["name"]}[/magenta]')
-
-            logical_content = '\n'.join(logical_lines)
-            str_val = dev_data.get('__str__')
-            str_line = f'\n[dim]{str_val}[/dim]' if str_val else ''
-            loc = dev_data['location']
-            loc_str = f'\n[dim]📍 {loc}[/dim]' if loc else ''
-
-            card_content = f'[bold green]{phys_name}[/bold green]{str_line}{loc_str}\n\n{logical_content}'
-
-            cards.append(
-                Panel(
-                    card_content,
-                    title='[bold cyan]Assigned[/bold cyan]',
-                    title_align='left',
-                    border_style='green' if any(x['is_default'] for x in dev_data['logical_devices']) else 'blue',
-                    width=50,
-                )
-            )
-
-        self.console.print()
-        self.console.print(Columns(cards, equal=True, expand=False))
+        self._print_device_cards(devices_dict)
