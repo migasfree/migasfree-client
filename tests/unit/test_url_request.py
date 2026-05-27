@@ -369,9 +369,11 @@ class TestMtlsSupport:
         assert url_req._mtls_key is None
 
     @responses.activate
+    @patch('os.access')
     @patch('requests.Session.post')
-    def test_run_with_mtls_cert(self, mock_post):
+    def test_run_with_mtls_cert(self, mock_post, mock_access):
         """Test that requests include mTLS client certificate when configured"""
+        mock_access.return_value = True
         url = 'https://example.com/api/endpoint'
         mtls_cert = '/path/to/mtls/cert.pem'
         mtls_key = '/path/to/mtls/key.pem'
