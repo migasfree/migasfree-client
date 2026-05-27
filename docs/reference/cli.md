@@ -17,6 +17,19 @@ These options are available for most commands:
 | `-d`, `--debug`   | Enable debug output                          |
 | `-q`, `--quiet`   | Enable quiet mode (suppress output)          |
 
+## Privilege Requirements
+
+Migasfree v5 implements a zero-trust architecture. All communication with the server is authenticated using **mTLS certificates** and **JWS payload signatures**.
+
+For security reasons, these cryptographic keys (located in `/var/migasfree-client/keys/` and `/var/migasfree-client/mtls/`) are strictly protected with `0600` permissions and are owned by `root`.
+
+**As a result, any CLI command that interacts with the Migasfree Server API MUST be executed with administrative privileges (`root` or `sudo`).**
+
+* **Requires `sudo`**: `sync`, `register`, `apps`, `traits`, `tags`, `info`, `upload`
+* **Does NOT require `sudo`**: `search` (queries the local Package Management System without contacting the server)
+
+If you attempt to run a command that requires server interaction without privileges, the CLI will safely abort and display a `Permission denied reading mTLS security keys` error.
+
 ## Commands
 
 ### sync
@@ -277,10 +290,10 @@ migasfree info [options] [KEY]
 
 Supported keys:
 
-- **Identification**: `id`, `uuid`, `name`, `search`, `fqdn`
-- **System Telemetry**: `status`, `sync_end_date`, `ip_address`, `mac_address`
-- **Hardware Specifications**: `cpu`, `architecture`, `ram`, `storage`, `disks`
-- **Product Info**: `product`, `product_system`
+* **Identification**: `id`, `uuid`, `name`, `search`, `fqdn`
+* **System Telemetry**: `status`, `sync_end_date`, `ip_address`, `mac_address`
+* **Hardware Specifications**: `cpu`, `architecture`, `ram`, `storage`, `disks`
+* **Product Info**: `product`, `product_system`
 
 **Examples:**
 
@@ -313,11 +326,11 @@ migasfree label
 
 **Output includes:**
 
-- Computer UUID
-- Computer name
-- IP address
-- Server name
-- Project
+* Computer UUID
+* Computer name
+* IP address
+* Server name
+* Project
 
 **Example:**
 
@@ -427,8 +440,8 @@ migasfree import-mtls <file>
 
 **Certificate formats supported:**
 
-- PEM files (cert.pem, key.pem, ca.pem)
-- PKCS#12 files (.p12, .pfx)
+* PEM files (cert.pem, key.pem, ca.pem)
+* PKCS#12 files (.p12, .pfx)
 
 **Example:**
 
@@ -664,7 +677,7 @@ Commands read settings from the configuration file. See [Configuration Reference
 
 ## See Also
 
-- [Getting Started](../getting-started.md)
-- [Configuration Reference](configuration.md)
-- [Environment Variables](environment-variables.md)
-- [Troubleshooting](../how-to/troubleshooting.md)
+* [Getting Started](../getting-started.md)
+* [Configuration Reference](configuration.md)
+* [Environment Variables](environment-variables.md)
+* [Troubleshooting](../how-to/troubleshooting.md)

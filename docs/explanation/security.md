@@ -117,7 +117,13 @@ $ ls -la /var/migasfree-client/mtls/*/key.pem
 -rw------- 1 root root 1704 Jan 15 10:30 key.pem
 ```
 
-The client enforces 0600 permissions on private keys.
+The client enforces `0600` permissions on private keys.
+
+#### CLI Execution Implications
+
+Because the mTLS private key and JWS signing keys are strictly locked down to `root`, **any migasfree-client command that requires network communication with the server MUST be executed with `sudo` or as the `root` user.**
+
+This includes structurally "read-only" commands such as `migasfree apps` and `migasfree traits`. If a standard user attempts to execute them, the internal HTTP client will be unable to read the certificates and the execution will safely abort with an `EPERM` error, protecting against identity spoofing.
 
 ## Message Signing (JWS)
 
