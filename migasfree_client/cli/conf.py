@@ -34,8 +34,7 @@ class MigasFreeConf(MigasFreeCommand):
     CMD = 'migasfree conf'
 
     def run(self, args=None):
-        # We don't need all the mtls/pms setup from _init_command for local config changes
-        # self._init_command()
+        super().run(args, init_command=False, show_config=False)
 
         if args is None:
             return

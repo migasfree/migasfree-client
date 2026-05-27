@@ -22,7 +22,7 @@ import subprocess
 import sys
 from typing import ClassVar
 
-from ..command import MigasFreeCommand, set_debug_log_level
+from ..command import MigasFreeCommand
 from ..utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -37,12 +37,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
         super().__init__()
 
     def run(self, args=None):
-        if hasattr(args, 'debug') and args.debug:
-            self._debug = True
-            set_debug_log_level()
-
-        if hasattr(args, 'quiet') and args.quiet:
-            self._quiet = True
+        super().run(args, init_command=False, show_config=False)
 
         username = args.user
         password = args.password

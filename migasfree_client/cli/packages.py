@@ -19,7 +19,7 @@ import sys
 
 from rich.table import Table
 
-from ..command import MigasFreeCommand, set_debug_log_level
+from ..command import MigasFreeCommand
 from ..utils import ALL_OK
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
@@ -35,12 +35,7 @@ class MigasFreePackages(MigasFreeCommand):
         self.pms_selection()
 
     def run(self, args=None):
-        if hasattr(args, 'debug') and args.debug:
-            self._debug = True
-            set_debug_log_level()
-
-        if hasattr(args, 'quiet') and args.quiet:
-            self._quiet = True
+        super().run(args, init_command=False, show_config=False)
 
         if not self.pms:
             msg = _('No Package Management System (PMS) found on this system.')

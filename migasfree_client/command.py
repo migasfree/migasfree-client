@@ -710,8 +710,9 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
 
         sys.exit(utils.ALL_OK)
 
-    def run(self, args=None):
-        self._init_command()
+    def run(self, args=None, init_command=True, show_config=True):
+        if init_command:
+            self._init_command()
 
         if hasattr(args, 'debug') and args.debug:
             self._debug = True
@@ -720,5 +721,5 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         if hasattr(args, 'quiet') and args.quiet:
             self._quiet = True
 
-        if not self._quiet:
+        if show_config and not self._quiet:
             self._show_config_options()
