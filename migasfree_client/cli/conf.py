@@ -71,7 +71,7 @@ class MigasFreeConf(MigasFreeCommand):
                     'manage_devices': self.migas_manage_devices,
                     'ca_file': get_mtls_ca_file(self.migas_server),
                 }
-                print(json.dumps(ret, ensure_ascii=False))
+                self.console.print(json.dumps(ret, ensure_ascii=False), soft_wrap=True)
             else:
                 self._show_config_options()
             return

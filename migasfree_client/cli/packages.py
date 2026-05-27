@@ -45,7 +45,7 @@ class MigasFreePackages(MigasFreeCommand):
         if not self.pms:
             msg = _('No Package Management System (PMS) found on this system.')
             if self._quiet:
-                print(json.dumps({'error': msg}))
+                self.console.print(json.dumps({'error': msg}), soft_wrap=True)
             else:
                 self.console.print(msg, style='red')
             sys.exit(ALL_OK)
@@ -62,7 +62,7 @@ class MigasFreePackages(MigasFreeCommand):
     def _handle_available(self):
         packages = self.pms.available_packages()
         if self._quiet:
-            print(json.dumps(packages))
+            self.console.print(json.dumps(packages), soft_wrap=True)
         else:
             self.console.print()
             self.console.print(
@@ -79,7 +79,7 @@ class MigasFreePackages(MigasFreeCommand):
     def _handle_installed(self):
         packages = self.pms.query_all()
         if self._quiet:
-            print(json.dumps(packages))
+            self.console.print(json.dumps(packages), soft_wrap=True)
         else:
             self.console.print()
             table = Table(show_header=True, header_style='bold magenta')
@@ -105,7 +105,7 @@ class MigasFreePackages(MigasFreeCommand):
         except Exception:
             msg = _('Invalid JSON array provided for packages check.')
             if self._quiet:
-                print(json.dumps({'error': msg}))
+                self.console.print(json.dumps({'error': msg}), soft_wrap=True)
             else:
                 self.console.print(msg, style='red')
             sys.exit(ALL_OK)
@@ -116,7 +116,7 @@ class MigasFreePackages(MigasFreeCommand):
                 installed_packages.append(pkg)
 
         if self._quiet:
-            print(json.dumps(installed_packages))
+            self.console.print(json.dumps(installed_packages), soft_wrap=True)
         else:
             self.console.print()
             self.console.print(_('Checking package installation status:'), style='bold')

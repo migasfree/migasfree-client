@@ -23,7 +23,6 @@ class TestMigasFreeUserCheck(unittest.TestCase):
             self.cmd.console = MagicMock()
 
     @patch('sys.exit')
-    @patch('builtins.print')
     @patch('platform.system', return_value='Linux')
     @patch('getpass.getuser', return_value='tux')
     @patch('pwd.getpwnam')
@@ -31,12 +30,12 @@ class TestMigasFreeUserCheck(unittest.TestCase):
     @patch('grp.getgrall', return_value=[])
     @patch('subprocess.run')
     def test_run_auth_sudo_success_quiet(
-        self, mock_sub_run, mock_grall, mock_grgid, mock_pwnam, mock_getuser, mock_sys, mock_print, mock_exit
+        self, mock_sub_run, mock_grall, mock_grgid, mock_pwnam, mock_getuser, mock_sys, mock_exit
     ):
         """Test user-check success via sudo_auth in quiet mode"""
         args = MagicMock()
         args.user = 'tux'
-        args.pwd = 'secret'
+        args.password = 'secret'
         args.quiet = True
         args.debug = False
 
@@ -58,7 +57,7 @@ class TestMigasFreeUserCheck(unittest.TestCase):
 
         mock_sub_run.assert_called_once()
         # Verify JSON output structure
-        args_called = mock_print.call_args[0][0]
+        args_called = self.cmd.console.print.call_args[0][0]
         res_json = json.loads(args_called)
         self.assertTrue(res_json['authenticated'])
         self.assertTrue(res_json['is_privileged'])
@@ -80,7 +79,7 @@ class TestMigasFreeUserCheck(unittest.TestCase):
         """Test user-check success via sudo_auth in interactive mode (verbose)"""
         args = MagicMock()
         args.user = 'tux'
-        args.pwd = 'secret'
+        args.password = 'secret'
         args.quiet = False
         args.debug = False
 

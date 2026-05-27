@@ -18,8 +18,7 @@ class TestMigasFreePackages(unittest.TestCase):
             self.cmd.pms = MagicMock()
 
     @patch('sys.exit')
-    @patch('builtins.print')
-    def test_run_available_quiet(self, mock_print, mock_exit):
+    def test_run_available_quiet(self, mock_exit):
         """Test packages --available with quiet/silent mode"""
         args = MagicMock()
         args.available = True
@@ -33,7 +32,9 @@ class TestMigasFreePackages(unittest.TestCase):
         self.cmd.run(args)
 
         self.cmd.pms.available_packages.assert_called_once()
-        mock_print.assert_called_once_with(json.dumps(['google-chrome-stable', 'firefox-esr']))
+        self.cmd.console.print.assert_called_once_with(
+            json.dumps(['google-chrome-stable', 'firefox-esr']), soft_wrap=True
+        )
         mock_exit.assert_called_once()
 
     @patch('sys.exit')
@@ -55,8 +56,7 @@ class TestMigasFreePackages(unittest.TestCase):
         mock_exit.assert_called_once()
 
     @patch('sys.exit')
-    @patch('builtins.print')
-    def test_run_installed_quiet(self, mock_print, mock_exit):
+    def test_run_installed_quiet(self, mock_exit):
         """Test packages --installed with quiet/silent mode"""
         args = MagicMock()
         args.available = False
@@ -70,12 +70,11 @@ class TestMigasFreePackages(unittest.TestCase):
         self.cmd.run(args)
 
         self.cmd.pms.query_all.assert_called_once()
-        mock_print.assert_called_once_with(json.dumps(['firefox-esr_115.8_amd64.deb']))
+        self.cmd.console.print.assert_called_once_with(json.dumps(['firefox-esr_115.8_amd64.deb']), soft_wrap=True)
         mock_exit.assert_called_once()
 
     @patch('sys.exit')
-    @patch('builtins.print')
-    def test_run_check_quiet(self, mock_print, mock_exit):
+    def test_run_check_quiet(self, mock_exit):
         """Test packages --check with quiet/silent mode"""
         args = MagicMock()
         args.available = False
@@ -90,7 +89,7 @@ class TestMigasFreePackages(unittest.TestCase):
 
         self.cmd.pms.is_installed.assert_any_call('firefox-esr')
         self.cmd.pms.is_installed.assert_any_call('non-existent')
-        mock_print.assert_called_once_with(json.dumps(['firefox-esr']))
+        self.cmd.console.print.assert_called_once_with(json.dumps(['firefox-esr']), soft_wrap=True)
         mock_exit.assert_called_once()
 
 

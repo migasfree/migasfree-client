@@ -268,7 +268,7 @@ class MigasFreeUserCheck(MigasFreeCommand):
             }
             if error_msg:
                 response['error'] = error_msg
-            print(json.dumps(response))
+            self.console.print(json.dumps(response), soft_wrap=True)
         else:
             self.console.print()
             self.console.print(
