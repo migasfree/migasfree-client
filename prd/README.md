@@ -46,7 +46,7 @@ graph TD
 | **Package Operations** | `install`, `purge`, `search` | Exposes standard package management routines mapped dynamically to the local OS package manager (APT, DNF, PACMAN, Zypper, WPT). |
 | **System Classification** | `tags`, `info`, `label` | Allows reading and writing system taxonomy labels, managing group tags, and retrieving unique system IDs. |
 | **Device & Peripherals** | `device` | Provisions, manages, and assigns logical and physical devices/printers based on telemetry and server-side rules. |
-| **Resource Distribution**| `upload` | Empowers authorized packagers to upload packages and package sets directly to the Migasfree server repositories. |
+| **Resource Distribution** | `upload` | Empowers authorized packagers to upload packages and package sets directly to the Migasfree server repositories. |
 | **Client Configuration** | `conf` | Manages local client options (`/etc/migasfree.conf`) dynamically via the CLI. |
 
 ---
@@ -63,10 +63,15 @@ graph TD
 | `device` | Query, assign, or configure physical and logical devices/printers. | **Root / Administrator** | [CLI Sync Command](./pages/01-cli-command-sync.md#device) |
 | `info` | Retrieve comprehensive computer metadata and telemetry (UUID, CPU, RAM, status, network). | **Root / Administrator** | [CLI Sync Command](./pages/01-cli-command-sync.md#info) |
 | `attributes` | Query assigned organizational attributes and identity (CID). | **Root / Administrator** | N/A |
-| `traits` | Query system attributes and configuration traits retrieved from server. | **Public** | [CLI Sync Command](./pages/01-cli-command-sync.md#traits) |
-| `label` | Show terminal-rendered identification details for support desks. | **Public** | [CLI Sync Command](./pages/01-cli-command-sync.md#label) |
-| `import-mtls`| Bulk-import administrative certificates from a tar archive. | **Root / Administrator** | [CLI Register Command](./pages/02-cli-command-register.md#import-mtls) |
-| `remove-keys`| Revoke all local project keys and certificates. | **Root / Administrator** | [CLI Register Command](./pages/02-cli-command-register.md#remove-keys) |
+| `traits` | Query system attributes and configuration traits retrieved from server. | **Root / Administrator** | [CLI Sync Command](./pages/01-cli-command-sync.md#traits) |
+| `apps` | Query the catalog of available applications for this computer. | **Root / Administrator** | N/A |
+| `search` | Local query to the package manager (APT, DNF, etc.) without server interaction. | **Public** | N/A |
+| `label` | Show terminal-rendered identification details for support desks. | **Root / Administrator** | [CLI Sync Command](./pages/01-cli-command-sync.md#label) |
+| `import-mtls` | Bulk-import administrative certificates from a tar archive. | **Root / Administrator** | [CLI Register Command](./pages/02-cli-command-register.md#import-mtls) |
+| `remove-keys` | Revoke all local project keys and certificates. | **Root / Administrator** | [CLI Register Command](./pages/02-cli-command-register.md#remove-keys) |
+
+> [!NOTE]
+> **Privilege Requirements:** In Migasfree v5, all subcommands that require communication with the server (such as `apps`, `traits`, and `label`) must be executed with root privileges. This is because the underlying HTTP layer uses mTLS certificates (`cert.pem`, `key.pem`) and payload signatures (`migasfree-client.pri`) that are strictly protected with `0600` permissions. The only subcommand that operates securely without `sudo` is `search`, as it only queries the local package manager.
 
 ---
 
