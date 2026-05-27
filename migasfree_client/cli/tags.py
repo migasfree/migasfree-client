@@ -45,7 +45,6 @@ class MigasFreeTags(MigasFreeCommand):
     _tags = None
 
     def __init__(self):
-        self._check_user_is_root()
         super().__init__()
 
     def _usage_examples(self):
@@ -229,6 +228,7 @@ class MigasFreeTags(MigasFreeCommand):
             self.end_of_transmission()
 
         elif isinstance(args.set, list) or isinstance(args.communicate, list):
+            self._check_user_is_root()
             self._tags = []
             if args.set is not None:
                 self._tags = self._sanitize(args.set)

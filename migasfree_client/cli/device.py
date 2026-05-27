@@ -74,6 +74,7 @@ class MigasFreeDevices(MigasFreeCommand):
     @require_sign_keys
     @require_computer_id
     def assign_logical(self, logical_id, assigned=True):
+        self._check_user_is_root()
         logger.debug('Assigning or unassigning logical device: id=%s, assigned=%s', logical_id, assigned)
         data = {'cid': self._computer_id, 'id': int(logical_id), 'assigned': assigned}
         response = self._api_call('assign_logical', data=data)
@@ -82,6 +83,7 @@ class MigasFreeDevices(MigasFreeCommand):
     @require_sign_keys
     @require_computer_id
     def set_default_logical(self, logical_id):
+        self._check_user_is_root()
         logger.debug('Setting default logical device: logical_id=%s', logical_id)
         data = {'cid': self._computer_id, 'logical_id': int(logical_id) if logical_id and logical_id != '0' else None}
         response = self._api_call('set_default_logical', data=data)

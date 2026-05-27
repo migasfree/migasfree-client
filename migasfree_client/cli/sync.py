@@ -52,8 +52,6 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
     _pms_status_ok = True  # indicates the status of transactions with PMS
 
     def __init__(self):
-        self._check_user_is_root()
-
         signal.signal(signal.SIGINT, self._exit_gracefully)
         signal.signal(signal.SIGTERM, self._exit_gracefully)
         if utils.is_linux():
@@ -714,6 +712,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         return self._set_default_printer(devices, logical_devices)
 
     def _handle_sync_command(self, args):
+        self._check_user_is_root()
         if args.force_upgrade:
             self.migas_auto_update_packages = True
 
@@ -737,16 +736,19 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
             sys.exit(errno.EPROTO)
 
     def _handle_register_command(self, args):
+        self._check_user_is_root()
         self.cmd_register_computer(args.user, getattr(args, 'password', None), getattr(args, 'assume_yes', False))
 
     def _handle_search_command(self, args):
         self.cmd_search(' '.join(args.pattern))
 
     def _handle_install_command(self, args):
+        self._check_user_is_root()
         with lock_file_context(self.CMD, self.LOCK_FILE):
             self.cmd_install_package(' '.join(args.pkg_install))
 
     def _handle_purge_command(self, args):
+        self._check_user_is_root()
         with lock_file_context(self.CMD, self.LOCK_FILE):
             self.cmd_remove_package(' '.join(args.pkg_purge))
 

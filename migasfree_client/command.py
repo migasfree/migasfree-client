@@ -669,6 +669,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         sys.exit(utils.ALL_OK)
 
     def cmd_remove_keys(self, args=None):
+        self._check_user_is_root()
         is_all = getattr(args, 'all', False)
         is_debug = getattr(args, 'debug', False)
         is_quiet = getattr(args, 'quiet', True)
@@ -696,6 +697,7 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
 
     def cmd_import_mtls(self, cert_file):
         """Import mTLS certificate from tar file."""
+        self._check_user_is_root()
         self._show_message(_('Importing mTLS certificate...'))
 
         result = mtls.import_mtls_certificate(cert_file)

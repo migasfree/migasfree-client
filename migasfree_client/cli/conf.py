@@ -56,6 +56,9 @@ class MigasFreeConf(MigasFreeCommand):
         # Filter out None values
         to_write = {k: v for k, v in write_operations.items() if v is not None}
 
+        if to_write:
+            self._check_user_is_root()
+
         if not to_write:
             if getattr(args, 'json', False):
                 ret = {

@@ -26,6 +26,7 @@ class TestMigasFreeDevices(unittest.TestCase):
             self.devices._mtls_cert = 'cert-path'
             self.devices.console = MagicMock()
             self.devices._check_sign_keys = MagicMock(return_value=True)
+            self.devices._check_user_is_root = MagicMock()
 
     @patch('sys.exit')
     def test_run_json(self, mock_exit):
