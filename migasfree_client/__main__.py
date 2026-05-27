@@ -235,10 +235,22 @@ def main(argv=None):
         rprint(_('%(program)s version: %(version)s') % {'program': PROGRAM, 'version': get_mfc_release()})
         sys.stdout.flush()
 
-    if args.cmd in ['register', 'sync', 'install', 'purge', 'search', 'traits']:
+    if args.cmd in ('sync', 'install', 'purge'):
         from .cli.sync import MigasFreeSync
 
         MigasFreeSync().run(args)
+    elif args.cmd == 'register':
+        from .cli.register import MigasFreeRegister
+
+        MigasFreeRegister().run(args)
+    elif args.cmd == 'search':
+        from .cli.search import MigasFreeSearch
+
+        MigasFreeSearch().run(args)
+    elif args.cmd == 'traits':
+        from .cli.traits import MigasFreeTraits
+
+        MigasFreeTraits().run(args)
     elif args.cmd == 'label':
         from .cli.label import MigasFreeLabel
 
@@ -259,14 +271,16 @@ def main(argv=None):
         from .cli.attributes import MigasFreeAttributes
 
         MigasFreeAttributes().run(args)
-    elif args.cmd == 'version':
+    elif args.cmd in ('version', 'remove-keys', 'network'):
         from .command import MigasFreeCommand
 
-        MigasFreeCommand().cmd_version(args)
-    elif args.cmd == 'remove-keys':
-        from .command import MigasFreeCommand
-
-        MigasFreeCommand().cmd_remove_keys(args)
+        cmd = MigasFreeCommand()
+        if args.cmd == 'version':
+            cmd.cmd_version(args)
+        elif args.cmd == 'remove-keys':
+            cmd.cmd_remove_keys(args)
+        elif args.cmd == 'network':
+            cmd.cmd_network(args)
     elif args.cmd == 'import-mtls':
         from .command import MigasFreeCommand
 
@@ -283,10 +297,6 @@ def main(argv=None):
         from .cli.usercheck import MigasFreeUserCheck
 
         MigasFreeUserCheck().run(args)
-    elif args.cmd == 'network':
-        from .command import MigasFreeCommand
-
-        MigasFreeCommand().cmd_network(args)
     elif args.cmd == 'apps':
         from .cli.apps import MigasFreeApps
 

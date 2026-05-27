@@ -417,20 +417,6 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
         return traits
 
-    @require_sign_keys
-    def cmd_traits(self, prefix, key):
-        traits = self._traits(show=False)
-        self.end_of_transmission()
-
-        if prefix:
-            ret = filter(lambda item: item['prefix'] == prefix, traits)
-            if key:
-                ret = [item.get(key) for item in ret]
-
-            traits = list(ret)
-
-        self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False), soft_wrap=True)
-
     def _run_events(self, diff):
         self._show_message(_('Running events...'))
 
@@ -510,11 +496,6 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
             return
 
         self._run_events(diff)
-
-    def cmd_search(self, pattern):
-        self._check_pms()
-
-        return self.pms.search(pattern)
 
     def cmd_install_package(self, pkg):
         self._check_pms()
@@ -735,13 +716,6 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         if not self._pms_status_ok:
             sys.exit(errno.EPROTO)
 
-    def _handle_register_command(self, args):
-        self._check_user_is_root()
-        self.cmd_register_computer(args.user, getattr(args, 'password', None), getattr(args, 'assume_yes', False))
-
-    def _handle_search_command(self, args):
-        self.cmd_search(' '.join(args.pattern))
-
     def _handle_install_command(self, args):
         self._check_user_is_root()
         with lock_file_context(self.CMD, self.LOCK_FILE):
@@ -751,9 +725,6 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         self._check_user_is_root()
         with lock_file_context(self.CMD, self.LOCK_FILE):
             self.cmd_remove_package(' '.join(args.pkg_purge))
-
-    def _handle_traits_command(self, args):
-        self.cmd_traits(args.prefix, args.traits_key)
 
     def run(self, args=None):
         super().run(args)
@@ -767,11 +738,8 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
         command_handlers = {
             'sync': self._handle_sync_command,
-            'register': self._handle_register_command,
-            'search': self._handle_search_command,
             'install': self._handle_install_command,
             'purge': self._handle_purge_command,
-            'traits': self._handle_traits_command,
         }
 
         handler = command_handlers.get(args.cmd)
