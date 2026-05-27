@@ -15,8 +15,7 @@ These options are available for most commands:
 | Option            | Description                                  |
 | ----------------- | -------------------------------------------- |
 | `-d`, `--debug`   | Enable debug output                          |
-| `-e`, `--pms`     | Select package management system             |
-| `-g`, `--graphic` | Enable graphical mode (show notifications)   |
+| `-q`, `--quiet`   | Enable quiet mode (suppress output)          |
 
 ## Commands
 
@@ -30,11 +29,14 @@ migasfree sync [options]
 
 **Options:**
 
-| Option            | Description                                                  |
-| ----------------- | ------------------------------------------------------------ |
-| `-f`, `--force`   | Force package updates even if Auto_Update_Packages is False  |
-| `-d`, `--debug`   | Enable debug output                                          |
-| `-g`, `--graphic` | Show graphical notifications                                 |
+| Option                  | Description                                                  |
+| ----------------------- | ------------------------------------------------------------ |
+| `-f`, `--force-upgrade` | Force package updates even if Auto_Update_Packages is False  |
+| `-dev`, `--devices`     | Synchronize devices only                                     |
+| `-hard`, `--hardware`   | Synchronize hardware only                                    |
+| `-soft`, `--software`   | Synchronize software only                                    |
+| `-att`, `--attributes`  | Synchronize attributes only                                  |
+| `-fau`, `--faults`      | Synchronize faults only                                      |
 
 **Actions performed:**
 
@@ -76,7 +78,7 @@ migasfree register [options]
 | Option             | Description                              |
 | ------------------ | ---------------------------------------- |
 | `-u`, `--user`     | Username for authentication              |
-| `-p`, `--password` | Password (will prompt if not provided)   |
+| `-p`, `--pwd`      | Password (will prompt if not provided)   |
 
 **Examples:**
 
@@ -138,32 +140,6 @@ sudo migasfree install htop
 
 # Install multiple packages
 sudo migasfree install vim git curl
-```
-
----
-
-### remove
-
-Removes packages via the package management system.
-
-```bash
-migasfree remove <package> [package...]
-```
-
-**Arguments:**
-
-| Argument  | Description                        |
-| --------- | ---------------------------------- |
-| `package` | One or more package names to remove|
-
-**Examples:**
-
-```bash
-# Remove a package
-sudo migasfree remove nano
-
-# Remove multiple packages
-sudo migasfree remove nano telnet ftp
 ```
 
 ---
@@ -384,7 +360,7 @@ migasfree upload [options]
 | ---------------- | -------------------------- |
 | `-f`, `--file`   | Package file to upload     |
 | `-s`, `--store`  | Target store on server     |
-| `-S`, `--source` | Upload as source package   |
+| `-r`, `--dir`    | Directory with packages to upload |
 
 **Examples:**
 
