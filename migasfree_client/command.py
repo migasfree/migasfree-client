@@ -368,6 +368,14 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
             all_keys_exist = all(os.path.isfile(path) for path in paths.values())
 
         if all_keys_exist:
+            if not all(os.access(path, os.R_OK) for path in paths.values()):
+                msg = _(
+                    'Permission denied reading security keys. You must run this command with administrative privileges (root/sudo).'
+                )
+                self.operation_failed(msg)
+                logger.error(msg)
+                return False
+
             if get_computer_id and not self._computer_id:
                 self.get_computer_id()
 
