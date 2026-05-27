@@ -224,6 +224,28 @@ class TestMigasFreeSync(unittest.TestCase):
         self.sync.run(args)
         mock_handle.assert_called_with(args)
 
+    @patch('sys.exit')
+    @patch('migasfree_client.cli.sync.MigasFreeSync._init_command')
+    @patch('migasfree_client.cli.sync.MigasFreeSync._handle_sync_command')
+    def test_json_option_activation(self, mock_handle, mock_init, mock_exit):
+        """Test that --json sets _json, _quiet and settings.JSON_OUTPUT flags"""
+        from migasfree_client import settings
+
+        args = MagicMock()
+        args.cmd = 'sync'
+        args.json = True
+
+        # Reset attributes
+        self.sync._json = False
+        self.sync._quiet = False
+        settings.JSON_OUTPUT = False
+
+        self.sync.run(args)
+
+        self.assertTrue(self.sync._json)
+        self.assertTrue(self.sync._quiet)
+        self.assertTrue(settings.JSON_OUTPUT)
+
     @patch('sys.exit', side_effect=SystemExit)
     @patch('migasfree_client.cli.sync.MigasFreeSync._init_command')
     def test_run_usage_on_no_cmd(self, mock_init, mock_exit):

@@ -20,8 +20,9 @@ import logging
 import os
 import sys
 
-from migasfree_client import utils
-from migasfree_client.command import require_computer_id
+from .. import utils
+from ..command import require_computer_id
+from .renderer import show_stage
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
@@ -64,7 +65,7 @@ class HardwareCollectorMixin:
     def update_hardware_inventory(self):
         hardware = {}
 
-        self._show_message(_('Capturing hardware information...'))
+        show_stage(self, _('Capturing hardware information...'), stage='hardware')
         env = os.environ.copy()
         if not utils.is_windows():
             env['LC_ALL'] = 'C'
@@ -84,13 +85,13 @@ class HardwareCollectorMixin:
         try:
             hardware = json.loads(output)
         except ValueError as e:
-            self._show_message(_('Parsing hardware information...'))
+            show_stage(self, _('Parsing hardware information...'), stage='hardware')
             self._report_error(f'{_("Hardware information")}: {e!s}')
             return
 
         logger.debug('Hardware inventory: %s', hardware)
 
-        self._show_message(_('Sending hardware information...'))
+        show_stage(self, _('Sending hardware information...'), stage='hardware')
         response = self._url_request.run(
             url=self.api_endpoint(self.URLS['upload_hardware']),
             data={'id': self._computer_id, 'hardware': hardware},

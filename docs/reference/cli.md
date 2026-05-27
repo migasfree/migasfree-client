@@ -45,6 +45,7 @@ migasfree sync [options]
 | Option                  | Description                                                  |
 | ----------------------- | ------------------------------------------------------------ |
 | `-f`, `--force-upgrade` | Force package updates even if Auto_Update_Packages is False  |
+| `-j`, `--json`          | Structured JSON stream output (ideal for GUI integration)   |
 | `-dev`, `--devices`     | Synchronize devices only                                     |
 | `-hard`, `--hardware`   | Synchronize hardware only                                    |
 | `-soft`, `--software`   | Synchronize software only                                    |
@@ -145,6 +146,12 @@ migasfree install <package> [package...]
 | --------- | ----------------------------------- |
 | `package` | One or more package names to install|
 
+**Options:**
+
+| Option         | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
+| `-j`, `--json` | Structured JSON stream output (ideal for GUI integration)   |
+
 **Examples:**
 
 ```bash
@@ -170,6 +177,12 @@ migasfree purge <package> [package...]
 | Argument  | Description                        |
 | --------- | ---------------------------------- |
 | `package` | One or more package names to purge |
+
+**Options:**
+
+| Option         | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
+| `-j`, `--json` | Structured JSON stream output (ideal for GUI integration)   |
 
 **Examples:**
 
@@ -635,6 +648,32 @@ migasfree user-check -u tux -p secret
 
 # Quiet check returning JSON for machine integration
 migasfree -q user-check -u tux -p secret
+```
+
+---
+
+### network
+
+Retrieves system network telemetry and configurations.
+
+```bash
+migasfree network [options]
+```
+
+**Options:**
+
+| Option         | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
+| `-j`, `--json` | Output network information as structured JSON               |
+
+**Examples:**
+
+```bash
+# Get network details (text format)
+migasfree network
+
+# Get network details in JSON format
+migasfree network --json
 ```
 
 ---

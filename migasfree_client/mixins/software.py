@@ -17,8 +17,9 @@ import gettext
 import logging
 import os
 
-from migasfree_client import settings, utils
-from migasfree_client.command import require_computer_id
+from .. import settings, utils
+from ..command import require_computer_id
+from .renderer import show_stage
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
@@ -72,7 +73,7 @@ class SoftwareManagerMixin:
 
         repos = self.get_repositories()
 
-        self._show_message(_('Creating repositories...'))
+        show_stage(self, _('Creating repositories...'), stage='repositories')
 
         server = self.migas_server
         if self.migas_package_proxy_cache:
@@ -92,7 +93,7 @@ class SoftwareManagerMixin:
         """
         self._check_pms()
 
-        self._show_message(_('Getting repositories metadata...'))
+        show_stage(self, _('Getting repositories metadata...'), stage='metadata')
         ret = self.pms.clean_all()
 
         if ret:
@@ -103,7 +104,7 @@ class SoftwareManagerMixin:
     def uninstall_packages(self, packages):
         self._check_pms()
 
-        self._show_message(_('Uninstalling packages...'))
+        show_stage(self, _('Uninstalling packages...'), stage='uninstall')
         ret, error = self.pms.remove_silent(packages)
 
         if ret:
@@ -115,7 +116,7 @@ class SoftwareManagerMixin:
     def install_mandatory_packages(self, packages):
         self._check_pms()
 
-        self._show_message(_('Installing mandatory packages...'))
+        show_stage(self, _('Installing mandatory packages...'), stage='install')
         ret, error = self.pms.install_silent(packages)
 
         if ret:
@@ -129,7 +130,7 @@ class SoftwareManagerMixin:
     def _update_packages(self):
         self._check_pms()
 
-        self._show_message(_('Updating packages...'))
+        show_stage(self, _('Updating packages...'), stage='update')
         ret, error = self.pms.update_silent()
 
         if ret:
@@ -179,7 +180,7 @@ class SoftwareManagerMixin:
             self._show_message(_('Software diff'))
             self.console.print(history)
 
-        self._show_message(_('Uploading software...'))
+        show_stage(self, _('Uploading software...'), stage='software')
         response = self._api_call(
             'upload_software',
             {'id': self._computer_id, 'inventory': after, 'history': history},

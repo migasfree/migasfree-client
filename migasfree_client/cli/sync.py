@@ -217,7 +217,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
             if not self._computer_id:
                 self.get_computer_id()
 
-            self._show_message(_('Uploading old errors...'))
+            self.show_stage(_('Uploading old errors...'), stage='connection')
             with self.console.status(''):
                 response = self._url_request.run(
                     url=self.api_endpoint(self.URLS['upload_errors']),
@@ -237,7 +237,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         self._error_file_descriptor = None
 
         if os.stat(self.ERROR_FILE).st_size:
-            self._show_message(_('Sending errors to server...'))
+            self.show_stage(_('Sending errors to server...'), stage='connection')
             with self.console.status(''):
                 self._url_request.run(
                     url=self.api_endpoint(self.URLS['upload_errors']),
@@ -255,7 +255,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         attributes = self._eval_attributes(response)
         logger.debug('Attributes to send: %s', attributes)
 
-        self._show_message(_('Uploading attributes...'))
+        self.show_stage(_('Uploading attributes...'), stage='attributes')
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['upload_attributes']), data=attributes, debug=self._debug
@@ -272,7 +272,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
             data = self._eval_faults(response)
             logger.debug('Faults to send: %s', data)
 
-            self._show_message(_('Uploading faults...'))
+            self.show_stage(_('Uploading faults...'), stage='faults')
             with self.console.status(''):
                 response = self._url_request.run(
                     url=self.api_endpoint(self.URLS['upload_faults']), data=data, debug=self._debug
@@ -287,7 +287,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         if not consumer:
             consumer = self.CMD
 
-        self._show_message(_('Ending synchronization...'))
+        self.show_stage(_('Ending synchronization...'), stage='finish')
         with self.console.status(''):
             response = self._url_request.run(
                 url=self.api_endpoint(self.URLS['upload_sync']),
@@ -308,7 +308,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
     @require_sign_keys
     def cmd_synchronize(self):
         start_date = datetime.now().isoformat()
-        self._show_message(_('Connecting to migasfree server...'))
+        self.show_stage(_('Connecting to migasfree server...'), stage='connection')
 
         available, _retry_after = availability.check_availability(
             self._url_request, self.api_endpoint(self.URLS['upload_sync_availability']), self._computer_id
@@ -351,43 +351,43 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         self.upload_execution_errors()
         self.end_synchronization(start_date)
         self.end_of_transmission()
-        self._show_message(_('Completed operations'))
+        self.show_stage(_('Completed operations'), stage='finish')
 
     def cmd_attributes(self):
-        self._show_message(_('Connecting to migasfree server...'))
+        self.show_stage(_('Connecting to migasfree server...'), stage='connection')
         self.upload_old_errors()
         self.upload_attributes()
         self.upload_execution_errors()
         self.end_of_transmission()
-        self._show_message(_('Completed operations'))
+        self.show_stage(_('Completed operations'), stage='finish')
 
     def cmd_faults(self):
-        self._show_message(_('Connecting to migasfree server...'))
+        self.show_stage(_('Connecting to migasfree server...'), stage='connection')
         self.upload_old_errors()
         self.upload_faults()
         self.upload_execution_errors()
         self.end_of_transmission()
-        self._show_message(_('Completed operations'))
+        self.show_stage(_('Completed operations'), stage='finish')
 
     def cmd_devices(self):
-        self._show_message(_('Connecting to migasfree server...'))
+        self.show_stage(_('Connecting to migasfree server...'), stage='connection')
         self.upload_old_errors()
         self.sync_logical_devices()
         self.upload_execution_errors()
         self.end_of_transmission()
-        self._show_message(_('Completed operations'))
+        self.show_stage(_('Completed operations'), stage='finish')
 
     def cmd_hardware(self):
-        self._show_message(_('Connecting to migasfree server...'))
+        self.show_stage(_('Connecting to migasfree server...'), stage='connection')
         self.upload_old_errors()
         self.update_hardware_inventory()
         self.upload_execution_errors()
         self.end_of_transmission()
-        self._show_message(_('Completed operations'))
+        self.show_stage(_('Completed operations'), stage='finish')
 
     def cmd_software(self):
         if self.pms:
-            self._show_message(_('Connecting to migasfree server...'))
+            self.show_stage(_('Connecting to migasfree server...'), stage='connection')
             self.upload_old_errors()
 
             software_before = self.pms.query_all()
@@ -398,12 +398,18 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
             self.upload_execution_errors()
             self.end_of_transmission()
-            self._show_message(_('Completed operations'))
+            self.show_stage(_('Completed operations'), stage='finish')
 
     def _traits(self, show=True):
         traits = self.get_traits()
         if show:
-            self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False), soft_wrap=True)
+            if getattr(self, '_json', False):
+                import sys
+
+                sys.stdout.write(json.dumps({'type': 'traits', 'data': traits}) + '\n')
+                sys.stdout.flush()
+            else:
+                self.console.print(json.dumps(traits, indent=settings.JSON_INDENT, ensure_ascii=False), soft_wrap=True)
 
         content = {}
         if os.path.isfile(settings.TRAITS_FILE):
@@ -418,7 +424,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         return traits
 
     def _run_events(self, diff):
-        self._show_message(_('Running events...'))
+        self.show_stage(_('Running events...'), stage='software')
 
         sentinel = True
         for key, _value in diff:
@@ -557,14 +563,14 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         try:
             self.devices_class.get_connection()
         except RuntimeError:
-            self._show_message(_('Synchronizing logical devices...'))
+            self.show_stage(_('Synchronizing logical devices...'), stage='hardware')
             _msg = _('Printer service is not running')
             self.operation_failed(_msg)
             logging.error(_msg)
             self._write_error(_msg)
             return False
         except NameError:
-            self._show_message(_('Synchronizing logical devices...'))
+            self.show_stage(_('Synchronizing logical devices...'), stage='hardware')
             _msg = _('Printer service is required. If not, configure Manage_Devices parameter to False.')
             self.operation_failed(_msg)
             logging.error(_msg)
@@ -683,7 +689,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         try:
             printers = self.devices_class.get_printers()
         except RuntimeError:
-            self._show_message(_('Synchronizing logical devices...'))
+            self.show_stage(_('Synchronizing logical devices...'), stage='hardware')
             self._report_error(_('Error getting printers information'))
             return False
 

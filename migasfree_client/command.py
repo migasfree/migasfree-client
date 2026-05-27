@@ -719,6 +719,11 @@ class MigasFreeCommand(RendererMixin, ConfigMixin):
         sys.exit(utils.ALL_OK)
 
     def run(self, args=None, init_command=True, show_config=True):
+        if getattr(args, 'json', False) is True:
+            self._json = True
+            self._quiet = True
+            settings.JSON_OUTPUT = True
+
         if init_command:
             self._init_command()
 

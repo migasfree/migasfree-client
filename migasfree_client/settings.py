@@ -66,3 +66,4 @@ CERT_FILE = os.path.join(TMP_PATH, 'cert.pem')
 MTLS_DEFAULT_VALIDITY_DAYS = 7305  # 20 years
 
 JSON_INDENT = 4
+JSON_OUTPUT = False

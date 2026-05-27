@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import gettext
+import json
 import logging
 import os
 import select
@@ -22,6 +23,7 @@ import subprocess
 import sys
 import time
 
+from .. import settings
 from .data import _bytes_to_str
 from .system import is_linux, is_windows
 
@@ -79,8 +81,14 @@ def _stream_output_nonblocking(process):
                 chunk = process.stdout.read()
                 chunk = _bytes_to_str(chunk)
                 if chunk and chunk != '\n':
-                    sys.stdout.write(chunk)
-                    sys.stdout.flush()
+                    if getattr(settings, 'JSON_OUTPUT', False):
+                        for line in chunk.splitlines():
+                            if line.strip():
+                                sys.stdout.write(json.dumps({'type': 'log', 'stage': 'pms', 'message': line}) + '\n')
+                        sys.stdout.flush()
+                    else:
+                        sys.stdout.write(chunk)
+                        sys.stdout.flush()
                     logger.info(chunk)
                 output_buffer = f'{output_buffer}{chunk}'
     else:
@@ -102,8 +110,14 @@ def _stream_output_nonblocking(process):
                 chunk = process.stdout.read()
                 chunk = _bytes_to_str(chunk)
                 if chunk and chunk != '\n':
-                    sys.stdout.write(chunk)
-                    sys.stdout.flush()
+                    if getattr(settings, 'JSON_OUTPUT', False):
+                        for line in chunk.splitlines():
+                            if line.strip():
+                                sys.stdout.write(json.dumps({'type': 'log', 'stage': 'pms', 'message': line}) + '\n')
+                        sys.stdout.flush()
+                    else:
+                        sys.stdout.write(chunk)
+                        sys.stdout.flush()
                     logger.info(chunk)
                 output_buffer = f'{output_buffer}{chunk}'
 

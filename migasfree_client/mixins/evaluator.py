@@ -20,7 +20,8 @@ import os
 import socket
 import tempfile
 
-from migasfree_client import network, utils
+from .. import network, utils
+from .renderer import show_stage
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
@@ -89,7 +90,7 @@ class CodeEvaluatorMixin:
         }
 
         # properties converted in attributes
-        self._show_message(_('Evaluating attributes...'))
+        show_stage(self, _('Evaluating attributes...'), stage='attributes')
         with self.console.status(''):
             for item in properties:
                 ret, response['sync_attributes'][item['prefix']], error = self._eval_code(
@@ -109,7 +110,7 @@ class CodeEvaluatorMixin:
     def _eval_faults(self, fault_definitions):
         response = {'id': self._computer_id, 'faults': {}}
 
-        self._show_message(_('Executing faults...'))
+        show_stage(self, _('Executing faults...'), stage='faults')
         with self.console.status(''):
             for item in fault_definitions:
                 ret, result, error = self._eval_code(item['name'], item['language'], item['code'])

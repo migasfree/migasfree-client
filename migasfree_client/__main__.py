@@ -51,6 +51,7 @@ def parse_args(argv):
 
     subparser_sync = subparsers.add_parser('sync', help=_('Synchronize computer with server'))
     subparser_sync.add_argument('-f', '--force-upgrade', action='store_true', help=_('Force package upgrades'))
+    subparser_sync.add_argument('-j', '--json', action='store_true', help=_('Structured JSON output'))
 
     group_sync = subparser_sync.add_mutually_exclusive_group(required=False)
     group_sync.add_argument(
@@ -69,9 +70,11 @@ def parse_args(argv):
     subparser_install.add_argument(
         'pkg_install', nargs='+', action='store', metavar='PACKAGE', help=_('Package to install')
     )
+    subparser_install.add_argument('-j', '--json', action='store_true', help=_('Structured JSON output'))
 
     subparser_purge = subparsers.add_parser('purge', help=_('Purge package'))
     subparser_purge.add_argument('pkg_purge', nargs='+', action='store', metavar='PACKAGE', help=_('Package to purge'))
+    subparser_purge.add_argument('-j', '--json', action='store_true', help=_('Structured JSON output'))
 
     subparser_traits = subparsers.add_parser('traits', help=_('Get computer traits at server'))
     subparser_traits.add_argument(

@@ -14,14 +14,39 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import gettext
+import json
 import logging
 import os
+import sys
 import time
 
 from .. import settings, utils
 
 _ = gettext.gettext
 logger = logging.getLogger('migasfree_client')
+
+
+_STAGE_PERCENTAGES = {
+    'connection': 5,
+    'attributes': 10,
+    'faults': 20,
+    'repositories': 30,
+    'metadata': 40,
+    'uninstall': 50,
+    'install': 65,
+    'update': 75,
+    'software': 85,
+    'hardware': 90,
+    'finish': 100,
+}
+
+
+def show_stage(obj, msg, stage):
+    try:
+        obj._show_message(msg, stage=stage)
+    except (TypeError, AttributeError):
+        if hasattr(obj, '_show_message'):
+            obj._show_message(msg)
 
 
 class RendererMixin:
@@ -37,9 +62,65 @@ class RendererMixin:
     - self.pms
     """
 
-    def _show_message(self, msg):
-        self.console.print()
-        self.console.rule(msg)
+    def show_stage(self, msg, stage):
+        show_stage(self, msg, stage)
+
+    def _show_message(self, msg, stage=None):
+        if getattr(self, '_json', False):
+            if stage is None:
+                stage = 'sync'
+                percent = getattr(self, '_sync_progress', 0)
+
+                msg_lower = msg.lower()
+                if 'connect' in msg_lower or 'conect' in msg_lower:
+                    stage = 'connection'
+                    percent = 5
+                elif 'attribute' in msg_lower or 'atributo' in msg_lower:
+                    stage = 'attributes'
+                    percent = 10
+                elif 'fault' in msg_lower or 'fallo' in msg_lower:
+                    stage = 'faults'
+                    percent = 20
+                elif 'repositor' in msg_lower:
+                    stage = 'repositories'
+                    percent = 30
+                elif 'metadata' in msg_lower:
+                    stage = 'metadata'
+                    percent = 40
+                elif (
+                    'uninstall' in msg_lower
+                    or 'remov' in msg_lower
+                    or 'desinstal' in msg_lower
+                    or 'elimin' in msg_lower
+                ):
+                    stage = 'uninstall'
+                    percent = 50
+                elif 'install' in msg_lower or 'instal' in msg_lower:
+                    stage = 'install'
+                    percent = 65
+                elif 'updat' in msg_lower or 'actualiz' in msg_lower:
+                    stage = 'update'
+                    percent = 75
+                elif 'software' in msg_lower:
+                    stage = 'software'
+                    percent = 85
+                elif 'device' in msg_lower or 'hardware' in msg_lower or 'dispositiv' in msg_lower:
+                    stage = 'hardware'
+                    percent = 90
+                elif 'complet' in msg_lower or 'termin' in msg_lower or 'finaliz' in msg_lower:
+                    stage = 'finish'
+                    percent = 100
+            else:
+                percent = _STAGE_PERCENTAGES.get(stage, getattr(self, '_sync_progress', 0))
+
+            self._sync_progress = percent
+
+            payload = {'type': 'progress', 'stage': stage, 'percent': percent, 'detail': msg, 'message': msg}
+            sys.stdout.write(json.dumps(payload) + '\n')
+            sys.stdout.flush()
+        else:
+            self.console.print()
+            self.console.rule(msg)
 
     def _show_config_options(self):
         conf_file = settings.CONF_FILE if os.path.isfile(settings.CONF_FILE) else ''
@@ -127,21 +208,32 @@ class RendererMixin:
         raise NotImplementedError
 
     def operation_ok(self, info=''):
-        msg = str(info) if info else _('Ok')
-        self.console.log(msg, style='green')
+        if getattr(self, '_json', False):
+            msg = str(info) if info else _('Ok')
+            payload = {'type': 'status', 'stage': 'ok', 'message': msg}
+            sys.stdout.write(json.dumps(payload) + '\n')
+            sys.stdout.flush()
+        else:
+            msg = str(info) if info else _('Ok')
+            self.console.log(msg, style='green')
 
     def operation_failed(self, info=''):
-        console = self.error_console
-        if utils.is_windows():
-            console = self.console
-            console.style = 'bright_red'
+        if getattr(self, '_json', False):
+            payload = {'type': 'status', 'stage': 'failed', 'message': str(info)}
+            sys.stdout.write(json.dumps(payload) + '\n')
+            sys.stdout.flush()
+        else:
+            console = self.error_console
+            if utils.is_windows():
+                console = self.console
+                console.style = 'bright_red'
 
-        console.rule(_('Failed'))
-        if info:
-            console.log(info)
+            console.rule(_('Failed'))
+            if info:
+                console.log(info)
 
-        if utils.is_windows():
-            console.style = ''
+            if utils.is_windows():
+                console.style = ''
 
     def _report_error(self, msg):
         """Report error to console, logger and error file."""
