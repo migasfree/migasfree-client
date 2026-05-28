@@ -66,14 +66,14 @@ class TestMigasFreeCommandBase(unittest.TestCase):
         """Test operation_ok console output"""
         self.cmd.console = MagicMock()
         self.cmd.operation_ok('Success')
-        self.cmd.console.log.assert_called()
+        self.cmd.console.print.assert_called()
 
     @patch('migasfree_client.command.utils.is_windows', return_value=False)
     def test_operation_failed(self, mock_win):
         """Test operation_failed console output"""
         self.cmd.error_console = MagicMock()
         self.cmd.operation_failed('Failure')
-        self.cmd.error_console.log.assert_called()
+        self.cmd.error_console.print.assert_called()
 
     @patch('migasfree_client.mixins.config.UrlRequest')
     def test_init_url_request(self, mock_url_request_class):
