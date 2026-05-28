@@ -68,50 +68,11 @@ class RendererMixin:
     def _show_message(self, msg, stage=None):
         if getattr(self, '_json', False):
             if stage is None:
-                stage = 'sync'
+                stage = getattr(self, '_sync_stage', 'sync')
                 percent = getattr(self, '_sync_progress', 0)
-
-                msg_lower = msg.lower()
-                if 'connect' in msg_lower or 'conect' in msg_lower:
-                    stage = 'connection'
-                    percent = 5
-                elif 'attribute' in msg_lower or 'atributo' in msg_lower:
-                    stage = 'attributes'
-                    percent = 10
-                elif 'fault' in msg_lower or 'fallo' in msg_lower:
-                    stage = 'faults'
-                    percent = 20
-                elif 'repositor' in msg_lower:
-                    stage = 'repositories'
-                    percent = 30
-                elif 'metadata' in msg_lower:
-                    stage = 'metadata'
-                    percent = 40
-                elif (
-                    'uninstall' in msg_lower
-                    or 'remov' in msg_lower
-                    or 'desinstal' in msg_lower
-                    or 'elimin' in msg_lower
-                ):
-                    stage = 'uninstall'
-                    percent = 50
-                elif 'install' in msg_lower or 'instal' in msg_lower:
-                    stage = 'install'
-                    percent = 65
-                elif 'updat' in msg_lower or 'actualiz' in msg_lower:
-                    stage = 'update'
-                    percent = 75
-                elif 'software' in msg_lower:
-                    stage = 'software'
-                    percent = 85
-                elif 'device' in msg_lower or 'hardware' in msg_lower or 'dispositiv' in msg_lower:
-                    stage = 'hardware'
-                    percent = 90
-                elif 'complet' in msg_lower or 'termin' in msg_lower or 'finaliz' in msg_lower:
-                    stage = 'finish'
-                    percent = 100
             else:
                 percent = _STAGE_PERCENTAGES.get(stage, getattr(self, '_sync_progress', 0))
+                self._sync_stage = stage
 
             self._sync_progress = percent
 
