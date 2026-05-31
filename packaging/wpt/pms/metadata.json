@@ -1,0 +1,8 @@
+{
+  "name": "migasfree-client",
+  "version": "5.0.0",
+  "description": "Client component of the Migasfree Systems Management System, enabling automated software deployment, fleet hardware/software inventory, and configuration synchronization.",
+  "maintainer": "Jose Antonio Chavarría <jachavar@gmail.com>",
+  "specification": "1.0.0",
+  "homepage": "https://migasfree.org"
+}
