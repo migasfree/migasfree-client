@@ -18,9 +18,11 @@ import logging
 import os
 import sys
 
+from rich.panel import Panel
+
 from ..command import MigasFreeCommand, require_computer_id, require_sign_keys
 from ..settings import ICON_PATH, TMP_PATH
-from ..utils import ALL_OK, execute_as_user, is_linux, is_windows, write_file
+from ..utils import ALL_OK, execute_as_user, is_linux, is_windows, is_xsession, write_file
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -118,6 +120,25 @@ class MigasFreeLabel(MigasFreeCommand):
         response = self._api_call('get_label', {'id': self._computer_id})
         return self._handle_response(response, success_msg=False)
 
+    def _show_console_label(self, info):
+        card_content = (
+            f'[bold cyan]PROJECT/LABEL:[/bold cyan] {info.get("search")}\n'
+            f'[bold cyan]UUID:[/bold cyan]          {info.get("uuid")}\n'
+            f'[bold cyan]SERVER:[/bold cyan]        {self.migas_protocol}://{self.migas_server}\n'
+            f'[bold cyan]HELPDESK:[/bold cyan]      {info.get("helpdesk")}'
+        )
+
+        self.console.print()
+        self.console.print(
+            Panel(
+                card_content,
+                title='[bold green]MIGASFREE LABEL[/bold green]',
+                title_align='center',
+                border_style='green',
+                width=60,
+            )
+        )
+
     @require_sign_keys
     def _show_label(self):
         info = self.get_label()
@@ -143,9 +164,20 @@ class MigasFreeLabel(MigasFreeCommand):
         write_file(_file, html)
 
         if is_linux():
-            execute_as_user(['xdg-open', _file])
+            if is_xsession():
+                try:
+                    execute_as_user(['xdg-open', _file])
+                except Exception as e:
+                    logger.debug('Failed to open label using xdg-open: %s', e)
+                    self._show_console_label(info)
+            else:
+                self._show_console_label(info)
         else:
-            execute_as_user(['cmd', '/c', 'start', _file])
+            try:
+                execute_as_user(['cmd', '/c', 'start', _file])
+            except Exception as e:
+                logger.debug('Failed to open label on Windows: %s', e)
+                self._show_console_label(info)
 
     def run(self, args=None):
         super().run(args)

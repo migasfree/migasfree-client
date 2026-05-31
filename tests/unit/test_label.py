@@ -30,12 +30,13 @@ class TestMigasFreeLabel(unittest.TestCase):
         mock_api.assert_called_with('get_label', {'id': '123'})
         self.assertEqual(result['id'], '123')
 
+    @patch('migasfree_client.cli.label.is_xsession', return_value=True)
     @patch('migasfree_client.cli.label.MigasFreeLabel.get_label')
     @patch('migasfree_client.cli.label.write_file')
     @patch('migasfree_client.cli.label.execute_as_user')
     @patch('migasfree_client.cli.label.is_linux', return_value=True)
     @patch('migasfree_client.cli.label.is_windows', return_value=False)
-    def test_show_label_linux(self, mock_windows, mock_linux, mock_execute, mock_write, mock_get_label):
+    def test_show_label_linux(self, mock_windows, mock_linux, mock_execute, mock_write, mock_get_label, mock_xsession):
         """Test showing label on Linux (xdg-open)"""
         mock_get_label.return_value = {
             'search': 'TEST-SEARCH',
@@ -47,6 +48,66 @@ class TestMigasFreeLabel(unittest.TestCase):
         mock_write.assert_called_once()
         mock_execute.assert_called_once()
         self.assertIn('xdg-open', mock_execute.call_args[0][0])
+
+    @patch('migasfree_client.cli.label.is_xsession', return_value=False)
+    @patch('migasfree_client.cli.label.MigasFreeLabel.get_label')
+    @patch('migasfree_client.cli.label.write_file')
+    @patch('migasfree_client.cli.label.execute_as_user')
+    @patch('migasfree_client.cli.label.is_linux', return_value=True)
+    @patch('migasfree_client.cli.label.is_windows', return_value=False)
+    def test_show_label_linux_no_xsession(
+        self, mock_windows, mock_linux, mock_execute, mock_write, mock_get_label, mock_xsession
+    ):
+        """Test showing label on Linux without X session (console fallback)"""
+        mock_get_label.return_value = {
+            'search': 'TEST-SEARCH',
+            'uuid': 'TEST-UUID',
+            'helpdesk': 'Contact Support',
+            'name': 'n',
+        }
+        self.label._show_label()
+        mock_write.assert_called_once()
+        mock_execute.assert_not_called()
+        self.label.console.print.assert_called()
+
+    @patch('migasfree_client.cli.label.is_xsession', return_value=True)
+    @patch('migasfree_client.cli.label.MigasFreeLabel.get_label')
+    @patch('migasfree_client.cli.label.write_file')
+    @patch('migasfree_client.cli.label.execute_as_user', side_effect=FileNotFoundError('xdg-open not found'))
+    @patch('migasfree_client.cli.label.is_linux', return_value=True)
+    @patch('migasfree_client.cli.label.is_windows', return_value=False)
+    def test_show_label_linux_xdg_open_error(
+        self, mock_windows, mock_linux, mock_execute, mock_write, mock_get_label, mock_xsession
+    ):
+        """Test showing label on Linux when xdg-open fails (console fallback)"""
+        mock_get_label.return_value = {
+            'search': 'TEST-SEARCH',
+            'uuid': 'TEST-UUID',
+            'helpdesk': 'Contact Support',
+            'name': 'n',
+        }
+        self.label._show_label()
+        mock_write.assert_called_once()
+        mock_execute.assert_called_once()
+        self.label.console.print.assert_called()
+
+    @patch('migasfree_client.cli.label.MigasFreeLabel.get_label')
+    @patch('migasfree_client.cli.label.write_file')
+    @patch('migasfree_client.cli.label.execute_as_user', side_effect=FileNotFoundError('start not found'))
+    @patch('migasfree_client.cli.label.is_linux', return_value=False)
+    @patch('migasfree_client.cli.label.is_windows', return_value=True)
+    def test_show_label_windows_error(self, mock_windows, mock_linux, mock_execute, mock_write, mock_get_label):
+        """Test showing label on Windows when start command fails (console fallback)"""
+        mock_get_label.return_value = {
+            'search': 'TEST-SEARCH',
+            'uuid': 'TEST-UUID',
+            'helpdesk': 'Contact Support',
+            'name': 'n',
+        }
+        self.label._show_label()
+        mock_write.assert_called_once()
+        mock_execute.assert_called_once()
+        self.label.console.print.assert_called()
 
     @patch('sys.exit')
     @patch('migasfree_client.cli.label.MigasFreeLabel._show_label')
