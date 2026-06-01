@@ -319,6 +319,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
             logger.warning(msg)
             sys.exit(errno.EAGAIN)
 
+        self.operation_ok()
         self.upload_old_errors()
         self._execute_path(settings.PRE_SYNC_PATH)
         self.upload_attributes()
@@ -355,6 +356,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
     def cmd_attributes(self):
         self.show_stage(_('Connecting to migasfree server...'), stage='connection')
+        self.operation_ok()
         self.upload_old_errors()
         self.upload_attributes()
         self.upload_execution_errors()
@@ -363,6 +365,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
     def cmd_faults(self):
         self.show_stage(_('Connecting to migasfree server...'), stage='connection')
+        self.operation_ok()
         self.upload_old_errors()
         self.upload_faults()
         self.upload_execution_errors()
@@ -371,6 +374,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
     def cmd_devices(self):
         self.show_stage(_('Connecting to migasfree server...'), stage='connection')
+        self.operation_ok()
         self.upload_old_errors()
         self.sync_logical_devices()
         self.upload_execution_errors()
@@ -379,6 +383,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
     def cmd_hardware(self):
         self.show_stage(_('Connecting to migasfree server...'), stage='connection')
+        self.operation_ok()
         self.upload_old_errors()
         self.update_hardware_inventory()
         self.upload_execution_errors()
@@ -388,6 +393,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
     def cmd_software(self):
         if self.pms:
             self.show_stage(_('Connecting to migasfree server...'), stage='connection')
+            self.operation_ok()
             self.upload_old_errors()
 
             software_before = self.pms.query_all()
