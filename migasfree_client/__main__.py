@@ -19,7 +19,7 @@ import sys
 
 from rich import print as rprint
 
-from .utils import ALL_OK, get_mfc_release
+from migasfree_client.utils import ALL_OK, get_mfc_release
 
 __author__ = 'Jose Antonio Chavarría <jachavar@gmail.com>'
 __license__ = 'GPLv3'
@@ -239,43 +239,43 @@ def main(argv=None):
         sys.stdout.flush()
 
     if args.cmd in ('sync', 'install', 'purge'):
-        from .cli.sync import MigasFreeSync
+        from migasfree_client.cli.sync import MigasFreeSync
 
         MigasFreeSync().run(args)
     elif args.cmd == 'register':
-        from .cli.register import MigasFreeRegister
+        from migasfree_client.cli.register import MigasFreeRegister
 
         MigasFreeRegister().run(args)
     elif args.cmd == 'search':
-        from .cli.search import MigasFreeSearch
+        from migasfree_client.cli.search import MigasFreeSearch
 
         MigasFreeSearch().run(args)
     elif args.cmd == 'traits':
-        from .cli.traits import MigasFreeTraits
+        from migasfree_client.cli.traits import MigasFreeTraits
 
         MigasFreeTraits().run(args)
     elif args.cmd == 'label':
-        from .cli.label import MigasFreeLabel
+        from migasfree_client.cli.label import MigasFreeLabel
 
         MigasFreeLabel().run(args)
     elif args.cmd == 'tags':
-        from .cli.tags import MigasFreeTags
+        from migasfree_client.cli.tags import MigasFreeTags
 
         MigasFreeTags().run(args)
     elif args.cmd == 'upload':
-        from .cli.upload import MigasFreeUpload
+        from migasfree_client.cli.upload import MigasFreeUpload
 
         MigasFreeUpload().run(args)
     elif args.cmd == 'info':
-        from .cli.info import MigasFreeInfo
+        from migasfree_client.cli.info import MigasFreeInfo
 
         MigasFreeInfo().run(args)
     elif args.cmd == 'attributes':
-        from .cli.attributes import MigasFreeAttributes
+        from migasfree_client.cli.attributes import MigasFreeAttributes
 
         MigasFreeAttributes().run(args)
     elif args.cmd in ('version', 'remove-keys', 'network'):
-        from .command import MigasFreeCommand
+        from migasfree_client.command import MigasFreeCommand
 
         cmd = MigasFreeCommand()
         if args.cmd == 'version':
@@ -285,31 +285,31 @@ def main(argv=None):
         elif args.cmd == 'network':
             cmd.cmd_network(args)
     elif args.cmd == 'import-mtls':
-        from .command import MigasFreeCommand
+        from migasfree_client.command import MigasFreeCommand
 
         MigasFreeCommand().cmd_import_mtls(args.cert_file)
     elif args.cmd == 'conf':
-        from .cli.conf import MigasFreeConf
+        from migasfree_client.cli.conf import MigasFreeConf
 
         MigasFreeConf().run(args)
     elif args.cmd == 'packages':
-        from .cli.packages import MigasFreePackages
+        from migasfree_client.cli.packages import MigasFreePackages
 
         MigasFreePackages().run(args)
     elif args.cmd == 'user-check':
-        from .cli.usercheck import MigasFreeUserCheck
+        from migasfree_client.cli.usercheck import MigasFreeUserCheck
 
         MigasFreeUserCheck().run(args)
     elif args.cmd == 'apps':
-        from .cli.apps import MigasFreeApps
+        from migasfree_client.cli.apps import MigasFreeApps
 
         MigasFreeApps().run(args)
     elif args.cmd == 'categories':
-        from .cli.apps import MigasFreeCategories
+        from migasfree_client.cli.apps import MigasFreeCategories
 
         MigasFreeCategories().run(args)
     elif args.cmd == 'devices':
-        from .cli.device import MigasFreeDevices
+        from migasfree_client.cli.device import MigasFreeDevices
 
         MigasFreeDevices().run(args)
 
