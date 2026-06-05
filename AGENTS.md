@@ -60,3 +60,4 @@ This project is supported by specialized AI Skills in `.agent/skills`. **ALWAYS*
 4. **PMS Safety**: Package management operations can be destructive. Always ensure safety checks are in place.
 5. **Security First**: All communication with the server should be signed/encrypted as per protocol.
 6. **Platform Detection Best Practices**: Always use the direct built-in platform detection helpers in `migasfree_client.utils` (`is_windows()`, `is_linux()`) instead of raw `sys.platform` or negations.
+7. **Version Updates**: When changing the project version, make sure to also update the version in `metadata.json` accordingly.
