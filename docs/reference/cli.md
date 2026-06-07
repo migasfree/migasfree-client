@@ -625,6 +625,32 @@ sudo migasfree devices --set-default 0
 
 ---
 
+### eval
+
+Internal command used by the attribute and fault evaluator to execute Python script files inside the client's isolated Python environment.
+
+> [!NOTE]
+> This command is primarily used on Windows workstations where `migasfree-client` is deployed as a standalone frozen binary (`migasfree.exe`). It runs the script using the interpreter and environment bundled inside the binary, eliminating any dependency on a system-wide Python installation.
+
+```bash
+migasfree eval <file>
+```
+
+**Arguments:**
+
+| Argument | Description                           |
+| -------- | ------------------------------------- |
+| `file`   | Path to the Python script to execute. |
+
+**Examples:**
+
+```bash
+# Evaluate a local script file
+migasfree eval C:\path\to\script.py
+```
+
+---
+
 ### user-check
 
 Verifies user credentials and checks if they have administrative privileges.
