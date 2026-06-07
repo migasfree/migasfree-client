@@ -2,6 +2,7 @@
 Unit tests for migasfree_client.__main__
 """
 
+import contextlib
 import os
 import sys
 import tempfile
@@ -148,6 +149,21 @@ class TestMainRouting:
                 raise AssertionError('SystemExit should be raised')
             except SystemExit as e:
                 assert e.code == 0
+        finally:
+            if os.path.exists(temp_name):
+                os.remove(temp_name)
+
+    @patch('migasfree_client.__main__.rprint')
+    def test_route_eval_does_not_print_version(self, mock_rprint):
+        """Test that eval subcommand does not print the program version"""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write('exit(0)\n')
+            temp_name = f.name
+
+        try:
+            with contextlib.suppress(SystemExit):
+                main(['eval', temp_name])
+            mock_rprint.assert_not_called()
         finally:
             if os.path.exists(temp_name):
                 os.remove(temp_name)

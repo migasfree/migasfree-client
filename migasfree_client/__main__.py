@@ -237,7 +237,7 @@ def main(argv=None):
 
     args = parse_args(argv)
 
-    if hasattr(args, 'quiet') and not args.quiet:
+    if hasattr(args, 'quiet') and not args.quiet and args.cmd != 'eval':
         rprint(_('%(program)s version: %(version)s') % {'program': PROGRAM, 'version': get_mfc_release()})
         sys.stdout.flush()
 
