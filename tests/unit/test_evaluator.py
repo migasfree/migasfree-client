@@ -45,8 +45,9 @@ class TestCodeEvaluatorMixin(unittest.TestCase):
 
     @patch('migasfree_client.utils.write_file')
     @patch('migasfree_client.utils.timeout_execute')
+    @patch('migasfree_client.utils.is_windows', return_value=False)
     @patch('migasfree_client.utils.is_linux', return_value=True)
-    def test_eval_code_python_linux(self, mock_linux, mock_execute, mock_write):
+    def test_eval_code_python_linux(self, mock_linux, mock_windows, mock_execute, mock_write):
         """Test evaluating Python code on Linux"""
         mock_execute.return_value = (0, 'execution output', '')
 
