@@ -316,7 +316,13 @@ def main(argv=None):
 
         MigasFreeDevices().run(args)
     elif args.cmd == 'eval':
+        import builtins
         import runpy
+
+        if not hasattr(builtins, 'exit'):
+            builtins.exit = sys.exit
+        if not hasattr(builtins, 'quit'):
+            builtins.quit = sys.exit
 
         sys.argv = [args.file]
         runpy.run_path(args.file, run_name='__main__')

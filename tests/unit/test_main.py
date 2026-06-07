@@ -2,7 +2,9 @@
 Unit tests for migasfree_client.__main__
 """
 
+import os
 import sys
+import tempfile
 from unittest.mock import patch
 
 from migasfree_client.__main__ import main, parse_args
@@ -115,3 +117,37 @@ class TestMainRouting:
             parse_args([])
             mock_help.assert_called_once()
             mock_exit.assert_called_once_with(ALL_OK)
+
+    def test_route_eval_with_exit(self):
+        """Test routing to eval command and executing a script that uses exit"""
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write('exit(0)\n')
+            temp_name = f.name
+
+        try:
+            try:
+                main(['eval', temp_name])
+                raise AssertionError('SystemExit should be raised')
+            except SystemExit as e:
+                assert e.code == 0
+        finally:
+            if os.path.exists(temp_name):
+                os.remove(temp_name)
+
+    def test_route_eval_with_quit(self):
+        """Test routing to eval command and executing a script that uses quit"""
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            f.write('quit(0)\n')
+            temp_name = f.name
+
+        try:
+            try:
+                main(['eval', temp_name])
+                raise AssertionError('SystemExit should be raised')
+            except SystemExit as e:
+                assert e.code == 0
+        finally:
+            if os.path.exists(temp_name):
+                os.remove(temp_name)
