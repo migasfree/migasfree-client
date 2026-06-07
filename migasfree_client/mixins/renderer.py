@@ -81,8 +81,8 @@ class RendererMixin:
             sys.stdout.flush()
         else:
             self.console.print()
-            self.console.print("[bright_black]" + "⎯" * 76 + "[/bright_black]")
-            self.console.print(f"[bold blue]➔[/bold blue] [bold]{msg}[/bold]\n")
+            self.console.print('[bright_black]' + '⎯' * 76 + '[/bright_black]')
+            self.console.print(f'[bold blue]➔[/bold blue] [bold]{msg}[/bold]\n')
 
     def _show_config_options(self):
         conf_file = settings.CONF_FILE if os.path.isfile(settings.CONF_FILE) else ''
@@ -177,7 +177,7 @@ class RendererMixin:
             sys.stdout.flush()
         else:
             msg = str(info) if info else _('Ok')
-            self.console.print(rf"[bold green]✓ \[OK] {msg}[/bold green]")
+            self.console.print(rf'[bold green]✓ \[OK] {msg}[/bold green]')
 
     def operation_failed(self, info=''):
         if getattr(self, '_json', False):
@@ -189,7 +189,7 @@ class RendererMixin:
             console = self.error_console
             if utils.is_windows():
                 console = self.console
-            console.print(rf"[bold red]✗ \[ERROR] {msg}[/bold red]")
+            console.print(rf'[bold red]✗ \[ERROR] {msg}[/bold red]')
 
     def _report_error(self, msg):
         """Report error to console, logger and error file."""

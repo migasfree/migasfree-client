@@ -58,6 +58,58 @@ class TestCodeEvaluatorMixin(unittest.TestCase):
         cmd = mock_execute.call_args[0][0]
         self.assertEqual(cmd[0], 'python3')
 
+    @patch('migasfree_client.utils.write_file')
+    @patch('migasfree_client.utils.timeout_execute')
+    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.is_linux', return_value=False)
+    def test_eval_code_python_windows(self, mock_linux, mock_windows, mock_execute, mock_write):
+        """Test evaluating Python code on Windows"""
+        import sys
+
+        mock_execute.return_value = (0, 'execution output', '')
+
+        ret, output, _error = self.evaluator._eval_code('test-trait', 'python', 'print("hello")')
+
+        self.assertEqual(ret, 0)
+        self.assertEqual(output, 'execution output')
+        mock_execute.assert_called()
+        cmd = mock_execute.call_args[0][0]
+        self.assertEqual(cmd[0], sys.executable)
+
+    @patch('migasfree_client.utils.write_file')
+    @patch('migasfree_client.utils.timeout_execute')
+    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.is_linux', return_value=False)
+    def test_eval_code_cmd_windows(self, mock_linux, mock_windows, mock_execute, mock_write):
+        """Test evaluating CMD script on Windows"""
+        mock_execute.return_value = (0, 'execution output', '')
+
+        ret, output, _error = self.evaluator._eval_code('test-trait', 'cmd', 'echo hello')
+
+        self.assertEqual(ret, 0)
+        self.assertEqual(output, 'execution output')
+        mock_execute.assert_called()
+        cmd = mock_execute.call_args[0][0]
+        self.assertEqual(cmd[0], 'cmd')
+        self.assertEqual(cmd[1], '/c')
+
+    @patch('migasfree_client.utils.write_file')
+    @patch('migasfree_client.utils.timeout_execute')
+    @patch('migasfree_client.utils.is_windows', return_value=True)
+    @patch('migasfree_client.utils.is_linux', return_value=False)
+    def test_eval_code_powershell_windows(self, mock_linux, mock_windows, mock_execute, mock_write):
+        """Test evaluating PowerShell script on Windows"""
+        mock_execute.return_value = (0, 'execution output', '')
+
+        ret, output, _error = self.evaluator._eval_code('test-trait', 'powershell', 'Write-Output hello')
+
+        self.assertEqual(ret, 0)
+        self.assertEqual(output, 'execution output')
+        mock_execute.assert_called()
+        cmd = mock_execute.call_args[0][0]
+        self.assertEqual(cmd[0], 'powershell')
+        self.assertEqual(cmd[4], 'Bypass')
+
     @patch('socket.getfqdn', return_value='test.host')
     @patch('migasfree_client.network.get_network_info', return_value={'ip': '192.168.1.10'})
     @patch('migasfree_client.utils.get_user_info', return_value={'fullname': 'Test User'})

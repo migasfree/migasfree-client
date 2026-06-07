@@ -59,9 +59,19 @@ class CodeEvaluatorMixin:
         if lang not in allowed_languages:
             return 0, '', ''
 
-        if lang == 'python' and utils.is_linux():
-            lang = 'python3'
-        cmd = [lang, filename]
+        if lang == 'python':
+            if utils.is_windows():
+                import sys
+
+                cmd = [sys.executable, filename]
+            else:
+                cmd = ['python3', filename]
+        elif lang == 'cmd' and utils.is_windows():
+            cmd = ['cmd', '/c', filename]
+        elif lang == 'powershell' and utils.is_windows():
+            cmd = ['powershell', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', filename]
+        else:
+            cmd = [lang, filename]
 
         ret, output, error = utils.timeout_execute(cmd)
         logger.debug('Executed command: %s', cmd)
