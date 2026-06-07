@@ -221,6 +221,9 @@ def parse_args(argv):
     )
     subparser_devices.add_argument('-j', '--json', action='store_true', help=_('Return data as JSON'))
 
+    subparser_eval = subparsers.add_parser('eval', help=_('Evaluate script file'))
+    subparser_eval.add_argument('file', action='store', help=_('Script file to execute'))
+
     if len(argv) < 1:
         parser.print_help()
         sys.exit(ALL_OK)
@@ -312,6 +315,11 @@ def main(argv=None):
         from migasfree_client.cli.device import MigasFreeDevices
 
         MigasFreeDevices().run(args)
+    elif args.cmd == 'eval':
+        import runpy
+
+        sys.argv = [args.file]
+        runpy.run_path(args.file, run_name='__main__')
 
     return ALL_OK
 

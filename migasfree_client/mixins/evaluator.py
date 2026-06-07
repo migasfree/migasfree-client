@@ -63,7 +63,10 @@ class CodeEvaluatorMixin:
             if utils.is_windows():
                 import sys
 
-                cmd = [sys.executable, filename]
+                if getattr(sys, 'frozen', False):
+                    cmd = [sys.executable, 'eval', filename]
+                else:
+                    cmd = [sys.executable, filename]
             else:
                 cmd = ['python3', filename]
         elif lang == 'cmd' and utils.is_windows():
