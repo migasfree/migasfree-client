@@ -79,6 +79,22 @@ def create_shim(exe_path: str) -> bool:
         return False
 
 
+def update_pkg_list(target_dir: str) -> None:
+    """Regenerate the WPT .list manifest with actual installed paths."""
+    pkg_list = os.environ.get('WPT_PKG_LIST')
+    if not pkg_list:
+        return
+
+    files = []
+    for root, _, archives in os.walk(target_dir):
+        for item in archives:
+            files.append(os.path.join(root, item))
+
+    with open(pkg_list, 'w', encoding='utf-8') as f:
+        for path in sorted(files):
+            f.write(f'{path}\n')
+
+
 def main():
     # 1. Paths resolution
     wpt_install_dir = os.environ.get('WPT_INSTALL_DIR')
@@ -112,6 +128,9 @@ def main():
     except Exception as e:
         print(f'Error relocating files: {e}', file=sys.stderr)
         sys.exit(1)
+
+    # Update the WPT .list manifest with the actual installed paths
+    update_pkg_list(target_install_dir)
 
     # 2. Register in App Paths
     success = register_in_app_paths(target_exe_path, target_install_dir)
