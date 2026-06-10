@@ -113,11 +113,19 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
 
         response = self._url_request.run(
             url=self.api_endpoint(self.URLS['get_repositories_keys']),
+            method='GET',
             safe=False,
             exit_on_error=False,
             debug=self._debug,
         )
         logger.debug('Response get_repos_key: %s', response)
+
+        if isinstance(response, dict) and 'error' in response:
+            return False
+
+        key_content = response.get('public_key') if isinstance(response, dict) else response
+        if not key_content:
+            return False
 
         path = settings.TMP_PATH
         if not self._check_path(path):
@@ -126,7 +134,7 @@ class MigasFreeSync(CodeEvaluatorMixin, HardwareCollectorMixin, SoftwareManagerM
         path_file = os.path.join(path, utils.sanitize_path(self.migas_server))
         logger.debug('Trying writing file: %s', path_file)
 
-        ret = utils.write_file(path_file, response)
+        ret = utils.write_file(path_file, key_content)
         if not ret:
             msg = _('Error writing key file')
             self.operation_failed(msg)

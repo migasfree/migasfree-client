@@ -209,15 +209,16 @@ class UrlRequest:
         return None, False
 
     # ... existing methods _check_tmp_path, _build_default_headers, _setup_request_keys, _log_request_info, _build_proxies, _build_mtls_params ...
-    def _execute_post(self, url, data, headers, proxies, cert_param, verify_param):
-        """Execute POST request and handle connection errors.
+    def _execute_request(self, method, url, data, headers, proxies, cert_param, verify_param):
+        """Execute HTTP request and handle connection errors.
 
         Returns:
             On success: requests.Response object
             On error: dict with 'error' key
         """
         try:
-            return self.session.post(
+            return self.session.request(
+                method,
                 url,
                 data=data,
                 headers=headers,
@@ -236,9 +237,11 @@ class UrlRequest:
             logger.error('Request error: %s', e)
             return {'error': {'info': str(e), 'code': errno.EIO}}
 
-    def run(self, url, data='', upload_files=None, safe=True, exit_on_error=True, debug=False, keys=None):
+    def run(
+        self, url, data='', upload_files=None, safe=True, exit_on_error=True, debug=False, keys=None, method='POST'
+    ):
         """
-        Make an HTTP POST request with signature/encryption support.
+        Make an HTTP request with signature/encryption support.
 
         This method wraps data using the migasfree signature/encryption protocol
         when safe=True. It also supports file uploads and mTLS client certificates.
@@ -251,6 +254,7 @@ class UrlRequest:
             exit_on_error: If True, exit the program on error
             debug: Enable debug mode
             keys: Optional dict with 'private' and 'public' key paths
+            method: HTTP method to use (e.g. 'POST', 'GET')
 
         Returns:
             On success: The unwrapped response data
@@ -258,6 +262,9 @@ class UrlRequest:
         """
         self._debug = debug
         self._exit_on_error = exit_on_error
+
+        if method == 'GET':
+            data = None
 
         if keys:
             self._setup_request_keys(keys)
@@ -279,9 +286,9 @@ class UrlRequest:
         proxies = self._build_proxies()
         cert_param, verify_param = self._build_mtls_params()
 
-        result = self._execute_post(url, data, headers, proxies, cert_param, verify_param)
+        result = self._execute_request(method, url, data, headers, proxies, cert_param, verify_param)
 
-        # Check if _execute_post returned an error dict
+        # Check if _execute_request returned an error dict
         if isinstance(result, dict) and 'error' in result:
             return result
 

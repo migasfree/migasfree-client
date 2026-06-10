@@ -177,7 +177,7 @@ class TestMigasFreeSync(unittest.TestCase):
 
     def test_get_repos_key_success(self):
         """Test fetching and importing repository keys"""
-        self.sync._url_request.run.return_value = 'gpg-key-content'
+        self.sync._url_request.run.return_value = {'public_key': 'gpg-key-content'}
         with patch('migasfree_client.utils.write_file', return_value=True), patch.object(
             self.sync, '_check_path', return_value=True
         ):

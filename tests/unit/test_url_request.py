@@ -149,11 +149,11 @@ class TestErrorHandling:
         url = 'http://example.com/api/endpoint'
 
         # responses library doesn't directly support timeout simulation
-        # We'll mock the requests.Session.post to raise ReadTimeout
-        with patch('requests.Session.post') as mock_post:
+        # We'll mock the requests.Session.request to raise ReadTimeout
+        with patch('requests.Session.request') as mock_request:
             from requests.exceptions import ReadTimeout
 
-            mock_post.side_effect = ReadTimeout('Request timed out')
+            mock_request.side_effect = ReadTimeout('Request timed out')
 
             url_req = UrlRequest()
             result = url_req.run(url, safe=False, exit_on_error=False)
@@ -370,8 +370,8 @@ class TestMtlsSupport:
 
     @responses.activate
     @patch('os.access')
-    @patch('requests.Session.post')
-    def test_run_with_mtls_cert(self, mock_post, mock_access):
+    @patch('requests.Session.request')
+    def test_run_with_mtls_cert(self, mock_request, mock_access):
         """Test that requests include mTLS client certificate when configured"""
         mock_access.return_value = True
         url = 'https://example.com/api/endpoint'
@@ -382,20 +382,20 @@ class TestMtlsSupport:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'ok'}
-        mock_post.return_value = mock_response
+        mock_request.return_value = mock_response
 
         url_req = UrlRequest(mtls_cert=mtls_cert, mtls_key=mtls_key)
         url_req.run(url, safe=False)
 
         # Verify request was made with cert parameter
-        assert mock_post.called
-        call_kwargs = mock_post.call_args[1]
+        assert mock_request.called
+        call_kwargs = mock_request.call_args[1]
         assert 'cert' in call_kwargs
         assert call_kwargs['cert'] == (mtls_cert, mtls_key)
 
     @responses.activate
-    @patch('requests.Session.post')
-    def test_run_without_mtls_cert(self, mock_post):
+    @patch('requests.Session.request')
+    def test_run_without_mtls_cert(self, mock_request):
         """Test that requests without mTLS configured use None for cert"""
         url = 'https://example.com/api/endpoint'
 
@@ -403,13 +403,13 @@ class TestMtlsSupport:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'ok'}
-        mock_post.return_value = mock_response
+        mock_request.return_value = mock_response
 
         url_req = UrlRequest()
         url_req.run(url, safe=False)
 
         # Verify request was made with cert=None
-        assert mock_post.called
-        call_kwargs = mock_post.call_args[1]
+        assert mock_request.called
+        call_kwargs = mock_request.call_args[1]
         assert 'cert' in call_kwargs
         assert call_kwargs['cert'] is None
