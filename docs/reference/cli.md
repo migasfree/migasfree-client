@@ -250,6 +250,12 @@ migasfree tags -s production webserver
 
 # Add tags to existing ones
 migasfree tags -c branch-office
+
+# Clear all tags (replace existing ones with nothing)
+sudo migasfree tags -s ""
+
+# Clear all tags (communicate empty tags)
+sudo migasfree tags -c ""
 ```
 
 ---

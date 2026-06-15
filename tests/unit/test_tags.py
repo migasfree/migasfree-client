@@ -43,6 +43,30 @@ class TestMigasFreeTags(unittest.TestCase):
         mock_failed.assert_called_once()
         mock_exit.assert_called_once()
 
+    def test_sanitize_empty_tags(self):
+        """Test sanitization of empty string tags"""
+        tag_list = ['', ' ', '""', '"  "']
+        result = self.tags._sanitize(tag_list)
+        self.assertEqual(result, [])
+
+    @patch('sys.exit')
+    @patch('migasfree_client.cli.tags.MigasFreeTags._init_command')
+    @patch('migasfree_client.cli.tags.lock_file_context')
+    def test_run_set_tags_empty(self, mock_lock, mock_init, mock_exit):
+        """Test run dispatcher for unsetting/clearing tags via empty string"""
+        args = MagicMock()
+        args.set = ['']
+        args.get = False
+        args.communicate = False
+        args.cmd = 'tags'
+
+        with patch.object(self.tags, 'set_tags') as mock_set, patch.object(self.tags, '_apply_rules') as mock_apply:
+            self.tags.run(args)
+            self.assertEqual(self.tags._tags, [])
+            self.assertFalse(self.tags._interactive)
+            mock_set.assert_called_once()
+            mock_apply.assert_called_once()
+
     @patch('migasfree_client.cli.tags.execute')
     @patch('migasfree_client.cli.tags.is_zenity', return_value=True)
     @patch('migasfree_client.cli.tags.is_xsession', return_value=True)

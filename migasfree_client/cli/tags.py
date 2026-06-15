@@ -43,9 +43,11 @@ logger = logging.getLogger('migasfree_client')
 
 class MigasFreeTags(MigasFreeCommand):
     _tags = None
+    _interactive = False
 
     def __init__(self):
         super().__init__()
+        self._interactive = False
 
     def _usage_examples(self):
         self.console.print('\n' + _('Examples:'))
@@ -59,7 +61,15 @@ class MigasFreeTags(MigasFreeCommand):
             (_('Communicate tags to server (with GUI):'), [f'{self.CMD} tags -c', f'{self.CMD} tags --communicate']),
             (_('Set tags (command line):'), [f'{self.CMD} tags -s tag...', f'{self.CMD} tags --set tag...']),
             (_('Set tags (with GUI):'), [f'{self.CMD} tags -s', f'{self.CMD} tags --set']),
-            (_('Unsetting all tags (command line):'), [f'{self.CMD} tags -s ""', f'{self.CMD} tags --set ""']),
+            (
+                _('Unsetting all tags (command line):'),
+                [
+                    f'{self.CMD} tags -s ""',
+                    f'{self.CMD} tags --set ""',
+                    f'{self.CMD} tags -c ""',
+                    f'{self.CMD} tags --communicate ""',
+                ],
+            ),
         ]
         for title, cmds in examples:
             self.console.print(f'  {title}')
@@ -74,19 +84,22 @@ class MigasFreeTags(MigasFreeCommand):
         self.console.print()
 
     def _sanitize(self, tag_list):
+        sanitized = []
         if tag_list:
-            tag_list = [item.replace('"', '') for item in tag_list]
+            tag_list = [item.replace('"', '').strip() for item in tag_list]
             for item in tag_list:
+                if not item:
+                    continue
                 try:
                     _prefix, _value = item.split('-', 1)
                 except ValueError:
                     msg = _('Tags must be in "prefix-value" format')
                     self.operation_failed(msg)
                     sys.exit(errno.ENODATA)
+                sanitized.append(item)
+            logger.info('Sanitized list: %s', sanitized)
 
-            logger.info('Sanitized list: %s', tag_list)
-
-        return tag_list
+        return sanitized
 
     def _select_tags(self, assigned, available):
         selected_tags = []
@@ -162,7 +175,7 @@ class MigasFreeTags(MigasFreeCommand):
 
     @require_sign_keys
     def set_tags(self):
-        if not self._tags and not self._quiet:
+        if self._interactive:
             self._tags = self._select_tags(
                 assigned=self.get_assigned_tags(),
                 available=self.get_available_tags(),
@@ -229,11 +242,9 @@ class MigasFreeTags(MigasFreeCommand):
 
         elif isinstance(args.set, list) or isinstance(args.communicate, list):
             self._check_user_is_root()
-            self._tags = []
-            if args.set is not None:
-                self._tags = self._sanitize(args.set)
-            elif args.communicate is not None:
-                self._tags = self._sanitize(args.communicate)
+            provided_args = args.set if args.set is not None else args.communicate
+            self._tags = self._sanitize(provided_args)
+            self._interactive = len(provided_args) == 0 and not self._quiet
 
             if not self._quiet:
                 self._show_running_options()
